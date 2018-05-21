@@ -1,0 +1,7 @@
+apiVersion: "trusted.identity/v1"
+kind: PodTI
+metadata:
+  name: cluster-policy
+spec:
+  pod-name: mypod
+  ti-secret: ti-mypod

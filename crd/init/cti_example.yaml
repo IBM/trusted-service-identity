@@ -1,0 +1,7 @@
+apiVersion: "trusted.identity/v1"
+kind: ClusterTI
+metadata:
+  name: cluster-policy
+spec:
+  cluster-name: mycluster
+  cluster-region: dal
