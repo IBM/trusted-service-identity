@@ -29,5 +29,13 @@ ${CODEGEN_PKG}/generate-groups.sh all \
   github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis \
   cr:v1
 
+${CODEGEN_PKG}/generate-groups.sh all \
+  github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis \
+  cti:v1
+
+${CODEGEN_PKG}/generate-groups.sh all \
+  github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis \
+  pti:v1
+
 # To use your own boilerplate text append:
 #   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt

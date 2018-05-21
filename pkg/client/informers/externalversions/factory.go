@@ -26,8 +26,8 @@ import (
 	time "time"
 
 	versioned "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/clientset/versioned"
-	cr "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/cr"
 	internalinterfaces "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/internalinterfaces"
+	pti "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/pti"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -125,9 +125,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Cr() cr.Interface
+	Pti() pti.Interface
 }
 
-func (f *sharedInformerFactory) Cr() cr.Interface {
-	return cr.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Pti() pti.Interface {
+	return pti.New(f, f.namespace, f.tweakListOptions)
 }

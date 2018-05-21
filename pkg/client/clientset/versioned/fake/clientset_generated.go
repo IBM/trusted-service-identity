@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/clientset/versioned"
-	crv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cr/v1"
-	fakecrv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cr/v1/fake"
+	ptiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/pti/v1"
+	fakeptiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/pti/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -62,12 +62,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// CrV1 retrieves the CrV1Client
-func (c *Clientset) CrV1() crv1.CrV1Interface {
-	return &fakecrv1.FakeCrV1{Fake: &c.Fake}
+// PtiV1 retrieves the PtiV1Client
+func (c *Clientset) PtiV1() ptiv1.PtiV1Interface {
+	return &fakeptiv1.FakePtiV1{Fake: &c.Fake}
 }
 
-// Cr retrieves the CrV1Client
-func (c *Clientset) Cr() crv1.CrV1Interface {
-	return &fakecrv1.FakeCrV1{Fake: &c.Fake}
+// Pti retrieves the PtiV1Client
+func (c *Clientset) Pti() ptiv1.PtiV1Interface {
+	return &fakeptiv1.FakePtiV1{Fake: &c.Fake}
 }
