@@ -42,12 +42,18 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
   name = "k8s.io/code-generator"
   branch = "release-1.9"
 
+[[constraint]]
+  name = "k8s.io/client-go"
+  branch = "release-6.0"
+
+[[constraint]]
+  name = "k8s.io/kubernetes"
+  branch = "release-1.9"
+
 [prune]
   #non-go = false
   go-tests = true
   #unused-packages = true
-
-
 
 # Fix: vendor/k8s.io/kubernetes/pkg/util/parsers/parsers.go:36:16: undefined: reference.ParseNormalizedNamed
 [[override]]
