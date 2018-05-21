@@ -25,9 +25,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/clientset/versioned"
-	internalinterfaces "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/internalinterfaces"
-	pti "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/pti"
+	versioned "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned"
+	internalinterfaces "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
+	pti "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/informers/externalversions/pti"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

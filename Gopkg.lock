@@ -14,12 +14,6 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/docker/distribution"
   packages = [
@@ -83,41 +77,10 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
-  name = "github.com/golang/protobuf"
-  packages = [
-    "proto",
-    "ptypes",
-    "ptypes/any",
-    "ptypes/duration",
-    "ptypes/timestamp"
-  ]
-  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
-  version = "v1.1.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/google/gofuzz"
   packages = ["."]
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
-
-[[projects]]
-  name = "github.com/googleapis/gnostic"
-  packages = [
-    "OpenAPIv2",
-    "compiler",
-    "extensions"
-  ]
-  revision = "7c663266750e7d82587642f65e60bc4083f1f84e"
-  version = "v0.2.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/golang-lru"
-  packages = [
-    ".",
-    "simplelru"
-  ]
-  revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
 
 [[projects]]
   name = "github.com/json-iterator/go"
@@ -161,30 +124,14 @@
 
 [[projects]]
   branch = "master"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna"
   ]
   revision = "57065200b4b034a1c8ad54ff77069408c2218ae6"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/sys"
-  packages = [
-    "unix",
-    "windows"
-  ]
-  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -207,12 +154,6 @@
   ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/time"
-  packages = ["rate"]
-  revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
 
 [[projects]]
   branch = "master"
@@ -241,34 +182,9 @@
   name = "k8s.io/api"
   packages = [
     "admission/v1beta1",
-    "admissionregistration/v1alpha1",
     "admissionregistration/v1beta1",
-    "apps/v1",
-    "apps/v1beta1",
-    "apps/v1beta2",
     "authentication/v1",
-    "authentication/v1beta1",
-    "authorization/v1",
-    "authorization/v1beta1",
-    "autoscaling/v1",
-    "autoscaling/v2beta1",
-    "batch/v1",
-    "batch/v1beta1",
-    "batch/v2alpha1",
-    "certificates/v1beta1",
-    "core/v1",
-    "events/v1beta1",
-    "extensions/v1beta1",
-    "networking/v1",
-    "policy/v1beta1",
-    "rbac/v1",
-    "rbac/v1alpha1",
-    "rbac/v1beta1",
-    "scheduling/v1alpha1",
-    "settings/v1alpha1",
-    "storage/v1",
-    "storage/v1alpha1",
-    "storage/v1beta1"
+    "core/v1"
   ]
   revision = "9273ee02527c608cecc74969b3e489f5dba686da"
 
@@ -277,15 +193,6 @@
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "examples/client-go/pkg/apis/cr",
-    "examples/client-go/pkg/apis/cr/v1",
-    "examples/client-go/pkg/client/clientset/versioned",
-    "examples/client-go/pkg/client/clientset/versioned/scheme",
-    "examples/client-go/pkg/client/clientset/versioned/typed/cr/v1",
-    "examples/client-go/pkg/client/clientset/versioned/typed/cr/v1/fake",
-    "examples/client-go/pkg/client/informers/externalversions/cr",
-    "examples/client-go/pkg/client/informers/externalversions/cr/v1",
-    "examples/client-go/pkg/client/informers/externalversions/internalinterfaces",
-    "examples/client-go/pkg/client/listers/cr/v1",
     "pkg/features"
   ]
   revision = "4efc6f1b8d5f71558d1c385a49f960ea23f0bbbf"
@@ -294,12 +201,9 @@
   branch = "release-1.9"
   name = "k8s.io/apimachinery"
   packages = [
-    "pkg/api/errors",
-    "pkg/api/meta",
     "pkg/api/resource",
     "pkg/apis/meta/internalversion",
     "pkg/apis/meta/v1",
-    "pkg/apis/meta/v1/unstructured",
     "pkg/apis/meta/v1alpha1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
@@ -311,13 +215,9 @@
     "pkg/runtime/serializer/json",
     "pkg/runtime/serializer/protobuf",
     "pkg/runtime/serializer/recognizer",
-    "pkg/runtime/serializer/streaming",
     "pkg/runtime/serializer/versioning",
     "pkg/selection",
     "pkg/types",
-    "pkg/util/cache",
-    "pkg/util/clock",
-    "pkg/util/diff",
     "pkg/util/errors",
     "pkg/util/framer",
     "pkg/util/intstr",
@@ -329,7 +229,6 @@
     "pkg/util/validation/field",
     "pkg/util/wait",
     "pkg/util/yaml",
-    "pkg/version",
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
@@ -343,33 +242,6 @@
     "pkg/util/feature"
   ]
   revision = "a2affdf2c58bd3d026a6832908b0e2f5ca8960fa"
-
-[[projects]]
-  name = "k8s.io/client-go"
-  packages = [
-    "discovery",
-    "discovery/fake",
-    "kubernetes/scheme",
-    "pkg/apis/clientauthentication",
-    "pkg/apis/clientauthentication/v1alpha1",
-    "pkg/version",
-    "plugin/pkg/client/auth/exec",
-    "rest",
-    "rest/watch",
-    "testing",
-    "tools/cache",
-    "tools/clientcmd/api",
-    "tools/metrics",
-    "tools/pager",
-    "transport",
-    "util/buffer",
-    "util/cert",
-    "util/flowcontrol",
-    "util/integer",
-    "util/retry"
-  ]
-  revision = "23781f4d6632d88e869066eaebb743857aa1ef9b"
-  version = "v7.0.0"
 
 [[projects]]
   branch = "release-1.9"
@@ -422,6 +294,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c2ff755a19f924b25c7649c3cde4d0f2eff148145b9183737c3a39bbe23f3298"
+  inputs-digest = "cad394f630f92d44dc5ee0e85b572770f4d83e58530294ecfb0e41a665e1e7d5"
   solver-name = "gps-cdcl"
   solver-version = 1

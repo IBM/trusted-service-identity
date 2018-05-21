@@ -23,10 +23,10 @@ package v1
 import (
 	time "time"
 
-	cti_v1 "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis/cti/v1"
-	versioned "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/clientset/versioned"
-	internalinterfaces "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/listers/cti/v1"
+	cti_v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/cti/v1"
+	versioned "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned"
+	internalinterfaces "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/listers/cti/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

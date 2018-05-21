@@ -26,15 +26,15 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 #                  k8s.io/kubernetes. The output-base is needed for the generators to output into the vendor dir
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 ${CODEGEN_PKG}/generate-groups.sh all \
-  github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis \
+  github.ibm.com/brandon-lum/ti-keyrelease/pkg/client github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis \
   cr:v1
 
 ${CODEGEN_PKG}/generate-groups.sh all \
-  github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis \
+  github.ibm.com/brandon-lum/ti-keyrelease/pkg/client github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis \
   cti:v1
 
 ${CODEGEN_PKG}/generate-groups.sh all \
-  github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis \
+  github.ibm.com/brandon-lum/ti-keyrelease/pkg/client github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis \
   pti:v1
 
 # To use your own boilerplate text append:

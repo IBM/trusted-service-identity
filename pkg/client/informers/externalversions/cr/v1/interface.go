@@ -21,7 +21,7 @@ limitations under the License.
 package v1
 
 import (
-	internalinterfaces "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

@@ -21,8 +21,8 @@ limitations under the License.
 package pti
 
 import (
-	internalinterfaces "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/informers/externalversions/pti/v1"
+	internalinterfaces "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/informers/externalversions/pti/v1"
 )
 
 // Interface provides access to each of this group's versions.

@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	pti_v1 "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/apis/pti/v1"
+	pti_v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/pti/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

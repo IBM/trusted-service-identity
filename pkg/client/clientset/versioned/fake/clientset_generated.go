@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.ibm.com/Brandon-Lum/TI-KeyRelease/pkg/client/clientset/versioned"
+	clientset "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned"
 	ptiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/pti/v1"
 	fakeptiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/pti/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
