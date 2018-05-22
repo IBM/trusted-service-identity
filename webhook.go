@@ -39,10 +39,11 @@ const (
 )
 
 type WebhookServer struct {
-	sidecarConfig    *Config
+	sidecarConfig    *SideCarConfig
 	server           *http.Server
 }
 
+//initContainerConfig *InitContainerConfig
 // Webhook Server parameters
 type WhSvrParameters struct {
 	port int                 // webhook server port
@@ -51,7 +52,7 @@ type WhSvrParameters struct {
 	sidecarCfgFile string    // path to sidecar injector configuration file
 }
 
-type Config struct {
+type SideCarConfig struct {
 	Containers  []corev1.Container  `yaml:"containers"`
 	Volumes     []corev1.Volume     `yaml:"volumes"`
 }
@@ -80,14 +81,14 @@ func applyDefaultsWorkaround(containers []corev1.Container, volumes []corev1.Vol
 	})
 }
 
-func loadConfig(configFile string) (*Config, error) {
+func loadConfig(configFile string) (*SideCarConfig, error) {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return nil, err
 	}
 	glog.Infof("New configuration: sha256sum %x", sha256.Sum256(data))
 	
-	var cfg Config
+	var cfg SideCarConfig
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
@@ -194,7 +195,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 }
 
 // create mutation patch for resoures
-func createPatch(pod *corev1.Pod, sidecarConfig *Config, annotations map[string]string) ([]byte, error) {
+func createPatch(pod *corev1.Pod, sidecarConfig *SideCarConfig, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 	
 	patch = append(patch, addContainer(pod.Spec.Containers, sidecarConfig.Containers, "/spec/containers")...)

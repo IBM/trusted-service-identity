@@ -17,3 +17,19 @@ data:
       - name: nginx-conf
         configMap:
           name: nginx-configmap
+    initcontainerconfig.yaml: |
+        initContainers:
+        - name: gen-vault-cert
+          image: lumjjb/gen-vault-cert:v1
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: ti-vault-secret
+              mountPath: /vault-certs
+        volumes:
+          - name: ti-vault-secret
+            secret:
+              secretName: ti-secret-changeme
+        addVolumeMounts:
+          - name: ti-vault-secret
+            mountPath: /vault-certs
+

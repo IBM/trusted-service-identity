@@ -1,0 +1,2 @@
+#!/bin/bash
+docker build . -t lumjjb/gen-vault-cert:v1 && docker push lumjjb/gen-vault-cert:v1
