@@ -245,18 +245,18 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 }
 
 // create mutation patch for resoures
-func createPatch(pod *corev1.Pod, sidecarConfig *SideCarConfig, initcontainerConfig *InitContainerConfig, serviceaccountVolMounts []corev1.VolumeMount, annotations map[string]string) ([]byte, error) {
+func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig, serviceaccountVolMounts []corev1.VolumeMount, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
     // Sidecar additions
-	patch = append(patch, addContainer(pod.Spec.Containers, sidecarConfig.Containers, "/spec/containers")...)
+	//patch = append(patch, addContainer(pod.Spec.Containers, sidecarConfig.Containers, "/spec/containers")...)
+    //glog.Infof("add volumes: %v", sidecarConfig.Volumes)
+	//patch = append(patch, addVolume(pod.Spec.Volumes, append(sidecarConfig.Volumes,initcontainerConfig.Volumes...), "/spec/volumes")...)
     glog.Infof("add volumes: %v", initcontainerConfig.Volumes)
-    glog.Infof("add volumes: %v", sidecarConfig.Volumes)
-	patch = append(patch, addVolume(pod.Spec.Volumes, append(sidecarConfig.Volumes,initcontainerConfig.Volumes...), "/spec/volumes")...)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
-
     patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
-	//patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
+	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
+
     for i, c := range pod.Spec.Containers {
         glog.Infof("add vol mounts : %v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
         patch = append(patch, addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
@@ -378,7 +378,7 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
     // Create TI secret key to populate
 
     glog.Infof("Creating patch")
-	patchBytes, err := createPatch(&pod, whsvr.sidecarConfig, whsvr.initcontainerConfig, []corev1.VolumeMount{serviceaccountVolMount}, annotations)
+	patchBytes, err := createPatch(&pod, whsvr.initcontainerConfig, []corev1.VolumeMount{serviceaccountVolMount}, annotations)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
