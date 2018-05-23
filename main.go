@@ -21,9 +21,15 @@ func main() {
 	flag.StringVar(&parameters.certFile, "tlsCertFile", "/etc/webhook/certs/cert.pem", "File containing the x509 Certificate for HTTPS.")
 	flag.StringVar(&parameters.keyFile, "tlsKeyFile", "/etc/webhook/certs/key.pem", "File containing the x509 private key to --tlsCertFile.")
 	flag.StringVar(&parameters.sidecarCfgFile, "sidecarCfgFile", "/etc/webhook/config/sidecarconfig.yaml", "File containing the mutation configuration.")
+	flag.StringVar(&parameters.initcontainerCfgFile, "initcontainerCfgFile", "/etc/webhook/config/initcontainerconfig.yaml", "File containing the mutation configuration.")
 	flag.Parse()
 	
-	sidecarConfig, err := loadConfig(parameters.sidecarCfgFile)
+	sidecarConfig, err := loadSideCarConfig(parameters.sidecarCfgFile)
+	if err != nil {
+		glog.Errorf("Filed to load configuration: %v", err)
+	}
+	
+	initcontainerConfig, err := loadInitContainerConfig(parameters.initcontainerCfgFile)
 	if err != nil {
 		glog.Errorf("Filed to load configuration: %v", err)
 	}
@@ -35,6 +41,7 @@ func main() {
 	
 	whsvr := &WebhookServer {
 		sidecarConfig:    sidecarConfig,
+		initcontainerConfig:    initcontainerConfig,
 		server:           &http.Server {
 			Addr:        fmt.Sprintf(":%v", parameters.port),
 			TLSConfig:   &tls.Config{Certificates: []tls.Certificate{pair}},
