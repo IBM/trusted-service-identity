@@ -5,3 +5,9 @@ metadata:
 spec:
   cluster-name: mycluster
   cluster-region: dal
+  identity-rules:
+    - image: "lumjjb/"
+      identity: id-lumjjb
+    - image: "ibmcom/"
+      identity: id-ibm
+

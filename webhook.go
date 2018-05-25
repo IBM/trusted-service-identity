@@ -54,8 +54,9 @@ var ignoredNamespaces = []string{
 }
 
 const (
-	admissionWebhookAnnotationInjectKey = "sidecar-injector-webhook.morven.me/inject"
-	admissionWebhookAnnotationStatusKey = "sidecar-injector-webhook.morven.me/status"
+	admissionWebhookAnnotationInjectKey = "admission.trusted.identity/inject"
+    admissionWebhookAnnotationStatusKey = "admission.trusted.identity/status"
+	admissionWebhookAnnotationSecretKey = "admission.trusted.identity/ti-secret-key"
 )
 
 type WebhookServer struct {
@@ -76,6 +77,7 @@ type InitContainerConfig struct {
     InitContainers  []corev1.Container   `yaml:"initContainers"`
 	Volumes         []corev1.Volume      `yaml:"volumes"`
 	AddVolumeMounts []corev1.VolumeMount `yaml:"addVolumeMounts"`
+	Annotations map[string]string `yaml:"annotations"`
 }
 
 func (ic *InitContainerConfig) DeepCopy () *InitContainerConfig {
@@ -83,6 +85,7 @@ func (ic *InitContainerConfig) DeepCopy () *InitContainerConfig {
         InitContainers: make([]corev1.Container, len(ic.InitContainers)),
         Volumes: make([]corev1.Volume, len(ic.Volumes)),
         AddVolumeMounts: make([]corev1.VolumeMount, len(ic.AddVolumeMounts)),
+        Annotations: make(map[string]string),
     }
 
     for i, v := range ic.InitContainers {
@@ -96,12 +99,13 @@ func (ic *InitContainerConfig) DeepCopy () *InitContainerConfig {
     for i, v := range ic.AddVolumeMounts{
         icc.AddVolumeMounts[i] = *v.DeepCopy()
     }
+    
+    for k,v := range ic.Annotations {
+        icc.Annotations[k] = v
+    }
 
     return icc
 }
-
-
-
 
 type patchOperation struct {
 	Op    string      `json:"op"`
@@ -138,6 +142,10 @@ func loadInitContainerConfig(configFile string) (*InitContainerConfig, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
+
+    if cfg.Annotations == nil {
+        cfg.Annotations = make(map[string]string)
+    }
 
 	return &cfg, nil
 }
@@ -247,9 +255,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 			patch = append(patch, patchOperation{
 				Op:   "add",
 				Path: "/metadata/annotations",
-				Value: map[string]string{
-					key: value,
-				},
+                Value: added,
 			})
 		} else {
 			patch = append(patch, patchOperation{
@@ -262,9 +268,108 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 	return patch
 }
 
+
+func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.AdmissionRequest) (*InitContainerConfig, error) {
+    namespace := req.Namespace
+    if namespace == metav1.NamespaceNone {
+        namespace = metav1.NamespaceDefault
+    }
+
+    initcontainerConfigCp := whsvr.initcontainerConfig.DeepCopy()
+    
+    
+
+    glog.Infof("Applying defaults")
+
+	// Workaround: https://github.com/kubernetes/kubernetes/issues/57982
+	applyDefaultsWorkaround(initcontainerConfigCp.InitContainers, initcontainerConfigCp.Volumes)
+
+    var err error
+
+    // XXX: Added workaround for //github.com/kubernetes/kubernetes/issues/57982
+    // for service accounts
+    if len(pod.Spec.Containers) == 0 {
+        err =  fmt.Errorf("Pod has no containers")
+		glog.Infof("Err: %v", err)
+        return nil, err
+    }
+
+    var serviceaccountVolMount corev1.VolumeMount
+    foundServiceAccount := false
+    for _, vmount := range pod.Spec.Containers[0].VolumeMounts {
+        if strings.Contains(vmount.Name , "token") {
+            serviceaccountVolMount = vmount
+            foundServiceAccount = true
+            break
+        }
+    }
+
+    if !foundServiceAccount {
+        err =  fmt.Errorf("service account token not found")
+		glog.Infof("Err: %v", err)
+        return nil, err
+    }
+
+    for i, c := range initcontainerConfigCp.InitContainers {
+        glog.Infof("add vol mounts (initc) : %v", c.VolumeMounts, serviceaccountVolMount)
+        initcontainerConfigCp.InitContainers[i].VolumeMounts = append(c.VolumeMounts, serviceaccountVolMount)
+    }
+
+    // Set volume 
+    uuid, err := pseudo_uuid()
+    if err != nil {
+        glog.Infof("Err: %v", err)
+        return nil, err
+    }
+
+    secretName := "ti-secret-" + uuid
+    
+    // Create a secret
+    glog.Infof("Getting cluster Config")
+    kubeConf, err := rest.InClusterConfig()
+	if err != nil {
+		glog.Infof("Err: %v", err)
+		return nil, err
+	}
+
+    glog.Infof("Creating kube client")
+	client, err := ccorev1.NewForConfig(kubeConf)
+	if err != nil {
+		glog.Infof("Err: %v", err)
+		return nil, err
+	}
+
+
+    // Create secret if it doesn't exist
+    glog.Infof("Creating secret")
+    createSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName}}
+    createSecret, err = client.Secrets(namespace).Create(createSecret)
+    if err != nil {
+        if !errors.IsAlreadyExists(err) {
+            glog.Infof("Err: %v", err)
+            return nil, err
+        }
+    }
+
+    glog.Infof("pod name : %v", pod.ObjectMeta.Name)
+    for i,v := range initcontainerConfigCp.Volumes {
+        if v.Name == "ti-vault-secret" {
+            initcontainerConfigCp.Volumes[i].VolumeSource.Secret.SecretName = secretName
+            break
+        }
+    }
+
+    glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
+    initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
+    initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
+
+    return initcontainerConfigCp, nil
+
+}
 // create mutation patch for resoures
-func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig, annotations map[string]string) ([]byte, error) {
+func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]byte, error) {
 	var patch []patchOperation
+    annotations := initcontainerConfig.Annotations
 
     // additions
     glog.Infof("add volumes: %v", initcontainerConfig.Volumes)
@@ -285,11 +390,7 @@ func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig, anno
 func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 	req := ar.Request
 
-    namespace := req.Namespace
-    if namespace == metav1.NamespaceNone {
-        namespace = metav1.NamespaceDefault
-    }
-	var pod corev1.Pod
+    var pod corev1.Pod
 	if err := json.Unmarshal(req.Object.Raw, &pod); err != nil {
 		glog.Errorf("Could not unmarshal raw object: %v", err)
 		return &v1beta1.AdmissionResponse{
@@ -310,124 +411,20 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 		}
 	}
 
-
-    initcontainerConfigCp := whsvr.initcontainerConfig.DeepCopy()
-    
-    
-
-    glog.Infof("Applying defaults")
-
-	// Workaround: https://github.com/kubernetes/kubernetes/issues/57982
-	applyDefaultsWorkaround(initcontainerConfigCp.InitContainers, initcontainerConfigCp.Volumes)
-
-    var err error
-
-    // XXX: Added workaround for //github.com/kubernetes/kubernetes/issues/57982
-    // for service accounts
-    if len(pod.Spec.Containers) == 0 {
-        err =  fmt.Errorf("Pod has no containers")
-		glog.Infof("Err: %v", err)
+    // Mutation Initialization
+    initContainerConfig, err := whsvr.mutateInitialization (pod, req)
+    if err != nil{
         return &v1beta1.AdmissionResponse{
-            Result: &metav1.Status{
-                Message: err.Error(),
-            },
-        }
-    }
-    var serviceaccountVolMount corev1.VolumeMount
-    foundServiceAccount := false
-    for _, vmount := range pod.Spec.Containers[0].VolumeMounts {
-        if strings.Contains(vmount.Name , "token") {
-            serviceaccountVolMount = vmount
-            foundServiceAccount = true
-            break
-        }
-    }
-
-    if !foundServiceAccount {
-        err =  fmt.Errorf("service account token not found")
-		glog.Infof("Err: %v", err)
-        return &v1beta1.AdmissionResponse{
-            Result: &metav1.Status{
-                Message: err.Error(),
-            },
-        }
-    }
-
-    for i, c := range initcontainerConfigCp.InitContainers {
-        glog.Infof("add vol mounts (initc) : %v", c.VolumeMounts, serviceaccountVolMount)
-        initcontainerConfigCp.InitContainers[i].VolumeMounts = append(c.VolumeMounts, serviceaccountVolMount)
-    }
-
-    for i:=0; i < len(pod.Spec.Containers); i++ {
+			Result: &metav1.Status{
+				Message: err.Error(),
+			},
+		}
 
     }
-
-    // Set volume 
-    uuid, err := pseudo_uuid()
-    if err != nil {
-        glog.Infof("Err: %v", err)
-        return &v1beta1.AdmissionResponse{
-            Result: &metav1.Status{
-                Message: err.Error(),
-            },
-        }
-    }
-
-    secretName := "ti-secret-" + uuid
-    
-    // Create a secret
-    glog.Infof("Getting cluster Config")
-    kubeConf, err := rest.InClusterConfig()
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return &v1beta1.AdmissionResponse{
-            Result: &metav1.Status{
-                Message: err.Error(),
-            },
-        }
-	}
-
-    glog.Infof("Creating kube client")
-	client, err := ccorev1.NewForConfig(kubeConf)
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return &v1beta1.AdmissionResponse{
-            Result: &metav1.Status{
-                Message: err.Error(),
-            },
-        }
-	}
-
-
-    // Create secret if it doesn't exist
-    glog.Infof("Creating secret")
-    createSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName}}
-    createSecret, err = client.Secrets(namespace).Create(createSecret)
-    if err != nil {
-        if !errors.IsAlreadyExists(err) {
-            glog.Infof("Err: %v", err)
-            return &v1beta1.AdmissionResponse{
-                Result: &metav1.Status{
-                Message: err.Error(),
-                },
-            }
-        }
-    }
-
-    glog.Infof("pod name : %v", pod.ObjectMeta.Name)
-    for i,v := range initcontainerConfigCp.Volumes {
-        if v.Name == "ti-vault-secret" {
-            initcontainerConfigCp.Volumes[i].VolumeSource.Secret.SecretName = secretName
-            break
-        }
-    }
-
-    glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
-    annotations := map[string]string{admissionWebhookAnnotationStatusKey: "injected", "ti-secret-key" : secretName}
 
     // Create TI secret key to populate
     glog.Infof("Creating patch")
-	patchBytes, err := createPatch(&pod, initcontainerConfigCp, annotations)
+	patchBytes, err := createPatch(&pod, initContainerConfig)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{

@@ -17,7 +17,7 @@ data:
             items:
               - path: "ti-secret"
                 fieldRef:
-                  fieldPath: metadata.annotations['ti-secret-key']
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-secret-key']
         - name: ti-vault-secret
           secret:
             secretName: ti-vault-
