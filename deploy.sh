@@ -14,7 +14,6 @@ kubectl -n trusted-identity apply -f deployment/crd/cti_example.yaml
 #kubectl -n trusted-identity apply -f deployment/configmap.yaml
 TI_SA_TOKEN=$(kubectl -n trusted-identity get sa ti-sa -o jsonpath='{.secrets[0].name}')
 cat deployment/configmap.yaml | sed -e "s|\${TI_SA_TOKEN}|${TI_SA_TOKEN}|g" | kubectl -n trusted-identity apply -f -
-kubectl -n trusted-identity apply -f deployment/nginxconfigmap.yaml
 ./deployment/webhook-insecure-cert.sh --namespace trusted-identity
 
 # Create services and deployment
