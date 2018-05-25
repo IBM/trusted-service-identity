@@ -16,7 +16,6 @@ spec:
           image: lumjjb/sidecar-injector:v1
           imagePullPolicy: Always
           args:
-            - -sidecarCfgFile=/etc/webhook/config/sidecarconfig.yaml
             - -initcontainerCfgFile=/etc/webhook/config/initcontainerconfig.yaml
             - -tlsCertFile=/etc/webhook/certs/cert.pem
             - -tlsKeyFile=/etc/webhook/certs/key.pem

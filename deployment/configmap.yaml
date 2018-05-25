@@ -3,20 +3,6 @@ kind: ConfigMap
 metadata:
   name: sidecar-injector-webhook-configmap
 data:
-  sidecarconfig.yaml: |
-    containers:
-      - name: sidecar-nginx
-        image: nginx:1.12.2
-        imagePullPolicy: IfNotPresent
-        ports:
-          - containerPort: 80
-        volumeMounts:
-          - name: nginx-conf
-            mountPath: /etc/nginx
-    volumes:
-      - name: nginx-conf
-        configMap:
-          name: nginx-configmap
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
@@ -26,14 +12,15 @@ data:
           - name: pod-metadata
             mountPath: /pod-metadata
       volumes:
-        - name: ti-vault-secret
-          emptyDir: {}
         - name: pod-metadata
           downwardAPI:
             items:
-              - path: "name"
+              - path: "ti-secret"
                 fieldRef:
-                  fieldPath: metadata.name
+                  fieldPath: metadata.annotations['ti-secret-key']
+        - name: ti-vault-secret
+          secret:
+            secretName: ti-vault-
       addVolumeMounts:
         - name: ti-vault-secret
           mountPath: /vault-certs

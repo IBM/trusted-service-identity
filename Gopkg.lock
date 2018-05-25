@@ -354,6 +354,7 @@
     "discovery",
     "discovery/fake",
     "kubernetes/scheme",
+    "kubernetes/typed/core/v1",
     "pkg/version",
     "rest",
     "rest/watch",
@@ -362,6 +363,7 @@
     "tools/clientcmd/api",
     "tools/metrics",
     "tools/pager",
+    "tools/reference",
     "transport",
     "util/buffer",
     "util/cert",
@@ -421,6 +423,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "58f93b68725384f41df633db6675a52c5a38d253a2bed500ff644309d34d4ce0"
+  inputs-digest = "c4ffa8309401e81c2d1e97bc1a53478d7863d1173698f5eec583f438bd2fb33e"
   solver-name = "gps-cdcl"
   solver-version = 1
