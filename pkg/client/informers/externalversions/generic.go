@@ -23,7 +23,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/pti/v1"
+	v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/cti/v1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -54,9 +54,9 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=pti.trusted.identity, Version=v1
-	case v1.SchemeGroupVersion.WithResource("podtis"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Pti().V1().PodTIs().Informer()}, nil
+	// Group=trusted.identity, Version=v1
+	case v1.SchemeGroupVersion.WithResource("clustertis"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Trusted().V1().ClusterTIs().Informer()}, nil
 
 	}
 

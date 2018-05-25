@@ -27,15 +27,7 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 ${CODEGEN_PKG}/generate-groups.sh all \
   github.ibm.com/brandon-lum/ti-keyrelease/pkg/client github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis \
-  cr:v1
-
-${CODEGEN_PKG}/generate-groups.sh all \
-  github.ibm.com/brandon-lum/ti-keyrelease/pkg/client github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis \
   cti:v1
-
-${CODEGEN_PKG}/generate-groups.sh all \
-  github.ibm.com/brandon-lum/ti-keyrelease/pkg/client github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis \
-  pti:v1
 
 # To use your own boilerplate text append:
 #   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt

@@ -63,13 +63,13 @@ func NewFilteredClusterTIInformer(client versioned.Interface, namespace string, 
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ClustertisV1().ClusterTIs(namespace).List(options)
+				return client.TrustedV1().ClusterTIs(namespace).List(options)
 			},
 			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ClustertisV1().ClusterTIs(namespace).Watch(options)
+				return client.TrustedV1().ClusterTIs(namespace).Watch(options)
 			},
 		},
 		&cti_v1.ClusterTI{},

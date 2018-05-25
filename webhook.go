@@ -274,6 +274,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 }
 
 
+// If return nil, no changes required
 func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.AdmissionRequest) (*InitContainerConfig, error) {
     namespace := req.Namespace
     if namespace == metav1.NamespaceNone {
@@ -343,6 +344,14 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
         return nil, err
     }
 
+    glog.Info("Namespace : %v", namespace)
+    ctis, err := cticlient.ClusterTIs(namespace).List(metav1.ListOptions{}) 
+    if err !=nil {
+        return nil, err
+    }
+    glog.Info("Lists: %v", ctis)
+
+
     cti, err := cticlient.ClusterTIs(namespace).Get("cluster-policy", metav1.GetOptions{})
     if err != nil {
         fmt.Printf("Err: %v", err)
@@ -356,6 +365,11 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
     }
 
     glog.Infof("CTI Identity Check: %v", identity)
+
+    // If no identity, no requirement to perform key generation, just pass through
+    if identity == "" {
+        return nil, nil
+    }
 
     // Create a secret
     glog.Infof("Creating kube client")
@@ -446,7 +460,11 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 				Message: err.Error(),
 			},
 		}
-
+    }
+    if initContainerConfig == nil {
+        return &v1beta1.AdmissionResponse{
+	        Allowed: true,		
+		}
     }
 
     // Create TI secret key to populate

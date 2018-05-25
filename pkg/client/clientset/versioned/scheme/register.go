@@ -19,7 +19,7 @@ limitations under the License.
 package scheme
 
 import (
-	ptiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/pti/v1"
+	trustedv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/cti/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -50,6 +50,6 @@ func init() {
 // After this, RawExtensions in Kubernetes types will serialize kube-aggregator types
 // correctly.
 func AddToScheme(scheme *runtime.Scheme) {
-	ptiv1.AddToScheme(scheme)
+	trustedv1.AddToScheme(scheme)
 
 }

@@ -6,8 +6,7 @@ info:
   cluster-name: mycluster
   cluster-region: dal
 policy:
-  identity-rules:
-    - image: "lumjjb/"
-      identity: id-lumjjb
-    - image: "ibmcom/"
-      identity: id-ibm
+  - image: "lumjjb/"
+    identity: id-lumjjb
+  - image: "ibmcom/"
+    identity: id-ibm

@@ -11,6 +11,8 @@ data:
         volumeMounts:
           - name: pod-metadata
             mountPath: /pod-metadata
+          - name: pod-identity
+            mountPath: /pod-identity
       volumes:
         - name: pod-metadata
           downwardAPI:
@@ -18,6 +20,13 @@ data:
               - path: "ti-secret"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-secret-key']
+        - name: pod-identity
+          downwardAPI:
+            items:
+              - path: "ti-identity"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
+
         - name: ti-vault-secret
           secret:
             secretName: ti-vault-

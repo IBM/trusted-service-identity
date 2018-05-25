@@ -17,6 +17,8 @@ limitations under the License.
 package v1
 
 import (
+    "strings" 
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     corev1 "k8s.io/api/core/v1"
 )
@@ -57,6 +59,36 @@ type ClusterTIList struct {
 	Items []ClusterTI `json:"items"`
 }
 
+func (pe *ClusterTIPolicyEntry) CheckPolicyItem (pod corev1.Pod) (identity string, err error) {
+    for _,cspec := range pod.Spec.InitContainers { 
+        if pe.Image != nil {
+            if !strings.HasPrefix(cspec.Image, *pe.Image) {
+                return "", nil
+            }
+        }
+    }
+
+    for _,cspec := range pod.Spec.Containers { 
+        if pe.Image != nil {
+            if !strings.HasPrefix(cspec.Image, *pe.Image) {
+                return "", nil
+            }
+        }
+    }
+    return pe.Identity, nil
+}
+// CheckPolicy returns the identity of the policy matched. Returns empty string if no identity matches
 func (cti *ClusterTI) CheckPolicy (pod corev1.Pod) (identity string, err error) {
-    return "id1", nil
+    for _, pe := range cti.Policy {
+        id , err := pe.CheckPolicyItem (pod) 
+        if err != nil {
+            return "", err
+        }
+
+        if id != "" {
+            return id, nil
+        }
+    }
+
+    return "", nil
 }

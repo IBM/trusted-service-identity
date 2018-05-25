@@ -20,7 +20,7 @@ package versioned
 
 import (
 	glog "github.com/golang/glog"
-	ptiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/pti/v1"
+	trustedv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -28,27 +28,27 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	PtiV1() ptiv1.PtiV1Interface
+	TrustedV1() trustedv1.TrustedV1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Pti() ptiv1.PtiV1Interface
+	Trusted() trustedv1.TrustedV1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	ptiV1 *ptiv1.PtiV1Client
+	trustedV1 *trustedv1.TrustedV1Client
 }
 
-// PtiV1 retrieves the PtiV1Client
-func (c *Clientset) PtiV1() ptiv1.PtiV1Interface {
-	return c.ptiV1
+// TrustedV1 retrieves the TrustedV1Client
+func (c *Clientset) TrustedV1() trustedv1.TrustedV1Interface {
+	return c.trustedV1
 }
 
-// Deprecated: Pti retrieves the default version of PtiClient.
+// Deprecated: Trusted retrieves the default version of TrustedClient.
 // Please explicitly pick a version.
-func (c *Clientset) Pti() ptiv1.PtiV1Interface {
-	return c.ptiV1
+func (c *Clientset) Trusted() trustedv1.TrustedV1Interface {
+	return c.trustedV1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -67,7 +67,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.ptiV1, err = ptiv1.NewForConfig(&configShallowCopy)
+	cs.trustedV1, err = trustedv1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.ptiV1 = ptiv1.NewForConfigOrDie(c)
+	cs.trustedV1 = trustedv1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -93,7 +93,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.ptiV1 = ptiv1.New(c)
+	cs.trustedV1 = trustedv1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

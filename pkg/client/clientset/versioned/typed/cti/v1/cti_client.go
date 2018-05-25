@@ -25,22 +25,22 @@ import (
 	rest "k8s.io/client-go/rest"
 )
 
-type ClustertisV1Interface interface {
+type TrustedV1Interface interface {
 	RESTClient() rest.Interface
 	ClusterTIsGetter
 }
 
-// ClustertisV1Client is used to interact with features provided by the clustertis.trusted.identity group.
-type ClustertisV1Client struct {
+// TrustedV1Client is used to interact with features provided by the trusted.identity group.
+type TrustedV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ClustertisV1Client) ClusterTIs(namespace string) ClusterTIInterface {
+func (c *TrustedV1Client) ClusterTIs(namespace string) ClusterTIInterface {
 	return newClusterTIs(c, namespace)
 }
 
-// NewForConfig creates a new ClustertisV1Client for the given config.
-func NewForConfig(c *rest.Config) (*ClustertisV1Client, error) {
+// NewForConfig creates a new TrustedV1Client for the given config.
+func NewForConfig(c *rest.Config) (*TrustedV1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -49,12 +49,12 @@ func NewForConfig(c *rest.Config) (*ClustertisV1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ClustertisV1Client{client}, nil
+	return &TrustedV1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new ClustertisV1Client for the given config and
+// NewForConfigOrDie creates a new TrustedV1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *ClustertisV1Client {
+func NewForConfigOrDie(c *rest.Config) *TrustedV1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -62,9 +62,9 @@ func NewForConfigOrDie(c *rest.Config) *ClustertisV1Client {
 	return client
 }
 
-// New creates a new ClustertisV1Client for the given RESTClient.
-func New(c rest.Interface) *ClustertisV1Client {
-	return &ClustertisV1Client{c}
+// New creates a new TrustedV1Client for the given RESTClient.
+func New(c rest.Interface) *TrustedV1Client {
+	return &TrustedV1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -82,7 +82,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *ClustertisV1Client) RESTClient() rest.Interface {
+func (c *TrustedV1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

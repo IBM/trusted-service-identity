@@ -17,5 +17,5 @@ limitations under the License.
 // +k8s:deepcopy-gen=package
 
 // Package v1 is the v1 version of the API.
-// +groupName=clustertis.trusted.identity
+// +groupName=trusted.identity
 package v1
