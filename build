@@ -1,7 +1,7 @@
 #dep ensure
-CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o kube-mutating-webhook-tutorial .
+CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ti-webhook .
 if [ $? -ne 0 ]; then exit 1 ; fi
 docker build --no-cache -t lumjjb/sidecar-injector:v1 .
-rm -rf kube-mutating-webhook-tutorial
+rm -rf ti-webhook
 
 docker push lumjjb/sidecar-injector:v1

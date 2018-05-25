@@ -292,6 +292,7 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
 
     var err error
 
+    /*
     // XXX: Added workaround for //github.com/kubernetes/kubernetes/issues/57982
     // for service accounts
     if len(pod.Spec.Containers) == 0 {
@@ -320,7 +321,7 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
         glog.Infof("add vol mounts (initc) : %v", c.VolumeMounts, serviceaccountVolMount)
         initcontainerConfigCp.InitContainers[i].VolumeMounts = append(c.VolumeMounts, serviceaccountVolMount)
     }
-
+    */
     // Set volume 
     uuid, err := pseudo_uuid()
     if err != nil {

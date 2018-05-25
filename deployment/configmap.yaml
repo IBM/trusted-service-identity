@@ -11,8 +11,13 @@ data:
         volumeMounts:
           - name: pod-metadata
             mountPath: /pod-metadata
+            readOnly: true
           - name: pod-identity
             mountPath: /pod-identity
+            readOnly: true
+          - name: ti-sa-mount
+            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+            readOnly: true
       volumes:
         - name: pod-metadata
           downwardAPI:
@@ -26,10 +31,12 @@ data:
               - path: "ti-identity"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
-
         - name: ti-vault-secret
           secret:
             secretName: ti-vault-
+        - name: ti-sa-mount
+          secret:
+            secretName: ${TI_SA_TOKEN}
       addVolumeMounts:
         - name: ti-vault-secret
           mountPath: /vault-certs
