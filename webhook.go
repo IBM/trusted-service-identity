@@ -23,6 +23,9 @@ import (
 
 	ccorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
     "k8s.io/client-go/rest"
+
+	cctiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
+	ctiv1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/cti/v1"
 )
 
 
@@ -57,6 +60,7 @@ const (
 	admissionWebhookAnnotationInjectKey = "admission.trusted.identity/inject"
     admissionWebhookAnnotationStatusKey = "admission.trusted.identity/status"
 	admissionWebhookAnnotationSecretKey = "admission.trusted.identity/ti-secret-key"
+	admissionWebhookAnnotationIdentityKey = "admission.trusted.identity/ti-identity"
 )
 
 type WebhookServer struct {
@@ -116,6 +120,7 @@ type patchOperation struct {
 func init() {
 	_ = corev1.AddToScheme(runtimeScheme)
 	_ = admissionregistrationv1beta1.AddToScheme(runtimeScheme)
+	_ = ctiv1.AddToScheme(runtimeScheme)
 	// defaulting with webhooks:
 	// https://github.com/kubernetes/kubernetes/issues/57982
 	_ = v1.AddToScheme(runtimeScheme)
@@ -324,7 +329,6 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
 
     secretName := "ti-secret-" + uuid
     
-    // Create a secret
     glog.Infof("Getting cluster Config")
     kubeConf, err := rest.InClusterConfig()
 	if err != nil {
@@ -332,8 +336,30 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
 		return nil, err
 	}
 
+    // Check Cluster TI policy
+    cticlient, err := cctiv1.NewForConfig(kubeConf)
+    if err != nil {
+        fmt.Printf("Err: %v", err)
+        return nil, err
+    }
+
+    cti, err := cticlient.ClusterTIs(namespace).Get("cluster-policy", metav1.GetOptions{})
+    if err != nil {
+        fmt.Printf("Err: %v", err)
+        return nil, err
+    }
+
+    glog.Infof("Got CTI: %v", cti)
+    identity, err := cti.CheckPolicy (pod)
+    if err != nil {
+        return nil, err
+    }
+
+    glog.Infof("CTI Identity Check: %v", identity)
+
+    // Create a secret
     glog.Infof("Creating kube client")
-	client, err := ccorev1.NewForConfig(kubeConf)
+    client, err := ccorev1.NewForConfig(kubeConf)
 	if err != nil {
 		glog.Infof("Err: %v", err)
 		return nil, err
@@ -362,6 +388,7 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
     glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
     initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
     initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
+    initcontainerConfigCp.Annotations[admissionWebhookAnnotationIdentityKey] = identity
 
     return initcontainerConfigCp, nil
 

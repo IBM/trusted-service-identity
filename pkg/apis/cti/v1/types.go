@@ -18,6 +18,7 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    corev1 "k8s.io/api/core/v1"
 )
 
 // +genclient
@@ -29,28 +30,22 @@ type ClusterTI struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Spec   ClusterTISpec   `json:"spec"`
-	Status ClusterTIStatus `json:"status,omitempty"`
+	Info ClusterTISpec   `json:"info"`
+	Policy []ClusterTIPolicyEntry `json:"policy,omitempty"`
 }
 
 // ExampleSpec is the spec for an Example resource
 type ClusterTISpec struct {
-	Foo string `json:"foo"`
-	Bar bool   `json:"bar"`
+	ClusterName string `json:"cluster-name"`
+	ClusterRegion string `json:"cluster-region"`
 }
 
-// ExampleStatus is the status for an Example resource
-type ClusterTIStatus struct {
-	State   ClusterTIState `json:"state,omitempty"`
-	Message string       `json:"message,omitempty"`
+// ClusterTIPolicyEntry is a cluster TI policy entry
+type ClusterTIPolicyEntry struct {
+	Image *string `json:"image,omitempty"`
+	Identity string       `json:"identity"`
 }
 
-type ClusterTIState string
-
-const (
-	ExampleStateCreated   ClusterTIState = "Created"
-	ExampleStateProcessed ClusterTIState = "Processed"
-)
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -60,4 +55,8 @@ type ClusterTIList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []ClusterTI `json:"items"`
+}
+
+func (cti *ClusterTI) CheckPolicy (pod corev1.Pod) (identity string, err error) {
+    return "id1", nil
 }

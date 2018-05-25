@@ -30,13 +30,13 @@ import (
 
 // FakeClusterTIs implements ClusterTIInterface
 type FakeClusterTIs struct {
-	Fake *FakeCtiV1
+	Fake *FakeClustertisV1
 	ns   string
 }
 
-var clustertisResource = schema.GroupVersionResource{Group: "cti.trusted.identity", Version: "v1", Resource: "clustertis"}
+var clustertisResource = schema.GroupVersionResource{Group: "clustertis.trusted.identity", Version: "v1", Resource: "clustertis"}
 
-var clustertisKind = schema.GroupVersionKind{Group: "cti.trusted.identity", Version: "v1", Kind: "ClusterTI"}
+var clustertisKind = schema.GroupVersionKind{Group: "clustertis.trusted.identity", Version: "v1", Kind: "ClusterTI"}
 
 // Get takes name of the clusterTI, and returns the corresponding clusterTI object, and an error if there is any.
 func (c *FakeClusterTIs) Get(name string, options v1.GetOptions) (result *cti_v1.ClusterTI, err error) {

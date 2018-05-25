@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	cr "k8s.io/apiextensions-apiserver/examples/client-go/pkg/apis/cr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SchemeGroupVersion is group version used to register these objects
@@ -47,5 +48,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&Example{},
 		&ExampleList{},
 	)
+    metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
 }

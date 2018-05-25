@@ -24,17 +24,17 @@ import (
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeCtiV1 struct {
+type FakeClustertisV1 struct {
 	*testing.Fake
 }
 
-func (c *FakeCtiV1) ClusterTIs(namespace string) v1.ClusterTIInterface {
+func (c *FakeClustertisV1) ClusterTIs(namespace string) v1.ClusterTIInterface {
 	return &FakeClusterTIs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeCtiV1) RESTClient() rest.Interface {
+func (c *FakeClustertisV1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

@@ -17,5 +17,5 @@ limitations under the License.
 package cti
 
 const (
-	GroupName = "cti.trusted.identity"
+	GroupName = "clustertis.trusted.identity"
 )

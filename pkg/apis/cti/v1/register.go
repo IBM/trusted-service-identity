@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	cti "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/cti"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SchemeGroupVersion is group version used to register these objects
@@ -47,5 +48,7 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ClusterTI{},
 		&ClusterTIList{},
 	)
+    metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+
 	return nil
 }

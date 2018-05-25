@@ -53,7 +53,7 @@ type clusterTIs struct {
 }
 
 // newClusterTIs returns a ClusterTIs
-func newClusterTIs(c *CtiV1Client, namespace string) *clusterTIs {
+func newClusterTIs(c *ClustertisV1Client, namespace string) *clusterTIs {
 	return &clusterTIs{
 		client: c.RESTClient(),
 		ns:     namespace,
