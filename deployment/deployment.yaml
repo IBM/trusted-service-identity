@@ -1,19 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: sidecar-injector-webhook-deployment
+  name: ti-injector-webhook-deployment
   labels:
-    app: sidecar-injector
+    app: ti-injector
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: sidecar-injector
+        app: ti-injector
     spec:
       containers:
-        - name: sidecar-injector
-          image: lumjjb/sidecar-injector:v1
+        - name: ti-injector
+          image: lumjjb/ti-injector:v1
           imagePullPolicy: Always
           args:
             - -initcontainerCfgFile=/etc/webhook/config/initcontainerconfig.yaml
@@ -31,7 +31,7 @@ spec:
       volumes:
         - name: webhook-certs
           secret:
-            secretName: sidecar-injector-webhook-certs
+            secretName: ti-injector-webhook-certs
         - name: webhook-config
           configMap:
-            name: sidecar-injector-webhook-configmap
+            name: ti-injector-webhook-configmap

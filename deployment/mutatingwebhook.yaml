@@ -1,14 +1,14 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: sidecar-injector-webhook-cfg
+  name: ti-injector-webhook-cfg
   labels:
-    app: sidecar-injector
+    app: ti-injector
 webhooks:
-  - name: sidecar-injector.morven.me
+  - name: ti-injector.morven.me
     clientConfig:
       service:
-        name: sidecar-injector-webhook-svc
+        name: ti-injector-webhook-svc
         namespace: trusted-identity
         path: "/mutate"
       caBundle: ${CA_BUNDLE}
@@ -19,4 +19,4 @@ webhooks:
         resources: ["pods"]
     namespaceSelector:
       matchLabels:
-        sidecar-injector: enabled
+        ti-injector: enabled

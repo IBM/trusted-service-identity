@@ -1,7 +1,7 @@
 #dep ensure
 CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ti-webhook .
 if [ $? -ne 0 ]; then exit 1 ; fi
-docker build --no-cache -t lumjjb/sidecar-injector:v1 .
+docker build --no-cache -t lumjjb/ti-injector:v1 .
 rm -rf ti-webhook
 
-docker push lumjjb/sidecar-injector:v1
+docker push lumjjb/ti-injector:v1
