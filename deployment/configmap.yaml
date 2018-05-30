@@ -12,9 +12,6 @@ data:
           - name: pod-metadata
             mountPath: /pod-metadata
             readOnly: true
-          - name: pod-identity
-            mountPath: /pod-identity
-            readOnly: true
           - name: ti-sa-mount
             mountPath: /var/run/secrets/kubernetes.io/serviceaccount
             readOnly: true
@@ -25,12 +22,12 @@ data:
               - path: "ti-secret"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-secret-key']
-        - name: pod-identity
-          downwardAPI:
-            items:
               - path: "ti-identity"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
+              - path: "ti-pod-name"
+                fieldRef:
+                  fieldPath: metadata.name
         - name: ti-vault-secret
           secret:
             secretName: ti-vault-

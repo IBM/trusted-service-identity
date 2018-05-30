@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"time"
+    "strings" 
 
 	"github.com/golang/glog"
 
@@ -30,21 +31,35 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/workqueue"
+
+    ccorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+    "k8s.io/client-go/rest"
 )
+
+var (
+    RConfig = RevokerConfig{}
+)
+
+// RevokerConfig contains the configuration of the revoker
+type RevokerConfig struct {
+    // Namespace is the namespace to monitor for revocations
+    Namespace string
+}
 
 type Controller struct {
 	indexer  cache.Indexer
 	queue    workqueue.RateLimitingInterface
 	informer cache.Controller
+	cv1Client *ccorev1.CoreV1Client
 }
 
-func NewController(queue workqueue.RateLimitingInterface, indexer cache.Indexer, informer cache.Controller) *Controller {
+func NewController(queue workqueue.RateLimitingInterface, indexer cache.Indexer, informer cache.Controller, cv1Client *ccorev1.CoreV1Client) *Controller {
 	return &Controller{
 		informer: informer,
 		indexer:  indexer,
 		queue:    queue,
+        cv1Client: cv1Client,
 	}
 }
 
@@ -70,7 +85,7 @@ func (c *Controller) processNextItem() bool {
 // information about the pod to stdout. In case an error happened, it has to simply return the error.
 // The retry logic should not be part of the business logic.
 func (c *Controller) syncToStdout(key string) error {
-	obj, exists, err := c.indexer.GetByKey(key)
+	_, exists, err := c.indexer.GetByKey(key)
 	if err != nil {
 		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
 		return err
@@ -78,11 +93,28 @@ func (c *Controller) syncToStdout(key string) error {
 
 	if !exists {
 		// Below we will warm up our cache with a Pod, so that we will see a delete for one pod
-		fmt.Printf("Pod %s does not exist anymore\n", key)
+		fmt.Printf("Pod %s does not exist anymore, revoking certs \n", key)
+        podName := strings.TrimPrefix(key, RConfig.Namespace + "/")
+        labelSelector := &meta_v1.LabelSelector{
+            MatchLabels: map[string]string { "ti-pod-name" : podName },
+        }
+        secretList, err := c.cv1Client.Secrets(RConfig.Namespace).List(meta_v1.ListOptions{LabelSelector: meta_v1.FormatLabelSelector(labelSelector)})
+        if err != nil {
+            glog.Errorf("Error getting secret list for pod %v: %v", key, err)
+            return err
+        }
+
+        for _, secret := range secretList.Items {
+            fmt.Printf("Revoking and deleting cert from secret: %v\n", secret.ObjectMeta.Name)
+            if err = c.cv1Client.Secrets(RConfig.Namespace).Delete (secret.ObjectMeta.Name, &meta_v1.DeleteOptions{}); err != nil {
+                glog.Errorf("Failed to delete secret")
+                return err
+            }
+        }
 	} else {
 		// Note that you also have to check the uid if you have a local controlled resource, which
 		// is dependent on the actual instance, to detect that a Pod was recreated with the same name
-		fmt.Printf("Sync/Add/Update for Pod %s\n", obj.(*v1.Pod).GetName())
+		//fmt.Printf("Sync/Add/Update for Pod %s\n", obj.(*v1.Pod).GetName())
 	}
 	return nil
 }
@@ -142,27 +174,48 @@ func (c *Controller) runWorker() {
 }
 
 func main() {
-	var kubeconfig string
-	var master string
-
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "absolute path to the kubeconfig file")
-	flag.StringVar(&master, "master", "", "master url")
+    flag.StringVar(&RConfig.Namespace, "namespace", v1.NamespaceDefault, "Namespace to monitor for revokations")
 	flag.Parse()
+    //flag.Set("logtostderr", "true")
 
-	// creates the connection
-	config, err := clientcmd.BuildConfigFromFlags(master, kubeconfig)
+    // Get in-cluster config
+    glog.Infof("Getting cluster Config")
+    config, err := rest.InClusterConfig()
 	if err != nil {
+        glog.Infof("Cluster Config Err")
 		glog.Fatal(err)
 	}
 
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
+        glog.Infof("New Config Err")
 		glog.Fatal(err)
 	}
 
+    // corev1 clientset
+    cv1Client, err := ccorev1.NewForConfig(config)
+    if err != nil {
+        glog.Infof("New Config Err")
+		glog.Fatal(err)
+    }
+
+/*
+
+    // Create secret if it doesn't exist
+    glog.Infof("Creating secret")
+    createSecret, err = cv1Client.Secrets(namespace).Create(createSecret)
+    if err != nil {
+        if !errors.IsAlreadyExists(err) {
+            glog.Infof("Err: %v", err)
+            return nil, err
+        }
+    }
+*/
+_ = cv1Client
+
 	// create the pod watcher
-	podListWatcher := cache.NewListWatchFromClient(clientset.CoreV1().RESTClient(), "pods", v1.NamespaceDefault, fields.Everything())
+	podListWatcher := cache.NewListWatchFromClient(clientset.CoreV1().RESTClient(), "pods", RConfig.Namespace, fields.Everything())
 
 	// create the workqueue
 	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
@@ -173,16 +226,16 @@ func main() {
 	// of the Pod than the version which was responsible for triggering the update.
 	indexer, informer := cache.NewIndexerInformer(podListWatcher, &v1.Pod{}, 0, cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			key, err := cache.MetaNamespaceKeyFunc(obj)
-			if err == nil {
-				queue.Add(key)
-			}
+			//key, err := cache.MetaNamespaceKeyFunc(obj)
+			//if err == nil {
+			//	queue.Add(key)
+			//}
 		},
 		UpdateFunc: func(old interface{}, new interface{}) {
-			key, err := cache.MetaNamespaceKeyFunc(new)
-			if err == nil {
-				queue.Add(key)
-			}
+			//key, err := cache.MetaNamespaceKeyFunc(new)
+			//if err == nil {
+			//	queue.Add(key)
+			//}
 		},
 		DeleteFunc: func(obj interface{}) {
 			// IndexerInformer uses a delta queue, therefore for deletes we have to use this
@@ -194,18 +247,7 @@ func main() {
 		},
 	}, cache.Indexers{})
 
-	controller := NewController(queue, indexer, informer)
-
-	// We can now warm up the cache for initial synchronization.
-	// Let's suppose that we knew about a pod "mypod" on our last run, therefore add it to the cache.
-	// If this pod is not there anymore, the controller will be notified about the removal after the
-	// cache has synchronized.
-	indexer.Add(&v1.Pod{
-		ObjectMeta: meta_v1.ObjectMeta{
-			Name:      "mypod",
-			Namespace: v1.NamespaceDefault,
-		},
-	})
+	controller := NewController(queue, indexer, informer, cv1Client)
 
 	// Now let's start the controller
 	stop := make(chan struct{})

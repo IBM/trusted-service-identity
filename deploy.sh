@@ -4,6 +4,7 @@ cd "$( dirname "${BASH_SOURCE[0]}")"
 kubectl create namespace trusted-identity
 
 kubectl -n trusted-identity delete -f deployment/deployment.yaml
+kubectl -n trusted-identity delete -f deployment/revoker-deployment.yaml
 
 
 # Create rbac bindings
@@ -19,5 +20,6 @@ cat deployment/configmap.yaml | sed -e "s|\${TI_SA_TOKEN}|${TI_SA_TOKEN}|g" | ku
 # Create services and deployment
 kubectl -n trusted-identity apply -f deployment/service.yaml
 kubectl -n trusted-identity apply -f deployment/deployment.yaml
+kubectl -n trusted-identity apply -f deployment/revoker-deployment.yaml
 
 kubectl label namespace trusted-identity ti-injector=enabled --overwrite
