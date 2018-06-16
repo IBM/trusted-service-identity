@@ -8,7 +8,7 @@ kubectl -n trusted-identity delete -f deployment/revoker-deployment.yaml
 
 
 # Create rbac bindings
-kubectl -n trusted-identity create deployment/tiRBAC.yaml
+kubectl -n trusted-identity create -f deployment/tiRBAC.yaml
 # Create configs and keys
 kubectl -n trusted-identity apply -f deployment/crd/crd_clusterinfo.yaml
 kubectl -n trusted-identity apply -f deployment/crd/cti_example.yaml
