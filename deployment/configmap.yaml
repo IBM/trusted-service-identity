@@ -1,4 +1,4 @@
-apiVersion: v1
+deploy.shapiVersion: v1
 kind: ConfigMap
 metadata:
   name: ti-injector-webhook-configmap
@@ -14,6 +14,9 @@ data:
             readOnly: true
           - name: ti-sa-mount
             mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+            readOnly: true
+          - name: ti-keys
+            mountPath: /keys
             readOnly: true
       volumes:
         - name: pod-metadata
@@ -31,6 +34,9 @@ data:
         - name: ti-vault-secret
           secret:
             secretName: ti-vault-
+        - name: ti-keys
+          secret:
+            secretName: ti-keys-config
         - name: ti-sa-mount
           secret:
             secretName: ${TI_SA_TOKEN}
