@@ -11,7 +11,7 @@ CMD ["/bin/bash", "-c", "/kubectl cluster-info && \
 cat /pod-metadata/ti-secret && \
 mkdir certs && \
 cp /keys/v3_ext v3_ext && \
-echo \"URI.1 = trusted-identity\" >> v3_ext && \
+echo \"URI.1 = trusted-identity://$(cat /pod-metadata/ti-identity)\" >> v3_ext && \
 echo \"URI.2 = pod://$(cat /pod-metadata/ti-pod-name)\" >> v3_ext && \
 echo \"URI.3 = images://$(cat /pod-metadata/ti-images)\" >> v3_ext && \
 openssl req -nodes -sha256 -newkey rsa:2048 -out CSR.csr  -keyout certs/client.key -new -config /keys/image.conf && \
