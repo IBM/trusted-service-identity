@@ -61,6 +61,7 @@ const (
     admissionWebhookAnnotationStatusKey = "admission.trusted.identity/status"
 	admissionWebhookAnnotationSecretKey = "admission.trusted.identity/ti-secret-key"
 	admissionWebhookAnnotationIdentityKey = "admission.trusted.identity/ti-identity"
+	admissionWebhookAnnotationImagesKey = "admission.trusted.identity/ti-images"
 )
 
 type WebhookServer struct {
@@ -400,10 +401,30 @@ func (whsvr *WebhookServer) mutateInitialization (pod corev1.Pod, req *v1beta1.A
         }
     }
 
+    // Get list of images
+    images := ""
+    for _, cspec := range pod.Spec.InitContainers {
+        if images == "" {
+            images = cspec.Image
+        } else {
+            images = images + "," + cspec.Image
+        }
+    }
+
+    for _, cspec := range pod.Spec.Containers {
+        if images == "" {
+            images = cspec.Image
+        } else {
+            images = images + "," + cspec.Image
+        }
+    }
+
+
     glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
     initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
     initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
     initcontainerConfigCp.Annotations[admissionWebhookAnnotationIdentityKey] = identity
+    initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
 
     return initcontainerConfigCp, nil
 

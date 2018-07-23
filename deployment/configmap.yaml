@@ -31,6 +31,9 @@ data:
               - path: "ti-pod-name"
                 fieldRef:
                   fieldPath: metadata.name
+              - path: "ti-images"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
         - name: ti-vault-secret
           secret:
             secretName: ti-vault-
