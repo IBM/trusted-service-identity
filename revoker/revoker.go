@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
     "strings" 
+    "os/exec"
 
 	"github.com/golang/glog"
 
@@ -95,6 +96,17 @@ func (c *Controller) syncToStdout(key string) error {
 		// Below we will warm up our cache with a Pod, so that we will see a delete for one pod
 		fmt.Printf("Pod %s does not exist anymore, revoking certs \n", key)
         podName := strings.TrimPrefix(key, RConfig.Namespace + "/")
+        
+        // TODO: Change to CA revocation
+        // Revoke cert from vault
+        cmd := exec.Command("/vault_revoke.sh", podName)
+        cmdout, err := cmd.CombinedOutput()
+        if err != nil {
+            fmt.Printf("Failed to run vault_revoke. err: %v, output: %v\n", err, string(cmdout))
+        } else {
+            fmt.Printf("Successfully vault revoked pod %s!\n", podName)
+        }
+
         labelSelector := &meta_v1.LabelSelector{
             MatchLabels: map[string]string { "ti-pod-name" : podName },
         }

@@ -12,6 +12,10 @@ spec:
         app: ti-revoker
     spec:
       serviceAccountName: ti-sa
+      volumes:
+      - name: ti-keys
+        secret:
+          secretName: ti-keys-config
       containers:
         - name: ti-revoker
           image: lumjjb/ti-revoker:v1
@@ -21,3 +25,7 @@ spec:
             - -alsologtostderr
             - -v=4
             - 2>&1
+          volumeMounts:
+          - name: ti-keys
+            mountPath: /keys
+            readOnly: true
