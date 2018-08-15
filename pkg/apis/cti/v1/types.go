@@ -17,10 +17,10 @@ limitations under the License.
 package v1
 
 import (
-    "strings" 
+	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    corev1 "k8s.io/api/core/v1"
 )
 
 // +genclient
@@ -32,22 +32,21 @@ type ClusterTI struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Info ClusterTISpec   `json:"info"`
+	Info   ClusterTISpec          `json:"info"`
 	Policy []ClusterTIPolicyEntry `json:"policy,omitempty"`
 }
 
 // ExampleSpec is the spec for an Example resource
 type ClusterTISpec struct {
-	ClusterName string `json:"cluster-name"`
+	ClusterName   string `json:"cluster-name"`
 	ClusterRegion string `json:"cluster-region"`
 }
 
 // ClusterTIPolicyEntry is a cluster TI policy entry
 type ClusterTIPolicyEntry struct {
-	Image *string `json:"image,omitempty"`
-	Identity string       `json:"identity"`
+	Image    *string `json:"image,omitempty"`
+	Identity string  `json:"identity"`
 }
-
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -59,36 +58,37 @@ type ClusterTIList struct {
 	Items []ClusterTI `json:"items"`
 }
 
-func (pe *ClusterTIPolicyEntry) CheckPolicyItem (pod corev1.Pod) (identity string, err error) {
-    for _,cspec := range pod.Spec.InitContainers { 
-        if pe.Image != nil {
-            if !strings.HasPrefix(cspec.Image, *pe.Image) {
-                return "", nil
-            }
-        }
-    }
+func (pe *ClusterTIPolicyEntry) CheckPolicyItem(pod corev1.Pod) (identity string, err error) {
+	for _, cspec := range pod.Spec.InitContainers {
+		if pe.Image != nil {
+			if !strings.HasPrefix(cspec.Image, *pe.Image) {
+				return "", nil
+			}
+		}
+	}
 
-    for _,cspec := range pod.Spec.Containers { 
-        if pe.Image != nil {
-            if !strings.HasPrefix(cspec.Image, *pe.Image) {
-                return "", nil
-            }
-        }
-    }
-    return pe.Identity, nil
+	for _, cspec := range pod.Spec.Containers {
+		if pe.Image != nil {
+			if !strings.HasPrefix(cspec.Image, *pe.Image) {
+				return "", nil
+			}
+		}
+	}
+	return pe.Identity, nil
 }
+
 // CheckPolicy returns the identity of the policy matched. Returns empty string if no identity matches
-func (cti *ClusterTI) CheckPolicy (pod corev1.Pod) (identity string, err error) {
-    for _, pe := range cti.Policy {
-        id , err := pe.CheckPolicyItem (pod) 
-        if err != nil {
-            return "", err
-        }
+func (cti *ClusterTI) CheckPolicy(pod corev1.Pod) (identity string, err error) {
+	for _, pe := range cti.Policy {
+		id, err := pe.CheckPolicyItem(pod)
+		if err != nil {
+			return "", err
+		}
 
-        if id != "" {
-            return id, nil
-        }
-    }
+		if id != "" {
+			return id, nil
+		}
+	}
 
-    return "", nil
+	return "", nil
 }

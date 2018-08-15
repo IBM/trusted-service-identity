@@ -19,9 +19,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os/exec"
+	"strings"
 	"time"
-    "strings" 
-    "os/exec"
 
 	"github.com/golang/glog"
 
@@ -34,33 +34,33 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
-    ccorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-    "k8s.io/client-go/rest"
+	ccorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 )
 
 var (
-    RConfig = RevokerConfig{}
+	RConfig = RevokerConfig{}
 )
 
 // RevokerConfig contains the configuration of the revoker
 type RevokerConfig struct {
-    // Namespace is the namespace to monitor for revocations
-    Namespace string
+	// Namespace is the namespace to monitor for revocations
+	Namespace string
 }
 
 type Controller struct {
-	indexer  cache.Indexer
-	queue    workqueue.RateLimitingInterface
-	informer cache.Controller
+	indexer   cache.Indexer
+	queue     workqueue.RateLimitingInterface
+	informer  cache.Controller
 	cv1Client *ccorev1.CoreV1Client
 }
 
 func NewController(queue workqueue.RateLimitingInterface, indexer cache.Indexer, informer cache.Controller, cv1Client *ccorev1.CoreV1Client) *Controller {
 	return &Controller{
-		informer: informer,
-		indexer:  indexer,
-		queue:    queue,
-        cv1Client: cv1Client,
+		informer:  informer,
+		indexer:   indexer,
+		queue:     queue,
+		cv1Client: cv1Client,
 	}
 }
 
@@ -95,34 +95,34 @@ func (c *Controller) syncToStdout(key string) error {
 	if !exists {
 		// Below we will warm up our cache with a Pod, so that we will see a delete for one pod
 		fmt.Printf("Pod %s does not exist anymore, revoking certs \n", key)
-        podName := strings.TrimPrefix(key, RConfig.Namespace + "/")
-        
-        // TODO: Change to CA revocation
-        // Revoke cert from vault
-        cmd := exec.Command("/vault_revoke.sh", podName)
-        cmdout, err := cmd.CombinedOutput()
-        if err != nil {
-            fmt.Printf("Failed to run vault_revoke. err: %v, output: %v\n", err, string(cmdout))
-        } else {
-            fmt.Printf("Successfully vault revoked pod %s!\n", podName)
-        }
+		podName := strings.TrimPrefix(key, RConfig.Namespace+"/")
 
-        labelSelector := &meta_v1.LabelSelector{
-            MatchLabels: map[string]string { "ti-pod-name" : podName },
-        }
-        secretList, err := c.cv1Client.Secrets(RConfig.Namespace).List(meta_v1.ListOptions{LabelSelector: meta_v1.FormatLabelSelector(labelSelector)})
-        if err != nil {
-            glog.Errorf("Error getting secret list for pod %v: %v", key, err)
-            return err
-        }
+		// TODO: Change to CA revocation
+		// Revoke cert from vault
+		cmd := exec.Command("/vault_revoke.sh", podName)
+		cmdout, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Printf("Failed to run vault_revoke. err: %v, output: %v\n", err, string(cmdout))
+		} else {
+			fmt.Printf("Successfully vault revoked pod %s!\n", podName)
+		}
 
-        for _, secret := range secretList.Items {
-            fmt.Printf("Revoking and deleting cert from secret: %v\n", secret.ObjectMeta.Name)
-            if err = c.cv1Client.Secrets(RConfig.Namespace).Delete (secret.ObjectMeta.Name, &meta_v1.DeleteOptions{}); err != nil {
-                glog.Errorf("Failed to delete secret")
-                return err
-            }
-        }
+		labelSelector := &meta_v1.LabelSelector{
+			MatchLabels: map[string]string{"ti-pod-name": podName},
+		}
+		secretList, err := c.cv1Client.Secrets(RConfig.Namespace).List(meta_v1.ListOptions{LabelSelector: meta_v1.FormatLabelSelector(labelSelector)})
+		if err != nil {
+			glog.Errorf("Error getting secret list for pod %v: %v", key, err)
+			return err
+		}
+
+		for _, secret := range secretList.Items {
+			fmt.Printf("Revoking and deleting cert from secret: %v\n", secret.ObjectMeta.Name)
+			if err = c.cv1Client.Secrets(RConfig.Namespace).Delete(secret.ObjectMeta.Name, &meta_v1.DeleteOptions{}); err != nil {
+				glog.Errorf("Failed to delete secret")
+				return err
+			}
+		}
 	} else {
 		// Note that you also have to check the uid if you have a local controlled resource, which
 		// is dependent on the actual instance, to detect that a Pod was recreated with the same name
@@ -186,45 +186,45 @@ func (c *Controller) runWorker() {
 }
 
 func main() {
-    flag.StringVar(&RConfig.Namespace, "namespace", v1.NamespaceDefault, "Namespace to monitor for revokations")
+	flag.StringVar(&RConfig.Namespace, "namespace", v1.NamespaceDefault, "Namespace to monitor for revokations")
 	flag.Parse()
-    //flag.Set("logtostderr", "true")
+	//flag.Set("logtostderr", "true")
 
-    // Get in-cluster config
-    glog.Infof("Getting cluster Config")
-    config, err := rest.InClusterConfig()
+	// Get in-cluster config
+	glog.Infof("Getting cluster Config")
+	config, err := rest.InClusterConfig()
 	if err != nil {
-        glog.Infof("Cluster Config Err")
+		glog.Infof("Cluster Config Err")
 		glog.Fatal(err)
 	}
 
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-        glog.Infof("New Config Err")
+		glog.Infof("New Config Err")
 		glog.Fatal(err)
 	}
 
-    // corev1 clientset
-    cv1Client, err := ccorev1.NewForConfig(config)
-    if err != nil {
-        glog.Infof("New Config Err")
+	// corev1 clientset
+	cv1Client, err := ccorev1.NewForConfig(config)
+	if err != nil {
+		glog.Infof("New Config Err")
 		glog.Fatal(err)
-    }
+	}
 
-/*
+	/*
 
-    // Create secret if it doesn't exist
-    glog.Infof("Creating secret")
-    createSecret, err = cv1Client.Secrets(namespace).Create(createSecret)
-    if err != nil {
-        if !errors.IsAlreadyExists(err) {
-            glog.Infof("Err: %v", err)
-            return nil, err
-        }
-    }
-*/
-_ = cv1Client
+	   // Create secret if it doesn't exist
+	   glog.Infof("Creating secret")
+	   createSecret, err = cv1Client.Secrets(namespace).Create(createSecret)
+	   if err != nil {
+	       if !errors.IsAlreadyExists(err) {
+	           glog.Infof("Err: %v", err)
+	           return nil, err
+	       }
+	   }
+	*/
+	_ = cv1Client
 
 	// create the pod watcher
 	podListWatcher := cache.NewListWatchFromClient(clientset.CoreV1().RESTClient(), "pods", RConfig.Namespace, fields.Everything())

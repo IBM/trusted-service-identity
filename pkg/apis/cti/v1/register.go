@@ -48,7 +48,7 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ClusterTI{},
 		&ClusterTIList{},
 	)
-    metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 
 	return nil
 }
