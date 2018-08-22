@@ -23,7 +23,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1 "github.ibm.com/brandon-lum/ti-keyrelease/pkg/apis/cti/v1"
+	v1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/apis/cti/v1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
