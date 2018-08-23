@@ -7,8 +7,7 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s
 RUN wget https://releases.hashicorp.com/vault/0.10.3/vault_0.10.3_linux_amd64.zip && unzip vault_0.10.3_linux_amd64.zip
 RUN rm -f vault_0.10.3_linux_amd64.zip
 RUN echo "gen-vault-cert " > /info
-CMD ["/bin/bash", "-c", "/kubectl cluster-info && \
-cat /pod-metadata/ti-secret && \
+CMD ["/bin/bash", "-c", "cat /pod-metadata/ti-secret && \
 mkdir certs && \
 cp /keys/v3_ext v3_ext && \
 echo \"URI.1 = trusted-identity://$(cat /pod-metadata/ti-identity)\" >> v3_ext && \

@@ -11,6 +11,7 @@ spec:
       labels:
         app: ti-injector
     spec:
+      serviceAccountName: ti-sa
       containers:
         - name: ti-injector
           image: lumjjb/ti-injector:v1
