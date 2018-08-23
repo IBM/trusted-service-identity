@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: myubuntu
+  name: myubuntu
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+      labels:
+        app: myubuntu
+      name: myubuntu
+    spec:
+      containers:
+        - name: myubuntu
+          image: lumjjb/myubuntu:vault
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "while true; do cat /mydata; sleep 5; done;" ]
