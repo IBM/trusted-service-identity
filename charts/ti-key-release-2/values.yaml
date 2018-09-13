@@ -1,0 +1,12 @@
+# Default values for ti-key-release-2
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: trusted-identity
+
+
+# Not recommended for user to configure this. Hyperkube image to use when executing
+# kubectl commands
+hyperkube:
+  repository: quay.io/coreos/hyperkube
+  tag: v1.7.6_coreos.0

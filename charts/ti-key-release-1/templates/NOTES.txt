@@ -1,0 +1,14 @@
+This Helm deployment works with Helm v2.10.0 or higher. To upgrade your existing
+helm, install/upgrade your client first. E.g on Mac:
+  `brew install kubernetes-helm` or `brew upgrade kubernetes-helm`
+   then upgrade your server:  `helm init --upgrade`
+
+
+   app: {{ template "ti-key-release.name" . }}
+   chart: {{ template "ti-key-release.chart" . }}
+   release: {{ .Release.Name }}
+   namespace: {{ .Values.namespace }}
+
+First helm deployment is completed. Now execute the second part. Make sure it
+second deployment is using the same namespace ( {{ .Values.namespace }} ):
+    helm install charts/ti-key-release-2 --debug --name ti-test2

@@ -1,0 +1,51 @@
+{{ define "ti-injector-configmap.yaml.tpl" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ti-injector-webhook-configmap
+data:
+  initcontainerconfig.yaml: |
+      initContainers:
+      - name: gen-vault-cert
+        image: lumjjb/gen-vault-cert:v1
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: pod-metadata
+            mountPath: /pod-metadata
+            readOnly: true
+          - name: ti-sa-mount
+            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+            readOnly: true
+          - name: ti-keys
+            mountPath: /keys
+            readOnly: true
+      volumes:
+        - name: pod-metadata
+          downwardAPI:
+            items:
+              - path: "ti-secret"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-secret-key']
+              - path: "ti-identity"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
+              - path: "ti-pod-name"
+                fieldRef:
+                  fieldPath: metadata.name
+              - path: "ti-images"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
+        - name: ti-vault-secret
+          secret:
+            secretName: ti-vault-
+        - name: ti-keys
+          secret:
+            secretName: ti-keys-config
+        - name: ti-sa-mount
+          secret:
+            secretName: ${TI_SA_TOKEN}
+      addVolumeMounts:
+        - name: ti-vault-secret
+          mountPath: /vault-certs
+          readOnly: true
+{{ end }}

@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: my-hyperkube
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-hyperkube
+    spec:
+      serviceAccountName: ti-install-sa
+      containers:
+      - name: my-hyperkube
+        image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
+        command: ["/bin/sleep","infinity"]
+        # command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"] 
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: "/tmp/ti-key-release"
+            name: tmp-ti-key-release-configmap
+      volumes:
+        - name: tmp-ti-key-release-configmap
+          configMap:
+            name: ti-injector-configmap
+            defaultMode: 0744

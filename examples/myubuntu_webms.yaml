@@ -1,0 +1,20 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: myubuntu-webms
+  name: myubuntu-webms
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+      labels:
+        app: myubuntu-webms
+      name: myubuntu-webms
+    spec:
+      containers:
+        - name: myubuntu-webms
+          image: mrsabath/web-ms:latest 
+          imagePullPolicy: Always

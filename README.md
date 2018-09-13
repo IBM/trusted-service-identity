@@ -8,11 +8,6 @@
 ```console
 kubectl get pods --all-namespaces
 ```
-3. Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
-  ```bash
-  brew install kubernetes-helm
-  helm init
-  ```
 
 ## Build and Install
 Clone this project in a local directory, in your GOPATH
@@ -67,6 +62,32 @@ cd gen-vault-cert/
 cd ..
 ./deploy.sh
 ```
+
+## Helm Deployment
+
+Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
+```bash
+  brew install kubernetes-helm
+  helm init
+```
+
+Currently there are 2 charts to deploy TI KeyRelease: ti-key-release-1 and ti-key-rel
+-2
+Package the helm charts:
+```console
+cd TI-KeyRelease
+helm package charts/ti-key-release-1
+# update helm dependencies
+helm dep update charts/ti-key-release-2
+helm package --dependency-update charts/ti-key-release-2
+```
+
+The helm charts are ready to deploy
+
+```console
+helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test
+```
+
 
 ## Testing
 Once environment deployed, execute a test by deploying the following file:

@@ -1,0 +1,9 @@
+Trusted Identity Key Release enabled in {{ .Values.namespace }} namespace
+
+
+  app: {{ template "ti-key-release.name" . }}
+  chart: {{ template "ti-key-release.chart" . }}
+  release: {{ .Release.Name }}
+
+Execute test:
+  kubectl create -f examples/myubuntu_inject.yaml -n trusted-identity

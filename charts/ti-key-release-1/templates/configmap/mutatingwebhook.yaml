@@ -1,0 +1,24 @@
+{{ define "mutatingwebhook.tpl" }}
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: ti-injector-webhook-cfg
+  labels:
+    app: ti-injector
+webhooks:
+  - name: ti-injector.morven.me
+    clientConfig:
+      service:
+        name: ti-injector-webhook-svc
+        namespace: trusted-identity
+        path: "/mutate"
+      caBundle: ${CA_BUNDLE}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        ti-injector: enabled
+{{ end }}

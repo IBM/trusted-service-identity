@@ -1,0 +1,15 @@
+apiVersion: "trusted.identity/v1"
+kind: ClusterTI
+metadata:
+  name: cluster-policy
+  namespace: {{ .Values.namespace }}
+info:
+  cluster-name: mycluster
+  cluster-region: dal
+policy:
+  - image: "lumjjb/"
+    identity: id-lumjjb
+  - image: "ibmcom/"
+    identity: id-ibm
+  - image: "mrsabath/"
+    identity: id-mrsabath

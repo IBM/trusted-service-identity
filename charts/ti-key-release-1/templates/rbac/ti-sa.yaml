@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: ti-sa
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: ti-admin
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"]
+  verbs: ["create", "get", "patch", "update", "list", "delete"]
+- apiGroups: ["trusted.identity"]
+  resources: ["clustertis"]
+  verbs: ["get", "update", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: ti-admin-bind
+  namespace: trusted-identity
+subjects:
+- kind: ServiceAccount
+  name: ti-sa
+  namespace: trusted-identity
+roleRef:
+  kind: Role
+  name: ti-admin
+  apiGroup: rbac.authorization.k8s.io
