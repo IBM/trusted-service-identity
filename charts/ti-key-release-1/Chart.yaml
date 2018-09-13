@@ -2,7 +2,7 @@ apiVersion: v1
 description: A Helm chart for deployment of TI-KeyRelease
 name: ti-key-release-1
 version: 0.1.0
-home: https://github.ibm.com/Brandon-Lum/TI-KeyRelease
+home: https://github.ibm.com/kompass/TI-KeyRelease
 maintainers:
   - name: Brandon Lum
     email: Brandon.Lum@ibm.com

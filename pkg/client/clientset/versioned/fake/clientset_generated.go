@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/clientset/versioned"
-	trustedv1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
-	faketrustedv1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1/fake"
+	clientset "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned"
+	trustedv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
+	faketrustedv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

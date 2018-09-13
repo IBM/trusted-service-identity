@@ -24,8 +24,8 @@ import (
 	ccorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
-	ctiv1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/apis/cti/v1"
-	cctiv1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
+	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
+	cctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
 )
 
 func pseudo_uuid() (string, error) {

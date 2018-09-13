@@ -21,8 +21,8 @@ limitations under the License.
 package trusted
 
 import (
-	v1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/informers/externalversions/cti/v1"
-	internalinterfaces "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/cti/v1"
+	internalinterfaces "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.
