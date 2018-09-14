@@ -19,8 +19,8 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/apis/cti/v1"
-	"github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/clientset/versioned/scheme"
+	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
+	"github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )

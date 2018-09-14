@@ -19,8 +19,8 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/apis/cti/v1"
-	scheme "github.ibm.com/Brandon-Lum/ti-keyrelease/pkg/client/clientset/versioned/scheme"
+	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
+	scheme "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/scheme"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

@@ -14,9 +14,9 @@ Clone this project in a local directory, in your GOPATH
 
 ```console
 cd $GOPATH
-mkdir -p $GOPATH/src/github.ibm.com/Brandon-Lum/
-cd src/github.ibm.com/Brandon-Lum/
-git clone git@github.ibm.com:Brandon-Lum/TI-KeyRelease.git
+mkdir -p $GOPATH/src/github.ibm.com/kompass/
+cd src/github.ibm.com/kompass/
+git clone git@github.ibm.com:kompass/TI-KeyRelease.git
 cd TI-KeyRelease
 ```
 If you cannot clone the project with the git ssh protocol, make sure [you add your
