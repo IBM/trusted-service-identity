@@ -1,0 +1,3 @@
+# all but the binary
+**/*
+!ti-webhook

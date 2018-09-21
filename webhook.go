@@ -341,12 +341,12 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		return nil, err
 	}
 
-	glog.Info("Namespace : %v", namespace)
+	glog.Infof("Namespace : %v", namespace)
 	ctis, err := cticlient.ClusterTIs(namespace).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	glog.Info("Lists: %v", ctis)
+	glog.Infof("Lists: %v", ctis)
 
 	cti, err := cticlient.ClusterTIs(namespace).Get("cluster-policy", metav1.GetOptions{})
 	if err != nil {
