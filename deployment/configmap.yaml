@@ -6,7 +6,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: lumjjb/gen-vault-cert:v1
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/gen-vault-cert:v0.1
         imagePullPolicy: Always
         volumeMounts:
           - name: pod-metadata

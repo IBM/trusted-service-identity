@@ -14,7 +14,7 @@ spec:
       serviceAccountName: ti-sa
       containers:
         - name: ti-injector
-          image: lumjjb/ti-injector:v1
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-webhook:v0.1
           imagePullPolicy: Always
           args:
             - -initcontainerCfgFile=/etc/webhook/config/initcontainerconfig.yaml
