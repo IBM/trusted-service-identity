@@ -1,5 +1,0 @@
-#!/bin/bash
-CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ti-revoker .
-if [ $? -ne 0 ]; then exit 1 ; fi
-docker build . -t lumjjb/ti-revoker:v1 && docker push lumjjb/ti-revoker:v1
-rm ti-revoker

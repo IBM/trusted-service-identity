@@ -39,27 +39,50 @@ curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 It will install into your $GOPATH/bin directory by default or any other directory you specify using the INSTALL_DIRECTORY environment variable.
 
-```console
-dep ensure
-```
+To compile and build the image, get and test the dependencies:
 
+```console
+make dep get-deps test-deps
+```
 This might take some time to execute as it scans and installs the dependencies.
 Once the dependencies are installed, execute the build.
 
 ```console
-./build
+make build
 ```
-You will receive an error that you are denied write access to `lumjjb/ti-injector`
-registry. This is expected. You can modify [build](./build) script and replace
-`lumjjb` with your own registry namespace. If you change it, make sure you update
-[myubuntu_inject.yaml](myubuntu_inject.yaml) and [gen-vault-cert/build](gen-vault-cert/build) scripts.
-
+Now you can create an docker image:
 
 ```console
-cd gen-vault-cert/
-./build
+make docker
+```
 
-cd ..
+In order to push the image to public Artifactory registry, you need to obtain an
+access and create an [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key). The repository name is `res-kompass-kompass-docker-local.artifactory.swg-devops.com`
+
+Execute the docker login and push the image:
+
+```console
+docker login res-kompass-kompass-docker-local.artifactory.swg-devops.com
+Username: <your-user-id>
+Password: <API-key>
+
+make docker-push
+# or simply do it all at once:
+make all
+```
+
+Compile and create images for other sub-components
+
+```console
+cd revorker
+make all
+cd ../gen-vault-cert
+make all
+```
+
+To deploy manually:
+
+```console
 ./deploy.sh
 ```
 
