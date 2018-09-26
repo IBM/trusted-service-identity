@@ -87,6 +87,31 @@ To deploy manually:
 ```
 
 ## Helm Deployment
+The deployment is done in `trusted-identity` namespace. If you are testing or developing
+the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
+This would remove all the components and artifacts, then recreate a new, empty namespace:
+
+```console
+./cleanup.sh
+./init-namespace.sh
+```
+
+Currently the images for Trusted Identity project are stored in Artifactory. In order to
+use them, user has to be authenticated. You must obtain the [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key)
+as described above.
+
+Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
+(This needs to be done every-time the new namespace is created)
+
+```console
+kubectl -n trusted-identity create secret docker-registry regcred \ --docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com
+--docker-username=user@ibm.com \
+--docker-password=${API_KEY} \
+--docker-email=user@ibm.com
+
+# to check your secret:
+kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+```
 
 Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
 ```bash

@@ -14,6 +14,8 @@ spec:
         app: myubuntu
       name: myubuntu
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
         - name: myubuntu
           image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault

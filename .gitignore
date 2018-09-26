@@ -3,6 +3,7 @@
 *.dll
 *.so
 *.dylib
+*.tgz
 ti-webhook
 revoker/ti-revoker
 
