@@ -13,6 +13,8 @@ spec:
         app: ti-injector
     spec:
       serviceAccountName: ti-sa
+      imagePullSecrets:
+      - name: regcred
       containers:
         - name: ti-injector
           image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-webhook:v0.1
