@@ -2,9 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-
+# target namespace for the deployment
 namespace: trusted-identity
 
+# vault-address e.g. https://1.1.1.1:322222
+vaultaddress: https://169.62.157.164:32654
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
