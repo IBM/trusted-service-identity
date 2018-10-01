@@ -50,7 +50,7 @@ Once the dependencies are installed, execute the build.
 ```console
 make build
 ```
-Now you can create an docker image:
+Now you can create a docker image:
 
 ```console
 make docker
