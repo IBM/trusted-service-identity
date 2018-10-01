@@ -7,7 +7,7 @@ namespace: trusted-identity
 
 # vault-address e.g
 ti-key-release-1:
-  vaultaddress: https://169.62.157.164:32654
+  vaultAddress: https://169.62.157.164:32654
 
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
