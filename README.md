@@ -50,7 +50,7 @@ Once the dependencies are installed, execute the build.
 ```console
 make build
 ```
-Now you can create an docker image:
+Now you can create a docker image:
 
 ```console
 make docker
@@ -136,6 +136,20 @@ The helm charts are ready to deploy
 helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test
 ```
 
+If you like to change the address of the Vault server:
+
+Option 1 - directly
+```console
+helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test --set ti-key-release-1.vaultaddress=https://1.1.1.1:8888
+
+```
+
+Option 2 - capture the default values, modify them and install or upgrade:
+```console
+helm inspect values ti-key-release-2-0.1.0.tgz > config.yaml
+# modify config.yaml
+helm upgrade -i --values=config.yaml ti-test ti-key-release-2-0.1.0.tgz
+```
 
 ## Testing
 Once environment deployed, execute a test by deploying the following file:
