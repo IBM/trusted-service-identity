@@ -16,9 +16,11 @@ spec:
       - name: ti-keys
         secret:
           secretName: ti-keys-config
+      imagePullSecrets:
+      - name: regcred
       containers:
         - name: ti-revoker
-          image: lumjjb/ti-revoker:v1
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-revoker:v0.1
           imagePullPolicy: Always
           args:
             - -namespace=trusted-identity

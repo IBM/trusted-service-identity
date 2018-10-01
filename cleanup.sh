@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# if helm installed, remove the TI deployment
+if [ -x "$(command -v helm)" ]; then
+  echo "Helm installed"
+  helm ls --all | grep ti-key-release | awk '{print $1}' | sort -r| xargs helm delete --purge
+else "Helm NOT installed"
+fi
+
 kubectl -n trusted-identity delete -f deployment/revoker-deployment.yaml
 kubectl -n trusted-identity delete -f deployment/deployment.yaml
 kubectl -n trusted-identity delete -f deployment/service.yaml
