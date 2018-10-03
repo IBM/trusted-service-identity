@@ -21,4 +21,5 @@ spec:
           image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]
-          args: [ "while true; do cat /mydata; sleep 5; done;" ]
+          # args: [ "while true; do cat /mydata; sleep 5; done;" ]
+          args: [ "while true; do cat /jwt-tokens/token; sleep 5; done;" ]

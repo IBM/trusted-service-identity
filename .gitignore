@@ -18,3 +18,5 @@ revoker/ti-revoker
 
 # Do not sync vendor
 vendor/
+
+charts/ti-key-release-2/requirements.lock

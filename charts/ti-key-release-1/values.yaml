@@ -99,6 +99,35 @@ rootCaKey: |-
 
 rootCaSrl: FF418D6CF5C6A45D
 
+jwtkey: |-
+  -----BEGIN RSA PRIVATE KEY-----
+  MIIEogIBAAKCAQEAtRcoFKRhV5+1w3r9ZrDeT4XKaREaher2dAfg0i82Te2QG1B5
+  r5hxh4WAaCwj2Lo1wmX8wiTfY66hEURu7F4nKK00ra18EeVrLM3F5k06e3P0csz8
+  wGGIgwFo99p+rZBsqKU/93mY1JwT9IVzVnTiYT5OzkVPlxRPqXccDDr1ktWkE3bS
+  tG/Uz34Nz4ytiOOePIvntFwDUzp4lHfmtbVWmEHSXZFM7Txs/mrgoa2Nz3F/QpXo
+  hwiyYFBFKAcRRHYy2j8sPlrQUwYCiTR9Y47XHb2g4A8IpOVeMfYrxrsRjq4e15LD
+  JD3e9wkPksyB6Y9hFVfSE06/xIB7ZAG6fLD0mQIDAQABAoIBABPiQwhhND8GzlJ0
+  grZv3TkmG5+FvT/PGNiMtObfQDs2Roh5QaNCPdT/l6XYkucNKzH5ONOocM7lMdJP
+  jU5u2CXjPtGDJwhgBHCa94veFvnPNZwVXftRukeINBpi513vab7qxidKNrnBmX9T
+  1+I6W1EKImULvz17gXO+HFpLbwN8Ol1AJrJeZa7Kh9IgtUQ6G3p6pBziRZEuYr7Q
+  sK8QDK6f3mUFuu/V7wOw+X2LozxuydafjhqWh5BlyDdff8JDeckp8nyuDa5PtZPC
+  W3c0PIlvRZSfEUj07WBmS7n2imsXQbYBfFzWKymn1T/YpxtGISkkF9p7eHZeviqX
+  61z1fbECgYEA6u1eGQKdainmPx5U/Sl/WdVFeDFTF7yWZxNZ9Ke72WstWKogMNOe
+  Ha64c+u8Iz61jqZ/Z3Rwtj5anNjRHKquvaUVeEB29gC26+6VHwFAOLAuU0Bkb9+l
+  EhO4WWLMuRR22tNmeadAvN2ke23q/jKBud6k9EbVicOi916LIS8YiV8CgYEAxVWJ
+  JS9K8aYDJuVH7s9DQ4dcHZAvHLOsCjRLW4I1aCmlKNeU+JyBLdANmQThTvTXm5sK
+  z0MYjHbdljIxAXzG4wqf01jNJJb9sih/zi1hskprDSo+qiFiOW3xHfFwrhWxDAwH
+  NFhTy3GnyKomSIU0M4x2Ne8TpTet986aY5/QrQcCgYA1JHbZv36uakX8VzcwgXee
+  caEiXD4Iq492R6lcr6jNuPHsEafwg55L5p8xEc1gR6o4V6+QToXEo/xJaL589ptK
+  qRJfPm3qniTC4Bh5iAXoDOqdyH4v1G551V4pUjEvWNK+E34l3NDHKHgxt56l2/T+
+  f7/exjs9y7SMsqVUX1v0jwKBgAvAh1VmlqEDkQZ8+ya2wzu/UPYVwyiDbsiAysgd
+  Xg7hBAwFosKXl33h+R1W1BA+tqR2vFMRnOGoppOuU4rSIooc9N3CWR1HvL4ieVIP
+  E9VpZyy2ilrZeB8RdB2jZmGHuy6LfNZaOEtSbnqd33/MJwq238dggJwDT+IFNN6g
+  Au57AoGALTlcO/AMzyj/UjE+/6wP0nYuw90FitYq9h9q9jSYIMyxwQWJa4qWwkp9
+  0vuUNDqsbzFeqqG55f0FZp3bfmNExNs0igdcTzwfqt6Q4LGkZVFYicbshIxHDC0a
+  fn3/DuZcMg+chQ970y+XF5JtUwgVbYfaMiP1zrF0J6Fh4rHk3Cw=
+  -----END RSA PRIVATE KEY-----
+
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
 hyperkube:

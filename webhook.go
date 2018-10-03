@@ -71,29 +71,36 @@ type WebhookServer struct {
 //initContainerConfig *InitContainerConfig
 // Webhook Server parameters
 type WhSvrParameters struct {
-	port                 int    // webhook server port
-	certFile             string // path to the x509 certificate for https
-	keyFile              string // path to the x509 private key matching `CertFile`
-	initcontainerCfgFile string // path to initContainer injector configuration file
+	port                    int    // webhook server port
+	certFile                string // path to the x509 certificate for https
+	keyFile                 string // path to the x509 private key matching `CertFile`
+	initcontainerCfgFile    string // path to initContainer injector configuration file
+	sidecarcontainerCfgFile string // path to sidecarContainer configuration file
 }
 
 type InitContainerConfig struct {
-	InitContainers  []corev1.Container   `yaml:"initContainers"`
-	Volumes         []corev1.Volume      `yaml:"volumes"`
-	AddVolumeMounts []corev1.VolumeMount `yaml:"addVolumeMounts"`
-	Annotations     map[string]string    `yaml:"annotations"`
+	InitContainers    []corev1.Container   `yaml:"initContainers"`
+	SidecarContainers []corev1.Container   `yaml:"sidecarContainers"`
+	Volumes           []corev1.Volume      `yaml:"volumes"`
+	AddVolumeMounts   []corev1.VolumeMount `yaml:"addVolumeMounts"`
+	Annotations       map[string]string    `yaml:"annotations"`
 }
 
 func (ic *InitContainerConfig) DeepCopy() *InitContainerConfig {
 	icc := &InitContainerConfig{
-		InitContainers:  make([]corev1.Container, len(ic.InitContainers)),
-		Volumes:         make([]corev1.Volume, len(ic.Volumes)),
-		AddVolumeMounts: make([]corev1.VolumeMount, len(ic.AddVolumeMounts)),
-		Annotations:     make(map[string]string),
+		InitContainers:    make([]corev1.Container, len(ic.InitContainers)),
+		SidecarContainers: make([]corev1.Container, len(ic.SidecarContainers)),
+		Volumes:           make([]corev1.Volume, len(ic.Volumes)),
+		AddVolumeMounts:   make([]corev1.VolumeMount, len(ic.AddVolumeMounts)),
+		Annotations:       make(map[string]string),
 	}
 
 	for i, v := range ic.InitContainers {
 		icc.InitContainers[i] = *v.DeepCopy()
+	}
+
+	for i, v := range ic.SidecarContainers {
+		icc.SidecarContainers[i] = *v.DeepCopy()
 	}
 
 	for i, v := range ic.Volumes {
@@ -431,6 +438,8 @@ func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]b
 	glog.Infof("add volumes: %v", initcontainerConfig.Volumes)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
 	patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
+	patch = append(patch, addContainer(pod.Spec.Containers, initcontainerConfig.SidecarContainers,
+		"/spec/containers")...)
 	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
 
 	for i, c := range pod.Spec.Containers {

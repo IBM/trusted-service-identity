@@ -7,7 +7,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.1
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.2
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
@@ -21,7 +21,33 @@ data:
           - name: ti-keys
             mountPath: /keys
             readOnly: true
+      sidecarContainers:
+      - name: jwt-sidecar
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.2
+        imagePullPolicy: Always
+        imagePullSecrets:
+        - name: regcred
+        volumeMounts:
+          - name: jwt-shared-data
+            mountPath: /usr/share/jwt
+          - name: jwt-configmap
+            mountPath: "/configmap/jwt"
+            readOnly: true
+          - name: jwt-secret
+            mountPath: "/secret/jwt"
+            readOnly: true
+        command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
       volumes:
+        - name: jwt-shared-data
+          emptyDir: {}
+        - name: jwt-configmap
+          configMap:
+            name: ti-jwt-configmap
+            # this makes the files executable
+            defaultMode: 0744
+        - name: jwt-secret
+          secret:
+            secretName: jwt-secret
         - name: pod-metadata
           downwardAPI:
             items:
@@ -49,5 +75,8 @@ data:
       addVolumeMounts:
         - name: ti-vault-secret
           mountPath: /vault-certs
+          readOnly: true
+        - name: jwt-shared-data
+          mountPath: /jwt-tokens
           readOnly: true
 {{ end }}

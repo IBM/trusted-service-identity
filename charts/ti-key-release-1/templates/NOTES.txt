@@ -9,7 +9,7 @@ helm, install/upgrade your client first. E.g on Mac:
    release: {{ .Release.Name }}
    namespace: {{ .Values.namespace }}
 
-   vault-address: {{ .Values.vaultaddress }} encoded as {{ .Values.vaultaddress | b64enc }}
+   vault-address: {{ .Values.vaultAddress }} encoded as {{ .Values.vaultAddress | b64enc }}
 
 First helm deployment is completed. Now execute the second part. Make sure it
 second deployment is using the same namespace ( {{ .Values.namespace }} ):
