@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # Values below are used to create a secret: `ti-keys-config`
-# vault-address e.g. https://1.1.1.1:322222
+# vault-address e.g. https://1.1.1.1:32222
 vaultAddress: https://169.62.157.164:32654
 rootToken: 76e51cd3-de5b-2c31-85f8-d5cdbf1cb534
 rootCaCrt: |-
