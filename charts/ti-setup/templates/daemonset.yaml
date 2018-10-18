@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ti-setter
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      name: ti-setter
+  template:
+    metadata:
+      labels:
+        name: ti-setter
+    spec:
+      serviceAccountName: ti-admin-sa
+      # imagePullSecrets:
+      # - name: regcred
+      containers:
+        - name: hyperkube
+          # image: "{{ .Values.hyperkube.repository }}:{{ .Values.hyperkube.tag }}"
+          image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
+          #command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"]
+          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "-c", "--" ]
+          # args: [ "while true; do cat /mydata; sleep 5; done;" ]
+          args: [ "cp -r /secrets/ /host/ti; sleep 10; kubectl delete ds ti-setter -n ti-setup;sleep 100" ]
+          volumeMounts:
+          - mountPath: /host/ti
+            name: ti-volume
+          - mountPath: /etc
+            name: machine-id
+            readOnly: true
+          # - name: webhook-certs
+          #   mountPath: /secrets/certs
+          #   readOnly: true
+          - name: jwt-secret
+            mountPath: /secrets/jwt
+            readOnly: true
+          - name: ti-keys
+            mountPath: /secrets/keys
+            readOnly: true
+      volumes:
+      - name: ti-volume
+        hostPath:
+          # directory location on host
+           path: /ti
+           # this field is optional
+           type: DirectoryOrCreate
+      - name: machine-id
+        hostPath:
+          # directory location on host
+           path: /etc
+           # this field is optional
+           type: Directory
+      # - name: webhook-certs
+      #   secret:
+      #     secretName: ti-injector-webhook-certs
+      - name: jwt-secret
+        secret:
+          secretName: jwt-secret
+      - name: ti-keys
+        secret:
+          secretName: ti-keys-config
