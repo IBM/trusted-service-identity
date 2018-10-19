@@ -7,7 +7,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.2
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.3
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
@@ -21,9 +21,12 @@ data:
           - name: ti-keys
             mountPath: /keys
             readOnly: true
+          - name: ti-skeys
+            mountPath: /skeys
+            readOnly: true
       sidecarContainers:
       - name: jwt-sidecar
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.2
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.3
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
@@ -45,9 +48,20 @@ data:
             name: ti-jwt-configmap
             # this makes the files executable
             defaultMode: 0744
+        - name: ti-host-volume
+          hostPath:
+            # directory location on host
+             path: /ti
+             # directory must exist
+             type: Directory
         - name: jwt-secret
-          secret:
-            secretName: jwt-secret
+          hostPath:
+            # directory location on host
+             path: /ti/secrets/jwt
+             type: Directory
+        # - name: jwt-secret # TO-DELETE
+        #   secret:
+        #     secretName: jwt-secret
         - name: pod-metadata
           downwardAPI:
             items:
@@ -63,10 +77,15 @@ data:
               - path: "ti-images"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
-        - name: ti-vault-secret
+        - name: ti-vault-secret # TO-DELETE ??
           secret:
             secretName: ti-vault-
         - name: ti-keys
+          hostPath:
+            # directory location on host
+             path: /ti/secrets/keys
+             type: Directory
+        - name: ti-skeys
           secret:
             secretName: ti-keys-config
         - name: ti-sa-mount

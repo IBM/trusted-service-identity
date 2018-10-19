@@ -45,13 +45,12 @@ spec:
         hostPath:
           # directory location on host
            path: /ti
-           # this field is optional
+           # directory might not exist
            type: DirectoryOrCreate
       - name: machine-id
         hostPath:
           # directory location on host
            path: /etc
-           # this field is optional
            type: Directory
       # - name: webhook-certs
       #   secret:
