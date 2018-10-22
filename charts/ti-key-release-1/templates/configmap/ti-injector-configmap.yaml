@@ -18,6 +18,8 @@ data:
           - name: ti-sa-mount
             mountPath: /var/run/secrets/kubernetes.io/serviceaccount
             readOnly: true
+          - name: ti-vault-secret
+            mountPath: /certs
           - name: ti-keys
             mountPath: /keys
             readOnly: true
@@ -77,9 +79,8 @@ data:
               - path: "ti-images"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
-        - name: ti-vault-secret # TO-DELETE ??
-          secret:
-            secretName: ti-vault-
+        - name: ti-vault-secret
+          emptyDir: {}
         - name: ti-keys
           hostPath:
             # directory location on host

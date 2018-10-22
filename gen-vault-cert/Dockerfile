@@ -8,7 +8,6 @@ RUN wget https://releases.hashicorp.com/vault/0.10.3/vault_0.10.3_linux_amd64.zi
 RUN rm -f vault_0.10.3_linux_amd64.zip
 RUN echo "gen-vault-cert " > /info
 CMD ["/bin/bash", "-c", "cat /pod-metadata/ti-secret && \
-mkdir certs && \
 cp /skeys/v3_ext v3_ext && \
 echo \"URI.1 = trusted-identity://$(cat /pod-metadata/ti-identity)\" >> v3_ext && \
 echo \"URI.2 = pod://$(cat /pod-metadata/ti-pod-name)\" >> v3_ext && \
