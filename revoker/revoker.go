@@ -26,7 +26,6 @@ import (
 	"github.com/golang/glog"
 
 	"k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -107,22 +106,22 @@ func (c *Controller) syncToStdout(key string) error {
 			fmt.Printf("Successfully vault revoked pod %s!\n", podName)
 		}
 
-		labelSelector := &meta_v1.LabelSelector{
-			MatchLabels: map[string]string{"ti-pod-name": podName},
-		}
-		secretList, err := c.cv1Client.Secrets(RConfig.Namespace).List(meta_v1.ListOptions{LabelSelector: meta_v1.FormatLabelSelector(labelSelector)})
-		if err != nil {
-			glog.Errorf("Error getting secret list for pod %v: %v", key, err)
-			return err
-		}
-
-		for _, secret := range secretList.Items {
-			fmt.Printf("Revoking and deleting cert from secret: %v\n", secret.ObjectMeta.Name)
-			if err = c.cv1Client.Secrets(RConfig.Namespace).Delete(secret.ObjectMeta.Name, &meta_v1.DeleteOptions{}); err != nil {
-				glog.Errorf("Failed to delete secret")
-				return err
-			}
-		}
+		// labelSelector := &meta_v1.LabelSelector{
+		// 	MatchLabels: map[string]string{"ti-pod-name": podName},
+		// }
+		// secretList, err := c.cv1Client.Secrets(RConfig.Namespace).List(meta_v1.ListOptions{LabelSelector: meta_v1.FormatLabelSelector(labelSelector)})
+		// if err != nil {
+		// 	glog.Errorf("Error getting secret list for pod %v: %v", key, err)
+		// 	return err
+		// }
+		//
+		// for _, secret := range secretList.Items {
+		// 	fmt.Printf("Revoking and deleting cert from secret: %v\n", secret.ObjectMeta.Name)
+		// 	if err = c.cv1Client.Secrets(RConfig.Namespace).Delete(secret.ObjectMeta.Name, &meta_v1.DeleteOptions{}); err != nil {
+		// 		glog.Errorf("Failed to delete secret")
+		// 		return err
+		// 	}
+		// }
 	} else {
 		// Note that you also have to check the uid if you have a local controlled resource, which
 		// is dependent on the actual instance, to detect that a Pod was recreated with the same name

@@ -59,10 +59,13 @@ def main(args):
             payload["aud"] = args.aud
 
     if args.claims:
-        for item in args.claims.split(","):
-            k, v = item.split(':')
+        for item in args.claims.split("|"):
+            # strip out all the doublequotes
+            item = item.replace('"','')
+            s = item.split(':')
+            k = s[0]
+            v = ':'.join(s[1:])
             payload[k] = v
-
     token = jwt.JWT(header={"alg": "RS256", "typ": "JWT", "kid": key.key_id},
                 claims=payload)
 
