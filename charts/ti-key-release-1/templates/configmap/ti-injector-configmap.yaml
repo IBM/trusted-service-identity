@@ -26,6 +26,11 @@ data:
           - name: ti-skeys
             mountPath: /skeys
             readOnly: true
+          - name: host-etc
+            mountPath: /host/etc
+            readOnly: true
+          - name: ti-sidecar
+            mountPath: /sidecar
       sidecarContainers:
       - name: jwt-sidecar
         image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.3
@@ -41,9 +46,14 @@ data:
           - name: jwt-secret
             mountPath: "/secret/jwt"
             readOnly: true
+          - name: ti-sidecar
+            mountPath: "/initContainers"
+            readOnly: true
         command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
       volumes:
         - name: jwt-shared-data
+          emptyDir: {}
+        - name: ti-sidecar
           emptyDir: {}
         - name: jwt-configmap
           configMap:
@@ -55,6 +65,11 @@ data:
             # directory location on host
              path: /ti
              # directory must exist
+             type: Directory
+        - name: host-etc
+          hostPath:
+            # directory location on host
+             path: /etc
              type: Directory
         - name: jwt-secret
           hostPath:
