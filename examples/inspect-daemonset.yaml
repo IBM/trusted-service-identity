@@ -18,8 +18,6 @@ spec:
       containers:
         - name: hyperkube
           image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
-          #command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"]
-          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "--" ]
           args: [ "while true; do cat /mydata; sleep 5; done;" ]
@@ -29,18 +27,19 @@ spec:
           - mountPath: /etc
             name: machine-id
             readOnly: true
-          # - name: webhook-certs
-          #   mountPath: /secrets/certs
-          #   readOnly: true
-          # - name: jwt-secret
-          #   mountPath: /secrets/jwt
-          #   readOnly: true
+          - mountPath: /keys
+            name: ti-secret-volume
+            readOnly: true
       volumes:
       - name: ti-volume
         hostPath:
           # directory location on host
            path: /ti
-           # this field is optional
+           type: DirectoryOrCreate
+      - name: ti-secret-volume
+        hostPath:
+          # directory location on host
+           path: /ti/secrets/keys
            type: DirectoryOrCreate
       - name: machine-id
         hostPath:
@@ -48,9 +47,3 @@ spec:
            path: /etc
            # this field is optional
            type: Directory
-      # - name: webhook-certs
-      #   secret:
-      #     secretName: ti-injector-webhook-certs
-      # - name: jwt-secret
-      #   secret:
-      #     secretName: jwt-secret
