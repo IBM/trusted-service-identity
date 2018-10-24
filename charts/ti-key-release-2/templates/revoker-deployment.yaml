@@ -14,14 +14,18 @@ spec:
     spec:
       serviceAccountName: ti-sa
       volumes:
-      - name: ti-keys
+      - name: ti-skeys
         secret:
           secretName: ti-keys-config
+      - name: ti-keys
+        hostPath:
+          path: /ti/secrets/keys
+          type: Directory
       imagePullSecrets:
       - name: regcred
       containers:
         - name: ti-revoker
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-revoker:v0.2
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-revoker:v0.3
           imagePullPolicy: Always
           args:
             - -namespace=trusted-identity
@@ -31,4 +35,7 @@ spec:
           volumeMounts:
           - name: ti-keys
             mountPath: /keys
+            readOnly: true
+          - name: ti-skeys
+            mountPath: /skeys
             readOnly: true

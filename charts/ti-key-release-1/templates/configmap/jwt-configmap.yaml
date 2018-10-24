@@ -9,9 +9,5 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  claim-list: |-
-    key1:value1,key2:value2,foo:bar
   execute-get-key.sh: |-
-    while true; do python /gen-jwt.py /secret/jwt/key.pem --expire=30 --claims=$(cat /configmap/jwt/claim-list) > /usr/share/jwt/token;sleep 25; done
-# if the claims are added to "jwt-secret" then the format would be
-# /gen-jwt.py /secret/jwt/key.pem --expire=25 --claims=$(cat /secret/jwt/claim-list)
+    while true; do python /gen-jwt.py /secret/jwt/key.pem --expire=30 --claims=$(cat /jwt/claims) > /usr/share/jwt/token;sleep 25; done

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ds-cleaner
+spec:
+  selector:
+    matchLabels:
+      name: ds-cleaner
+  template:
+    metadata:
+      labels:
+        name: ds-cleaner
+    spec:
+      # imagePullSecrets:
+      # - name: regcred
+      containers:
+        - name: hyperkube
+          image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "rm -rf /host/ti; sleep 999" ]
+          volumeMounts:
+          - mountPath: /host/ti
+            name: ti-volume
+      volumes:
+      - name: ti-volume
+        hostPath:
+          # directory location on host
+           path: /ti
+           # this field is optional
+           type: DirectoryOrCreate

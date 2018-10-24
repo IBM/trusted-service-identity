@@ -13,7 +13,6 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -21,7 +20,6 @@ import (
 
 	"crypto/rand"
 
-	ccorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
 	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
@@ -374,32 +372,32 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		return nil, nil
 	}
 
-	// Create a secret
-	glog.Infof("Creating kube client")
-	client, err := ccorev1.NewForConfig(kubeConf)
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return nil, err
-	}
+	// // Create a secret
+	// glog.Infof("Creating kube client")
+	// client, err := ccorev1.NewForConfig(kubeConf)
+	// if err != nil {
+	// 	glog.Infof("Err: %v", err)
+	// 	return nil, err
+	// }
 
-	// Create secret if it doesn't exist
-	glog.Infof("Creating secret")
-	createSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName}}
-	createSecret, err = client.Secrets(namespace).Create(createSecret)
-	if err != nil {
-		if !errors.IsAlreadyExists(err) {
-			glog.Infof("Err: %v", err)
-			return nil, err
-		}
-	}
-
-	glog.Infof("pod name : %v", pod.ObjectMeta.Name)
-	for i, v := range initcontainerConfigCp.Volumes {
-		if v.Name == "ti-vault-secret" {
-			initcontainerConfigCp.Volumes[i].VolumeSource.Secret.SecretName = secretName
-			break
-		}
-	}
+	// // Create secret if it doesn't exist
+	// glog.Infof("Creating secret")
+	// createSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName}}
+	// createSecret, err = client.Secrets(namespace).Create(createSecret)
+	// if err != nil {
+	// 	if !errors.IsAlreadyExists(err) {
+	// 		glog.Infof("Err: %v", err)
+	// 		return nil, err
+	// 	}
+	// }
+	//
+	// glog.Infof("pod name : %v", pod.ObjectMeta.Name)
+	// for i, v := range initcontainerConfigCp.Volumes {
+	// 	if v.Name == "ti-vault-secret" {
+	// 		initcontainerConfigCp.Volumes[i].VolumeSource.Secret.SecretName = secretName
+	// 		break
+	// 	}
+	// }
 
 	// Get list of images
 	images := ""
