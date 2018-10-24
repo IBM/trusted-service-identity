@@ -11,30 +11,17 @@ spec:
       labels:
         name: ds-cleaner
     spec:
-      # enable sa to run `kubectl` inside the container
-      # serviceAccountName: ti-admin-sa
       # imagePullSecrets:
       # - name: regcred
       containers:
         - name: hyperkube
           image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
-          #command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"]
-          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "--" ]
           args: [ "rm -rf /host/ti; sleep 999" ]
           volumeMounts:
           - mountPath: /host/ti
             name: ti-volume
-          # - mountPath: /etc
-          #   name: machine-id
-          #   readOnly: true
-          # - name: webhook-certs
-          #   mountPath: /secrets/certs
-          #   readOnly: true
-          # - name: jwt-secret
-          #   mountPath: /secrets/jwt
-          #   readOnly: true
       volumes:
       - name: ti-volume
         hostPath:
@@ -42,15 +29,3 @@ spec:
            path: /ti
            # this field is optional
            type: DirectoryOrCreate
-      # - name: machine-id
-      #   hostPath:
-      #     # directory location on host
-      #      path: /etc
-      #      # this field is optional
-      #      type: Directory
-      # - name: webhook-certs
-      #   secret:
-      #     secretName: ti-injector-webhook-certs
-      # - name: jwt-secret
-      #   secret:
-      #     secretName: jwt-secret

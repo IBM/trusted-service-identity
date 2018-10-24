@@ -47,7 +47,7 @@ data:
             mountPath: "/secret/jwt"
             readOnly: true
           - name: ti-sidecar
-            mountPath: "/initContainers"
+            mountPath: "/jwt"
             readOnly: true
         command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
       volumes:
@@ -76,9 +76,6 @@ data:
             # directory location on host
              path: /ti/secrets/jwt
              type: Directory
-        # - name: jwt-secret # TO-DELETE
-        #   secret:
-        #     secretName: jwt-secret
         - name: pod-metadata
           downwardAPI:
             items:

@@ -14,7 +14,6 @@ rules:
 - apiGroups: [""] # "" indicates the core API group
   resources: ["secrets"]
   verbs: ["create", "get", "patch", "update", "list", "delete"]
-### MS, move these namespaces roles to a separate SA
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["create", "get", "patch", "update", "list", "delete"]
@@ -27,7 +26,6 @@ rules:
 - apiGroups: ["admissionregistration.k8s.io"]
   resources: ["mutatingwebhookconfigurations"]
   verbs: ["create", "get", "patch", "update", "list", "delete"]
-### MS
 - apiGroups: ["trusted.identity"] # "" indicates the core API group
   resources: ["clustertis"]
   verbs: ["get", "update", "list"]
