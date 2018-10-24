@@ -1,8 +1,8 @@
 GOPACKAGES=$(shell go list ./... | grep -v /vendor/) # With glide: GOPACKAGES=$(shell glide novendor)
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
-GIT_COMMIT_SHA="$(shell git rev-parse --short HEAD 2>/dev/null)"
-GIT_REMOTE_URL="$(shell git config --get remote.origin.url 2>/dev/null)"
+GIT_COMMIT_SHA=$(shell git rev-parse --short HEAD 2>/dev/null)
+GIT_REMOTE_URL=$(shell git config --get remote.origin.url 2>/dev/null)
 BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="ti-webhook"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
@@ -11,7 +11,7 @@ MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.3
 
 .PHONY: all test-deps build-deps fmt vet lint get-deps test build docker
 
-all: dep get-deps fmt test build docker docker-push timestamp
+all: dep get-deps fmt test build docker timestamp
 
 dep:
 	go get -u github.com/golang/dep/cmd/dep
