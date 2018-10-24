@@ -19,7 +19,7 @@ dep:
 get-deps: test-deps build-deps
 
 test-deps: build-deps
-	go get github.com/golang/x/lint/golint
+	go get -u golang.org/x/lint/golint
 	go get github.com/stretchr/testify/assert
 	go get github.com/pierrre/gotestcover
 
