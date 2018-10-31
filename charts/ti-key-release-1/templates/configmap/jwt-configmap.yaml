@@ -21,4 +21,3 @@ data:
       python /gen-jwt.py /secret/jwt/key.pem --expire={{ .Values.jwt.expireSec }} --claims=$(cat /tmp/claims) > /usr/share/jwt/token
       sleep $(({{ int .Values.jwt.expireSec }} - 5))
     done
-    # while true; do python /gen-jwt.py /secret/jwt/key.pem --expire=30 --claims=$(cat /jwt/claims) > /usr/share/jwt/token;sleep 25; done
