@@ -54,11 +54,13 @@ var ignoredNamespaces = []string{
 }
 
 const (
-	admissionWebhookAnnotationInjectKey   = "admission.trusted.identity/inject"
-	admissionWebhookAnnotationStatusKey   = "admission.trusted.identity/status"
-	admissionWebhookAnnotationSecretKey   = "admission.trusted.identity/ti-secret-key"
-	admissionWebhookAnnotationIdentityKey = "admission.trusted.identity/ti-identity"
-	admissionWebhookAnnotationImagesKey   = "admission.trusted.identity/ti-images"
+	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
+	admissionWebhookAnnotationStatusKey     = "admission.trusted.identity/status"
+	admissionWebhookAnnotationSecretKey     = "admission.trusted.identity/ti-secret-key"
+	admissionWebhookAnnotationIdentityKey   = "admission.trusted.identity/ti-identity"
+	admissionWebhookAnnotationImagesKey     = "admission.trusted.identity/ti-images"
+	admissionWebhookAnnotationClusterName   = "admission.trusted.identity/ti-cluster-name"
+	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/ti-cluster-region"
 )
 
 type WebhookServer struct {
@@ -372,6 +374,8 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		return nil, nil
 	}
 
+	glog.Infof("CTI Cluster Name: %v", cti.Info.ClusterName)
+	glog.Infof("CTI Cluster Region: %v", cti.Info.ClusterRegion)
 	// // Create a secret
 	// glog.Infof("Creating kube client")
 	// client, err := ccorev1.NewForConfig(kubeConf)
@@ -422,6 +426,8 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationIdentityKey] = identity
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
+	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
+	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion
 
 	return initcontainerConfigCp, nil
 

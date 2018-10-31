@@ -29,8 +29,8 @@ data:
           - name: host-etc
             mountPath: /host/etc
             readOnly: true
-          - name: ti-sidecar
-            mountPath: /sidecar
+          # - name: ti-sidecar
+          #   mountPath: /sidecar
       sidecarContainers:
       - name: jwt-sidecar
         image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.3
@@ -49,12 +49,17 @@ data:
           - name: ti-sidecar
             mountPath: "/jwt"
             readOnly: true
+          - name: pod-metadata
+            mountPath: /pod-metadata
+            readOnly: true
+          - name: host-etc
+            mountPath: /host/etc
         command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
       volumes:
         - name: jwt-shared-data
           emptyDir: {}
-        - name: ti-sidecar
-          emptyDir: {}
+        # - name: ti-sidecar
+        #   emptyDir: {}
         - name: jwt-configmap
           configMap:
             name: ti-jwt-configmap
@@ -91,6 +96,12 @@ data:
               - path: "ti-images"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
+              - path: "ti-cluster-name"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-cluster-name']
+              - path: "ti-cluster-region"
+                fieldRef:
+                  fieldPath: metadata.annotations['admission.trusted.identity/ti-cluster-region']
         - name: ti-vault-secret
           emptyDir: {}
         - name: ti-keys
