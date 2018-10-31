@@ -4,8 +4,8 @@ metadata:
   name: cluster-policy
   namespace: {{ .Values.namespace }}
 info:
-  cluster-name: mycluster
-  cluster-region: dal
+  cluster-name: {{ .Values.cluster.name }}
+  cluster-region: {{ .Values.cluster.region }}
 policy:
   - image: "res-kompass-kompass-docker-local.artifactory.swg-devops.com/"
     identity: id-res-kompass-kompass-docker-local.artifactory.swg-devops.com

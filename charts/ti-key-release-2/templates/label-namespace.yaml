@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: label-namespace
-  namespace: {{ .Values.namespace }}
+  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-weight: "5"
@@ -30,7 +30,7 @@ spec:
             - /kubectl
             - label
             - namespace
-            - {{ .Values.namespace }}
+            - {{ index .Values "ti-key-release-1" "namespace" }}
             - ti-injector=enabled
             - --overwrite
       restartPolicy: OnFailure

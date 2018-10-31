@@ -1,16 +1,17 @@
-This Helm deployment works with Helm v2.10.0 or higher. To upgrade your existing
-helm, install/upgrade your client first. E.g on Mac:
-  `brew install kubernetes-helm` or `brew upgrade kubernetes-helm`
-   then upgrade your server:  `helm init --upgrade`
-
+This Helm deployment sets up the environment for Trusted Identity. This is the
+first part of the deployment. 
 
    app: {{ template "ti-key-release.name" . }}
    chart: {{ template "ti-key-release.chart" . }}
    release: {{ .Release.Name }}
    namespace: {{ .Values.namespace }}
 
-   vault-address: {{ .Values.vaultAddress }} encoded as {{ .Values.vaultAddress | b64enc }}
+   vaultAddress: {{ .Values.vaultAddress }} encoded as {{ .Values.vaultAddress | b64enc }}
+   cluster.name: {{ .Values.cluster.name }}
+   cluster.region: {{ .Values.cluster.region }}
+   jwt.expireSec: {{ .Values.jwt.expireSec }}
 
-First helm deployment is completed. Now execute the second part. Make sure it
+
+First helm deployment is completed. Now execute the second part. Make sure the
 second deployment is using the same namespace ( {{ .Values.namespace }} ):
     helm install charts/ti-key-release-2 --debug --name ti-test2

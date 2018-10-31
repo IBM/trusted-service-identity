@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: {{ .Values.namespace }}
+  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
   name: ti-injector-webhook-svc
   labels:
     app: ti-injector

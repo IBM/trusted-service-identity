@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  namespace: {{ .Values.namespace }}
+  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
   name: ti-revoker-deployment
   labels:
     app: ti-revoker
