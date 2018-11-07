@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: delete-install-sa
-  namespace: {{ .Values.namespace }}
+  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
   annotations:
     helm.sh/hook: post-install
     helm.sh/hook-weight: "10"
@@ -32,5 +32,5 @@ spec:
             - sa
             - ti-install-sa
             - -n
-            - {{ .Values.namespace }}
+            - {{ index .Values "ti-key-release-1" "namespace" }}
       restartPolicy: OnFailure

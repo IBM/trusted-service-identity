@@ -5,9 +5,21 @@
 # target namespace for the deployment
 namespace: trusted-identity
 
+# Cluster Information
+cluster:
+  name: cluster-name
+  region: dal01
+
+# Section related to JWT token creation
+jwt:
+  # expireSec - Time To Live for JWT token (in seconds)
+  expireSec: 30
+
+
 # Values below are used to create a secret: `ti-keys-config`
 # vault-address e.g. https://1.1.1.1:32222
 vaultAddress: https://169.62.157.164:32654
+
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands

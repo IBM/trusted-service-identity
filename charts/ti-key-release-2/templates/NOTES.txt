@@ -1,9 +1,18 @@
-Trusted Identity Key Release enabled in {{ .Values.namespace }} namespace
-
+This helm chart installs environment for Trusted Identity
+  Namespace enabled: {{ index .Values "ti-key-release-1" "namespace" }}
 
   app: {{ template "ti-key-release.name" . }}
   chart: {{ template "ti-key-release.chart" . }}
   release: {{ .Release.Name }}
+
+  # Typically, the sub-chart values should be retrieved as
+  # {{ .Values.ti-key-release-1.vaultAddress }}
+  # however, there is a problem with retrieving values that contain "-"
+  # see the helm issue: https://github.com/helm/helm/issues/2192
+  vaultAddress: {{ index .Values "ti-key-release-1" "vaultAddress" }}
+  cluster.name: {{ index .Values "ti-key-release-1" "cluster" "name" }}
+  cluster.region: {{ index .Values "ti-key-release-1" "cluster" "region" }}
+  jwt.expireSec: {{ index .Values "ti-key-release-1" "jwt" "expireSec" }}
 
 Execute test:
   kubectl create -f examples/myubuntu_inject.yaml -n trusted-identity

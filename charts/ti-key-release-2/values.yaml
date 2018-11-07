@@ -2,12 +2,20 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
-namespace: trusted-identity
-
-# vault-address e.g
 ti-key-release-1:
+  namespace: trusted-identity
+  # vault endpoint:
   vaultAddress: https://169.62.157.164:32654
+  # Cluster Information
+  cluster:
+    name: cluster-name
+    region: dal01
+  # Section related to JWT token creation
+  jwt:
+    # expireSec - Time To Live for JWT token (in seconds)
+    expireSec: 30
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands

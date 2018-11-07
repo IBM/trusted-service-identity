@@ -86,7 +86,58 @@ To deploy manually:
 ./deploy.sh
 ```
 
-## Helm Deployment
+## Install and initialize Helm environment
+This project requires Helm v2.10.0 or higher.
+
+Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
+```bash
+  brew install kubernetes-helm
+  # or to upgrade the existing helm
+  brew upgrade kubernetes-helm
+  # then initialize (assuming your KUBECONFIG for the current cluster is already setup)
+  helm init
+```
+
+## Host Setup - one time  initialization
+All the worker hosts are required to be initialized with private keys and root CA
+(to be replaced by TPM in the future). This operation needs to be executed only once.
+
+### Build TI Setup helm charts
+
+Package the helm chart:
+```console
+cd TI-KeyRelease
+helm package charts/ti-setup
+```
+
+### Deploy TI Setup
+
+Get the default chart values and replace them with your private keys and certs
+
+```console
+helm inspect values ti-setup-0.1.0.tgz > config.yaml
+# modify config.yaml with your own values
+helm install ti-setup-0.1.0.tgz --values=config.yaml --debug --name ti-setup
+```
+
+Once the `ti-setup` is successfully deployed, remove it.
+```console
+helm delete --purge ti-setup
+```
+
+To test the values setup by the charts, run the daemonset to access all the hosts:
+
+```console
+kubectl create -f examples/inspect-daemonset.yaml
+```
+
+To remove/reset all the values setup by the `ti-setup` chart:
+
+```console
+helm create -f examples/cleanup-daemonset.yaml
+```
+
+## TI Key Release Helm Deployment
 The deployment is done in `trusted-identity` namespace. If you are testing or developing
 the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
 This would remove all the components and artifacts, then recreate a new, empty namespace:
@@ -114,13 +165,6 @@ kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.docke
 ```
 
 ### Build Helm Charts
-
-Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
-```bash
-  brew install kubernetes-helm
-  helm init
-```
-
 Currently there are 2 charts to deploy TI KeyRelease: ti-key-release-1 and ti-key-rel
 -2
 Package the helm charts:
@@ -240,10 +284,25 @@ with newly created JWT token:
 # run endless loop to test the connection
 while true; do curl --header "Authorization: Bearer $(cat /jwt-tokens/token)" web-service -s -w "%{http_code}\n";sleep 5; done
 ```
-Now you should be getting valid web service responses, with a 5 second authentication failure every 25 seconds.
+Now you should be getting valid web service responses
 You can copy the JWT token from /jwt-tokens/token and inspect it (e.g. [https://jwt.io/](https://jwt.io/))
 
+Sample JWT payload:
 
+```json
+{
+  "cluster-name": "cluster-name",
+  "cluster-region": "dal01",
+  "exp": 1541014498,
+  "iat": 1541014468,
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault",
+  "iss": "testing@secure.istio.io",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "pod": "myubuntu-767584864-2dkdg",
+  "sub": "testing@secure.istio.io",
+  "trusted-identity": "id-res-kompass-kompass-docker-local.artifactory.swg-devops.com"
+}
+```
 ## Cleanup
 Remove all the resources created for Trusted Identity
 ```console
