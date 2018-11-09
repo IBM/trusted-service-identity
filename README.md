@@ -238,7 +238,7 @@ spec:
   - name: web-service
   origins:
   - jwt:
-      issuer: "testing@secure.istio.io"
+      issuer: "wsched@us.ibm.com"
       jwksUri: "https://raw.githubusercontent.com/mrsabath/jwks-test/master/jwks.json"
   principalBinding: USE_ORIGIN
 ```
@@ -291,16 +291,16 @@ Sample JWT payload:
 
 ```json
 {
-  "cluster-name": "cluster-name",
+  "cluster-name": "mycluster",
   "cluster-region": "dal01",
   "exp": 1541014498,
   "iat": 1541014468,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault",
-  "iss": "testing@secure.istio.io",
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest",
+  "iss": "wsched@us.ibm.com",
   "machineid": "266c2075dace453da02500b328c9e325",
   "pod": "myubuntu-767584864-2dkdg",
-  "sub": "testing@secure.istio.io",
-  "trusted-identity": "id-res-kompass-kompass-docker-local.artifactory.swg-devops.com"
+  "sub": "wsched@us.ibm.com",
+  "trusted-identity": "https://github.ibm.com/kompass/TI-KeyRelease/tree/v1.0"
 }
 ```
 ## Cleanup

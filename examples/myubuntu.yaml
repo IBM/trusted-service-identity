@@ -18,7 +18,7 @@ spec:
       - name: regcred
       containers:
         - name: myubuntu
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]
           # args: [ "while true; do cat /mydata; sleep 5; done;" ]
