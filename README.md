@@ -129,9 +129,13 @@ To test the values setup by the charts, run the daemonset to access all the host
 
 ```console
 kubectl create -f examples/inspect-daemonset.yaml
+kubectl get pods
+# select the node that you like to inspect and get inside:
+kubectl exec -it <pod_id> /bin/bash
 ```
+Once inside the container, review the data in `/host/ti/secrets` directory
 
-To remove/reset all the values setup by the `ti-setup` chart:
+To remove/reset all the values setup by the `ti-setup` chart, run the following:
 
 ```console
 kubectl create -f examples/cleanup-daemonset.yaml
