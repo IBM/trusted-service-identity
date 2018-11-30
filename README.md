@@ -47,6 +47,23 @@ make dep get-deps test-deps
 This might take some time to execute as it scans and installs the dependencies.
 Once the dependencies are installed, execute the build.
 
+Regenerating deep copy
+
+Deep copy helpers are required for the data schema. A data copy helper (of the form zz_generated.deepcopy.go) already exists for this app under pkg/apis/cti/v1, however if change the schema you will need to regenerate it.
+
+To regenerate, simply run the following script from the root of this project:
+
+```
+hack/update-codegen.sh
+```
+
+this will update the pkg/client directory. If everything OK, following message appears:
+
+```
+diffing hack/../pkg against freshly generated codegen
+hack/../pkg up to date.
+```
+
 ```console
 make build
 ```
@@ -303,7 +320,8 @@ Sample JWT payload:
   "iss": "wsched@us.ibm.com",
   "machineid": "266c2075dace453da02500b328c9e325",
   "pod": "myubuntu-767584864-2dkdg",
-  "sub": "wsched@us.ibm.com"
+  "sub": "wsched@us.ibm.com",
+  "trusted-identity": "id-res-kompass-kompass-docker-local.artifactory.swg-devops.com"
 }
 ```
 ## Cleanup

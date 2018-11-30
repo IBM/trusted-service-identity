@@ -21,7 +21,7 @@ package v1
 import (
 	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
 	scheme "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/scheme"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
@@ -37,11 +37,11 @@ type ClusterTIsGetter interface {
 type ClusterTIInterface interface {
 	Create(*v1.ClusterTI) (*v1.ClusterTI, error)
 	Update(*v1.ClusterTI) (*v1.ClusterTI, error)
-	Delete(name string, options *meta_v1.DeleteOptions) error
-	DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error
-	Get(name string, options meta_v1.GetOptions) (*v1.ClusterTI, error)
-	List(opts meta_v1.ListOptions) (*v1.ClusterTIList, error)
-	Watch(opts meta_v1.ListOptions) (watch.Interface, error)
+	Delete(name string, options *metav1.DeleteOptions) error
+	DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error
+	Get(name string, options metav1.GetOptions) (*v1.ClusterTI, error)
+	List(opts metav1.ListOptions) (*v1.ClusterTIList, error)
+	Watch(opts metav1.ListOptions) (watch.Interface, error)
 	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.ClusterTI, err error)
 	ClusterTIExpansion
 }
@@ -61,7 +61,7 @@ func newClusterTIs(c *TrustedV1Client, namespace string) *clusterTIs {
 }
 
 // Get takes name of the clusterTI, and returns the corresponding clusterTI object, and an error if there is any.
-func (c *clusterTIs) Get(name string, options meta_v1.GetOptions) (result *v1.ClusterTI, err error) {
+func (c *clusterTIs) Get(name string, options metav1.GetOptions) (result *v1.ClusterTI, err error) {
 	result = &v1.ClusterTI{}
 	err = c.client.Get().
 		Namespace(c.ns).
@@ -74,7 +74,7 @@ func (c *clusterTIs) Get(name string, options meta_v1.GetOptions) (result *v1.Cl
 }
 
 // List takes label and field selectors, and returns the list of ClusterTIs that match those selectors.
-func (c *clusterTIs) List(opts meta_v1.ListOptions) (result *v1.ClusterTIList, err error) {
+func (c *clusterTIs) List(opts metav1.ListOptions) (result *v1.ClusterTIList, err error) {
 	result = &v1.ClusterTIList{}
 	err = c.client.Get().
 		Namespace(c.ns).
@@ -86,7 +86,7 @@ func (c *clusterTIs) List(opts meta_v1.ListOptions) (result *v1.ClusterTIList, e
 }
 
 // Watch returns a watch.Interface that watches the requested clusterTIs.
-func (c *clusterTIs) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
+func (c *clusterTIs) Watch(opts metav1.ListOptions) (watch.Interface, error) {
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
@@ -121,7 +121,7 @@ func (c *clusterTIs) Update(clusterTI *v1.ClusterTI) (result *v1.ClusterTI, err 
 }
 
 // Delete takes name of the clusterTI and deletes it. Returns an error if one occurs.
-func (c *clusterTIs) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (c *clusterTIs) Delete(name string, options *metav1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("clustertis").
@@ -132,7 +132,7 @@ func (c *clusterTIs) Delete(name string, options *meta_v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *clusterTIs) DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error {
+func (c *clusterTIs) DeleteCollection(options *metav1.DeleteOptions, listOptions metav1.ListOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("clustertis").

@@ -23,11 +23,11 @@ package v1
 import (
 	time "time"
 
-	cti_v1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
+	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
 	versioned "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned"
 	internalinterfaces "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
 	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/listers/cti/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
@@ -59,20 +59,20 @@ func NewClusterTIInformer(client versioned.Interface, namespace string, resyncPe
 func NewFilteredClusterTIInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
-			ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
 				return client.TrustedV1().ClusterTIs(namespace).List(options)
 			},
-			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
 				return client.TrustedV1().ClusterTIs(namespace).Watch(options)
 			},
 		},
-		&cti_v1.ClusterTI{},
+		&ctiv1.ClusterTI{},
 		resyncPeriod,
 		indexers,
 	)
@@ -83,7 +83,7 @@ func (f *clusterTIInformer) defaultInformer(client versioned.Interface, resyncPe
 }
 
 func (f *clusterTIInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&cti_v1.ClusterTI{}, f.defaultInformer)
+	return f.factory.InformerFor(&ctiv1.ClusterTI{}, f.defaultInformer)
 }
 
 func (f *clusterTIInformer) Lister() v1.ClusterTILister {
