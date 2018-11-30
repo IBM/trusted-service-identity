@@ -28,7 +28,7 @@ spec:
         - name: hyperkube
           image: "{{ .Values.hyperkube.repository }}:{{ .Values.hyperkube.tag }}"
           command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"]
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           volumeMounts:
             - mountPath: "/tmp/ti-key-release"
               name: tmp-ti-key-release-configmap

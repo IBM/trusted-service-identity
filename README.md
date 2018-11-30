@@ -142,15 +142,15 @@ Once the `ti-setup` is successfully deployed, remove it.
 helm delete --purge ti-setup
 ```
 
-To test the values setup by the charts, run the daemonset to access all the hosts:
+To validate and inspect the values assigned by the setup chart, run the daemonset to access all the hosts:
 
 ```console
 kubectl create -f examples/inspect-daemonset.yaml
 kubectl get pods
 # select the node that you like to inspect and get inside:
 kubectl exec -it <pod_id> /bin/bash
+# review /host/ti/secrets, /etc/machineid, /keys/
 ```
-Once inside the container, review the data in `/host/ti/secrets` directory
 
 To remove/reset all the values setup by the `ti-setup` chart, run the following:
 
@@ -202,23 +202,19 @@ helm package --dependency-update charts/ti-key-release-2
 The helm charts are ready to deploy
 
 ```console
-helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test
+helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test \
+--set ti-key-release-1.cluster.name=mycluster-name \
+--set ti-key-release-1.cluster.region=dal01
 ```
 
-If you like to change the address of the Vault server:
-
-Option 1 - directly
-```console
-helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test --set ti-key-release-1.vaultAddress=https://1.1.1.1:8888
-```
-
-Option 2 - capture the default values, modify them and install or upgrade:
+Complete list of values can be obtained as follow:
 ```console
 helm inspect values ti-key-release-2-0.1.0.tgz > config.yaml
 # modify config.yaml
+helm install -i --values=config.yaml ti-test ti-key-release-2-0.1.0.tgz
+# or upgrade existing deployment
 helm upgrade -i --values=config.yaml ti-test ti-key-release-2-0.1.0.tgz
 ```
-This option can be also used to modify rootToken, rootCaCrt and rootCaCrt.
 
 ### Testing Deployment
 Once environment deployed, execute a test by deploying the following file:
@@ -226,7 +222,7 @@ Once environment deployed, execute a test by deploying the following file:
 kubectl -n trusted-identity create -f examples/myubuntu_inject.yaml
 ```
 The main container `myubuntu` should have a new key and certificate in `/vault-certs` directory
-for accessing the Vault.
+for accessing the Vault and JWT token in `/jwt-tokens`
 
 
 # Trusted Identity with Istio
@@ -365,3 +361,20 @@ ti-key-release-1:
     -----END RSA PRIVATE KEY-----
 ```
 Then redeploy the charts and your container.
+
+## Sample JWT claims
+
+```json
+{
+  "cluster-name": "EUcluster",
+  "cluster-region": "eu-de",
+  "exp": 1541689789,
+  "iat": 1541689759,
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault",
+  "iss": "testing@secure.istio.io",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "pod": "myubuntu-767584864-k9b59",
+  "sub": "testing@secure.istio.io",
+  "trusted-identity": "id-res-kompass-kompass-docker-local.artifactory.swg-devops.com"
+}
+```
