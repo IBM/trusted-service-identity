@@ -134,7 +134,7 @@ kubectl create -f examples/inspect-daemonset.yaml
 To remove/reset all the values setup by the `ti-setup` chart:
 
 ```console
-helm create -f examples/cleanup-daemonset.yaml
+kubectl create -f examples/cleanup-daemonset.yaml
 ```
 
 ## TI Key Release Helm Deployment
