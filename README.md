@@ -299,8 +299,7 @@ Sample JWT payload:
   "iss": "wsched@us.ibm.com",
   "machineid": "266c2075dace453da02500b328c9e325",
   "pod": "myubuntu-767584864-2dkdg",
-  "sub": "wsched@us.ibm.com",
-  "trusted-identity": "https://github.ibm.com/kompass/TI-KeyRelease/tree/v1.0"
+  "sub": "wsched@us.ibm.com"
 }
 ```
 ## Cleanup
