@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	cti_v1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
+	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -39,20 +39,20 @@ var clustertisResource = schema.GroupVersionResource{Group: "trusted.identity", 
 var clustertisKind = schema.GroupVersionKind{Group: "trusted.identity", Version: "v1", Kind: "ClusterTI"}
 
 // Get takes name of the clusterTI, and returns the corresponding clusterTI object, and an error if there is any.
-func (c *FakeClusterTIs) Get(name string, options v1.GetOptions) (result *cti_v1.ClusterTI, err error) {
+func (c *FakeClusterTIs) Get(name string, options v1.GetOptions) (result *ctiv1.ClusterTI, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(clustertisResource, c.ns, name), &cti_v1.ClusterTI{})
+		Invokes(testing.NewGetAction(clustertisResource, c.ns, name), &ctiv1.ClusterTI{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*cti_v1.ClusterTI), err
+	return obj.(*ctiv1.ClusterTI), err
 }
 
 // List takes label and field selectors, and returns the list of ClusterTIs that match those selectors.
-func (c *FakeClusterTIs) List(opts v1.ListOptions) (result *cti_v1.ClusterTIList, err error) {
+func (c *FakeClusterTIs) List(opts v1.ListOptions) (result *ctiv1.ClusterTIList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(clustertisResource, clustertisKind, c.ns, opts), &cti_v1.ClusterTIList{})
+		Invokes(testing.NewListAction(clustertisResource, clustertisKind, c.ns, opts), &ctiv1.ClusterTIList{})
 
 	if obj == nil {
 		return nil, err
@@ -62,8 +62,8 @@ func (c *FakeClusterTIs) List(opts v1.ListOptions) (result *cti_v1.ClusterTIList
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &cti_v1.ClusterTIList{}
-	for _, item := range obj.(*cti_v1.ClusterTIList).Items {
+	list := &ctiv1.ClusterTIList{}
+	for _, item := range obj.(*ctiv1.ClusterTIList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -79,31 +79,31 @@ func (c *FakeClusterTIs) Watch(opts v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a clusterTI and creates it.  Returns the server's representation of the clusterTI, and an error, if there is any.
-func (c *FakeClusterTIs) Create(clusterTI *cti_v1.ClusterTI) (result *cti_v1.ClusterTI, err error) {
+func (c *FakeClusterTIs) Create(clusterTI *ctiv1.ClusterTI) (result *ctiv1.ClusterTI, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(clustertisResource, c.ns, clusterTI), &cti_v1.ClusterTI{})
+		Invokes(testing.NewCreateAction(clustertisResource, c.ns, clusterTI), &ctiv1.ClusterTI{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*cti_v1.ClusterTI), err
+	return obj.(*ctiv1.ClusterTI), err
 }
 
 // Update takes the representation of a clusterTI and updates it. Returns the server's representation of the clusterTI, and an error, if there is any.
-func (c *FakeClusterTIs) Update(clusterTI *cti_v1.ClusterTI) (result *cti_v1.ClusterTI, err error) {
+func (c *FakeClusterTIs) Update(clusterTI *ctiv1.ClusterTI) (result *ctiv1.ClusterTI, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(clustertisResource, c.ns, clusterTI), &cti_v1.ClusterTI{})
+		Invokes(testing.NewUpdateAction(clustertisResource, c.ns, clusterTI), &ctiv1.ClusterTI{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*cti_v1.ClusterTI), err
+	return obj.(*ctiv1.ClusterTI), err
 }
 
 // Delete takes name of the clusterTI and deletes it. Returns an error if one occurs.
 func (c *FakeClusterTIs) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(clustertisResource, c.ns, name), &cti_v1.ClusterTI{})
+		Invokes(testing.NewDeleteAction(clustertisResource, c.ns, name), &ctiv1.ClusterTI{})
 
 	return err
 }
@@ -112,17 +112,17 @@ func (c *FakeClusterTIs) Delete(name string, options *v1.DeleteOptions) error {
 func (c *FakeClusterTIs) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	action := testing.NewDeleteCollectionAction(clustertisResource, c.ns, listOptions)
 
-	_, err := c.Fake.Invokes(action, &cti_v1.ClusterTIList{})
+	_, err := c.Fake.Invokes(action, &ctiv1.ClusterTIList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched clusterTI.
-func (c *FakeClusterTIs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *cti_v1.ClusterTI, err error) {
+func (c *FakeClusterTIs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *ctiv1.ClusterTI, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(clustertisResource, c.ns, name, data, subresources...), &cti_v1.ClusterTI{})
+		Invokes(testing.NewPatchSubresourceAction(clustertisResource, c.ns, name, data, subresources...), &ctiv1.ClusterTI{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*cti_v1.ClusterTI), err
+	return obj.(*ctiv1.ClusterTI), err
 }

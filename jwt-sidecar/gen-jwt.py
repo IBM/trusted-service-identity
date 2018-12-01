@@ -84,8 +84,8 @@ if __name__ == '__main__':
         help='The path to the key pem file. The key can be generated with openssl command: `openssl genrsa -out key.pem 2048`')
     # optional arguments
     parser.add_argument("-iss", "--iss",
-                        default="testing@secure.istio.io",
-                        help="iss claim. Default is `testing@secure.istio.io`")
+                        default="wsched@us.ibm.com",
+                        help="iss claim. Default is `wsched@us.ibm.com`")
     parser.add_argument("-aud", "--aud",
                         help="aud claim. This is comma-separated-list of audiences")
     parser.add_argument("-sub", "--sub",

@@ -47,6 +47,23 @@ make dep get-deps test-deps
 This might take some time to execute as it scans and installs the dependencies.
 Once the dependencies are installed, execute the build.
 
+Regenerating deep copy
+
+Deep copy helpers are required for the data schema. A data copy helper (of the form zz_generated.deepcopy.go) already exists for this app under pkg/apis/cti/v1, however if change the schema you will need to regenerate it.
+
+To regenerate, simply run the following script from the root of this project:
+
+```
+hack/update-codegen.sh
+```
+
+this will update the pkg/client directory. If everything OK, following message appears:
+
+```
+diffing hack/../pkg against freshly generated codegen
+hack/../pkg up to date.
+```
+
 ```console
 make build
 ```
@@ -130,14 +147,15 @@ To validate and inspect the values assigned by the setup chart, run the daemonse
 ```console
 kubectl create -f examples/inspect-daemonset.yaml
 kubectl get pods
-kubectl exec -it myubuntu_xxxxx /bin/bash
+# select the node that you like to inspect and get inside:
+kubectl exec -it <pod_id> /bin/bash
 # review /host/ti/secrets, /etc/machineid, /keys/
 ```
 
-To remove/reset all the values setup by the `ti-setup` chart:
+To remove/reset all the values setup by the `ti-setup` chart, run the following:
 
 ```console
-helm create -f examples/cleanup-daemonset.yaml
+kubectl create -f examples/cleanup-daemonset.yaml
 ```
 
 ## TI Key Release Helm Deployment
@@ -237,7 +255,7 @@ spec:
   - name: web-service
   origins:
   - jwt:
-      issuer: "testing@secure.istio.io"
+      issuer: "wsched@us.ibm.com"
       jwksUri: "https://raw.githubusercontent.com/mrsabath/jwks-test/master/jwks.json"
   principalBinding: USE_ORIGIN
 ```
@@ -290,15 +308,15 @@ Sample JWT payload:
 
 ```json
 {
-  "cluster-name": "cluster-name",
+  "cluster-name": "mycluster",
   "cluster-region": "dal01",
   "exp": 1541014498,
   "iat": 1541014468,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:vault",
-  "iss": "testing@secure.istio.io",
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest",
+  "iss": "wsched@us.ibm.com",
   "machineid": "266c2075dace453da02500b328c9e325",
   "pod": "myubuntu-767584864-2dkdg",
-  "sub": "testing@secure.istio.io",
+  "sub": "wsched@us.ibm.com",
   "trusted-identity": "id-res-kompass-kompass-docker-local.artifactory.swg-devops.com"
 }
 ```
