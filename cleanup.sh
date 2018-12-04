@@ -7,7 +7,7 @@ if [ -x "$(command -v helm)" ]; then
 else "Helm NOT installed"
 fi
 
-kubectl -n trusted-identity delete -f examples/myubuntu_inject.yaml
+kubectl -n trusted-identity delete -f examples/myubuntu.yaml
 kubectl -n trusted-identity delete -f examples/web-service.yaml
 kubectl -n trusted-identity delete -f examples/jwt-policy-example.yaml
 

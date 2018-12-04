@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
+  name: vtpm-server
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vtpm-server
+        version: v1
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: vtpm-server
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:v0.1
+          imagePullPolicy: Always
+          ports:
+          - name: http
+            containerPort: 5000
+            protocol: TCP
