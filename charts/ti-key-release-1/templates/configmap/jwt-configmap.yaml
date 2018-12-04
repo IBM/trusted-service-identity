@@ -12,7 +12,7 @@ data:
   execute-get-key.sh: |-
     while true
      do
-      echo -n "pod:$(cat /pod-metadata/ti-pod-name)|" >> /tmp/claims
+      echo -n "pod:$(cat /pod-metadata/ti-pod-name)|" > /tmp/claims
       echo -n "images:$(cat /pod-metadata/ti-images)|" >> /tmp/claims
       echo -n "cluster-name:$(cat /pod-metadata/ti-cluster-name)|" >> /tmp/claims
       echo -n "cluster-region:$(cat /pod-metadata/ti-cluster-region)|" >> /tmp/claims
