@@ -1,9 +1,10 @@
 This Helm deployment sets up the environment for Trusted Identity. This is the
-first part of the deployment. 
+first part of the deployment.
 
    app: {{ template "ti-key-release.name" . }}
    chart: {{ template "ti-key-release.chart" . }}
    release: {{ .Release.Name }}
+   tiVersion: {{ .Values.tiVersion }}
    namespace: {{ .Values.namespace }}
 
    vaultAddress: {{ .Values.vaultAddress }} encoded as {{ .Values.vaultAddress | b64enc }}

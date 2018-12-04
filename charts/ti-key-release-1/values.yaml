@@ -5,6 +5,9 @@
 # target namespace for the deployment
 namespace: trusted-identity
 
+# version of ti-components
+tiVersion: v0.4
+
 # Cluster Information
 cluster:
   name: cluster-name

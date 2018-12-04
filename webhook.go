@@ -57,7 +57,6 @@ const (
 	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
 	admissionWebhookAnnotationStatusKey     = "admission.trusted.identity/status"
 	admissionWebhookAnnotationSecretKey     = "admission.trusted.identity/ti-secret-key"
-	admissionWebhookAnnotationIdentityKey   = "admission.trusted.identity/ti-identity"
 	admissionWebhookAnnotationImagesKey     = "admission.trusted.identity/ti-images"
 	admissionWebhookAnnotationClusterName   = "admission.trusted.identity/ti-cluster-name"
 	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/ti-cluster-region"
@@ -362,18 +361,6 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	}
 
 	glog.Infof("Got CTI: %v", cti)
-	identity, err := cti.CheckPolicy(pod)
-	if err != nil {
-		return nil, err
-	}
-
-	glog.Infof("CTI Identity Check: %v", identity)
-
-	// If no identity, no requirement to perform key generation, just pass through
-	if identity == "" {
-		return nil, nil
-	}
-
 	glog.Infof("CTI Cluster Name: %v", cti.Info.ClusterName)
 	glog.Infof("CTI Cluster Region: %v", cti.Info.ClusterRegion)
 	// // Create a secret
@@ -424,7 +411,6 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationIdentityKey] = identity
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion

@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# version of ti-components
+tiVersion: v0.4
+
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
 ti-key-release-1:

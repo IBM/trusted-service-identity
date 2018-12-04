@@ -87,6 +87,7 @@ Password: <API-key>
 make docker-push
 # or simply do it all at once:
 make all
+make docker-push
 ```
 
 Compile and create images for other sub-components
@@ -129,12 +130,13 @@ helm package charts/ti-setup
 
 ### Deploy TI Setup
 
-Get the default chart values and replace them with your private keys and certs
+Get the default chart values and replace them with your private keys and certs.
+Replace X.X.X with proper version numbers
 
 ```console
-helm inspect values ti-setup-0.1.0.tgz > config.yaml
+helm inspect values ti-setup-X.X.X.tgz > config.yaml
 # modify config.yaml with your own values
-helm install ti-setup-0.1.0.tgz --values=config.yaml --debug --name ti-setup
+helm install ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
 ```
 
 Once the `ti-setup` is successfully deployed, remove it.
@@ -199,21 +201,21 @@ helm package --dependency-update charts/ti-key-release-2
 
 ### Deploy Helm charts
 
-The helm charts are ready to deploy
+The helm charts are ready to deploy. Replace X.X.X with proper version numbers
 
 ```console
-helm install ti-key-release-2-0.1.0.tgz --debug --name ti-test \
+helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.cluster.name=mycluster-name \
 --set ti-key-release-1.cluster.region=dal01
 ```
 
 Complete list of values can be obtained as follow:
 ```console
-helm inspect values ti-key-release-2-0.1.0.tgz > config.yaml
+helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
 # modify config.yaml
-helm install -i --values=config.yaml ti-test ti-key-release-2-0.1.0.tgz
+helm install -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 # or upgrade existing deployment
-helm upgrade -i --values=config.yaml ti-test ti-key-release-2-0.1.0.tgz
+helm upgrade -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 ```
 
 ### Testing Deployment

@@ -7,7 +7,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.3
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:{{ .Values.tiVersion }}
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
@@ -31,7 +31,7 @@ data:
             readOnly: true
       sidecarContainers:
       - name: jwt-sidecar
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.3
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:{{ .Values.tiVersion }}
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
