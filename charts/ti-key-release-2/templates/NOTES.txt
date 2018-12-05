@@ -18,7 +18,7 @@ This helm chart installs environment for Trusted Identity
 
   vTPM service is available from any container in the {{ index .Values "ti-key-release-1" "namespace" }} namespace
   To get JWKS:
-    curl http://{{ .Values.vtpmService.name }}:{{ .Values.vtpmService.port }}/getJWKS
+    curl http://{{ index .Values "ti-key-release-1" "vtpmService" "name" }}:{{ index .Values "ti-key-release-1" "vtpmService" "port" }}/getJWKS
 
 Execute test:
   kubectl create -f examples/myubuntu.yaml -n trusted-identity

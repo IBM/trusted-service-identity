@@ -23,12 +23,10 @@ ti-key-release-1:
     # expireSec - Time To Live for JWT token (in seconds)
     expireSec: 30
     issuer: wsched@us.ibm.com
-
-
-# vtpmService - vTPM Service is accessable only from within the namespace
-vtpmService:
-  name: vtpm-service
-  port: 8012
+  # vtpmService - vTPM Service is accessable only from within the namespace
+  vtpmService:
+    name: vtpm-service
+    port: 8012
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
