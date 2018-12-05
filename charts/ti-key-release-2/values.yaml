@@ -22,6 +22,7 @@ ti-key-release-1:
   jwt:
     # expireSec - Time To Live for JWT token (in seconds)
     expireSec: 30
+    issuer: wsched@us.ibm.com
 
 
 # vtpmService - vTPM Service is accessable only from within the namespace

@@ -51,8 +51,15 @@ RUN USE_SWTPM=1 STATEDIR=/tmp \
               && { echo 'jwt verified successfully'; exit 0; } || exit 1" \
   && rm -rf /tmp/*
 
-  # Adding support for flask
-  COPY requirements.txt /
-  RUN pip install -r requirements.txt
-  COPY run-server.sh server.py /usr/local/bin/
-  CMD ["/bin/bash", "-c", "/usr/local/bin/run-tpm-server.sh"]
+# Adding support for flask
+COPY requirements.txt /
+RUN pip install -r requirements.txt
+COPY run-server.sh server.py /usr/local/bin/
+
+# Default values for JWT, issuer and token expiration in seconds
+ARG DEFAULT_ISS="wsched@us.ibm.com"
+ARG DEFAULT_TTL_SEC=30
+ENV ISS=${DEFAULT_ISS}
+ENV TTL_SEC=${DEFAULT_TTL_SEC}
+
+CMD ["/bin/bash", "-c", "/usr/local/bin/run-tpm-server.sh"]

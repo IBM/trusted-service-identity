@@ -15,9 +15,11 @@
 # limitations under the License.
 
 """Python script generates a JWT signed with custom private key.
+issuer(iss) is passed as env. var. (ISS)
+token expiration is passed as env. var (TTL_SEC)
 
 Example:
-./gen-jwt.py  --iss example-issuer --aud foo,bar --claims=email:foo@google.com|dead:beef key.pem
+./gen-jwt.py  --aud foo,bar --claims=email:foo@google.com|images:img1,img2 key.pem
 """
 import argparse
 import time
@@ -46,18 +48,21 @@ def main(args):
             fout.write("]}")
         fout.close
 
+    expire = int(os.getenv('TTL_SEC', 30))
     now = int(time.time())
     payload = {
         # expire in one hour.
-        "exp": now + args.expire,
+        "exp": now + expire,
         "iat": now,
     }
-    if args.iss:
-        payload["iss"] = args.iss
-    if args.sub:
-        payload["sub"] = args.sub
-    else:
-        payload["sub"] = args.iss
+    payload["iss"] = os.getenv('ISS', default_value)
+    payload["sub"] = os.getenv('ISS', default_value)
+    # if args.iss:
+    #     payload["iss"] = args.iss
+    # if args.sub:
+    #     payload["sub"] = args.sub
+    # else:
+    #     payload["sub"] = args.iss
 
     if args.aud:
         if "," in args.aud:
@@ -68,7 +73,8 @@ def main(args):
     if args.claims:
         # we are using "|" to separate claims,
         # because `images` contain "," to seperate values
-        for item in args.claims.split("|"):
+        # strip last `\` if any to remove empty claims
+        for item in args.claims.rstrip('|').split("|"):
             # strip out all the doublequotes
             item = item.replace('"','')
             s = item.split(':')
