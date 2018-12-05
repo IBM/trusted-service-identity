@@ -12,11 +12,11 @@ data:
   execute-get-key.sh: |-
     while true
      do
-      echo -n "pod:$(cat /pod-metadata/ti-pod-name)|" > /tmp/claims
-      echo -n "images:$(cat /pod-metadata/ti-images)|" >> /tmp/claims
-      echo -n "cluster-name:$(cat /pod-metadata/ti-cluster-name)|" >> /tmp/claims
-      echo -n "cluster-region:$(cat /pod-metadata/ti-cluster-region)|" >> /tmp/claims
-      echo -n "machineid:$(cat /host/etc/machine-id)" >> /tmp/claims
-      python /gen-jwt.py /secret/jwt/key.pem --expire={{ .Values.jwt.expireSec }} --claims=$(cat /tmp/claims) > /usr/share/jwt/token
+      echo -n "pod=$(cat /pod-metadata/ti-pod-name)&" > /tmp/claims
+      echo -n "images=$(cat /pod-metadata/ti-images)&" >> /tmp/claims
+      echo -n "cluster-name=$(cat /pod-metadata/ti-cluster-name)&" >> /tmp/claims
+      echo -n "cluster-region=$(cat /pod-metadata/ti-cluster-region)&" >> /tmp/claims
+      echo -n "machineid=$(cat /host/etc/machine-id)" >> /tmp/claims
+      curl http://vtpm-service:8012/getJWT?"$(cat /tmp/claims)" > /usr/share/jwt/token
       sleep $(({{ int .Values.jwt.expireSec }} - 5))
     done
