@@ -29,7 +29,7 @@ spec:
       - name: regcred
       containers:
         - name: vtpm-service
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:v0.1
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:v0.4
           imagePullPolicy: Always
           ports:
           - name: http
