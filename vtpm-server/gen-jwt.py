@@ -27,6 +27,9 @@ import os
 
 from jwcrypto import jwt, jwk
 
+expire = int(os.getenv('TTL_SEC', 30))
+iss = os.getenv('ISS', 'wsched@us.ibm.com')
+
 def main(args):
     """Generates a signed JSON Web Token from local private key."""
 
@@ -48,15 +51,14 @@ def main(args):
             fout.write("]}")
         fout.close
 
-    expire = int(os.getenv('TTL_SEC', 30))
     now = int(time.time())
     payload = {
         # expire in one hour.
         "exp": now + expire,
         "iat": now,
     }
-    payload["iss"] = os.getenv('ISS', default_value)
-    payload["sub"] = os.getenv('ISS', default_value)
+    payload["iss"] = iss
+    payload["sub"] = iss
     # if args.iss:
     #     payload["iss"] = args.iss
     # if args.sub:
@@ -73,7 +75,7 @@ def main(args):
     if args.claims:
         # we are using "|" to separate claims,
         # because `images` contain "," to seperate values
-        # strip last `\` if any to remove empty claims
+        # strip last `|` if any to remove empty claims
         for item in args.claims.rstrip('|').split("|"):
             # strip out all the doublequotes
             item = item.replace('"','')
