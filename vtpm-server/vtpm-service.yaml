@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vtpm-service
+  labels:
+    app: vtpm-service
+spec:
+  ports:
+  - port: 8080
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: vtpm-service
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: vtpm-service
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vtpm-service
+        version: v1
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: vtpm-service
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:v0.4
+          imagePullPolicy: Always
+          ports:
+          - name: http
+            containerPort: 5000
+            protocol: TCP
