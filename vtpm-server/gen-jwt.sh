@@ -13,7 +13,7 @@ if ! [ -c /dev/tpm0 ] || [ -n ${USE_SWTPM} ]; then
 	source ${DIR}/tcsd_swtpm.sh
 
 	# start tcsd + swtpm
-	start_tcsd "${STATEDIR}"
+	start_tcsd "${STATEDIR}" "1"
 else
 	echo "HW TPM support not implemented" >&2
 	exit 1

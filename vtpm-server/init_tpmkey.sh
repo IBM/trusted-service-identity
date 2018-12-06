@@ -17,7 +17,7 @@ if ! [ -c /dev/tpm0 ] || [ -n ${USE_SWTPM} ]; then
 	source ${DIR}/tcsd_swtpm.sh
 
 	# start and setup tcsd + swtpm
-	setup_tcsd "${STATEDIR}" "${OWNER_PASSWORD}" "${SRK_PASSWORD}"
+	setup_tcsd "${STATEDIR}" "${OWNER_PASSWORD}" "${SRK_PASSWORD}" "1"
 else
 	echo "HW TPM support not implemented" >&2
 	exit 1

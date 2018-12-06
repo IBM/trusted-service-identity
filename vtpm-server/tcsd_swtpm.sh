@@ -131,13 +131,16 @@ stop_swtpm()
 start_tcsd()
 {
 	local workdir="$1"
+	local use_swtpm="$2"
 
 	local tcsd_conf=$workdir/tcsd.conf
 	local tcsd_system_ps_file=$workdir/system_ps_file
 	local tcsd_pidfile=$workdir/tcsd.pid
 
-	start_swtpm "$workdir"
-	[ $? -ne 0 ] && return 1
+	if [ $use_swtpm -ne 0 ]; then
+		start_swtpm "$workdir"
+		[ $? -ne 0 ] && return 1
+	fi
 
 	cat <<_EOF_ > $tcsd_conf
 port = $TCSD_LISTEN_PORT
@@ -147,8 +150,13 @@ _EOF_
 	chown tss:tss $tcsd_conf
 	chmod 0600 $tcsd_conf
 
-	bash -c "TCSD_USE_TCP_DEVICE=1 TCSD_TCP_DEVICE_PORT=$SWTPM_SERVER_PORT tcsd -c $tcsd_conf -e -f &>/dev/null & echo \$! > $tcsd_pidfile; wait" &
-	BASH_PID=$!
+	if [ $use_swtpm -ne 0 ]; then
+		bash -c "TCSD_USE_TCP_DEVICE=1 TCSD_TCP_DEVICE_PORT=$SWTPM_SERVER_PORT tcsd -c $tcsd_conf -e -f &>/dev/null & echo \$! > $tcsd_pidfile; wait" &
+		BASH_PID=$!
+	else
+		echo "Support for HWTPM missing."
+		return 1
+	fi
 
 	if wait_for_file $tcsd_pidfile 3; then
 		echo "Could not get TCSD's PID file"
@@ -217,23 +225,29 @@ setup_tcsd()
 	local workdir="$1"
 	local owner_password="$2"
 	local srk_password="$3"
+	local use_swtpm="$4"
 
 	local msg
 
-	start_tcsd "$workdir"
+	start_tcsd "$workdir" "$use_swtpm"
 	[ $? -ne 0 ] && return 1
 
-	tpm_createek
-	[ $? -ne 0 ] && {
-		echo "Could not create EK"
+	if [ $use_swtpm -ne 0 ]; then
+		tpm_createek
+		[ $? -ne 0 ] && {
+			echo "Could not create EK"
+			return 1
+		}
+		msg="$(run_tpm_takeownership "$owner_password" "$srk_password")"
+		[ $? -ne 0 ] && {
+			echo "Could not take ownership of TPM"
+			echo "$msg"
+			return 1
+		}
+	else
+		echo "HW TPM support not implemented."
 		return 1
-	}
-	msg="$(run_tpm_takeownership "$owner_password" "$srk_password")"
-	[ $? -ne 0 ] && {
-		echo "Could not take ownership of TPM"
-		echo "$msg"
-		return 1
-	}
+	fi
 	return 0
 }
 
