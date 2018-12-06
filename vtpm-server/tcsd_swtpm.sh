@@ -136,14 +136,18 @@ start_tcsd()
 	local tcsd_conf=$workdir/tcsd.conf
 	local tcsd_system_ps_file=$workdir/system_ps_file
 	local tcsd_pidfile=$workdir/tcsd.pid
+	local comment=""
 
 	if [ $use_swtpm -ne 0 ]; then
 		start_swtpm "$workdir"
 		[ $? -ne 0 ] && return 1
+	else
+		# Use the standard TCSD port in case of hardware TPM
+		comment="#"
 	fi
 
 	cat <<_EOF_ > $tcsd_conf
-port = $TCSD_LISTEN_PORT
+${comment}port = $TCSD_LISTEN_PORT
 system_ps_file = $tcsd_system_ps_file
 _EOF_
 
