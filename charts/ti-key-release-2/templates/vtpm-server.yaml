@@ -17,6 +17,12 @@ spec:
         - name: vtpm-server
           image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:{{ .Values.tiVersion }}
           imagePullPolicy: Always
+          env:
+            - name: ISS
+              # this doublequotes actually works :)
+              value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
+            - name: TTL_SEC
+              value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
           ports:
           - name: http
             containerPort: 5000
