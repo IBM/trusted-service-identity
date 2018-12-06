@@ -35,7 +35,8 @@ RUN git clone https://github.com/stefanberger/jwcrypto jwcrypto \
   && python setup.py test \
   && python setup.py install
 
-COPY tcsd_swtpm.sh init_tpmkey.sh gen-jwt.py gen-jwt.sh validate-jwt.py run-tpm-server.sh /usr/local/bin/
+COPY tcsd_swtpm.sh init_tpmkey.sh gen-jwt.py gen-jwt.sh validate-jwt.py run-tpm-server.sh \
+	system.data.auth system.data.noauth resetlockvalue /usr/local/bin/
 
 # Force usage of SWTPM; comment to for usage of HW TPM (once implemented)
 ENV USE_SWTPM=1

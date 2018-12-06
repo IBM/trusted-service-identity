@@ -52,6 +52,16 @@ Build and test-run it using the following commands:
   docker run -ti --rm jwt-sidecar gen-jwt.sh --iss example-issuer --aud foo,bar --claims=email:foo@google.com,dead:beef
 ```
 
+If you have a hardware TPM you can then also try to run the following
+command. Not that no process may be using /dev/tpm0 when it is passed
+to the container and you should know the owner and SRK passwords
+that the TPM 1.2 has in case it already is owned. If the TPM 1.2 is
+not owned, ownership will be taken then.
+
+```
+  docker run -ti --env USE_SWTPM= --env OWNER_PASSWORD=ooo --env SRK_PASSWORD= --device=/dev/tpm0:/dev/tpm0 --rm jwt-sidecar gen-jwt.sh --iss example-issuer --aud foo,bar --claims=email:foo@google.com,dead:beef
+```
+
 To run the Flask server:
 
 ```

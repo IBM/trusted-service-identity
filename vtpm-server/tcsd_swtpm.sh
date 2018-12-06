@@ -24,7 +24,7 @@ SWTPM_SERVER_PORT=12345
 SWTPM_CTRL_PORT=$((SWTPM_SERVER_PORT + 1))
 SWTPM_PIDFILE=${workdir}/swtpm.pid
 TCSD_LISTEN_PORT=12347
-export TSS_TCSD_PORT=$TCSD_LISTEN_PORT
+TSS_TCSD_PORT=$TCSD_LISTEN_PORT
 
 wait_for_file() {
 	local filename="$1"
@@ -81,6 +81,37 @@ cleanup()
 	fi
 }
 
+# check whether the TPM is owned
+#
+# @param1: the device to use to talk to the TPM
+is_tpm_owned()
+{
+	local dev="$1"
+
+	local res
+
+	exec 100<>${dev}
+	[ $? -ne 0 ] && {
+		echo "Could not open $dev for r/w."
+		return 2
+	}
+
+	/bin/echo -en '\x00\xC1\x00\x00\x00\x16\x00\x00\x00\x65\x00\x00\x00\x04\x00\x00\x00\x04\x00\x00\x01\x08' >&100
+	res=$(cat <&100 | od -tx1 -An)
+	exec 100>&-
+	exp=" 00 c4 00 00 00 23 00 00 00 00 00 00 00 15 00 1f"
+	if [ "${res:0:48}" != "${exp}" ]; then
+		echo "Unexpected return message header from TPM"
+		echo "Received: ${res:0:48}"
+		echo "Expected: ${exp}"
+		return 2
+	fi
+	if [ "${res:53:2}" == "00" ]; then
+		return 0
+	fi
+	return 1
+}
+
 start_swtpm()
 {
 	local workdir="$1"
@@ -134,16 +165,18 @@ start_tcsd()
 	local use_swtpm="$2"
 
 	local tcsd_conf=$workdir/tcsd.conf
-	local tcsd_system_ps_file=$workdir/system_ps_file
+	local tcsd_system_ps_file=$workdir/system.data
 	local tcsd_pidfile=$workdir/tcsd.pid
 	local comment=""
 
 	if [ $use_swtpm -ne 0 ]; then
+		export TSS_TCSD_PORT
 		start_swtpm "$workdir"
 		[ $? -ne 0 ] && return 1
 	else
 		# Use the standard TCSD port in case of hardware TPM
 		comment="#"
+		unset TSS_TCSD_PORT
 	fi
 
 	cat <<_EOF_ > $tcsd_conf
@@ -158,8 +191,8 @@ _EOF_
 		bash -c "TCSD_USE_TCP_DEVICE=1 TCSD_TCP_DEVICE_PORT=$SWTPM_SERVER_PORT tcsd -c $tcsd_conf -e -f &>/dev/null & echo \$! > $tcsd_pidfile; wait" &
 		BASH_PID=$!
 	else
-		echo "Support for HWTPM missing."
-		return 1
+		bash -c "unset TCSD_USE_TCP_DEVICE; tcsd -c $tcsd_conf -e -f &>/dev/null & echo \$! > $tcsd_pidfile; wait" &
+		BASH_PID=$!
 	fi
 
 	if wait_for_file $tcsd_pidfile 3; then
@@ -231,7 +264,17 @@ setup_tcsd()
 	local srk_password="$3"
 	local use_swtpm="$4"
 
-	local msg
+	local msg owned
+
+	if [ $use_swtpm -eq 0 ]; then
+		is_tpm_owned /dev/tpm0
+		owned=$?
+		resetlockvalue -pwdo "${OWNER_PASSWORD}"
+		[ $? -ne 0 ] && {
+			echo "Resetting the lockout on the TPM failed."
+		}
+		sleep 1
+	fi
 
 	start_tcsd "$workdir" "$use_swtpm"
 	[ $? -ne 0 ] && return 1
@@ -249,8 +292,15 @@ setup_tcsd()
 			return 1
 		}
 	else
-		echo "HW TPM support not implemented."
-		return 1
+		if [ $owned -eq 0 ]; then
+			msg="$(run_tpm_takeownership "$owner_password" "$srk_password")"
+			[ $? -ne 0 ] && {
+				echo "Could not take ownership of TPM; assuming it is owned already"
+				return 0
+			}
+		else
+			echo "TPM is already owned. Not taking ownership."
+		fi
 	fi
 	return 0
 }
@@ -265,7 +315,7 @@ run_tpmtool()
 	local prg out rc
 
 	prg="spawn $TPMTOOL $@
-		expect {
+		expect -timeout 90 {
 			\"Enter SRK password:\" {
 				send \"$srk_password\n\"
 				exp_continue

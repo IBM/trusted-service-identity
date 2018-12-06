@@ -6,17 +6,16 @@ STATEDIR=${STATEDIR:-/tmp}
 init_tpmkey.sh
 [ $? -ne 0 ] && {
 	echo "Failed to initialize TPM key"
+	exit 1
 }
 
-if ! [ -c /dev/tpm0 ] || [ -n ${USE_SWTPM} ]; then
-	# use tcsd + swtpm
-	source ${DIR}/tcsd_swtpm.sh
+source ${DIR}/tcsd_swtpm.sh
 
+if ! [ -c /dev/tpm0 ] || [ -n "${USE_SWTPM}" ]; then
 	# start tcsd + swtpm
 	start_tcsd "${STATEDIR}" "1"
 else
-	echo "HW TPM support not implemented" >&2
-	exit 1
+	start_tcsd "${STATEDIR}" "0"
 fi
 
 unset GNUTLS_PIN
