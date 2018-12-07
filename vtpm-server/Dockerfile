@@ -16,6 +16,16 @@ RUN dnf -y install make automake autoconf autogen libtool gettext texinfo \
   && make -j $(nproc) \
   && make -j $(nproc) install
 
+# Build patched trouser
+RUN dnf -y install automake autoconf libtool gcc openssl-devel \
+  && git clone https://github.com/stefanberger/trousers.git trousers \
+  && cd trousers \
+  && git checkout origin/fix_authfail -b my_fix_authfail \
+  && ./bootstrap.sh \
+  && ./configure --prefix=/usr \
+  && make -j $(nproc) \
+  && echo make -j $(nproc) install
+
 RUN dnf -y install expect nmap-ncat procps-ng
 RUN dnf -y install swtpm --enablerepo=updates-testing
 
