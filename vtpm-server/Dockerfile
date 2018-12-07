@@ -16,7 +16,9 @@ RUN dnf -y install make automake autoconf autogen libtool gettext texinfo \
   && make -j $(nproc) \
   && make -j $(nproc) install
 
-# Build patched trouser
+# Build patched trousers
+# We HAVE TO enable debugging on tcsd to make this work -- at least
+# then it work with the TPM on sbct-4.pok.ibm.com -- WEIRD!!
 RUN dnf -y install automake autoconf libtool gcc openssl-devel \
   && git clone https://github.com/stefanberger/trousers.git trousers \
   && cd trousers \
@@ -24,7 +26,11 @@ RUN dnf -y install automake autoconf libtool gcc openssl-devel \
   && ./bootstrap.sh \
   && ./configure --prefix=/usr \
   && make -j $(nproc) \
-  && echo make -j $(nproc) install
+  && make -j $(nproc) install \
+  && ./configure --prefix=/usr --enable-debug \
+  && make -j$(nproc) clean \
+  && make -j$(nproc) all \
+  && cp src/tcsd/tcsd /sbin/tcsd
 
 RUN dnf -y install expect nmap-ncat procps-ng
 RUN dnf -y install swtpm --enablerepo=updates-testing
