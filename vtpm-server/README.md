@@ -44,29 +44,49 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6bnVsbCwidHlwIjoiSldUIn0.eyIiOiIiLCJjbHVzdGVyLW5hbWUi
 ```
 
 
-## Old Info:
+## Low-level TPM Info:
+
 Build and test-run it using the following commands:
 
 ```
   docker build -t jwt-sidecar .
-  docker run -ti --rm jwt-sidecar gen-jwt.sh --iss example-issuer --aud foo,bar --claims=email:foo@google.com,dead:beef
+  docker run -ti --rm jwt-sidecar \
+   gen-jwt.sh --iss example-issuer --aud foo,bar --claims=email:foo@google.com,dead:beef
 ```
 
 If you have a hardware TPM you can then also try to run the following
-command. Not that no process may be using /dev/tpm0 when it is passed
-to the container and you should know the owner and SRK passwords
-that the TPM 1.2 has in case it already is owned. If the TPM 1.2 is
-not owned, ownership will be taken then.
+command. Note that no process may be using /dev/tpm0 when it is passed
+to the container and you MUST know the owner and SRK passwords
+that the TPM 1.2 has in case it is already owned. If the TPM 1.2 is
+not owned, ownership will be taken then and the given passwords will be
+the ones that will need to be used.
+
+To avoid problems, use it with an owner password set and the SRK having
+the well known password. SRK_PASSWORD=  [empty] corresponds to the well
+known SRK password of 20 zero bytes.
 
 ```
-  docker run -ti --env USE_SWTPM= --env OWNER_PASSWORD=ooo --env SRK_PASSWORD= --device=/dev/tpm0:/dev/tpm0 --rm jwt-sidecar gen-jwt.sh --iss example-issuer --aud foo,bar --claims=email:foo@google.com,dead:beef
+  docker run -ti --env USE_SWTPM= --env OWNER_PASSWORD=ooo --env SRK_PASSWORD= \
+   --device=/dev/tpm0:/dev/tpm0 --rm jwt-sidecar \
+   gen-jwt.sh --iss example-issuer --aud foo,bar --claims=email:foo@google.com,dead:beef
 ```
 
 To run the Flask server:
 
 ```
-docker build -t jwt-sidecar .
-docker run -d --name jwt -p 8080:5000 jwt-sidecar /usr/local/bin/run-tpm-server.sh
+  docker build -t jwt-sidecar .
+
+  # run with swtpm:
+  docker run -d --name jwt -p 8080:5000 \
+   --env USE_SWTPM=1 --env OWNER_PASSWORD=ooo --env SRK_PASSWORD= \
+   jwt-sidecar /usr/local/bin/run-tpm-server.sh
+
+  # run with hwtpm (see note above!!)
+  docker run -d --name jwt -p 8080:5000 \
+   --env USE_SWTPM=  --env OWNER_PASSWORD=ooo --env SRK_PASSWORD= \
+   --device=/dev/tpm0:/dev/tpm0 \
+   jwt-sidecar /usr/local/bin/run-tpm-server.sh
+
 ```
 
 Then test from another console:
