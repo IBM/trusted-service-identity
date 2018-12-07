@@ -7,9 +7,10 @@ RUN dnf -y install make automake autoconf autogen libtool gettext texinfo \
   tar gzip perl nettle guile p11-kit gperf libtasn1-devel libidn2-devel \
   libunistring-devel gawk bison trousers-devel \
   gettext-devel patch rsync wget which nettle-devel p11-kit-devel gcc \
+  && dnf -y update nettle \
   && git clone https://gitlab.com/stefanberger/gnutls.git gnutls \
   && cd gnutls \
-  && git checkout origin/tpm12_fixes_issue_601 -b tpm12_fixes_issue_601 \
+  && git checkout tags/gnutls_3_6_5 -b gnutls_3_6_5 \
   && ./bootstrap \
   && ./configure --prefix=/usr --with-tpm --disable-doc \
   && make -j $(nproc) \
