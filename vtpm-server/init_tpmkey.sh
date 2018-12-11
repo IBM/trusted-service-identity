@@ -12,16 +12,26 @@ if [ -f ${STATEDIR}/tpm_initialized ]; then
 	exit 0
 fi
 
-if ! [ -c /dev/tpm0 ] || [ -n ${USE_SWTPM} ]; then
-	# use tcsd + swtpm
-	source ${DIR}/tcsd_swtpm.sh
-
+source ${DIR}/tcsd_swtpm.sh
+if ! [ -c /dev/tpm0 ] || [ -n "${USE_SWTPM}" ]; then
 	# start and setup tcsd + swtpm
-	setup_tcsd "${STATEDIR}" "${OWNER_PASSWORD}" "${SRK_PASSWORD}"
+	setup_tcsd "${STATEDIR}" "${OWNER_PASSWORD}" "${SRK_PASSWORD}" "1"
 else
-	echo "HW TPM support not implemented" >&2
-	exit 1
+	is_tpm_owned /dev/tpm0
+	owned=$?
+	if [ $owned -eq 1 ]; then
+		if [ ! -f ${STATEDIR}/system.data ]; then
+			if [ -z "$SRK_PASSWORD" ]; then
+				cp ${DIR}/system.data.noauth ${STATEDIR}/system.data
+			else
+				cp ${DIR}/system.data.auth ${STATEDIR}/system.data
+			fi
+		fi
+	fi
+	# start and setup tcsd + hwtpm
+	setup_tcsd "${STATEDIR}" "${OWNER_PASSWORD}" "${SRK_PASSWORD}" "0"
 fi
+[ $? -ne 0 ] && exit 1
 
 KEY_PASSWORD="${SRK_PASSWORD}"
 if [ -z "${SRK_PASSWORD}" ]; then
