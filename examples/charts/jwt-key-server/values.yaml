@@ -1,0 +1,59 @@
+# Default values for jwt-key-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+namespace: default
+
+image:
+  repository: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-key-server
+  tag: v0.2
+  pullPolicy: Always
+  pullSecretName: regcred
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: true
+  annotations: {}
+  path: /
+  # hosts: specify here the access to the ingress
+  # for IKS: `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
+  # for CIP, keep the hosts empty and use IPs directly (typically master or proxy IP)
+  hosts:
+  #  - mycluster.eu-de.containers.appdomain.cloud
+  tls: []
+  #  - secretName: mycluster
+  #    hosts:
+  #      - mycluster.eu-de.containers.appdomain.cloud
+
+server:
+  port: 5000
+
+# public location of the JWKS
+jwks:
+  url: https://raw.githubusercontent.com/mrsabath/jwks-test/master/jwks.json
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

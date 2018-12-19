@@ -7,13 +7,30 @@ RUN dnf -y install make automake autoconf autogen libtool gettext texinfo \
   tar gzip perl nettle guile p11-kit gperf libtasn1-devel libidn2-devel \
   libunistring-devel gawk bison trousers-devel \
   gettext-devel patch rsync wget which nettle-devel p11-kit-devel gcc \
+  && dnf -y update nettle \
   && git clone https://gitlab.com/stefanberger/gnutls.git gnutls \
   && cd gnutls \
-  && git checkout origin/tpm12_fixes_issue_601 -b tpm12_fixes_issue_601 \
+  && git checkout tags/gnutls_3_6_5 -b gnutls_3_6_5 \
   && ./bootstrap \
   && ./configure --prefix=/usr --with-tpm --disable-doc \
   && make -j $(nproc) \
   && make -j $(nproc) install
+
+# Build patched trousers
+# We HAVE TO enable debugging on tcsd to make this work -- at least
+# then it work with the TPM on sbct-4.pok.ibm.com -- WEIRD!!
+RUN dnf -y install automake autoconf libtool gcc openssl-devel \
+  && git clone https://github.com/stefanberger/trousers.git trousers \
+  && cd trousers \
+  && git checkout origin/fix_authfail -b my_fix_authfail \
+  && ./bootstrap.sh \
+  && ./configure --prefix=/usr \
+  && make -j $(nproc) \
+  && make -j $(nproc) install \
+  && ./configure --prefix=/usr --enable-debug \
+  && make -j$(nproc) clean \
+  && make -j$(nproc) all \
+  && cp src/tcsd/tcsd /sbin/tcsd
 
 RUN dnf -y install expect nmap-ncat procps-ng
 RUN dnf -y install swtpm --enablerepo=updates-testing
@@ -35,7 +52,8 @@ RUN git clone https://github.com/stefanberger/jwcrypto jwcrypto \
   && python setup.py test \
   && python setup.py install
 
-COPY tcsd_swtpm.sh init_tpmkey.sh gen-jwt.py gen-jwt.sh validate-jwt.py run-tpm-server.sh /usr/local/bin/
+COPY tcsd_swtpm.sh init_tpmkey.sh gen-jwt.py gen-jwt.sh validate-jwt.py run-tpm-server.sh \
+	system.data.auth system.data.noauth resetlockvalue /usr/local/bin/
 
 # Force usage of SWTPM; comment to for usage of HW TPM (once implemented)
 ENV USE_SWTPM=1

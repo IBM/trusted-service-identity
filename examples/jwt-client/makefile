@@ -1,18 +1,18 @@
 GIT_COMMIT_SHA="$(shell git rev-parse --short HEAD 2>/dev/null)"
 GIT_REMOTE_URL="$(shell git config --get remote.origin.url 2>/dev/null)"
 BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
-BINARY_NAME="vtpm-server"
+BINARY_NAME="ti-jwt-client"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.4
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.2
 
 all: docker docker-push timestamp
 
-fast: docker-fast docker-push timestamp
-
-docker-fast:
+fast:
 	docker build -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	docker push $(IMAGE)
+	docker push $(MUTABLE_IMAGE)
 
 docker:
 	docker build --no-cache -t $(IMAGE) .

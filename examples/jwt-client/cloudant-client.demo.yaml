@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cl-client-service
+  labels:
+    app: cl-client-service
+spec:
+  ports:
+  - port: 8000
+    name: http
+    targetPort: http
+    protocol: TCP
+  selector:
+    app: cl-client
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: cl-client
+  name: cl-client
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+      labels:
+        app: cl-client
+      name: cl-client
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: cl-client
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:20ce253a043f75941ec95643150a8b4a94c915188f2341276d0478919fb92670
+          imagePullPolicy: Always
+          env:
+            - name: TARGET_URL
+              value: "https://59f38332-95da-4de3-a2e0-40bd768faed3-bluemix.cloudant.com"
+            - name: KEYSTORE_URL
+              value: "https://198.11.242.156"
+          ports:
+          - name: http
+            containerPort: 8000
+            protocol: TCP

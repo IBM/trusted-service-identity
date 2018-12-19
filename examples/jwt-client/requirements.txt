@@ -1,0 +1,4 @@
+Flask==1.0.2
+pycrypto==2.6.1
+jwcrypto==0.5.0
+cloudant==2.10.0
