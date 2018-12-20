@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cl-client-service
+  namespace: trusted-identity
   labels:
     app: cl-client-service
 spec:
@@ -17,6 +18,7 @@ spec:
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
+  namespace: trusted-identity
   labels:
     app: cl-client
   name: cl-client
@@ -34,13 +36,15 @@ spec:
       - name: regcred
       containers:
         - name: cl-client
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:20ce253a043f75941ec95643150a8b4a94c915188f2341276d0478919fb92670
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d
           imagePullPolicy: Always
           env:
             - name: TARGET_URL
+              # replace the TARGET_URL value with address to Cloudant
               value: "https://59f38332-95da-4de3-a2e0-40bd768faed3-bluemix.cloudant.com"
             - name: KEYSTORE_URL
-              value: "https://198.11.242.156"
+              # replace the KEYSTORE_URL value with an actual address of JWT Key Store
+              value: ""
           ports:
           - name: http
             containerPort: 8000

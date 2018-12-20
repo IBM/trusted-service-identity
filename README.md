@@ -1,4 +1,6 @@
-# Trusted Identity
+# Trusted Identity (TI)
+
+Detailed description of the TI demo is available [here](examples/README.md)
 
 ## Prerequisites
 
@@ -93,15 +95,23 @@ make docker-push
 Compile and create images for other sub-components
 
 ```console
-make all -C gen-vault-cert/
-make all -C revoker/
-make all -C jwt-sidecar/
+make all -C components/gen-vault-cert/
+make all -C components/revoker/
+make all -C components/jwt-sidecar/
+make all -C components/vtpm-server/
 ```
 
 To deploy manually:
 
 ```console
 ./deploy.sh
+```
+
+Compile and build examples (JWT server and client)
+
+```console
+make all -C examples/jwt-client/
+make all -C examples/jwt-server/
 ```
 
 ## Install and initialize Helm environment
@@ -134,9 +144,9 @@ Get the default chart values and replace them with your private keys and certs.
 Replace X.X.X with proper version numbers
 
 ```console
-helm inspect values ti-setup-X.X.X.tgz > config.yaml
+helm inspect values charts/ti-setup-X.X.X.tgz > config.yaml
 # modify config.yaml with your own values
-helm install ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
+helm install charts/ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
 ```
 
 Once the `ti-setup` is successfully deployed, remove it.
@@ -158,6 +168,7 @@ To remove/reset all the values setup by the `ti-setup` chart, run the following:
 
 ```console
 kubectl create -f examples/cleanup-daemonset.yaml
+kubectl delete -f examples/cleanup-daemonset.yaml
 ```
 
 ## TI Key Release Helm Deployment
