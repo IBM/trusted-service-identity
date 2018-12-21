@@ -6,7 +6,7 @@
 # cannot use the value from `ti-key-release-1`
 # parsing problem:
 #    `error converting YAML to JSON`
-tiVersion: v0.6
+tiVersion: v0.7
 
 
 # createVaultCert - if true, unique certs will be created
