@@ -17,6 +17,7 @@ spec:
           image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-webhook:v0.6
           imagePullPolicy: Always
           args:
+            - -createVaultCert=true
             - -initcontainerCfgFile=/etc/webhook/config/initcontainerconfig.yaml
             - -tlsCertFile=/etc/webhook/certs/cert.pem
             - -tlsKeyFile=/etc/webhook/certs/key.pem

@@ -8,6 +8,11 @@
 #    `error converting YAML to JSON`
 tiVersion: v0.6
 
+
+# createVaultCert - if true, unique certs will be created
+# during Init Containers and inserted to Vault
+createVaultCert: false
+
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
 ti-key-release-1:
