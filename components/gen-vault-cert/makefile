@@ -10,6 +10,13 @@ MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.7
 
 all: docker docker-push timestamp
 
+fast:
+	docker build -t $(IMAGE) .
+	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	docker push $(IMAGE)
+	docker push $(MUTABLE_IMAGE)
+	date
+
 docker:
 	docker build --no-cache -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)

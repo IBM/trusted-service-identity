@@ -13,6 +13,13 @@ MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.7
 
 all: build docker docker-push timestamp
 
+fast: build
+	docker build -t $(IMAGE) .
+	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	docker push $(IMAGE)
+	docker push $(MUTABLE_IMAGE)
+	date
+
 build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -o $(BINARY_NAME) -v
 
