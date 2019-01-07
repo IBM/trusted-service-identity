@@ -40,6 +40,7 @@ func main() {
 			Addr:      fmt.Sprintf(":%v", parameters.port),
 			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},
 		},
+		WhSvrParams: parameters,
 	}
 
 	// define http server and server handler
