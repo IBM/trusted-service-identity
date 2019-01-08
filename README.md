@@ -1,4 +1,6 @@
-# Trusted Identity
+# Trusted Identity (TI)
+
+Detailed description of the TI demo is available [here](examples/README.md)
 
 ## Prerequisites
 
@@ -93,15 +95,23 @@ make docker-push
 Compile and create images for other sub-components
 
 ```console
-make all -C gen-vault-cert/
-make all -C revoker/
-make all -C jwt-sidecar/
+make all -C components/gen-vault-cert/
+make all -C components/revoker/
+make all -C components/jwt-sidecar/
+make all -C components/vtpm-server/
 ```
 
 To deploy manually:
 
 ```console
 ./deploy.sh
+```
+
+Compile and build examples (JWT server and client)
+
+```console
+make all -C examples/jwt-client/
+make all -C examples/jwt-server/
 ```
 
 ## Install and initialize Helm environment
@@ -134,9 +144,9 @@ Get the default chart values and replace them with your private keys and certs.
 Replace X.X.X with proper version numbers
 
 ```console
-helm inspect values ti-setup-X.X.X.tgz > config.yaml
+helm inspect values charts/ti-setup-X.X.X.tgz > config.yaml
 # modify config.yaml with your own values
-helm install ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
+helm install charts/ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
 ```
 
 Once the `ti-setup` is successfully deployed, remove it.
@@ -158,6 +168,7 @@ To remove/reset all the values setup by the `ti-setup` chart, run the following:
 
 ```console
 kubectl create -f examples/cleanup-daemonset.yaml
+kubectl delete -f examples/cleanup-daemonset.yaml
 ```
 
 ## TI Key Release Helm Deployment
@@ -216,21 +227,6 @@ helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
 helm install -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 # or upgrade existing deployment
 helm upgrade -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
-```
-
-## Administrator Setup
-During the chart deployment, vTPM is initialized and as a result, the public key set,
-JWKS, needs to be registered with the JWT Key Store. To obtain the
-JWKS, exec into a container running on `trusted_identity` namespace and execute
-the following service call:
-
-```console
-curl http://vtpm-service:8012/getJWKS > jwts.json
-```
-
-Then register this JWTS with JWT Key Store:
-```console
-curl --insecure "https://<JWT_Key_Store>/register?jwks=$(cat jwks.json | base64 -w 0)&cluster-name=EUcluster"
 ```
 
 ### Testing Deployment
@@ -383,16 +379,14 @@ Then redeploy the charts and your container.
 
 ```json
 {
-  "cluster-region": "eu-de",
   "cluster-name": "EUcluster",
-  "machineid": "266c2075dace453da02500b328c9e325",
-  "pod": "myubuntu-767584864-k9b59",  
-  "images": "res-kompass-kompass-docker-local.artifactory
-	.swgdevops.com/myubuntu:latest@sha256:5b224e11f0e8da
-	f35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "cluster-region": "eu-de",
   "exp": 1541689789,
   "iat": 1541689759,
-  "iss": "wsched@us.ibm.com",
-  "sub": "wsched@us.ibm.com"
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "iss": "testing@secure.istio.io",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "pod": "myubuntu-767584864-k9b59",
+  "sub": "testing@secure.istio.io"
 }
 ```
