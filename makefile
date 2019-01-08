@@ -32,6 +32,7 @@ build:
 docker: build
 	docker build --no-cache -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	rm $(BINARY_NAME)
 
 docker-push:
 	docker push $(IMAGE)

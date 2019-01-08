@@ -3,8 +3,6 @@
 *.dll
 *.so
 *.dylib
-ti-webhook
-revoker/ti-revoker
 
 # Test binary, build with `go test -c`
 *.test
