@@ -17,7 +17,7 @@ Required steps:
 1. Make sure the all the [TI Prerequisites](../README.md#prerequisites) are met.
 2. Images are already built and published in artifactory, although if you like to
 create your own images, follow the steps to [build](../README.md#build-and-install)
-3. Make sure you have [Helm installed](README.md#install-and-initialize-helm-environment)
+3. Make sure you have [Helm installed](../README.md#install-and-initialize-helm-environment)
 
 
 ## 2.0 Initial setup of the environment
