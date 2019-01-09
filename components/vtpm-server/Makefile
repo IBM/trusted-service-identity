@@ -4,16 +4,17 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="vtpm-server"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.6
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.7
 
 all: docker docker-push timestamp
 
-fast: docker-fast docker-push timestamp
-
-docker-fast:
+fast:
 	docker build -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
-
+	docker push $(IMAGE)
+	docker push $(MUTABLE_IMAGE)
+	date
+	
 docker:
 	docker build --no-cache -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)

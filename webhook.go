@@ -65,12 +65,14 @@ const (
 type WebhookServer struct {
 	initcontainerConfig *InitContainerConfig
 	server              *http.Server
+	WhSvrParams         WhSvrParameters
 }
 
 //initContainerConfig *InitContainerConfig
 // Webhook Server parameters
 type WhSvrParameters struct {
 	port                    int    // webhook server port
+	createVaultCert         bool   // true to inject keys on init
 	certFile                string // path to the x509 certificate for https
 	keyFile                 string // path to the x509 private key matching `CertFile`
 	initcontainerCfgFile    string // path to initContainer injector configuration file
@@ -420,14 +422,16 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 }
 
 // create mutation patch for resoures
-func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]byte, error) {
+func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]byte, error) {
 	var patch []patchOperation
 	annotations := initcontainerConfig.Annotations
 
 	// additions
 	glog.Infof("add volumes: %v", initcontainerConfig.Volumes)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
-	patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
+	if createVaultCert {
+		patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
+	}
 	patch = append(patch, addContainer(pod.Spec.Containers, initcontainerConfig.SidecarContainers,
 		"/spec/containers")...)
 	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
@@ -483,7 +487,9 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Create TI secret key to populate
 	glog.Infof("Creating patch")
-	patchBytes, err := createPatch(&pod, initContainerConfig)
+	createVaultCert := whsvr.WhSvrParams.createVaultCert
+	glog.Infof("createVaultCert: %v", createVaultCert)
+	patchBytes, err := createPatch(createVaultCert, &pod, initContainerConfig)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{

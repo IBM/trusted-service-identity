@@ -6,7 +6,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.6
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.7
         imagePullSecrets:
         - name: regcred
         imagePullPolicy: Always

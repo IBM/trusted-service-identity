@@ -18,6 +18,7 @@ func main() {
 
 	// get command line parameters
 	flag.IntVar(&parameters.port, "port", 443, "Webhook server port.")
+	flag.BoolVar(&parameters.createVaultCert, "createVaultCert", true, "Boolean to insert keys to Vault on init")
 	flag.StringVar(&parameters.certFile, "tlsCertFile", "/etc/webhook/certs/cert.pem", "File containing the x509 Certificate for HTTPS.")
 	flag.StringVar(&parameters.keyFile, "tlsKeyFile", "/etc/webhook/certs/key.pem", "File containing the x509 private key to --tlsCertFile.")
 	flag.StringVar(&parameters.initcontainerCfgFile, "initcontainerCfgFile", "/etc/webhook/config/initcontainerconfig.yaml", "File containing the mutation configuration.")
@@ -39,6 +40,7 @@ func main() {
 			Addr:      fmt.Sprintf(":%v", parameters.port),
 			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},
 		},
+		WhSvrParams: parameters,
 	}
 
 	// define http server and server handler
