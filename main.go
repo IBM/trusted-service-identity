@@ -13,6 +13,16 @@ import (
 	"github.com/golang/glog"
 )
 
+// Webhook Server parameters
+type WhSvrParameters struct {
+	port                    int    // webhook server port
+	createVaultCert         bool   // true to inject keys on init
+	certFile                string // path to the x509 certificate for https
+	keyFile                 string // path to the x509 private key matching `CertFile`
+	initcontainerCfgFile    string // path to initContainer injector configuration file
+	sidecarcontainerCfgFile string // path to sidecarContainer configuration file
+}
+
 func main() {
 	var parameters WhSvrParameters
 
@@ -40,7 +50,7 @@ func main() {
 			Addr:      fmt.Sprintf(":%v", parameters.port),
 			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},
 		},
-		WhSvrParams: parameters,
+		createVaultCert: parameters.createVaultCert,
 	}
 
 	// define http server and server handler

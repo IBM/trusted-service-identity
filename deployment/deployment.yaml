@@ -14,7 +14,7 @@ spec:
       serviceAccountName: ti-sa
       containers:
         - name: ti-injector
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-webhook:v0.7
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-webhook:v0.8
           imagePullPolicy: Always
           args:
             - -createVaultCert=true

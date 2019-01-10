@@ -65,18 +65,7 @@ const (
 type WebhookServer struct {
 	initcontainerConfig *InitContainerConfig
 	server              *http.Server
-	WhSvrParams         WhSvrParameters
-}
-
-//initContainerConfig *InitContainerConfig
-// Webhook Server parameters
-type WhSvrParameters struct {
-	port                    int    // webhook server port
-	createVaultCert         bool   // true to inject keys on init
-	certFile                string // path to the x509 certificate for https
-	keyFile                 string // path to the x509 private key matching `CertFile`
-	initcontainerCfgFile    string // path to initContainer injector configuration file
-	sidecarcontainerCfgFile string // path to sidecarContainer configuration file
+	createVaultCert     bool // true to inject keys on init
 }
 
 type InitContainerConfig struct {
@@ -487,7 +476,7 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Create TI secret key to populate
 	glog.Infof("Creating patch")
-	createVaultCert := whsvr.WhSvrParams.createVaultCert
+	createVaultCert := whsvr.createVaultCert
 	glog.Infof("createVaultCert: %v", createVaultCert)
 	patchBytes, err := createPatch(createVaultCert, &pod, initContainerConfig)
 	if err != nil {
