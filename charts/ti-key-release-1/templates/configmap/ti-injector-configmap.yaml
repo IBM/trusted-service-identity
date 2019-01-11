@@ -86,6 +86,9 @@ data:
               - path: "ti-pod-name"
                 fieldRef:
                   fieldPath: metadata.name
+              - path: "ti-pod-namespace"
+                fieldRef:
+                  fieldPath: metadata.namespace
               - path: "ti-images"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-images']

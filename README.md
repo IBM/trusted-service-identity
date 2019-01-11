@@ -381,12 +381,13 @@ Then redeploy the charts and your container.
 {
   "cluster-name": "EUcluster",
   "cluster-region": "eu-de",
-  "exp": 1541689789,
-  "iat": 1541689759,
+  "exp": 1547224830,
+  "iat": 1547224800,
   "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
-  "iss": "testing@secure.istio.io",
+  "iss": "wsched@us.ibm.com",
   "machineid": "266c2075dace453da02500b328c9e325",
-  "pod": "myubuntu-767584864-k9b59",
-  "sub": "testing@secure.istio.io"
+  "namespace": "trusted-identity",
+  "pod": "myubuntu-698b749889-m9xz9",
+  "sub": "wsched@us.ibm.com"
 }
 ```

@@ -7,7 +7,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="ti-revoker"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.8
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.9
 
 .PHONY: all test-deps build-deps fmt vet lint get-deps test build docker
 

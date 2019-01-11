@@ -12,6 +12,7 @@ cp /skeys/v3_ext v3_ext && \
 echo \"URI.1 = pod://$(cat /pod-metadata/ti-pod-name)\" >> v3_ext && \
 echo \"URI.2 = images://$(cat /pod-metadata/ti-images)\" >> v3_ext && \
 echo \"URI.3 = machineid://$(cat /host/etc/machine-id)\" >> v3_ext && \
+echo \"URI.4 = namespace://$(cat /pod-metadata/ti-pod-namespace)\" >> v3_ext && \
 openssl req -nodes -sha256 -newkey rsa:2048 -out CSR.csr  -keyout certs/client.key -new -config /skeys/image.conf && \
 openssl x509 -req -in CSR.csr  -CA  /keys/rootCA.crt -CAkey /keys/rootCA.key -CAserial ca.srl -CAcreateserial -passin pass:gohome -out certs/client.crt -extfile v3_ext -extensions v3_req && \
 /vault login -address=$(cat /skeys/address) -tls-skip-verify $(cat /keys/root-token) && \
