@@ -66,6 +66,44 @@ type WebhookServer struct {
 	initcontainerConfig *InitContainerConfig
 	server              *http.Server
 	createVaultCert     bool // true to inject keys on init
+	clusterInfo         ClusterInfoGetter
+}
+
+type ClusterInfoGetter interface {
+	GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error)
+}
+
+type cigKube struct {
+	cticlient *cctiv1.TrustedV1Client
+}
+
+func NewCigKube() (*cigKube, error) {
+	glog.Infof("Getting cluster Config")
+	kubeConf, err := rest.InClusterConfig()
+	if err != nil {
+		glog.Infof("Err: %v", err)
+		return nil, err
+	}
+	cticlient, err := cctiv1.NewForConfig(kubeConf)
+	if err != nil {
+		fmt.Printf("Err: %v", err)
+		return nil, err
+	}
+	ci := cigKube{
+		cticlient: cticlient,
+	}
+	return &ci, nil
+}
+
+func (ck *cigKube) GetClusterTI(namespace string, policy string) (*ctiv1.ClusterTI, error) {
+	// get the client using KubeConfig
+	glog.Infof("Namespace : %v", namespace)
+	cti, err := ck.cticlient.ClusterTIs(namespace).Get(policy, metav1.GetOptions{})
+	if err != nil {
+		fmt.Printf("Err: %v", err)
+		return nil, err
+	}
+	return cti, err
 }
 
 type InitContainerConfig struct {
@@ -324,28 +362,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 
 	secretName := "ti-secret-" + uuid
 
-	glog.Infof("Getting cluster Config")
-	kubeConf, err := rest.InClusterConfig()
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return nil, err
-	}
-
-	// Check Cluster TI policy
-	cticlient, err := cctiv1.NewForConfig(kubeConf)
-	if err != nil {
-		fmt.Printf("Err: %v", err)
-		return nil, err
-	}
-
-	glog.Infof("Namespace : %v", namespace)
-	ctis, err := cticlient.ClusterTIs(namespace).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	glog.Infof("Lists: %v", ctis)
-
-	cti, err := cticlient.ClusterTIs(namespace).Get("cluster-policy", metav1.GetOptions{})
+	cti, err := whsvr.clusterInfo.GetClusterTI(namespace, "cluster-policy")
 	if err != nil {
 		fmt.Printf("Err: %v", err)
 		return nil, err
