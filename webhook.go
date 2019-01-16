@@ -95,15 +95,15 @@ func NewCigKube() (*cigKube, error) {
 	return &ci, nil
 }
 
-func (ck *cigKube) GetClusterTI(namespace string, policy string) (*ctiv1.ClusterTI, error) {
+func (ck *cigKube) GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error) {
 	// get the client using KubeConfig
 	glog.Infof("Namespace : %v", namespace)
 	cti, err := ck.cticlient.ClusterTIs(namespace).Get(policy, metav1.GetOptions{})
 	if err != nil {
 		fmt.Printf("Err: %v", err)
-		return nil, err
+		return ctiv1.ClusterTI{}, err
 	}
-	return cti, err
+	return *cti, err
 }
 
 type InitContainerConfig struct {
