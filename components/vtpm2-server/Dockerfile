@@ -43,6 +43,8 @@ RUN jwt=$(gen-jwt.sh \
   && echo "$jwt" \
   && bash -c "validate-jwt.py $(cat /tmp/tpmkeyurl) <(echo -n "$jwt") \
               && { echo 'jwt verified successfully'; exit 0; } || exit 1" \
+  && bash -c "validate-jwt.py /tmp/tpmpubkey.pem <(echo -n "$jwt") \
+              && { echo 'jwt verified successfully'; exit 0; } || exit 1" \
   && rm -rf /tmp/*
 
 # Adding support for flask
