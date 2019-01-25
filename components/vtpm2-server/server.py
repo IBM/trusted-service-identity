@@ -20,7 +20,8 @@ def get():
         claims = "--claims="
         for k in args:
             claims = claims + k + ":" + args[k] + "|"
-    with open("/tmp/tpmkeyurl") as f:
+    statedir = os.getenv('STATEDIR') or '/tmp'
+    with open("%s/tpmkeyurl" % statedir) as f:
         tpmkey = f.read().strip()
         print tpmkey
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer', claims])
@@ -28,7 +29,8 @@ def get():
 
 @app.route('/getJWKS')
 def getJWKS():
-    with open("/tmp/tpmkeyurl") as f:
+    statedir = os.getenv('STATEDIR') or '/tmp'
+    with open("%s/tpmkeyurl" % statedir) as f:
         tpmkey = f.read().strip()
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--jwks','/tmp/jwks.json'])
     with open("/tmp/jwks.json") as f:

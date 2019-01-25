@@ -2,6 +2,7 @@
 
 DIR="$(dirname "$0")"
 STATEDIR=${STATEDIR:-/tmp}
+mkdir -p ${STATEDIR}
 
 source ${DIR}/startup_tpm.sh
 

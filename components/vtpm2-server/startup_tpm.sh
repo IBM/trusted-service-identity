@@ -21,12 +21,12 @@ if ! [ -f ${TPMKEYFILE} ]; then
 	tsscreateprimary -hi o -st -rsa &>/dev/null || exit 1
 	tssevictcontrol -hi o -ho 80000000 -hp 81000001 || exit 1
 	tssflushcontext -ha 80000000 || exit 1
-	tssreadpublic -ho 81000001 -opem /tmp/tpmpubkey.persist.pem || exit 1
+	tssreadpublic -ho 81000001 -opem ${STATEDIR}/tpmpubkey.persist.pem || exit 1
 
 	create_tpm2_key -p 81000001 --rsa ${TPMKEYFILE} || exit 1
 	TPMKEYURI="ibmtss2:${TPMKEYFILE}"
-	# needs to go into /tmp/tpmkeyurl for server.py
-	echo -n ${TPMKEYURI} > /tmp/tpmkeyurl
+	# needs to go into ${STATEDIR}/tpmkeyurl for server.py
+	echo -n ${TPMKEYURI} > ${STATEDIR}/tpmkeyurl
 
 	openssl rsa -inform engine -engine tpm2 -pubout -in ${TPMKEYFILE} -out ${STATEDIR}/tpmpubkey.pem
 fi
