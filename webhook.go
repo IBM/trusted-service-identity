@@ -16,7 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/kubernetes/pkg/apis/core/v1"
+	v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 
 	"crypto/rand"
 
@@ -313,6 +313,8 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	if namespace == metav1.NamespaceNone {
 		namespace = metav1.NamespaceDefault
 	}
+	logJSON("AdmissionRequest", req)
+	logJSON("Pod", &pod)
 
 	initcontainerConfigCp := whsvr.initcontainerConfig.DeepCopy()
 
@@ -368,7 +370,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		return nil, err
 	}
 
-	glog.Infof("Got CTI: %v", cti)
+	glog.Infof("Got CTI: %#v", cti)
 	glog.Infof("CTI Cluster Name: %v", cti.Info.ClusterName)
 	glog.Infof("CTI Cluster Region: %v", cti.Info.ClusterRegion)
 	// // Create a secret
@@ -416,7 +418,6 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		}
 	}
 
-	glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
@@ -433,7 +434,6 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 	annotations := initcontainerConfig.Annotations
 
 	// additions
-	glog.Infof("add volumes: %v", initcontainerConfig.Volumes)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
 	if createVaultCert {
 		patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
@@ -443,7 +443,7 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
 
 	for i, c := range pod.Spec.Containers {
-		glog.Infof("add vol mounts : %v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
+		glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
 		patch = append(patch, addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
 	}
 
@@ -452,6 +452,8 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 
 // main mutation process
 func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+	logJSON("AdmissionReview", ar)
+
 	req := ar.Request
 
 	var pod corev1.Pod
@@ -477,6 +479,9 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Mutation Initialization
 	initContainerConfig, err := whsvr.mutateInitialization(pod, req)
+	// Dump the initContainerConfig so it can be used for testing:
+	logJSON("mutatedContainerConfig", initContainerConfig)
+
 	if err != nil {
 		glog.Infof("Err: %v", err)
 		return &v1beta1.AdmissionResponse{
@@ -568,4 +573,21 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 		glog.Errorf("Can't write response: %v", err)
 		http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
 	}
+}
+
+// Log the JSON format of the object
+func logJSON(msg string, v interface{}) {
+	s := getJSON(v)
+	glog.Infof("JSON for %v:\n %v", msg, s)
+
+}
+
+func getJSON(v interface{}) string {
+	// Dump the object so it can be used for testing
+	b, er := json.MarshalIndent(v, "", "    ")
+	if er != nil {
+		panic(er)
+	}
+	b2 := append(b, '\n')
+	return string(b2)
 }

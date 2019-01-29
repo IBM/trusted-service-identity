@@ -38,6 +38,7 @@ func main() {
 	if err != nil {
 		glog.Errorf("Failed to load configuration: %v", err)
 	}
+	logJSON("InitContainerConfig(main)", initcontainerConfig)
 
 	pair, err := tls.LoadX509KeyPair(parameters.certFile, parameters.keyFile)
 	if err != nil {

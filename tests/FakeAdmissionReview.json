@@ -1,0 +1,116 @@
+{
+    "kind": "AdmissionReview",
+    "apiVersion": "admission.k8s.io/v1beta1",
+    "request": {
+        "uid": "98e7aa26-201d-11e9-8d9e-4a1d4b24414a",
+        "kind": {
+            "group": "",
+            "version": "v1",
+            "kind": "Pod"
+        },
+        "resource": {
+            "group": "",
+            "version": "v1",
+            "resource": "pods"
+        },
+        "namespace": "trusted-identity",
+        "operation": "CREATE",
+        "userInfo": {
+            "username": "system:serviceaccount:kube-system:replicaset-controller",
+            "uid": "0ca3a81d-e8e1-11e8-a185-561f3c8e950e",
+            "groups": [
+                "system:serviceaccounts",
+                "system:serviceaccounts:kube-system",
+                "system:authenticated"
+            ]
+        },
+        "object": {
+            "metadata": {
+                "generateName": "myubuntu-698b749889-",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "myubuntu",
+                    "pod-template-hash": "2546305445"
+                },
+                "annotations": {
+                    "admission.trusted.identity/inject": "true",
+                    "kubernetes.io/psp": "ibm-privileged-psp"
+                },
+                "ownerReferences": [
+                    {
+                        "apiVersion": "extensions/v1beta1",
+                        "kind": "ReplicaSet",
+                        "name": "myubuntu-698b749889",
+                        "uid": "98e29722-201d-11e9-8d9e-4a1d4b24414a",
+                        "controller": true,
+                        "blockOwnerDeletion": true
+                    }
+                ]
+            },
+            "spec": {
+                "volumes": [
+                    {
+                        "name": "default-token-wp8ht",
+                        "secret": {
+                            "secretName": "default-token-wp8ht"
+                        }
+                    }
+                ],
+                "containers": [
+                    {
+                        "name": "myubuntu",
+                        "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+                        "command": [
+                            "/bin/bash",
+                            "-c",
+                            "--"
+                        ],
+                        "args": [
+                            "while true; do cat /jwt-tokens/token; sleep 5; done;"
+                        ],
+                        "resources": {},
+                        "volumeMounts": [
+                            {
+                                "name": "default-token-wp8ht",
+                                "readOnly": true,
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                            }
+                        ],
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "imagePullPolicy": "Always"
+                    }
+                ],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 30,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "securityContext": {},
+                "imagePullSecrets": [
+                    {
+                        "name": "regcred"
+                    }
+                ],
+                "schedulerName": "default-scheduler",
+                "tolerations": [
+                    {
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "effect": "NoExecute",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "effect": "NoExecute",
+                        "tolerationSeconds": 300
+                    }
+                ]
+            },
+            "status": {}
+        },
+        "oldObject": null
+    }
+}
+
