@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -16,43 +15,61 @@ import (
 	"k8s.io/api/admission/v1beta1"
 )
 
-// Uncomment out the code below to display messages from "glog"
+var pod corev1.Pod
+var admissionRequest v1beta1.AdmissionRequest
+var admissionResponse v1beta1.AdmissionResponse
+var admissionReview v1beta1.AdmissionReview
 
 func init() {
+
+	// Uncomment out the code below to display messages from "glog"
 	flag.Set("alsologtostderr", fmt.Sprintf("%t", true))
 	var logLevel string
 	flag.StringVar(&logLevel, "logLevel", "5", "test")
+	flag.Parse()
 	flag.Lookup("v").Value.Set(logLevel)
+	fmt.Println("Argument '-logLevel' is ", logLevel)
+
+	// load K8s objects and unmarshal them to test the API format
+	pod = getFakePod()
+	admissionRequest = getFakeAdmissionRequest()
+	admissionResponse = getFakeAdmissionResponse()
+	admissionReview = getFakeAdmissionReview()
 }
 
 type cigKubeTest struct {
 	ret ctiv1.ClusterTI
 }
 
-func NewCigKubeTest(ret ctiv1.ClusterTI) *cigKubeTest {
+func newCigKubeTest(ret ctiv1.ClusterTI) *cigKubeTest {
 	return &cigKubeTest{ret}
 }
 
+// GetClusterTI implements method for ClusterInfoGetter interface, to be used
+// in testing
 func (ck *cigKubeTest) GetClusterTI(namespace, name string) (ctiv1.ClusterTI, error) {
 	return ck.ret, nil
 }
 
+// TestLoadInitFile - tests loadInitContainerConfig method from webhook.go. Validates the output
 func TestLoadInitFile(t *testing.T) {
 	icc, err := loadInitContainerConfig("tests/ConfigFile.yaml")
 	if err != nil {
 		t.Errorf("Error loading InitContainerConfig %v", err)
 		return
 	}
-	v := validateResults(getJSON(icc), "tests/ExpectInitContainerConfig.json")
-	if v == 0 {
-		t.Log("Results match expections")
-	} else {
-		t.Error("Results do not match expections")
+
+	err = validateResult(icc, "tests/ExpectInitContainerConfig.json")
+	if err != nil {
+		t.Errorf("Result failed: %v", err)
+		return
 	}
+	t.Logf("Results match expections")
 }
 
-func TestPseudo_uuid(t *testing.T) {
-	uuid, err := pseudo_uuid()
+// TestPseudoUUID - testing function to generate UUIDs
+func TestPseudoUUID(t *testing.T) {
+	uuid, err := pseudoUUID()
 	if err != nil {
 		t.Errorf("Error obtaining pseudo_uuid %v", err)
 		return
@@ -60,6 +77,7 @@ func TestPseudo_uuid(t *testing.T) {
 	t.Logf("UUID: %v", uuid)
 }
 
+// TestMutateInitialization - tests the results of calling `mutateInitialization` in webhook
 func TestMutateInitialization(t *testing.T) {
 
 	ret := ctiv1.ClusterTI{
@@ -68,7 +86,7 @@ func TestMutateInitialization(t *testing.T) {
 			ClusterRegion: "testRegion",
 		},
 	}
-	clInfo := NewCigKubeTest(ret)
+	clInfo := newCigKubeTest(ret)
 
 	icc, err := loadInitContainerConfig("tests/ConfigFile.yaml")
 	if err != nil {
@@ -83,11 +101,8 @@ func TestMutateInitialization(t *testing.T) {
 		clusterInfo:         clInfo,
 	}
 
-	req := getFakeAdmissionRequest()
-	pod := getFakePod()
-
 	// get test result of running mutateInitialization method:
-	result, err := whsvr.mutateInitialization(pod, &req)
+	result, err := whsvr.mutateInitialization(pod, &admissionRequest)
 	if err != nil {
 		t.Errorf("Error executing mutateInitialization %v", err)
 		return
@@ -99,41 +114,12 @@ func TestMutateInitialization(t *testing.T) {
 	annot["admission.trusted.identity/ti-secret-key"] = "ti-secret-XXX"
 	result.Annotations = annot
 
-	// convert the result JSON to []byte
-	resultB, err := json.Marshal(result)
+	err = validateResult(result, "tests/ExpectMutateInit.json")
 	if err != nil {
-		t.Errorf("Error marshal Result to []byte: %v", err)
+		t.Errorf("Result failed: %v", err)
 		return
 	}
-
-	// get the exepected result from a file
-	dat, err := ioutil.ReadFile("tests/ExpectMutateInit.json")
-	if err != nil {
-		t.Errorf("%v", err)
-		return
-	}
-	expect := InitContainerConfig{}
-	json.Unmarshal(dat, &expect)
-
-	// convert the expect JSON to []byte
-	expectB, err := json.Marshal(expect)
-	if err != nil {
-		t.Errorf("Error marshal Expected to []byte: %v", err)
-		return
-	}
-
-	// Execute JSON diff on both byte representations of JSON
-	// when using DefaultHTMLOptions, `text` can be treated as
-	// HTML with <pre> to show differences with colors
-	opts := jsondiff.DefaultHTMLOptions()
-	diff, text := jsondiff.Compare(expectB, resultB, &opts)
-
-	if diff == jsondiff.FullMatch {
-		t.Logf("Results match expections: %v", diff)
-	} else {
-		t.Errorf("Results do not match expections: %v %v", diff, text)
-		return
-	}
+	t.Logf("Results match expections")
 }
 
 func getContentOfTheFile(file string) string {
@@ -165,6 +151,13 @@ func getFakeAdmissionResponse() v1beta1.AdmissionResponse {
 	return ar
 }
 
+func getFakeAdmissionReview() v1beta1.AdmissionReview {
+	s := getContentOfTheFile("tests/FakeAdmissionReview.json")
+	ar := v1beta1.AdmissionReview{}
+	json.Unmarshal([]byte(s), &ar)
+	return ar
+}
+
 func getInitContainerConfig() InitContainerConfig {
 	s := getContentOfTheFile("tests/FakeInitContainerConfig.json")
 	obj := InitContainerConfig{}
@@ -172,7 +165,28 @@ func getInitContainerConfig() InitContainerConfig {
 	return obj
 }
 
-func validateResults(result string, expectedFile string) int {
-	s := getContentOfTheFile(expectedFile)
-	return strings.Compare(result, s)
+func validateResult(r interface{}, expectedFile string) error {
+
+	// marshal the object to []byte for comparison
+	result, err := json.Marshal(r)
+	if err != nil {
+		return err
+	}
+
+	// get the exepected result from a file
+	exp, err := ioutil.ReadFile(expectedFile)
+	if err != nil {
+		return err
+	}
+
+	// Execute JSON diff on both byte representations of JSON
+	// when using DefaultHTMLOptions, `text` can be treated as
+	// HTML with <pre> to show differences with colors
+	opts := jsondiff.DefaultHTMLOptions()
+	diff, text := jsondiff.Compare(result, exp, &opts)
+	if diff == jsondiff.FullMatch {
+		fmt.Printf("Results match expections: %v", diff)
+		return nil
+	}
+	return fmt.Errorf("Results do not match expections: %v %v", diff, text)
 }

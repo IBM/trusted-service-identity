@@ -13,7 +13,7 @@ import (
 	"github.com/golang/glog"
 )
 
-// Webhook Server parameters
+// WhSvrParameters - Webhook Server parameters
 type WhSvrParameters struct {
 	port                    int    // webhook server port
 	createVaultCert         bool   // true to inject keys on init

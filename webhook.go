@@ -26,7 +26,7 @@ import (
 	cctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
 )
 
-func pseudo_uuid() (string, error) {
+func pseudoUUID() (string, error) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
@@ -356,7 +356,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		    }
 	*/
 	// Set volume
-	uuid, err := pseudo_uuid()
+	uuid, err := pseudoUUID()
 	if err != nil {
 		glog.Infof("Err: %v", err)
 		return nil, err
