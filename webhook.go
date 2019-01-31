@@ -16,7 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/kubernetes/pkg/apis/core/v1"
+	v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 
 	"crypto/rand"
 
@@ -26,7 +26,7 @@ import (
 	cctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
 )
 
-func pseudo_uuid() (string, error) {
+func pseudoUUID() (string, error) {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
@@ -66,6 +66,44 @@ type WebhookServer struct {
 	initcontainerConfig *InitContainerConfig
 	server              *http.Server
 	createVaultCert     bool // true to inject keys on init
+	clusterInfo         ClusterInfoGetter
+}
+
+type ClusterInfoGetter interface {
+	GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error)
+}
+
+type cigKube struct {
+	cticlient *cctiv1.TrustedV1Client
+}
+
+func NewCigKube() (*cigKube, error) {
+	glog.Infof("Getting cluster Config")
+	kubeConf, err := rest.InClusterConfig()
+	if err != nil {
+		glog.Infof("Err: %v", err)
+		return nil, err
+	}
+	cticlient, err := cctiv1.NewForConfig(kubeConf)
+	if err != nil {
+		fmt.Printf("Err: %v", err)
+		return nil, err
+	}
+	ci := cigKube{
+		cticlient: cticlient,
+	}
+	return &ci, nil
+}
+
+func (ck *cigKube) GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error) {
+	// get the client using KubeConfig
+	glog.Infof("Namespace : %v", namespace)
+	cti, err := ck.cticlient.ClusterTIs(namespace).Get(policy, metav1.GetOptions{})
+	if err != nil {
+		fmt.Printf("Err: %v", err)
+		return ctiv1.ClusterTI{}, err
+	}
+	return *cti, err
 }
 
 type InitContainerConfig struct {
@@ -275,6 +313,8 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	if namespace == metav1.NamespaceNone {
 		namespace = metav1.NamespaceDefault
 	}
+	logJSON("AdmissionRequest", req)
+	logJSON("Pod", &pod)
 
 	initcontainerConfigCp := whsvr.initcontainerConfig.DeepCopy()
 
@@ -316,7 +356,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		    }
 	*/
 	// Set volume
-	uuid, err := pseudo_uuid()
+	uuid, err := pseudoUUID()
 	if err != nil {
 		glog.Infof("Err: %v", err)
 		return nil, err
@@ -324,34 +364,13 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 
 	secretName := "ti-secret-" + uuid
 
-	glog.Infof("Getting cluster Config")
-	kubeConf, err := rest.InClusterConfig()
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return nil, err
-	}
-
-	// Check Cluster TI policy
-	cticlient, err := cctiv1.NewForConfig(kubeConf)
+	cti, err := whsvr.clusterInfo.GetClusterTI(namespace, "cluster-policy")
 	if err != nil {
 		fmt.Printf("Err: %v", err)
 		return nil, err
 	}
 
-	glog.Infof("Namespace : %v", namespace)
-	ctis, err := cticlient.ClusterTIs(namespace).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	glog.Infof("Lists: %v", ctis)
-
-	cti, err := cticlient.ClusterTIs(namespace).Get("cluster-policy", metav1.GetOptions{})
-	if err != nil {
-		fmt.Printf("Err: %v", err)
-		return nil, err
-	}
-
-	glog.Infof("Got CTI: %v", cti)
+	glog.Infof("Got CTI: %#v", cti)
 	glog.Infof("CTI Cluster Name: %v", cti.Info.ClusterName)
 	glog.Infof("CTI Cluster Region: %v", cti.Info.ClusterRegion)
 	// // Create a secret
@@ -399,7 +418,6 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		}
 	}
 
-	glog.Infof("add vol  : %v", initcontainerConfigCp.Volumes)
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
@@ -416,7 +434,6 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 	annotations := initcontainerConfig.Annotations
 
 	// additions
-	glog.Infof("add volumes: %v", initcontainerConfig.Volumes)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
 	if createVaultCert {
 		patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
@@ -426,7 +443,7 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
 
 	for i, c := range pod.Spec.Containers {
-		glog.Infof("add vol mounts : %v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
+		glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
 		patch = append(patch, addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
 	}
 
@@ -435,6 +452,8 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 
 // main mutation process
 func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+	logJSON("AdmissionReview", ar)
+
 	req := ar.Request
 
 	var pod corev1.Pod
@@ -460,6 +479,9 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Mutation Initialization
 	initContainerConfig, err := whsvr.mutateInitialization(pod, req)
+	// Dump the initContainerConfig so it can be used for testing:
+	logJSON("mutatedContainerConfig", initContainerConfig)
+
 	if err != nil {
 		glog.Infof("Err: %v", err)
 		return &v1beta1.AdmissionResponse{
@@ -551,4 +573,21 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 		glog.Errorf("Can't write response: %v", err)
 		http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
 	}
+}
+
+// Log the JSON format of the object
+func logJSON(msg string, v interface{}) {
+	s := getJSON(v)
+	glog.Infof("JSON for %v:\n %v", msg, s)
+
+}
+
+func getJSON(v interface{}) string {
+	// Dump the object so it can be used for testing
+	b, er := json.MarshalIndent(v, "", "    ")
+	if er != nil {
+		panic(er)
+	}
+	b2 := append(b, '\n')
+	return string(b2)
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/golang/glog"
 )
 
-// Webhook Server parameters
+// WhSvrParameters - Webhook Server parameters
 type WhSvrParameters struct {
 	port                    int    // webhook server port
 	createVaultCert         bool   // true to inject keys on init
@@ -36,12 +36,18 @@ func main() {
 
 	initcontainerConfig, err := loadInitContainerConfig(parameters.initcontainerCfgFile)
 	if err != nil {
-		glog.Errorf("Filed to load configuration: %v", err)
+		glog.Errorf("Failed to load configuration: %v", err)
 	}
+	logJSON("InitContainerConfig(main)", initcontainerConfig)
 
 	pair, err := tls.LoadX509KeyPair(parameters.certFile, parameters.keyFile)
 	if err != nil {
-		glog.Errorf("Filed to load key pair: %v", err)
+		glog.Errorf("Failed to load key pair: %v", err)
+	}
+
+	clInfo, err := NewCigKube()
+	if err != nil {
+		glog.Errorf("Failed to create ClusterInfo: %v", err)
 	}
 
 	whsvr := &WebhookServer{
@@ -51,6 +57,7 @@ func main() {
 			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},
 		},
 		createVaultCert: parameters.createVaultCert,
+		clusterInfo:     clInfo,
 	}
 
 	// define http server and server handler

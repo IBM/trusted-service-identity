@@ -20,7 +20,7 @@ spec:
       - name: regcred
       containers:
         - name: ti-revoker
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-revoker:v0.9
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-revoker:v0.10
           imagePullPolicy: Always
           args:
             - -namespace=trusted-identity

@@ -215,6 +215,14 @@
   version = "1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:46eaf1c21b8bd109c87604eb6ea726a69f54264c1566ada2be922a335e7b43e7"
+  name = "github.com/nsf/jsondiff"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "7de28ed2b6e3cdae8e402f68542b1f287740f764"
+
+[[projects]]
   digest = "1:ee4d4af67d93cc7644157882329023ce9a7bcfce956a079069a9405521c7cc8d"
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
@@ -553,6 +561,7 @@
   input-imports = [
     "github.com/ghodss/yaml",
     "github.com/golang/glog",
+    "github.com/nsf/jsondiff",
     "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti",
     "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1",
     "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned",

@@ -1,0 +1,218 @@
+{
+    "InitContainers": [
+        {
+            "name": "gen-vault-cert",
+            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.10",
+            "resources": {},
+            "volumeMounts": [
+                {
+                    "name": "pod-metadata",
+                    "readOnly": true,
+                    "mountPath": "/pod-metadata"
+                },
+                {
+                    "name": "ti-sa-mount",
+                    "readOnly": true,
+                    "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                },
+                {
+                    "name": "ti-vault-secret",
+                    "mountPath": "/certs"
+                },
+                {
+                    "name": "ti-keys",
+                    "readOnly": true,
+                    "mountPath": "/keys"
+                },
+                {
+                    "name": "ti-skeys",
+                    "readOnly": true,
+                    "mountPath": "/skeys"
+                },
+                {
+                    "name": "host-etc",
+                    "readOnly": true,
+                    "mountPath": "/host/etc"
+                }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+        }
+    ],
+    "SidecarContainers": [
+        {
+            "name": "jwt-sidecar",
+            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.10",
+            "command": [
+                "/bin/sh",
+                "-c",
+                "/configmap/jwt/execute-get-key.sh"
+            ],
+            "resources": {},
+            "volumeMounts": [
+                {
+                    "name": "jwt-shared-data",
+                    "mountPath": "/usr/share/jwt"
+                },
+                {
+                    "name": "jwt-configmap",
+                    "readOnly": true,
+                    "mountPath": "/configmap/jwt"
+                },
+                {
+                    "name": "jwt-secret",
+                    "readOnly": true,
+                    "mountPath": "/secret/jwt"
+                },
+                {
+                    "name": "pod-metadata",
+                    "readOnly": true,
+                    "mountPath": "/pod-metadata"
+                },
+                {
+                    "name": "host-etc",
+                    "mountPath": "/host/etc"
+                }
+            ],
+            "imagePullPolicy": "Always"
+        }
+    ],
+    "Volumes": [
+        {
+            "name": "jwt-shared-data",
+            "emptyDir": {}
+        },
+        {
+            "name": "jwt-configmap",
+            "configMap": {
+                "name": "ti-jwt-configmap",
+                "defaultMode": 484
+            }
+        },
+        {
+            "name": "ti-host-volume",
+            "hostPath": {
+                "path": "/ti",
+                "type": "Directory"
+            }
+        },
+        {
+            "name": "host-etc",
+            "hostPath": {
+                "path": "/etc",
+                "type": "Directory"
+            }
+        },
+        {
+            "name": "jwt-secret",
+            "hostPath": {
+                "path": "/ti/secrets/jwt",
+                "type": "Directory"
+            }
+        },
+        {
+            "name": "pod-metadata",
+            "downwardAPI": {
+                "items": [
+                    {
+                        "path": "ti-secret",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-secret-key']"
+                        }
+                    },
+                    {
+                        "path": "ti-identity",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-identity']"
+                        }
+                    },
+                    {
+                        "path": "ti-pod-name",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.name"
+                        }
+                    },
+                    {
+                        "path": "ti-pod-namespace",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.namespace"
+                        }
+                    },
+                    {
+                        "path": "ti-images",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-images']"
+                        }
+                    },
+                    {
+                        "path": "ti-cluster-name",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-name']"
+                        }
+                    },
+                    {
+                        "path": "ti-cluster-region",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-region']"
+                        }
+                    }
+                ],
+                "defaultMode": 420
+            }
+        },
+        {
+            "name": "ti-vault-secret",
+            "emptyDir": {}
+        },
+        {
+            "name": "ti-keys",
+            "hostPath": {
+                "path": "/ti/secrets/keys",
+                "type": "Directory"
+            }
+        },
+        {
+            "name": "ti-skeys",
+            "secret": {
+                "secretName": "ti-keys-config",
+                "defaultMode": 420
+            }
+        },
+        {
+            "name": "ti-sa-mount",
+            "secret": {
+                "secretName": "ti-sa-token-jlb6g",
+                "defaultMode": 420
+            }
+        }
+    ],
+    "AddVolumeMounts": [
+        {
+            "name": "ti-vault-secret",
+            "readOnly": true,
+            "mountPath": "/vault-certs"
+        },
+        {
+            "name": "jwt-shared-data",
+            "readOnly": true,
+            "mountPath": "/jwt-tokens"
+        }
+    ],
+    "Annotations": {
+        "admission.trusted.identity/status": "injected",
+        "admission.trusted.identity/ti-cluster-name": "EUcluster",
+        "admission.trusted.identity/ti-cluster-region": "eu-de",
+        "admission.trusted.identity/ti-images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+        "admission.trusted.identity/ti-secret-key": "ti-secret-ea723670-1e8e-4b2b-398d-d48d59aa65c5"
+    }
+
+
+}
