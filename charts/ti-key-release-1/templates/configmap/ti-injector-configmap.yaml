@@ -5,30 +5,30 @@ metadata:
   name: ti-injector-webhook-configmap
 data:
   initcontainerconfig.yaml: |
-      initContainers:
-      - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:{{ .Values.tiVersion }}
-        imagePullPolicy: Always
-        imagePullSecrets:
-        - name: regcred
-        volumeMounts:
-          - name: pod-metadata
-            mountPath: /pod-metadata
-            readOnly: true
-          - name: ti-sa-mount
-            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-            readOnly: true
-          - name: ti-vault-secret
-            mountPath: /certs
-          - name: ti-keys
-            mountPath: /keys
-            readOnly: true
-          - name: ti-skeys
-            mountPath: /skeys
-            readOnly: true
-          - name: host-etc
-            mountPath: /host/etc
-            readOnly: true
+      # initContainers:
+      # - name: gen-vault-cert
+      #   image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:{{ .Values.tiVersion }}
+      #   imagePullPolicy: Always
+      #   imagePullSecrets:
+      #   - name: regcred
+      #   volumeMounts:
+      #     - name: pod-metadata
+      #       mountPath: /pod-metadata
+      #       readOnly: true
+      #     - name: ti-sa-mount
+      #       mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      #       readOnly: true
+      #     - name: ti-vault-secret
+      #       mountPath: /certs
+      #     - name: ti-keys
+      #       mountPath: /keys
+      #       readOnly: true
+      #     - name: ti-skeys
+      #       mountPath: /skeys
+      #       readOnly: true
+      #     - name: host-etc
+      #       mountPath: /host/etc
+      #       readOnly: true
       sidecarContainers:
       - name: jwt-sidecar
         image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:{{ .Values.tiVersion }}
