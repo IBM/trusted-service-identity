@@ -1,20 +1,9 @@
 FROM fedora:29
 
-RUN dnf -y install git python gnutls gnutls-utils tpm-tools trousers
-
-# Build patched gnutls
-RUN dnf -y install make automake autoconf autogen libtool gettext texinfo \
-  tar gzip perl nettle guile p11-kit gperf libtasn1-devel libidn2-devel \
-  libunistring-devel gawk bison trousers-devel \
-  gettext-devel patch rsync wget which nettle-devel p11-kit-devel gcc \
-  && dnf -y update nettle \
-  && git clone https://gitlab.com/stefanberger/gnutls.git gnutls \
-  && cd gnutls \
-  && git checkout tags/gnutls_3_6_5 -b gnutls_3_6_5 \
-  && ./bootstrap \
-  && ./configure --prefix=/usr --with-tpm --disable-doc \
-  && make -j $(nproc) \
-  && make -j $(nproc) install
+# we need gnutls 3.6.5 or later
+RUN dnf -y update \
+   && dnf -y install git python gnutls gnutls-utils tpm-tools trousers swtpm \
+       expect nmap-ncat procps-ng
 
 # Build patched trousers
 # We HAVE TO enable debugging on tcsd to make this work -- at least
@@ -31,9 +20,6 @@ RUN dnf -y install automake autoconf libtool gcc openssl-devel \
   && make -j$(nproc) clean \
   && make -j$(nproc) all \
   && cp src/tcsd/tcsd /sbin/tcsd
-
-RUN dnf -y install expect nmap-ncat procps-ng
-RUN dnf -y install swtpm --enablerepo=updates-testing
 
 # Build patched python-gnutls needed for patched jwcrypto
 RUN git clone https://github.com/stefanberger/python-gnutls.git python-gnutls \
