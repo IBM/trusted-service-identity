@@ -8,15 +8,13 @@
 #    `error converting YAML to JSON`
 tiVersion: v0.11
 
-
-# createVaultCert - if true, unique certs will be created
-# during Init Containers and inserted to Vault
-createVaultCert: false
-
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
 ti-key-release-1:
   namespace: trusted-identity
+  # createVaultCert - if true, unique certs will be created
+  # during Init Containers and inserted to Vault
+  createVaultCert: false
   # vault endpoint:
   vaultAddress: https://169.62.157.164:32654
   # Cluster Information

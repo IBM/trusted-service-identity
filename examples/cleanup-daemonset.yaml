@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: ds-cleaner
+  name: ti-setup-cleaner
 spec:
   selector:
     matchLabels:
-      name: ds-cleaner
+      name: ti-setup-cleaner
   template:
     metadata:
       labels:
-        name: ds-cleaner
+        name: ti-setup-cleaner
     spec:
       # imagePullSecrets:
       # - name: regcred
