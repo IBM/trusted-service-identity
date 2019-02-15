@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: myubuntu1
+  name: ti-setup-inspector
 spec:
   selector:
     matchLabels:
-      name: myubuntu1
+      name: ti-setup-inspector
   template:
     metadata:
       labels:
-        name: myubuntu1
+        name: ti-setup-inspector
     spec:
       # enable sa to run `kubectl` inside the container
       # serviceAccountName: ti-admin-sa

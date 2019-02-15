@@ -5,6 +5,8 @@ metadata:
   name: ti-injector-webhook-configmap
 data:
   initcontainerconfig.yaml: |
+      # initContainers is required. If "createVaultCert=true" we still create the
+      # configMap, but it will not be instantiated by the webhook
       initContainers:
       - name: gen-vault-cert
         image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:{{ .Values.tiVersion }}
@@ -41,9 +43,13 @@ data:
           - name: jwt-configmap
             mountPath: "/configmap/jwt"
             readOnly: true
+
+    {{- if .Values.createVaultCert }}
           - name: jwt-secret
             mountPath: "/secret/jwt"
             readOnly: true
+    {{- end }}
+
           - name: pod-metadata
             mountPath: /pod-metadata
             readOnly: true
@@ -58,21 +64,30 @@ data:
             name: ti-jwt-configmap
             # this makes the files executable
             defaultMode: 0744
+
+    {{- if .Values.createVaultCert }}
         - name: ti-host-volume
           hostPath:
             # directory location on host
              path: /ti
              # directory must exist
              type: Directory
-        - name: host-etc
-          hostPath:
-            # directory location on host
-             path: /etc
-             type: Directory
         - name: jwt-secret
           hostPath:
             # directory location on host
              path: /ti/secrets/jwt
+             type: Directory
+        - name: ti-keys
+          hostPath:
+            # directory location on host
+             path: /ti/secrets/keys
+             type: Directory
+    {{- end }}
+
+        - name: host-etc
+          hostPath:
+            # directory location on host
+             path: /etc
              type: Directory
         - name: pod-metadata
           downwardAPI:
@@ -100,11 +115,6 @@ data:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-cluster-region']
         - name: ti-vault-secret
           emptyDir: {}
-        - name: ti-keys
-          hostPath:
-            # directory location on host
-             path: /ti/secrets/keys
-             type: Directory
         - name: ti-skeys
           secret:
             secretName: ti-keys-config

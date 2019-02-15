@@ -1,6 +1,25 @@
 # Trusted Identity (TI)
 
-Detailed description of the TI demo is available [here](examples/README.md)
+Trusted Identity is closing the gap of preventing access to secrets by
+an untrusted operator during the process of obtaining authorization for data
+access by the applications running in the public cloud.
+
+The project ties Key Management Service technologies with identity via host
+provenance and integrity.
+
+TI limits access to keys (credentials, secrets) for service provider administrators,
+by creating a key/credential release system based on authorization of container
+workloads. Each application that requires access to key gets a short-term identity
+in form of a JSON Web Token (JWT) as a digital biometric identity that is bound
+to the process and signed by a chain of trust that originates from
+physical hardware. Secrets are released to the application based on this identity.
+
+Optionally, TI can additionally create a unique set of a certificate and private
+key that is automatically registered with Vault service. For more information about
+this option, read the [Create Vault Certificate](./README.md#create-vault-certificate)
+chapter below.  
+
+Detailed description of the *TI demo* is available [here](examples/README.md)
 
 ## Prerequisites
 
@@ -114,7 +133,7 @@ make all -C examples/jwt-client/
 make all -C examples/jwt-server/
 ```
 
-## Install and initialize Helm environment
+### Install and initialize Helm environment
 This project requires Helm v2.10.0 or higher.
 
 Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
@@ -126,52 +145,7 @@ Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). 
   helm init
 ```
 
-## Host Setup - one time  initialization
-All the worker hosts are required to be initialized with private keys and root CA
-(to be replaced by TPM in the future). This operation needs to be executed only once.
-
-### Build TI Setup helm charts
-
-Package the helm chart:
-```console
-cd TI-KeyRelease
-helm package charts/ti-setup
-```
-
-### Deploy TI Setup
-
-Get the default chart values and replace them with your private keys and certs.
-Replace X.X.X with proper version numbers
-
-```console
-helm inspect values charts/ti-setup-X.X.X.tgz > config.yaml
-# modify config.yaml with your own values
-helm install charts/ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
-```
-
-Once the `ti-setup` is successfully deployed, remove it.
-```console
-helm delete --purge ti-setup
-```
-
-To validate and inspect the values assigned by the setup chart, run the daemonset to access all the hosts:
-
-```console
-kubectl create -f examples/inspect-daemonset.yaml
-kubectl get pods
-# select the node that you like to inspect and get inside:
-kubectl exec -it <pod_id> /bin/bash
-# review /host/ti/secrets, /etc/machineid, /keys/
-```
-
-To remove/reset all the values setup by the `ti-setup` chart, run the following:
-
-```console
-kubectl create -f examples/cleanup-daemonset.yaml
-kubectl delete -f examples/cleanup-daemonset.yaml
-```
-
-## TI Key Release Helm Deployment
+### TI Key Release Helm Deployment
 The deployment is done in `trusted-identity` namespace. If you are testing or developing
 the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
 This would remove all the components and artifacts, then recreate a new, empty namespace:
@@ -232,10 +206,158 @@ helm upgrade -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 ### Testing Deployment
 Once environment deployed, execute a test by deploying the following file:
 ```console
-kubectl -n trusted-identity create -f examples/myubuntu_inject.yaml
+kubectl -n trusted-identity create -f examples/myubuntu.yaml
+kubectl -n trusted-identity get pods
+kubectl -n trusted-identity exec -it {pod_id} /bin/bash
+```
+The main container `myubuntu` should have a JWT token in `/jwt-tokens`
+
+## Sample JWT claims
+
+```json
+{
+  "cluster-name": "EUcluster",
+  "cluster-region": "eu-de",
+  "exp": 1547224830,
+  "iat": 1547224800,
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "iss": "wsched@us.ibm.com",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "namespace": "trusted-identity",
+  "pod": "myubuntu-698b749889-m9xz9",
+  "sub": "wsched@us.ibm.com"
+}
+```
+
+## Obtain JWKS
+In order to obtain the public JWKS for JWT signature validation, execute call to
+vTPM Server. Access to the server is available from any container in
+the trusted-identity namespace:
+```console
+  curl http://vtpm-service:8012/getJWKS
+```
+
+## Cleanup
+Remove all the resources created for Trusted Identity
+```console
+./cleanup.sh
+```
+Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
+
+
+## Create Vault Certificate
+In addition to creating JWT tokens, TI is capable of creating certificates with
+x509v3 extended attributes to enclose the claims in the tokens. The difference is
+that these certificates are not set to have a short expiry.
+Once the pod is removed, the certificates would be revoked from the Vault.
+In order to use this feature, one time host setup is required. See below.
+
+### Host Setup - one time  initialization
+All the worker hosts are required to be initialized with private keys and root CA
+(to be replaced by TPM in the future). This operation needs to be executed only once.
+
+### Build TI Setup helm charts
+
+Package the helm chart:
+```console
+cd TI-KeyRelease
+helm package charts/ti-setup
+```
+
+### Deploy TI Setup
+
+Get the default chart values and replace them with your private keys and certs.
+Replace X.X.X with proper version numbers
+
+```console
+helm inspect values charts/ti-setup-X.X.X.tgz > config.yaml
+# modify config.yaml with your own values
+helm install charts/ti-setup-X.X.X.tgz --values=config.yaml --debug --name ti-setup
+```
+
+Once the `ti-setup` is successfully deployed, remove it.
+```console
+helm delete --purge ti-setup
+```
+
+To validate and inspect the values assigned by the setup chart, run the daemonset to access all the hosts:
+
+```console
+kubectl create -f examples/inspect-daemonset.yaml
+kubectl get pods
+# select the node that you like to inspect and get inside:
+kubectl exec -it <pod_id> /bin/bash
+# review /host/ti/secrets, /etc/machineid, /keys/
+```
+
+To remove/reset all the values setup by the `ti-setup` chart, run the following:
+
+```console
+kubectl create -f examples/cleanup-daemonset.yaml
+kubectl delete -f examples/cleanup-daemonset.yaml
+```
+
+### Install TI with `Create Vault Certificate` option turned on
+After the initial host setup is complete, execute the TI Helm install.
+Make sure the `ti-key-release-1.createVaultCert=true`. This can be done
+either via CLI:
+
+```console
+helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+--set ti-key-release-1.cluster.name=mycluster-name \
+--set ti-key-release-1.cluster.region=dal01 \
+--set ti-key-release-1.createVaultCert=true
+```
+or by modifying the configuration values:
+```
+helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
+# modify config.yaml with ti-key-release-1.createVaultCert=true
+helm install -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
+```
+### Testing Deployment
+Once environment deployed, execute a test by deploying the following file:
+```console
+kubectl -n trusted-identity create -f examples/myubuntu.yaml
+kubectl -n trusted-identity get pods
+kubectl -n trusted-identity exec -it {pod_id} /bin/bash
 ```
 The main container `myubuntu` should have a new key and certificate in `/vault-certs` directory
 for accessing the Vault and JWT token in `/jwt-tokens`
+
+
+## Create your own private key and public JSON Web Key Set (JWKS)
+Before enabling the JWT policy in Istio, you need to first create a private key
+and JWKS. The following steps are based on [this doc](https://github.com/istio/istio/blob/release-1.0/security/tools/jwt/samples/README.md)
+This can be done from inside the sidecar container:
+
+```console
+kubectl -n trusted-identity exec -it <my_ubuntu_pod_id> -c jwt-sidecar /bin/bash
+# generate private key using openssl
+openssl genrsa -out key.pem 2048
+# run gen-jwt.py with --jkws to create new public key set (JWKS) and sample JWT
+python gen-jwt.py key.pem -jwks=./jwks.json --expire=60 --claims=foo:bar > demo.jwt
+```
+
+Preserve the newly created `key.pem` and `jwks.json`. Put the public JWKS to publicly accessible place e.g.
+https://raw.githubusercontent.com/mrsabath/jwks-test/master/jwks.json in public GITHUB: https://github.com/mrsabath/jwks-test/blob/master/jwks.json
+
+Put the private key to [./charts/ti-key-release-2/values.yaml](./charts/ti-key-release-2/values.yaml)
+
+```yaml
+
+ti-key-release-1:
+  jwtkey: |-
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEogIBAAKCAQEAtRcoFKRhV5+1w3r9ZrDeT4XKaREaher2dAfg0i82Te2QG1B5
+    . . . .
+         ***** MY KEY *****
+    . . . .
+    Au57AoGALTlcO/AMzyj/UjE+/6wP0nYuw90FitYq9h9q9jSYIMyxwQWJa4qWwkp9
+    0vuUNDqsbzFeqqG55f0FZp3bfmNExNs0igdcTzwfqt6Q4LGkZVFYicbshIxHDC0a
+    fn3/DuZcMg+chQ970y+XF5JtUwgVbYfaMiP1zrF0J6Fh4rHk3Cw=
+    -----END RSA PRIVATE KEY-----
+```
+Then redeploy the charts and your container.
 
 
 # Trusted Identity with Istio
@@ -316,78 +438,3 @@ while true; do curl --header "Authorization: Bearer $(cat /jwt-tokens/token)" we
 ```
 Now you should be getting valid web service responses
 You can copy the JWT token from /jwt-tokens/token and inspect it (e.g. [https://jwt.io/](https://jwt.io/))
-
-Sample JWT payload:
-
-```json
-{
-  "cluster-name": "mycluster",
-  "cluster-region": "dal01",
-  "exp": 1541014498,
-  "iat": 1541014468,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest",
-  "iss": "wsched@us.ibm.com",
-  "machineid": "266c2075dace453da02500b328c9e325",
-  "pod": "myubuntu-767584864-2dkdg",
-  "sub": "wsched@us.ibm.com",
-  "trusted-identity": "id-res-kompass-kompass-docker-local.artifactory.swg-devops.com"
-}
-```
-## Cleanup
-Remove all the resources created for Trusted Identity
-```console
-./cleanup.sh
-```
-Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
-
-
-## Create your own private key and public JSON Web Key Set (JWKS)
-Before enabling the JWT policy in Istio, you need to first create a private key
-and JWKS. The following steps are based on [this doc](https://github.com/istio/istio/blob/release-1.0/security/tools/jwt/samples/README.md)
-This can be done from inside the sidecar container:
-
-```console
-kubectl -n trusted-identity exec -it <my_ubuntu_pod_id> -c jwt-sidecar /bin/bash
-# generate private key using openssl
-openssl genrsa -out key.pem 2048
-# run gen-jwt.py with --jkws to create new public key set (JWKS) and sample JWT
-python gen-jwt.py key.pem -jwks=./jwks.json --expire=60 --claims=foo:bar > demo.jwt
-```
-
-Preserve the newly created `key.pem` and `jwks.json`. Put the public JWKS to publicly accessible place e.g.
-https://raw.githubusercontent.com/mrsabath/jwks-test/master/jwks.json in public GITHUB: https://github.com/mrsabath/jwks-test/blob/master/jwks.json
-
-Put the private key to [./charts/ti-key-release-2/values.yaml](./charts/ti-key-release-2/values.yaml)
-
-```yaml
-
-ti-key-release-1:
-  jwtkey: |-
-    -----BEGIN RSA PRIVATE KEY-----
-    MIIEogIBAAKCAQEAtRcoFKRhV5+1w3r9ZrDeT4XKaREaher2dAfg0i82Te2QG1B5
-    . . . .
-         ***** MY KEY *****
-    . . . .
-    Au57AoGALTlcO/AMzyj/UjE+/6wP0nYuw90FitYq9h9q9jSYIMyxwQWJa4qWwkp9
-    0vuUNDqsbzFeqqG55f0FZp3bfmNExNs0igdcTzwfqt6Q4LGkZVFYicbshIxHDC0a
-    fn3/DuZcMg+chQ970y+XF5JtUwgVbYfaMiP1zrF0J6Fh4rHk3Cw=
-    -----END RSA PRIVATE KEY-----
-```
-Then redeploy the charts and your container.
-
-## Sample JWT claims
-
-```json
-{
-  "cluster-name": "EUcluster",
-  "cluster-region": "eu-de",
-  "exp": 1547224830,
-  "iat": 1547224800,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
-  "iss": "wsched@us.ibm.com",
-  "machineid": "266c2075dace453da02500b328c9e325",
-  "namespace": "trusted-identity",
-  "pod": "myubuntu-698b749889-m9xz9",
-  "sub": "wsched@us.ibm.com"
-}
-```

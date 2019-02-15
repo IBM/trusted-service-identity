@@ -6,6 +6,8 @@ first part of the deployment.
    release: {{ .Release.Name }}
    tiVersion: {{ .Values.tiVersion }}
    namespace: {{ .Values.namespace }}
+   createVaultCert: {{ .Values.createVaultCert }}
+
 
    vaultAddress: {{ .Values.vaultAddress }} encoded as {{ .Values.vaultAddress | b64enc }}
    cluster.name: {{ .Values.cluster.name }}

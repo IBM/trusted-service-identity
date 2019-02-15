@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v0.10
+tiVersion: v0.11
 
 # Cluster Information
 cluster:
@@ -24,6 +24,9 @@ vtpmService:
   name: vtpm-service
   port: 8012
 
+# createVaultCert - if true, unique certs will be created
+# during Init Containers and inserted to Vault
+createVaultCert: false
 
 # Values below are used to create a secret: `ti-keys-config`
 # vault-address e.g. https://1.1.1.1:32222
