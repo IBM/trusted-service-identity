@@ -1,6 +1,6 @@
 # Trusted Identity (TI)
 
-Trusted Service Identity is closing the gap of preventing access to secrets by
+Trusted Identity is closing the gap of preventing access to secrets by
 an untrusted operator during the process of obtaining authorization for data
 access by the applications running in the public cloud.
 
@@ -9,9 +9,9 @@ provenance and integrity.
 
 TI limits access to keys (credentials, secrets) for service provider administrators,
 by creating a key/credential release system based on authorization of container
-workloads. Each application that requires access to data gets a short-term identity
-in form of a JSON Web Token (JWT) as a digital biometric that is bound to the
-lifetime of the process and signed by a chain of trust that originates from
+workloads. Each application that requires access to key gets a short-term identity
+in form of a JSON Web Token (JWT) as a digital biometric identity that is bound
+to the process and signed by a chain of trust that originates from
 physical hardware. Secrets are released to the application based on this identity.
 
 Optionally, TI can additionally create a unique set of a certificate and private
@@ -246,11 +246,11 @@ Make sure to run `./init.sh` again after the cleanup to start the fresh deployme
 
 
 ## Create Vault Certificate
-In addition to creating JWT tokens, TI is capable of creating a unique certificate
-and private key that is injected to Vault and allows this pod a direct access
-to its own space in Vault (e.g. to persists some confidential data). Once the pod is
-removed, the keys would be revoked from the Vault. In order to use this feature,
-one time host setup is required. See below.
+In addition to creating JWT tokens, TI is capable of creating certificates with
+x509v3 extended attributes to enclose the claims in the tokens. The difference is
+that these certificates are not set to have a short expiry.
+Once the pod is removed, the certificates would be revoked from the Vault.
+In order to use this feature, one time host setup is required. See below.
 
 ### Host Setup - one time  initialization
 All the worker hosts are required to be initialized with private keys and root CA
