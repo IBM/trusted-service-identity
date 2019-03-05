@@ -1,18 +1,22 @@
 # Trusted Identity Examples - Demo
-This demonstrates capabilities of Trusted Identity environment.
+This demo sets up Key Server and sample JWT Cloudant client to demonstrate
+how sample application can retrieve data securely from the Key Server using
+Trusted Identity.
 
-Required steps:
+For a guidance how to create a custom application that is usinng Trusted Identity
+see the following [Application Developer Guide](./README-AppDeveloper.md)
+
+Demo steps:
 * Prerequisites
-* Initial setup of the environment
-* Deploy TI framework (including vTPM)
-* Deploy JWT Key Server
+* Deploy TI framework
+* Deploy Key Server
 * Deploy JWT Cloudant client
 * Install JWKS keys for each vTPM deployment  
 * Define sample policies
 * Execute sample transactions
 
 
-## 1.0 Prerequisites
+## Prerequisites
 
 1. Make sure the all the [TI Prerequisites](../README.md#prerequisites) are met.
 2. Images are already built and published in artifactory, although if you like to
@@ -20,13 +24,7 @@ create your own images, follow the steps to [build](../README.md#build-and-insta
 3. Make sure you have [Helm installed](../README.md#install-and-initialize-helm-environment)
 
 
-## 2.0 Initial setup of the environment
-All the worker hosts are required to be initialized with private keys and root CA
-_(to be replaced by TPM in very close the future)_. This operation needs to be executed only once.
-This will be removed soon, but still needed today.
-Execute [host setup](../README.md#deploy-ti-setup)
-
-## 3.0 Deploy TI framework
+## Deploy TI framework
 Follow the [steps](../README.md#ti-key-release-helm-deployment) to setup `regcred`
 secret, then deploy TI. Make sure to specify a cluster name and region.
 
@@ -45,12 +43,13 @@ kubectl create -f examples/myubuntu.yaml -n trusted-identity
 ```
 
 
-## 4.0 Deploy JWT Key Server
+## Deploy JWT Key Server
 JWT Key Server is part of the included examples. Please note this only demonstrates
 the capabilities and it should not be used for production.
 
-### 4.1 Build and create helm charts
-The images are already created, but if you like to modify the code and recreate them,
+
+### Build and create helm charts for JWT Key Server
+The charts are already created, but if you like to modify the code and recreate them,
 follow these steps:
 
 ```console
@@ -62,7 +61,7 @@ helm package charts/jwt-key-server
 mv jwt-key-server-X.X.X.tgz charts/
 ```
 
-### 4.2 Deploy the JWT Key Server via Helm
+### Deploy the JWT Key Server via Helm
 JWT Key Server can be deployed anywhere as long as it is accessible to
 workloads in other clusters.
 
@@ -79,7 +78,7 @@ helm install --tls charts/jwt-key-server-X.X.X.tgz --debug --name ti-jwt-server
 The working example is using ICP cluster with master node on `198.11.242.156` IP.
 This is our Ingress access point for this service.
 
-### 4.3 Deploy JWT Key Server directly
+### Deploy JWT Key Server directly
 another option is to deploy the JWT Key Server directly
 
 ```console
@@ -132,8 +131,8 @@ No Auth header exists
 At this point, this is an expected result.
 
 
-## 5.0 Install JWKS keys for each vTPM deployment
-For every deployment of IT, obtain JWKS and configure it on Key Server.
+## Install JWKS keys for each vTPM deployment
+For every deployment of vTPM, obtain JWKS and configure it on Key Server.
 
 In order to obtain JWKS, connect to any container deployed in `trusted-identity`
 namespace and get it using `curl http://vtpm-service:8012/getJWKS`.
@@ -169,7 +168,7 @@ root@myubuntu-698b749889-pdp78:/#
 
 ```
 
-## 6.0 Deploy JWT Cloudant client
+## Deploy JWT Cloudant client
 Now we can deploy JWT Cloudant client. This simple program uses the JWT token
 created by the sidecar to call JWT Key Server to obtain Cloudant API key for
 retrieving data.

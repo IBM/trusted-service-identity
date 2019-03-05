@@ -212,7 +212,7 @@ kubectl -n trusted-identity exec -it {pod_id} /bin/bash
 ```
 The main container `myubuntu` should have a JWT token in `/jwt-tokens`
 
-## Sample JWT claims
+### Sample JWT claims
 
 ```json
 {
@@ -229,7 +229,7 @@ The main container `myubuntu` should have a JWT token in `/jwt-tokens`
 }
 ```
 
-## Obtain JWKS
+### Obtain JWKS
 In order to obtain the public JWKS for JWT signature validation, execute call to
 vTPM Server. Access to the server is available from any container in
 the trusted-identity namespace:
@@ -237,13 +237,15 @@ the trusted-identity namespace:
   curl http://vtpm-service:8012/getJWKS
 ```
 
+### Run Sample Demo
+Trusted Identity is ready for [a demo](examples/README.md)
+
 ## Cleanup
 Remove all the resources created for Trusted Identity
 ```console
 ./cleanup.sh
 ```
 Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
-
 
 ## Create Vault Certificate
 In addition to creating JWT tokens, TI is capable of creating certificates with
