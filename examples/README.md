@@ -153,7 +153,8 @@ For example `cluster-name=EUcluster` when our JWT Key Server is deployed on ICP
 `https://198.11.242.156/`:
 
 ```console
-root@myubuntu-698b749889-pdp78:/# curl --insecure "https://198.11.242.156/register?jwks=$(cat jwks.json | base64 -w 0)&cluster-name=EUcluster"
+export KEYSTORE_URL=https://198.11.242.156
+root@myubuntu-698b749889-pdp78:/# curl --insecure "${KEYSTORE_URL}/register?jwks=$(cat jwks.json | base64 -w 0)&cluster-name=EUcluster"
 Registered jwks (sha256:d35262ea0693bc6c7a16ced26e111e4b1ef4efec95b3cbaa781f9ac4b5ad7b0e) with claims MultiDict([('cluster-name', u'EUcluster')])root@myubuntu-698b749889-pdp78:/#
 ```
 
@@ -162,7 +163,7 @@ the registered JWKS. To test the access, simply execute the request to get back
 the claim values:
 
 ```console
-root@myubuntu-698b749889-pdp78:/# curl --insecure https://198.11.242.156/ --header "Authorization: Bearer $(cat /jwt-tokens/token)"
+root@myubuntu-698b749889-pdp78:/# curl --insecure ${KEYSTORE_URL} --header "Authorization: Bearer $(cat /jwt-tokens/token)"
 JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545313344, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1545313314, u'pod': u'myubuntu-698b749889-pdp78', u'sub': u'wsched@us.ibm.com'}
 root@myubuntu-698b749889-pdp78:/#
 

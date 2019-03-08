@@ -4,7 +4,7 @@ This document guides through adapting your application to be used with Trusted S
 ## Assumptions
 We assume that at this point you have a working K8s cluster with Trusted Service Identity
 environment deployed, including the sample Key Store and public JWKS is
-registered with the Key Store. Otherwise, please see [example/README.md](./README.md)
+registered with the Key Store. Otherwise, please see [examples/README.md](./README.md)
 
 ## Deploy sample application
 Deploy the sample application and exec into it:
@@ -40,7 +40,8 @@ the same cluster-name, will be using the registered JWKS.
 To test the access, simply execute the request to get back the claim values:
 
 ```console
-root@myubuntu-698b749889-vvgts:/# curl --insecure https://198.11.242.156/ --header "Authorization: Bearer $(cat /jwt-tokens/token)"
+export KEYSTORE_URL=https://198.11.242.156
+root@myubuntu-698b749889-vvgts:/# curl --insecure ${KEYSTORE_URL} --header "Authorization: Bearer $(cat /jwt-tokens/token)"
 
 JWT Claims: {u'cluster-name': u'mycluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'dal13', u'namespace': u'trusted-identity', u'exp': 1550889622, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1550889592, u'pod': u'myubuntu-698b749889-vvgts', u'sub': u'wsched@us.ibm.com'}
 ```
