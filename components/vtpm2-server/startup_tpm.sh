@@ -29,4 +29,5 @@ if ! [ -f ${TPMKEYFILE} ]; then
 	echo -n ${TPMKEYURI} > ${STATEDIR}/tpmkeyurl
 
 	openssl rsa -inform engine -engine tpm2 -pubout -in ${TPMKEYFILE} -out ${STATEDIR}/tpmpubkey.pem
+	openssl req -engine tpm2 -new -key ${TPMKEYFILE} -keyform engine -subj "/CN=vtpm2-jwt-server" -out ${STATEDIR}/server.csr
 fi
