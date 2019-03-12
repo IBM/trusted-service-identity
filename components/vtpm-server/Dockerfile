@@ -1,7 +1,9 @@
 FROM fedora:29
 
 # we need gnutls 3.6.5 or later
+# packaging error in f29 expect package forces us to remove whois-mkpasswd
 RUN dnf -y update \
+   && dnf -y remove whois-mkpasswd \
    && dnf -y install git python gnutls gnutls-utils tpm-tools trousers swtpm \
        expect nmap-ncat procps-ng
 
