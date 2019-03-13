@@ -46,9 +46,15 @@ def main(args):
 
     if args.jwks:
         with open(args.jwks, "w+") as fout:
-            fout.write("{ \"keys\":[ ")
-            fout.write(key.export(private_key=False))
-            fout.write("]}")
+            # this is the old JWKS format
+            # fout.write("{ \"keys\":[ ")
+            # fout.write(key.export(private_key=False))
+            # fout.write("]}")
+
+            # this is the new PEM format
+            fout.write("{ \"jwt_validation_pubkeys\": \"")
+            fout.write(key.public().export_to_pem())
+            fout.write("\" }")
         fout.close
 
     now = int(time.time())
