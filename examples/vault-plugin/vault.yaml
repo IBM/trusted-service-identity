@@ -1,0 +1,34 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ti-vault
+spec:
+  selector:
+    app: ti-vault
+  ports:
+  - protocol: TCP
+    port: 8200
+    targetPort: 8200
+  type: NodePort
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: ti-vault
+  name: ti-vault
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ti-vault
+      name: ti-vault
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: ti-vault
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-vault:v0.1
+          imagePullPolicy: Always

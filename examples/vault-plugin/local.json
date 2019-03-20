@@ -1,0 +1,11 @@
+
+storage "inmem" {}
+
+plugin_directory = "/plugins"
+
+ui = true
+
+disable_mlock = true
+log_level = "debug"
+
+api_addr = "http://127.0.0.1:8200"
