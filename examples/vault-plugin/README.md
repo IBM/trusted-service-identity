@@ -80,7 +80,7 @@ same `trusted-identity` namespace as the initial TI demo.
 Make sure the KUBECONFIG is properly set then execute:
 
 ```sh
-$ kubectl -n trusted-identity -f vault.yaml
+$ kubectl -n trusted-identity create -f vault.yaml
 ```
 
 In order to access this service remotely, some deployments (like IKS) require
@@ -298,6 +298,8 @@ D11 Test successful! RT: 0
 D12 Test successful! RT: 2
 D13 Test successful! RT: 2
 D14 Test successful! RT: 2
+D15 Test successful! RT: 2
+D16 Test successful! RT: 2
 Testing the 'demo-n' role:
 N01 Test successful! RT: 2
 N02 Test successful! RT: 0
@@ -308,12 +310,14 @@ N06 Test successful! RT: 0
 N07 Test successful! RT: 2
 N08 Test successful! RT: 2
 N09 Test successful! RT: 2
+N10 Test successful! RT: 2
 Testing the 'demo-r' role:
 R01 Test successful! RT: 2
 R02 Test successful! RT: 0
 R03 Test successful! RT: 0
 R04 Test successful! RT: 2
 R05 Test successful! RT: 2
+R06 Test successful! RT: 2
 Testing non-existing role
 E01 Test successful! RT: 0
 Testing access w/o token

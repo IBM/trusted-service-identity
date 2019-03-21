@@ -22,7 +22,6 @@ getToken()
  fi
 
  export TOKEN=$(cat /jwt-tokens/token)
- # export VAULT_TOKEN=$(curl -s --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
  export RESP=$(curl -s --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login)
  export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
  if [ "$VAULT_TOKEN" == "null" ] ; then

@@ -96,6 +96,9 @@ tests()
   test "vault kv get secret/ti-demo-all/eu-de/XXcluster/trusted-identity/${IMGSHA}/dummy" 2 D12
   test "vault kv get secret/ti-demo-all/dal01/UScluster/trusted-identity/${IMGSHA}/dummy" 2 D13
   test "vault kv get secret/ti-demo-all/wdc01/UScluster/trusted-identity/${IMGSHA}/dummy" 2 D14
+  test "vault kv get secret/ti-demo-r/${REGION}/dummy" 2 D15
+  test "vault kv get secret/ti-demo-n/${REGION}/${CLNAME}/${NS}/dummy" 2 D16
+
 
   # testing rule demo-n with policy ti-policy-n
   echo "Testing the 'demo-n' role: "
@@ -116,6 +119,8 @@ tests()
   test "vault kv get secret/ti-demo-n/eu-de/XXcluster/trusted-identity/dummy" 2 N07
   test "vault kv get secret/ti-demo-n/dal01/UScluster/trusted-identity/dummy" 2 N08
   test "vault kv get secret/ti-demo-n/wdc01/UScluster/trusted-identity/dummy" 2 N09
+  test "vault kv get secret/ti-demo-r/${REGION}/dummy" 2 N10
+
 
 
   # testing rule demo-r with policy ti-demo-r
@@ -131,6 +136,7 @@ tests()
   test "vault kv get secret/ti-demo-r/eu-de/dummy" 0 R03
   test "vault kv get secret/ti-demo-r/dal01/dummy" 2 R04
   test "vault kv get secret/ti-demo-r/wdc01/dummy" 2 R05
+  test "vault kv get secret/ti-demo-n/${REGION}/${CLNAME}/${NS}/dummy" 2 R06
 
 
   echo "Testing non-existing role"
