@@ -264,10 +264,11 @@ root@vault-cli-fd855bc5f-2cs4d:/#
 ```
 The measurements are grouped under "metadata" section.
 
-Review the test script (this example is customized for `eu-de` cluster):
+Review the test scripts `test-vault-cli.xx.sh`
+For example, this one is customized for `eu-de` cluster:
 
 ```console
-root@vault-cli-fd855bc5f-2cs4d:/# ./test-vault-cli.sh
+root@vault-cli-fd855bc5f-2cs4d:/# ./test-vault-cli.eu-de.sh
 Testing the default demo role:
 A01 Test successful! RT: 0
 A02 Test successful! RT: 2

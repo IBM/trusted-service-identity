@@ -52,9 +52,9 @@ def main(args):
             # fout.write("]}")
 
             # this is the new PEM format
-            fout.write("{ \"jwt_validation_pubkeys\": \"")
+            fout.write('{ "jwt_validation_pubkeys": "')
             fout.write(key.public().export_to_pem())
-            fout.write("\" }")
+            fout.write('" }')
         fout.close
 
     now = int(time.time())

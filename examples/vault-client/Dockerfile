@@ -5,13 +5,15 @@ RUN apt update && \
     apt install -y unzip && \
     apt install -y jq && \
     apt install -y vim
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
+    chmod +x kubectl
 RUN wget https://releases.hashicorp.com/vault/1.0.3/vault_1.0.3_linux_amd64.zip && \
     unzip vault_1.0.3_linux_amd64.zip && \
     mv vault /usr/local/bin/ && \
     rm -f vault_1.0.3_linux_amd64.zip
 COPY ./setup-vault-cli.sh /setup-vault-cli.sh
-COPY ./test-vault-cli.sh /test-vault-cli.sh
+COPY ./test-vault-cli.eu-de.sh /test-vault-cli.eu-de.sh
+COPY ./test-vault-cli.wdc01.sh /test-vault-cli.wdc01.sh
 
 # Default values for vault client setup
 ARG DEFAULT_VAULT_ADDR="http://vault:8200"

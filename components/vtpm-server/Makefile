@@ -14,7 +14,7 @@ fast:
 	docker push $(IMAGE)
 	docker push $(MUTABLE_IMAGE)
 	date
-	
+
 docker:
 	docker build --no-cache -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
@@ -25,3 +25,5 @@ docker-push:
 
 timestamp:
 	date
+
+.PHONY: all fast docker docker-push timestamp 

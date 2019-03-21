@@ -63,9 +63,6 @@ deps:
 	@echo "==> Updating deps for ${TOOL}"
 	@dep ensure -update
 
-.PHONY: bin default generate test bootstrap fmt deps
-
-
 docker:
 	docker build --no-cache -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
@@ -79,3 +76,5 @@ timestamp:
 	date
 
 all: bin docker docker-push timestamp
+
+.PHONY: bin default generate test bootstrap fmt deps docker docker-push timestamp all

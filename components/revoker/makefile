@@ -9,8 +9,6 @@ REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.12
 
-.PHONY: all test-deps build-deps fmt vet lint get-deps test build docker
-
 all: build docker docker-push timestamp
 
 fast: build
@@ -43,3 +41,5 @@ vet:
 
 lint:
 	@set -e; for LINE in ${GOPACKAGES}; do golint -set_exit_status=true $${LINE} ; done
+
+.PHONY: all fast build docker docker-push timestamp fmt vet lint
