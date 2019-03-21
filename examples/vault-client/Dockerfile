@@ -11,6 +11,7 @@ RUN wget https://releases.hashicorp.com/vault/1.0.3/vault_1.0.3_linux_amd64.zip 
     mv vault /usr/local/bin/ && \
     rm -f vault_1.0.3_linux_amd64.zip
 COPY ./setup-vault-cli.sh /setup-vault-cli.sh
+COPY ./test-vault-cli.sh /test-vault-cli.sh
 
 # Default values for vault client setup
 ARG DEFAULT_VAULT_ADDR="http://vault:8200"
@@ -18,4 +19,4 @@ ARG DEFAULT_VAULT_ROLE="demo"
 ENV VAULT_ADDR=${DEFAULT_VAULT_ADDR}
 ENV VAULT_ROLE=${DEFAULT_VAULT_ROLE}
 
-CMD ["/bin/bash", "-c", "while true; do sleep 5; done;"]
+CMD ["/bin/bash", "-c", "while true; do sleep 10; done;"]

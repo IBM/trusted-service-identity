@@ -1,0 +1,29 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: vault-cli
+  name: vault-cli
+  namespace: trusted-identity
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+      labels:
+        app: vault-cli
+      name: vault-cli
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: vault-cli
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1
+          imagePullPolicy: Always
+          env:
+            - name: VAULT_ADDR
+              # provide the public access to the Vault server with TI plugin
+              # value: "http://mycluster.eu-de.containers.appdomain.cloud:8200"
+            - name: VAULT_ROLE
+              value: "demo"
