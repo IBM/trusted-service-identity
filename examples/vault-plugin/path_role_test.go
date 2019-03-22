@@ -50,6 +50,7 @@ func TestPath_Create(t *testing.T) {
 		"ttl":             "1s",
 		"num_uses":        12,
 		"max_ttl":         "5s",
+		"metadata_claims": "test",
 	}
 
 	expectedSockAddr, err := sockaddr.NewSockAddr("127.0.0.1/8")
@@ -67,6 +68,7 @@ func TestPath_Create(t *testing.T) {
 		TTL:            1 * time.Second,
 		MaxTTL:         5 * time.Second,
 		NumUses:        12,
+		MetadataClaims: []string{"test"},
 		BoundCIDRs:     []*sockaddr.SockAddrMarshaler{&sockaddr.SockAddrMarshaler{expectedSockAddr}},
 	}
 
@@ -146,6 +148,7 @@ func TestPath_Read(t *testing.T) {
 		"ttl":             "1s",
 		"num_uses":        12,
 		"max_ttl":         "5s",
+		"metadata_claims": "test",
 	}
 
 	expected := map[string]interface{}{
@@ -159,6 +162,7 @@ func TestPath_Read(t *testing.T) {
 		"ttl":                            int64(1),
 		"num_uses":                       12,
 		"max_ttl":                        int64(5),
+		"metadata_claims":                []string{"test"},
 	}
 
 	req := &logical.Request{
