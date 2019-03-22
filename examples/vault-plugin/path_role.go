@@ -129,8 +129,7 @@ type jwtRole struct {
 	UserClaim                   string                        `json:"user_claim"`
 	GroupsClaim                 string                        `json:"groups_claim"`
 	GroupsClaimDelimiterPattern string                        `json:"groups_claim_delimiter_pattern"`
-	MetadataClaims							[]string                      `json:"metadata_claims"`
-
+	MetadataClaims              []string                      `json:"metadata_claims"`
 }
 
 // role takes a storage backend and the name and returns the role's storage
@@ -199,7 +198,7 @@ func (b *jwtAuthBackend) pathRoleRead(ctx context.Context, req *logical.Request,
 			"user_claim":                     role.UserClaim,
 			"groups_claim":                   role.GroupsClaim,
 			"groups_claim_delimiter_pattern": role.GroupsClaimDelimiterPattern,
-			"metadata_claims":								role.MetadataClaims,
+			"metadata_claims":                role.MetadataClaims,
 		},
 	}
 

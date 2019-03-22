@@ -250,7 +250,7 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 			Period:      role.Period,
 			NumUses:     role.NumUses,
 			Alias: &logical.Alias{
-				Name: userName,
+				Name:     userName,
 				Metadata: metadata,
 			},
 			GroupAliases: groupAliases,
