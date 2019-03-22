@@ -20,8 +20,16 @@ setupVault()
 {
   echo "Root Token: ${ROOT_TOKEN}"
   vault login ${ROOT_TOKEN}
+  # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
+  export VAULT_TOKEN=
 
+  # obtain the SHA256 for the plugin
+  # if the deployed image has the same binary as the one on your system, use the
+  # following method:
   export SHA256=$(shasum -a 256 "${PWD}/pkg/linux_amd64/${PLUGIN}" | cut -d' ' -f1)
+  # otherwise, you can obtain it by going directly to the vault server:
+  # export SHA256=$(kubectl -n trusted-identity exec $(kubectl -n trusted-identity get po | grep ti-vault-| awk '{print $1}') /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
+
   vault write sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt sha_256="${SHA256}" command="vault-plugin-auth-ti-jwt"
   vault auth enable -path="trusted-identity" -plugin-name="vault-plugin-auth-ti-jwt" plugin
 
