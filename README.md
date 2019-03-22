@@ -115,8 +115,8 @@ Compile and create images for other sub-components
 
 ```console
 make all -C components/gen-vault-cert/
-make all -C components/revoker/
 make all -C components/jwt-sidecar/
+make all -C components/revoker/
 make all -C components/vtpm-server/
 ```
 
@@ -129,6 +129,8 @@ To deploy manually:
 Compile and build examples (JWT server and client)
 
 ```console
+make all -C examples/vault-client/
+make all -C examples/vault-plugin/
 make all -C examples/jwt-client/
 make all -C examples/jwt-server/
 ```
@@ -173,8 +175,10 @@ kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.docke
 ```
 
 ### Build Helm Charts
-Currently there are 2 charts to deploy TI KeyRelease: ti-key-release-1 and ti-key-rel
--2
+Currently there are 2 charts to deploy TI KeyRelease:
+* ti-key-release-1
+* ti-key-release-2
+
 Package the helm charts:
 ```console
 cd TI-KeyRelease
@@ -183,10 +187,14 @@ helm package charts/ti-key-release-1
 helm dep update charts/ti-key-release-2
 helm package --dependency-update charts/ti-key-release-2
 ```
+Your new helm charts are ready to deploy.
 
 ### Deploy Helm charts
+TI helm charts are included with this repo under [charts/](./charts/) directory.
+You can use them directly or use the charts that you just created above.
 
-The helm charts are ready to deploy. Replace X.X.X with proper version numbers
+In order to setup your Trusted Identity environment, provide the cluster information
+during the helm install. Replace X.X.X with a proper version numbers.
 
 ```console
 helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
@@ -194,7 +202,7 @@ helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.cluster.region=dal01
 ```
 
-Complete list of values can be obtained as follow:
+Complete list of available setup parameters can be obtained as follow:
 ```console
 helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
 # modify config.yaml
@@ -230,7 +238,7 @@ The main container `myubuntu` should have a JWT token in `/jwt-tokens`
 ```
 
 ### Obtain JWKS
-In order to obtain the public JWKS for JWT signature validation, execute call to
+In order to obtain the public JWKS in PEM format for JWT signature validation, execute call to
 vTPM Server. Access to the server is available from any container in
 the trusted-identity namespace:
 ```console

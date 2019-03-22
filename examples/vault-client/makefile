@@ -25,4 +25,4 @@ docker-push:
 timestamp:
 	date
 
-.PHONY all fast docker docker-push timestamp
+.PHONY: all fast docker docker-push timestamp

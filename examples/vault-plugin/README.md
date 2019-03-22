@@ -116,7 +116,7 @@ spec:
 
 create ingress:
 ```console
-kubectl -n trusted-identity create ingress-IKS.yaml
+kubectl -n trusted-identity create -f ingress-IKS.yaml
 ```
 
 Test the connection:
@@ -177,7 +177,7 @@ build the deployment file `vault-cli.yaml`, using the Vault remote address (e.g.
 ingress from the steps above)
 
 ```sh
-$ kubectl -n trusted-identity -f ../vault-plugin/vault-cli.yaml
+$ kubectl -n trusted-identity create -f ../vault-client/vault-cli.yaml
 ```
 
 Once the pod is operational, get inside to run some testing.
