@@ -96,7 +96,7 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 		}
 
 		// We require notbefore or expiry; if only one is provided, we allow 5 minutes of leeway.
-		if claims.IssuedAt == 0 && claims.Expiry == 0 && claims.NotBefore == 0 {
+		if claims.IssuedAt == jwt.NumericDate(0) && claims.Expiry == jwt.NumericDate(0) && claims.NotBefore == jwt.NumericDate(0) {
 			return logical.ErrorResponse("no issue time, notbefore, or expiration time encoded in token"), nil
 		}
 		if claims.Expiry == 0 {
