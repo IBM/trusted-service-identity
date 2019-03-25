@@ -1,6 +1,8 @@
 # .travis.yml
 language: go
-
+go:
+- "1.12"
+  
 branches:
   - master
 
