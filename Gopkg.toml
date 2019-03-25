@@ -50,6 +50,10 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
   name = "k8s.io/kubernetes"
   branch = "release-1.9"
 
+[[constraint]]
+  name = "gopkg.in/square/go-jose.v2"
+  version = "=v2.1.8"
+
 [prune]
   #non-go = false
   go-tests = true

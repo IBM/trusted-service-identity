@@ -704,7 +704,7 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:3effe4e6f8af2d27c9cd6070c7c332344490cbeeaa5476ae2bc9e05eb1079f0c"
+  digest = "1:0e2f5bcb5e3c9a1e889fa84b49571df48c67b7047da64343cc88c078f77ea538"
   name = "gopkg.in/square/go-jose.v2"
   packages = [
     ".",
@@ -713,8 +713,8 @@
     "jwt",
   ]
   pruneopts = "T"
-  revision = "628223f44a71f715d2881ea69afc795a1e9c01be"
-  version = "v2.3.0"
+  revision = "8254d6c783765f38c8675fae4427a1fe73fbd09d"
+  version = "v2.1.8"
 
 [[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
