@@ -7,9 +7,9 @@ BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BINARY_NAME=ti-webhook
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.11
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.12
 
-.PHONY: all test-deps build-deps fmt vet lint get-deps test build docker
+.PHONY: all test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
 
 all: dep get-deps fmt test build docker timestamp
 

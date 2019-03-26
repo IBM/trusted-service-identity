@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: vault-ingress
+  namespace: trusted-identity
+spec:
+  rules:
+    # provide the actual Ingress for `host` value:
+# - host: my-ti-cluster.eu-de.containers.appdomain.cloud
+  - host:
+    http:
+      paths:
+      - backend:
+          serviceName: ti-vault
+          servicePort: 8200
+        path: /

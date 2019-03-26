@@ -24,42 +24,43 @@
 #   go-tests = true
 #   unused-packages = true
 
-required = ["k8s.io/code-generator/cmd/client-gen"]
+
+[[constraint]]
+  name = "github.com/coreos/go-oidc"
+  version = "2.0.0"
+
+[[constraint]]
+  name = "github.com/go-test/deep"
+  version = "1.0.1"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/golang/glog"
+  name = "github.com/hashicorp/errwrap"
 
 [[constraint]]
-  name = "k8s.io/api"
-  branch = "release-1.9"
+  branch = "master"
+  name = "github.com/hashicorp/go-cleanhttp"
 
 [[constraint]]
-  name = "k8s.io/apimachinery"
-  branch = "release-1.9"
+  branch = "master"
+  name = "github.com/hashicorp/go-hclog"
 
 [[constraint]]
-  name = "k8s.io/code-generator"
-  branch = "release-1.9"
+  branch = "master"
+  name = "github.com/hashicorp/go-sockaddr"
 
 [[constraint]]
-  name = "k8s.io/client-go"
-  branch = "release-6.0"
+  name = "github.com/hashicorp/vault"
+  branch = "master"
 
 [[constraint]]
-  name = "k8s.io/kubernetes"
-  branch = "release-1.9"
+  branch = "master"
+  name = "golang.org/x/oauth2"
 
 [[constraint]]
   name = "gopkg.in/square/go-jose.v2"
-  version = "=v2.1.8"
+  version = "2.1.8"
 
 [prune]
-  #non-go = false
   go-tests = true
-  #unused-packages = true
-
-# Fix: vendor/k8s.io/kubernetes/pkg/util/parsers/parsers.go:36:16: undefined: reference.ParseNormalizedNamed
-[[override]]
-  name = "github.com/docker/distribution"
-  branch = "master"
+  unused-packages = true

@@ -1,12 +1,18 @@
 # .travis.yml
 language: go
-
+go:
+- "1.12"
+  
 branches:
   - master
 
 # needed for the docker pipe
 services:
   - docker
+
+before_install:                                                                 
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh  
+  - dep ensure
 
 # avoid issues in travis with ssh / https acccess
 before_script:

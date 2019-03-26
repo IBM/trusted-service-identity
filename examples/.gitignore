@@ -1,0 +1,5 @@
+# Do not sync vendor
+*/vendor/
+*/bin/
+*/pkg/
+*.hcl
