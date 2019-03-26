@@ -45,7 +45,7 @@ build-deps: dep
 	dep ensure -v -vendor-only
 
 fmt:
-	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Please run gofmt -l -w on your code.' && exit 1; fi
+	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Please run gofmt -l -w $GOFILES on your code.' && exit 1; fi
 
 vet:
 	@set -e; for LINE in ${GOPACKAGES}; do go vet $${LINE} ; done
