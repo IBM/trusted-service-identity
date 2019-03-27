@@ -89,14 +89,17 @@ For every deployment of vTPM, obtain JWKS to configure Vault Plugin.
 In order to obtain JWKS, connect to any container deployed in the same
 `trusted-identity` namespace as vTPM and get it using `curl http://vtpm-service:8012/getJWKS`.
 
-As an example, let's create and connect to `myubuntu`, replace the end-of-line with `\n`
-and redirect the JWKS into a file `jwks.json`:
+Or get it directly from vTPM server:
 
 ```console
 $ alias k="kubectl -n trusted-identity"
-$ k create -f ../examples/myubuntu.yaml
-$ k exec -it $(k get po | grep myubuntu | awk '{print $1}') /bin/bash
-root@myubuntu-698b749889-pdp78:/# curl http://vtpm-service:8012/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
+$ k exec -it $(k get po | grep vtpm-server | awk '{print $1}') /bin/bash
+[root@vtpm-server-5d6fc78c8b-vjm8f /]#
+
+```
+Get the public JWKS Pem, with encoded end-of-line:
+```console
+[root@vtpm-server-5d6fc78c8b-vjm8f /]# curl localhost:5000/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
 ```
 
 Copy the `jwks.json` to your development machine where you have cloned this repo,
@@ -131,6 +134,27 @@ $ ./demo.vault-setup.sh
 ```
 
 ### Define sample policies and roles
+Policies are structured as paths for keys based on claims provided in JWT. 
+By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
+directory. One can inspect the content of the token by simply pasting it into
+[Debugger](https://jwt.io/) in Encoded window.
+Sample Payload:
+
+```json
+{
+  "cluster-name": "mycluster",
+  "cluster-region": "dal13",
+  "exp": 1550871343,
+  "iat": 1550871313,
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "iss": "wsched@us.ibm.com",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "namespace": "trusted-identity",
+  "pod": "myubuntu-698b749889-vvgts",
+  "sub": "wsched@us.ibm.com"
+}
+```
+
 
 Load the Vault Server with some sample polices. Review the `ti.policy.X.hcl.tpl`
 templates and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
