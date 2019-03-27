@@ -14,7 +14,7 @@ kubectl create -f examples/myubuntu.yaml -n trusted-identity
 alias k="kubectl -n trusted-identity"
 k exec -it $(k get po | grep myubuntu | awk '{print $1}') /bin/bash
 ```
-By defaultJWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
+By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
 directory. One can inspect the content of the token by simply pasting it into
 [Debugger](https://jwt.io/) in Encoded window.
 Sample Payload:
