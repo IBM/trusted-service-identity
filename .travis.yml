@@ -10,13 +10,11 @@ branches:
 services:
   - docker
 
-before_install:                                                                 
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh  
-  - dep ensure
-
 # avoid issues in travis with ssh / https acccess
 before_script:
   - git config --global url."git@github.ibm.com:".insteadOf "https://github.ibm.com/"
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh  
+  - dep ensure
 
 after_success:
 # docker login is required if you want to push docker images.
