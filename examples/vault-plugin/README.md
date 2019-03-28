@@ -3,74 +3,29 @@
 This is a standalone backend plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
 This plugin allows for JWTs (including OIDC tokens) to authenticate with Vault.
 
-
 ## Quick Links
     - Vault Website: https://www.vaultproject.io
     - JWT Auth Docs: https://www.vaultproject.io/docs/auth/jwt.html
     - Main Project Github: https://www.github.com/hashicorp/vault
 
-## Getting Started
+This document describes the Trusted Identity demo example and provides guidance
+for plugin development.
 
-This is a [Vault plugin](https://www.vaultproject.io/docs/internals/plugins.html)
-and is meant to work with Vault. This guide assumes you have already installed Vault
-and have a basic understanding of how Vault works.
+## Trusted Identity Demo
+Demo steps:
+* [Prerequisites](./../README.md#prerequisites)
+* [Deploy TI framework](./../README.md#deploy-ti-framework)
+* [Deploy Vault Service](./README.md#deploy-vault-service)
+* Configure the Vault Plugin
+* Define sample policies and roles
+* Deploy Vault Client
+* Execute sample transactions
 
-Otherwise, first read this guide on how to [get started with Vault](https://www.vaultproject.io/intro/getting-started/install.html).
+## TI Plugin Development
+[This section](./README.md#plugin-development) below describes the plugin development
 
-To learn specifically about how plugins work, see documentation on [Vault plugins](https://www.vaultproject.io/docs/internals/plugins.html).
 
-## Usage
-
-Please see [documentation for the plugin](https://www.vaultproject.io/docs/auth/jwt.html)
-on the Vault website.
-
-This plugin is currently built into Vault and by default is accessed
-at `auth/jwt`. To enable this in a running Vault server:
-
-```sh
-$ vault auth enable jwt
-Successfully enabled 'jwt' at 'jwt'!
-```
-
-To see all the supported paths, see the [JWT auth backend docs](https://www.vaultproject.io/docs/auth/jwt.html).
-
-## Developing the TI plugin for Vault
-
-If you wish to work on this plugin, you'll first need
-[Go](https://www.golang.org) installed on your machine.
-
-This component is the integral part of the Trusted Service Identity project, so
-please refer to installation instruction in main [README](https://github.ibm.com/kompass/TI-KeyRelease#build-and-install) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
-
-Then you can then download any required build tools by bootstrapping your
-environment:
-
-```sh
-$ make bootstrap
-```
-
-Setup dependencies (this builds `vendor` directory)
-
-```sh
-$ dep ensure
-```
-
-To compile a development version of this plugin, run `make` or `make dev`.
-This will put the plugin binary in the `bin` and `$GOPATH/bin` folders. `dev`
-mode will only generate the binary for your platform and is faster:
-
-```sh
-$ make
-$ make dev
-```
-
-Or execute `make all` to compile, build docker image and push to the artifactory repository.
-
-```sh
-$ make all
-```
-
-## Start the Vault Service and configure the TI plugin
+### Deploy Vault Service
 The Vault service can be started anywhere, as long as the Trusted Identity containers
 can access it.
 
@@ -126,26 +81,42 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/
 ```
 At this point, this is an expected result.
 
-## Obtain public JWKS for each vTPM deployment
+### Configure Vault Plugin
+
+#### Obtain public JWKS for each vTPM deployment
 For every deployment of vTPM, obtain JWKS to configure Vault Plugin.
 
 In order to obtain JWKS, connect to any container deployed in the same
 `trusted-identity` namespace as vTPM and get it using `curl http://vtpm-service:8012/getJWKS`.
 
-As an example, let's create and connect to `myubuntu`, replace the end-of-line with `\n`
-and redirect the JWKS into a file `jwks.json`:
+Or get it directly from vTPM server:
 
 ```console
 $ alias k="kubectl -n trusted-identity"
-$ k create -f ../examples/myubuntu.yaml
-$ k exec -it $(k get po | grep myubuntu | awk '{print $1}') /bin/bash
-root@myubuntu-698b749889-pdp78:/# curl http://vtpm-service:8012/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
+$ k exec -it $(k get po | grep vtpm-server | awk '{print $1}') /bin/bash
+[root@vtpm-server-5d6fc78c8b-vjm8f /]#
+
+```
+Get the public JWKS Pem, with encoded end-of-line:
+```console
+[root@vtpm-server-5d6fc78c8b-vjm8f /]# curl localhost:5000/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
 ```
 
 Copy the `jwks.json` to your development machine where you have cloned this repo,
 to complete the Vault plugin setup.
 
-Obtain the Vault Root Token:
+NOTE: If you have multiple clusters, each running different vTPM, copy the PEMs
+into a single `jwks.json` file, comma separating the values.
+
+For example `jwks.json`:
+
+```json
+{ "jwt_validation_pubkeys": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCvNxV+00o5HDc55lHGf74eoMNl\n644gqQiDMvimhygqU/Wg/LNKPvG8Y2hE6qNad3BWgZ4D2rpgFIQdThq7OsZnifbA\ngaML1YtUqOFh3fRGc27PmjTB9zKWAr7qQuxp1GKF+4IeRFjnuUkNN6SDcUgRB4+G\n5HzPdQq0txWhwWh5pwIDAQAB\n-----END PUBLIC KEY-----\n,-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCeud9RtyWaAq2WD/W3d/IYCx5S\n2A26dr0jb+vxPVQpdMy+sQRynTfCkR3tXom7sUfddwCEvck/CwHUbwMOfIfJ+JFR\nrmqvIedxHtPE6GbUuZsmjB2S1zrI5rk12TyzHaGEmxkxmuVa2lWnoqDvrL4mYH1a\nUvHejrAU0yCp+At8FQIDAQAB\n-----END PUBLIC KEY-----\n,-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsGsE1gzyRW69P+qzRA6OfE45H\nTrX5863tBKr/lPF++cowSobfKFo8SvvmR9u1AKwwZHHhsy6G3Gu61YWQcBLNuGfd\nYhZX6acSWCWw5P41cUY+ubUWnMnENW07BS6hmdoMteh5UnDfPZ9FgQEf5REyPHZK\nk86g36f24c0BsyxxTwIDAQAB\n-----END PUBLIC KEY-----" }
+
+```
+
+Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
+
 ```sh
 $ export ROOT_TOKEN=$(k logs $(k get po | grep ti-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
 ```
@@ -162,6 +133,29 @@ the Vault plugin setup script.
 $ ./demo.vault-setup.sh
 ```
 
+### Define sample policies and roles
+Policies are structured as paths for keys based on claims provided in JWT. 
+By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
+directory. One can inspect the content of the token by simply pasting it into
+[Debugger](https://jwt.io/) in Encoded window.
+Sample Payload:
+
+```json
+{
+  "cluster-name": "mycluster",
+  "cluster-region": "dal13",
+  "exp": 1550871343,
+  "iat": 1550871313,
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "iss": "wsched@us.ibm.com",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "namespace": "trusted-identity",
+  "pod": "myubuntu-698b749889-vvgts",
+  "sub": "wsched@us.ibm.com"
+}
+```
+
+
 Load the Vault Server with some sample polices. Review the `ti.policy.X.hcl.tpl`
 templates and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
 
@@ -169,7 +163,7 @@ templates and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) s
 $ ./demo.load-sample-policies.sh
 ```
 
-## Start the Vault client
+### Start the Vault client
 
 The vault client must be started in the cluster that has Trusted Identity installed.
 Using provided template [../vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml),
@@ -325,4 +319,67 @@ Testing access w/o token
 E02 Test successful! RT: 2
 E03 Test successful! RT: 2
 Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values
+```
+
+
+## Plugin Development
+### Getting Started
+
+This is a [Vault plugin](https://www.vaultproject.io/docs/internals/plugins.html)
+and is meant to work with Vault. This guide assumes you have already installed Vault
+and have a basic understanding of how Vault works.
+
+Otherwise, first read this guide on how to [get started with Vault](https://www.vaultproject.io/intro/getting-started/install.html).
+
+To learn specifically about how plugins work, see documentation on [Vault plugins](https://www.vaultproject.io/docs/internals/plugins.html).
+
+## Usage
+
+Please see [documentation for the plugin](https://www.vaultproject.io/docs/auth/jwt.html)
+on the Vault website.
+
+This plugin is currently built into Vault and by default is accessed
+at `auth/jwt`. To enable this in a running Vault server:
+
+```sh
+$ vault auth enable jwt
+Successfully enabled 'jwt' at 'jwt'!
+```
+
+To see all the supported paths, see the [JWT auth backend docs](https://www.vaultproject.io/docs/auth/jwt.html).
+
+## Developing the TI plugin for Vault
+
+If you wish to work on this plugin, you'll first need
+[Go](https://www.golang.org) installed on your machine.
+
+This component is the integral part of the Trusted Service Identity project, so
+please refer to installation instruction in main [README](https://github.ibm.com/kompass/TI-KeyRelease#build-and-install) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
+
+Then you can then download any required build tools by bootstrapping your
+environment:
+
+```sh
+$ make bootstrap
+```
+
+Setup dependencies (this builds `vendor` directory)
+
+```sh
+$ dep ensure
+```
+
+To compile a development version of this plugin, run `make` or `make dev`.
+This will put the plugin binary in the `bin` and `$GOPATH/bin` folders. `dev`
+mode will only generate the binary for your platform and is faster:
+
+```sh
+$ make
+$ make dev
+```
+
+Or execute `make all` to compile, build docker image and push to the artifactory repository.
+
+```sh
+$ make all
 ```
