@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
 #import threading
+import os
 import subprocess
 
 app = Flask(__name__)
@@ -38,3 +39,11 @@ def getJWKS():
         print jwks
         return str(jwks)
     return str(out)
+
+
+@app.route('/getCSR')
+def getCSR():
+    statedir = os.getenv('STATEDIR') or '/tmp'
+    with open("%s/server.csr" % statedir) as f:
+        csr = f.read().strip()
+        return str(csr)
