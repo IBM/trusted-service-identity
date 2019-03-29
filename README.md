@@ -118,6 +118,7 @@ make all -C components/gen-vault-cert/
 make all -C components/jwt-sidecar/
 make all -C components/revoker/
 make all -C components/vtpm-server/
+make all -C components/vtpm2-server/
 ```
 
 To deploy manually:
