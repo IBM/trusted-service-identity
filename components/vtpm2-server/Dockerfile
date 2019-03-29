@@ -25,9 +25,7 @@ RUN dnf -y install git openssl-devel automake autoconf libtool help2man file \
     && bash ./bootstrap.sh \
     && ./configure \
     && make -j$(nproc) \
-    && make install \
-    && cd /usr/lib64/engines-1.1 \
-    && ln -s libtpm2.so tpm2.so
+    && make install
 
 # we absolutely need python2-cryptography otherwise we may pick up the one from pip
 # and this one may cause issues
