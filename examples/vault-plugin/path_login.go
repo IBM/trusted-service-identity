@@ -2,6 +2,8 @@ package jwtauth
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"time"
@@ -37,6 +39,81 @@ func pathLogin(b *jwtAuthBackend) *framework.Path {
 		HelpSynopsis:    pathLoginHelpSyn,
 		HelpDescription: pathLoginHelpDesc,
 	}
+}
+
+func createCertFormat(s string) string {
+	return "-----BEGIN CERTIFICATE-----\n" + s + "\n-----END CERTIFICATE-----"
+}
+
+// getx5cIntermediariesPool returns the target cert and x5c cert pool based on the
+// x5c header in the JWT
+func getX5cIntermediariesPool(parsedJWT *jwt.JSONWebToken) ([]byte, *x509.CertPool, error) {
+	x509Intermediates := x509.NewCertPool()
+
+	for _, h := range parsedJWT.Headers {
+		if x5cObj, ok := h.ExtraHeaders["x5c"]; !ok {
+			continue
+		} else {
+			x5cList, ok := x5cObj.([]string)
+			if !ok {
+				return nil, nil, fmt.Errorf("Failed to cast x5c to string splice")
+			}
+			if len(x5cList) == 0 {
+				return nil, nil, fmt.Errorf("Empty x5c list")
+			}
+
+			for _, c := range x5cList {
+				ica := createCertFormat(c)
+				ok := x509Intermediates.AppendCertsFromPEM([]byte(ica))
+				if !ok {
+					return nil, nil, fmt.Errorf("Error appending certs in x5c list")
+				}
+			}
+
+			certPEM := []byte(createCertFormat(x5cList[0]))
+			return certPEM, x509Intermediates, nil
+		}
+	}
+
+	return nil, nil, fmt.Errorf("No x5c certs found")
+}
+
+// validateCertChain validates the target cert with a cert chain and a rootCA PEM
+// it returns the target cert chain as a parsed interface{} object consumable by
+// golang libraries.
+func validateCertChain(rootCAPEM []byte, targetCert []byte, x5cIntermediaries *x509.CertPool) (interface{}, error) {
+	roots := x509.NewCertPool()
+	ok := roots.AppendCertsFromPEM(rootCAPEM)
+	if !ok {
+		return nil, fmt.Errorf("Error appending root cert in x509 CertPool")
+	}
+
+	// Start Validation
+	block, _ := pem.Decode(targetCert)
+	if block == nil {
+		return nil, fmt.Errorf("failed to parse certificate PEM")
+	}
+
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse certificate: %v", err)
+	}
+
+	opts := x509.VerifyOptions{
+		Roots:         roots,
+		Intermediates: x5cIntermediaries,
+	}
+
+	_, err = cert.Verify(opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify cert: %v", err)
+	}
+
+	targetKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to convert cert bytes to key: %v", err)
+	}
+	return targetKey, nil
 }
 
 func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
@@ -84,9 +161,30 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 
 		claims := jwt.Claims{}
 
+		targetCert, x5cIntermediaries, err := getX5cIntermediariesPool(parsedJWT)
+		if err != nil {
+			x5cIntermediaries = nil
+			targetCert = nil
+		}
+
 		var valid bool
-		for _, key := range config.ParsedJWTPubKeys {
-			if err := parsedJWT.Claims(key, &claims, &allClaims); err == nil {
+		for i, key := range config.JWTValidationPubKeys {
+			var validateKey interface{}
+			// If there is a valid x5c chain, do chain validation and use the
+			// provided CA (first cert of chain as the public key) which acts
+			// as the intermediary.
+			if targetCert != nil {
+				certKey, err := validateCertChain([]byte(key), targetCert, x5cIntermediaries)
+				if err != nil {
+					validateKey = config.ParsedJWTPubKeys[i]
+				} else {
+					validateKey = certKey
+				}
+			} else {
+				validateKey = config.ParsedJWTPubKeys[i]
+			}
+
+			if err := parsedJWT.Claims(validateKey, &claims, &allClaims); err == nil {
 				valid = true
 				break
 			}
