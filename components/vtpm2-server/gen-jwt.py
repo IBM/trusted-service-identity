@@ -93,7 +93,13 @@ def main(args):
             k = s[0]
             v = ':'.join(s[1:])
             payload[k] = v
-    token = jwt.JWT(header={"alg": "RS256", "typ": "JWT", "kid": key.key_id},
+
+    statedir = os.getenv('STATEDIR') or '/tmp'
+    with open("%s/x5c" % statedir) as x:
+        x5c = x.read().strip()
+        print x5c
+
+    token = jwt.JWT(header={"alg": "RS256","x5c":x5c, "typ": "JWT", "kid": key.key_id},
                 claims=payload)
 
     token.make_signed_token(key)
