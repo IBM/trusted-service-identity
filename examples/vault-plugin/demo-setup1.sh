@@ -1,3 +1,4 @@
+vault login $ROOT_TOKEN
 vault status
 vault secrets enable pki
 # Increase the TTL by tuning the secrets engine. The default value of 30 days may
