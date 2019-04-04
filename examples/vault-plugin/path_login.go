@@ -3,7 +3,6 @@ package jwtauth
 import (
 	"context"
 	"crypto/x509"
-	"encoding/pem"
 	"errors"
 	"fmt"
 	"time"
@@ -41,83 +40,29 @@ func pathLogin(b *jwtAuthBackend) *framework.Path {
 	}
 }
 
-func createCertFormat(s string) string {
-	return "-----BEGIN CERTIFICATE-----\n" + s + "\n-----END CERTIFICATE-----"
-}
-
-// getx5cIntermediariesPool returns the target cert and x5c cert pool based on the
-// x5c header in the JWT
-func getX5cIntermediariesPool(parsedJWT *jwt.JSONWebToken) ([]byte, *x509.CertPool, error) {
-	x509Intermediates := x509.NewCertPool()
-
-    fmt.Printf("jwt: %v\n", parsedJWT)
-
-	for _, h := range parsedJWT.Headers {
-        fmt.Printf("jwt hdr: %v\n", h)
-		if x5cObj, ok := h.ExtraHeaders["x5c"]; !ok {
-            fmt.Printf("jwt hdr: no x5c header\n")
-			continue
-		} else {
-			x5cList, ok := x5cObj.([]string)
-			if !ok {
-				return nil, nil, fmt.Errorf("Failed to cast x5c to string splice")
-			}
-			if len(x5cList) == 0 {
-				return nil, nil, fmt.Errorf("Empty x5c list")
-			}
-
-			for _, c := range x5cList {
-				ica := createCertFormat(c)
-				ok := x509Intermediates.AppendCertsFromPEM([]byte(ica))
-				if !ok {
-					return nil, nil, fmt.Errorf("Error appending certs in x5c list")
-				}
-			}
-
-			certPEM := []byte(createCertFormat(x5cList[0]))
-			return certPEM, x509Intermediates, nil
-		}
-	}
-
-	return nil, nil, fmt.Errorf("No x5c certs found")
-}
-
-// validateCertChain validates the target cert with a cert chain and a rootCA PEM
-// it returns the target cert chain as a parsed interface{} object consumable by
-// golang libraries.
-func validateCertChain(rootCAPEM []byte, targetCert []byte, x5cIntermediaries *x509.CertPool) (interface{}, error) {
+// validateCertChain validates the jwt cert chain and returns the public key
+// that can validate the JWT if verifiable
+func validateCertChain(rootCAPEM []byte, jwtToken *jwt.JSONWebToken) (interface{}, error) {
 	roots := x509.NewCertPool()
 	ok := roots.AppendCertsFromPEM(rootCAPEM)
 	if !ok {
 		return nil, fmt.Errorf("Error appending root cert in x509 CertPool")
 	}
 
-	// Start Validation
-	block, _ := pem.Decode(targetCert)
-	if block == nil {
-		return nil, fmt.Errorf("failed to parse certificate PEM")
-	}
-
-	cert, err := x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse certificate: %v", err)
-	}
-
 	opts := x509.VerifyOptions{
 		Roots:         roots,
-		Intermediates: x5cIntermediaries,
+		Intermediates: nil,
 	}
 
-	_, err = cert.Verify(opts)
-	if err != nil {
-		return nil, fmt.Errorf("failed to verify cert: %v", err)
+	for _, h := range jwtToken.Headers {
+		certs, err := h.Certificates(opts)
+		if err == nil && len(certs) > 0 && len(certs[0]) > 0 {
+			fmt.Printf("Verification Success! %v\n", certs)
+			return certs[0][0].PublicKey, nil
+		}
 	}
 
-	targetKey, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to convert cert bytes to key: %v", err)
-	}
-	return targetKey, nil
+	return nil, fmt.Errorf("Unable to verify cert chain")
 }
 
 func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
@@ -164,30 +109,16 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 		}
 
 		claims := jwt.Claims{}
-
-		targetCert, x5cIntermediaries, err := getX5cIntermediariesPool(parsedJWT)
-		if err != nil {
-			x5cIntermediaries = nil
-			targetCert = nil
-            fmt.Printf("No certs in x5c")
-		}
-
 		var valid bool
 		for i, key := range config.JWTValidationPubKeys {
 			var validateKey interface{}
 			// If there is a valid x5c chain, do chain validation and use the
 			// provided CA (first cert of chain as the public key) which acts
 			// as the intermediary.
-			if targetCert != nil {
-                fmt.Printf("Validating cert chain\n")
-				certKey, err := validateCertChain([]byte(key), targetCert, x5cIntermediaries)
-				if err != nil {
-                    fmt.Printf("Couldn't validate cert chain\n")
-					validateKey = config.ParsedJWTPubKeys[i]
-				} else {
-					validateKey = certKey
-				}
-			} else {
+			validateKey, err := validateCertChain([]byte(key), parsedJWT)
+			if err != nil {
+				// If can't validate cert chain, use the rootCA public key
+				fmt.Printf("Couldn't validate cert chain\n")
 				validateKey = config.ParsedJWTPubKeys[i]
 			}
 
