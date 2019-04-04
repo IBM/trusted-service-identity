@@ -72,6 +72,7 @@ func (b *jwtAuthBackend) config(ctx context.Context, s logical.Storage) (*jwtCon
 	}
 
 	for _, v := range result.JWTValidationPubKeys {
+        fmt.Printf("Cert : %v", string(v))
 		cert, err := x509.ParseCertificate([]byte(v))
 		if err != nil {
 			return nil, errwrap.Wrapf("error parsing public cert: {{err}}", err)
