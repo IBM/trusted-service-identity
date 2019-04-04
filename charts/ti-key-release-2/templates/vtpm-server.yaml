@@ -15,7 +15,7 @@ spec:
       - name: regcred
       containers:
         - name: vtpm-server
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:{{ .Values.tiVersion }}
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm2-server:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS
