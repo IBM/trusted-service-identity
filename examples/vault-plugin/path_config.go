@@ -3,7 +3,9 @@ package jwtauth
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/pem"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"context"
@@ -72,8 +74,12 @@ func (b *jwtAuthBackend) config(ctx context.Context, s logical.Storage) (*jwtCon
 	}
 
 	for _, v := range result.JWTValidationPubKeys {
-        fmt.Printf("Cert : %v", string(v))
-		cert, err := x509.ParseCertificate([]byte(v))
+		block, _ := pem.Decode([]byte(v))
+		if block == nil {
+			return nil, fmt.Errorf("error parsing cert pem.")
+		}
+
+		cert, err := x509.ParseCertificate(block.Bytes)
 		if err != nil {
 			return nil, errwrap.Wrapf("error parsing public cert: {{err}}", err)
 		}
