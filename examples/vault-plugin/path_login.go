@@ -50,8 +50,12 @@ func createCertFormat(s string) string {
 func getX5cIntermediariesPool(parsedJWT *jwt.JSONWebToken) ([]byte, *x509.CertPool, error) {
 	x509Intermediates := x509.NewCertPool()
 
+    fmt.Printf("jwt: %v\n", parsedJWT)
+
 	for _, h := range parsedJWT.Headers {
+        fmt.Printf("jwt hdr: %v\n", h)
 		if x5cObj, ok := h.ExtraHeaders["x5c"]; !ok {
+            fmt.Printf("jwt hdr: no x5c header\n")
 			continue
 		} else {
 			x5cList, ok := x5cObj.([]string)
@@ -165,6 +169,7 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 		if err != nil {
 			x5cIntermediaries = nil
 			targetCert = nil
+            fmt.Printf("No certs in x5c")
 		}
 
 		var valid bool
@@ -174,8 +179,10 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 			// provided CA (first cert of chain as the public key) which acts
 			// as the intermediary.
 			if targetCert != nil {
+                fmt.Printf("Validating cert chain\n")
 				certKey, err := validateCertChain([]byte(key), targetCert, x5cIntermediaries)
 				if err != nil {
+                    fmt.Printf("Couldn't validate cert chain\n")
 					validateKey = config.ParsedJWTPubKeys[i]
 				} else {
 					validateKey = certKey
