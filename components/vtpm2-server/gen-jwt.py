@@ -24,6 +24,7 @@ Example:
 import argparse
 import time
 import os
+from os.path import join, exists
 
 from jwcrypto import jwt, jwk
 from EngineJWK import EngineJWK
@@ -95,15 +96,21 @@ def main(args):
             payload[k] = v
 
     statedir = os.getenv('STATEDIR') or '/tmp'
-    with open("%s/x5c" % statedir) as x:
-        x5c = x.read().strip()
-        print x5c
-
-    token = jwt.JWT(header={"alg": "RS256","x5c":x5c, "typ": "JWT", "kid": key.key_id},
-                claims=payload)
-
+    # add chain of trust
+    x5cfile = join(statedir, "x5c")
+    if exists(x5cfile):
+        try:
+            with open(x5cfile) as x:
+                x5c = x.read().strip()
+                print x5c
+                token = jwt.JWT(header={"alg": "RS256", "x5c":x5c, "typ": "JWT", "kid": key.key_id},
+                    claims=payload)
+                token.make_signed_token(key)
+                return token.serialize()
+        except:
+            print "Error opening opening x5c file"
+    token = jwt.JWT(header={"alg": "RS256", "typ": "JWT", "kid": key.key_id},claims=payload)
     token.make_signed_token(key)
-
     return token.serialize()
 
 
