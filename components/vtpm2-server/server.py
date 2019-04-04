@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request
 #import threading
 import os
+from os.path import join
 import subprocess
 
 app = Flask(__name__)
@@ -22,7 +23,8 @@ def get():
         for k in args:
             claims = claims + k + ":" + args[k] + "|"
     statedir = os.getenv('STATEDIR') or '/tmp'
-    with open("%s/tpmkeyurl" % statedir) as f:
+    tpmkeyfile = join(statedir, "tpmkeyurl")
+    with open(tpmkeyfile) as f:
         tpmkey = f.read().strip()
         print tpmkey
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer', claims])
@@ -31,10 +33,12 @@ def get():
 @app.route('/getJWKS')
 def getJWKS():
     statedir = os.getenv('STATEDIR') or '/tmp'
-    with open("%s/tpmkeyurl" % statedir) as f:
+    tpmkeyfile = join(statedir, "tpmkeyurl")
+    with open(tpmkeyfile) as f:
         tpmkey = f.read().strip()
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--jwks','/tmp/jwks.json'])
-    with open("/tmp/jwks.json") as f:
+    jwksfile = join(statedir, "jwks.json")
+    with open(jwksfile) as f:
         jwks = f.read().strip()
         print jwks
         return str(jwks)
@@ -44,6 +48,7 @@ def getJWKS():
 @app.route('/getCSR')
 def getCSR():
     statedir = os.getenv('STATEDIR') or '/tmp'
-    with open("%s/server.csr" % statedir) as f:
+    csrfile = join(statedir,"server.csr")
+    with open(csrfile) as f:
         csr = f.read().strip()
         return str(csr)
