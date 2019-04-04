@@ -11,7 +11,6 @@ import (
 	oidc "github.com/coreos/go-oidc"
 	"github.com/hashicorp/errwrap"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/vault/helper/certutil"
 	"github.com/hashicorp/vault/logical"
 	"github.com/hashicorp/vault/logical/framework"
 	"golang.org/x/oauth2"
@@ -73,11 +72,11 @@ func (b *jwtAuthBackend) config(ctx context.Context, s logical.Storage) (*jwtCon
 	}
 
 	for _, v := range result.JWTValidationPubKeys {
-		key, err := certutil.ParsePublicKeyPEM([]byte(v))
+		cert, err := x509.ParseCertificate([]byte(v))
 		if err != nil {
-			return nil, errwrap.Wrapf("error parsing public key: {{err}}", err)
+			return nil, errwrap.Wrapf("error parsing public cert: {{err}}", err)
 		}
-		result.ParsedJWTPubKeys = append(result.ParsedJWTPubKeys, key)
+		result.ParsedJWTPubKeys = append(result.ParsedJWTPubKeys, cert.PublicKey)
 	}
 
 	b.cachedConfig = result
@@ -127,11 +126,13 @@ func (b *jwtAuthBackend) pathConfigWrite(ctx context.Context, req *logical.Reque
 		}
 
 	case len(config.JWTValidationPubKeys) != 0:
+		/* TODO(lumjjb): Add checks for certs
 		for _, v := range config.JWTValidationPubKeys {
 			if _, err := certutil.ParsePublicKeyPEM([]byte(v)); err != nil {
 				return logical.ErrorResponse(errwrap.Wrapf("error parsing public key: {{err}}", err).Error()), nil
 			}
 		}
+		*/
 
 	default:
 		return nil, errors.New("unknown condition")
