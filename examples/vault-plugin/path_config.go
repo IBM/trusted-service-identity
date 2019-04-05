@@ -133,13 +133,17 @@ func (b *jwtAuthBackend) pathConfigWrite(ctx context.Context, req *logical.Reque
 		}
 
 	case len(config.JWTValidationPubKeys) != 0:
-		/* TODO(lumjjb): Add checks for certs
 		for _, v := range config.JWTValidationPubKeys {
-			if _, err := certutil.ParsePublicKeyPEM([]byte(v)); err != nil {
-				return logical.ErrorResponse(errwrap.Wrapf("error parsing public key: {{err}}", err).Error()), nil
+			block, _ := pem.Decode([]byte(v))
+			if block == nil {
+				return logical.ErrorResponse("error parsing public CA pem"), nil
+			}
+
+			_, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return logical.ErrorResponse(errwrap.Wrapf("error parsing public CA: {{err}}", err).Error()), nil
 			}
 		}
-		*/
 
 	default:
 		return nil, errors.New("unknown condition")
