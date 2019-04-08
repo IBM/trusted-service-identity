@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v0.13
+tiVersion: v0.14
 
 # Cluster Information
 cluster:
