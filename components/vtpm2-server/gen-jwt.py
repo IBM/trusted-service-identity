@@ -102,7 +102,6 @@ def main(args):
         try:
             with open(x5cfile) as x:
                 x5c = x.read().strip()
-                print x5c
                 token = jwt.JWT(header={"alg": "RS256", "x5c":x5c, "typ": "JWT", "kid": key.key_id},
                     claims=payload)
                 token.make_signed_token(key)
