@@ -26,7 +26,6 @@ def get():
     tpmkeyfile = join(statedir, "tpmkeyurl")
     with open(tpmkeyfile) as f:
         tpmkey = f.read().strip()
-        print tpmkey
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer', claims])
     return str(out)
 
@@ -40,7 +39,6 @@ def getJWKS():
     jwksfile = join(statedir, "jwks.json")
     with open(jwksfile) as f:
         jwks = f.read().strip()
-        print jwks
         return str(jwks)
     return str(out)
 
@@ -52,3 +50,23 @@ def getCSR():
     with open(csrfile) as f:
         csr = f.read().strip()
         return str(csr)
+
+@app.route('/public/postX5c', methods=["POST"])
+def postX5c():
+
+
+    error = ''
+    try:
+
+        statedir = os.getenv('STATEDIR') or '/tmp'
+        x5cfile = join(statedir, "x5c")
+        if exists(x5cfile):
+            return "File already exists."
+
+        new_x5c = request.form['x5c']
+        with open(x5cfile, "w+") as f:
+            f.write(new_x5c)
+        f.close
+    except Exception as e:
+        #flash(e)
+        return "Error "
