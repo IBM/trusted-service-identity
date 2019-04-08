@@ -3,7 +3,9 @@ package jwtauth
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/pem"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"context"
@@ -11,7 +13,6 @@ import (
 	oidc "github.com/coreos/go-oidc"
 	"github.com/hashicorp/errwrap"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/vault/helper/certutil"
 	"github.com/hashicorp/vault/logical"
 	"github.com/hashicorp/vault/logical/framework"
 	"golang.org/x/oauth2"
@@ -73,11 +74,16 @@ func (b *jwtAuthBackend) config(ctx context.Context, s logical.Storage) (*jwtCon
 	}
 
 	for _, v := range result.JWTValidationPubKeys {
-		key, err := certutil.ParsePublicKeyPEM([]byte(v))
-		if err != nil {
-			return nil, errwrap.Wrapf("error parsing public key: {{err}}", err)
+		block, _ := pem.Decode([]byte(v))
+		if block == nil {
+			return nil, fmt.Errorf("error parsing cert pem.")
 		}
-		result.ParsedJWTPubKeys = append(result.ParsedJWTPubKeys, key)
+
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, errwrap.Wrapf("error parsing public cert: {{err}}", err)
+		}
+		result.ParsedJWTPubKeys = append(result.ParsedJWTPubKeys, cert.PublicKey)
 	}
 
 	b.cachedConfig = result
@@ -128,8 +134,14 @@ func (b *jwtAuthBackend) pathConfigWrite(ctx context.Context, req *logical.Reque
 
 	case len(config.JWTValidationPubKeys) != 0:
 		for _, v := range config.JWTValidationPubKeys {
-			if _, err := certutil.ParsePublicKeyPEM([]byte(v)); err != nil {
-				return logical.ErrorResponse(errwrap.Wrapf("error parsing public key: {{err}}", err).Error()), nil
+			block, _ := pem.Decode([]byte(v))
+			if block == nil {
+				return logical.ErrorResponse("error parsing public CA pem"), nil
+			}
+
+			_, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return logical.ErrorResponse(errwrap.Wrapf("error parsing public CA: {{err}}", err).Error()), nil
 			}
 		}
 

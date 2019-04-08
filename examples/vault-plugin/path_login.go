@@ -2,6 +2,7 @@ package jwtauth
 
 import (
 	"context"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"time"
@@ -37,6 +38,31 @@ func pathLogin(b *jwtAuthBackend) *framework.Path {
 		HelpSynopsis:    pathLoginHelpSyn,
 		HelpDescription: pathLoginHelpDesc,
 	}
+}
+
+// validateCertChain validates the jwt cert chain and returns the public key
+// that can validate the JWT if verifiable
+func validateCertChain(rootCAPEM []byte, jwtToken *jwt.JSONWebToken) (interface{}, error) {
+	roots := x509.NewCertPool()
+	ok := roots.AppendCertsFromPEM(rootCAPEM)
+	if !ok {
+		return nil, fmt.Errorf("Error appending root cert in x509 CertPool")
+	}
+
+	opts := x509.VerifyOptions{
+		Roots:         roots,
+		Intermediates: nil,
+	}
+
+	for _, h := range jwtToken.Headers {
+		certs, err := h.Certificates(opts)
+		if err == nil && len(certs) > 0 && len(certs[0]) > 0 {
+			fmt.Printf("Verification Success! %v\n", certs)
+			return certs[0][0].PublicKey, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Unable to verify cert chain")
 }
 
 func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
@@ -83,10 +109,20 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 		}
 
 		claims := jwt.Claims{}
-
 		var valid bool
-		for _, key := range config.ParsedJWTPubKeys {
-			if err := parsedJWT.Claims(key, &claims, &allClaims); err == nil {
+		for i, key := range config.JWTValidationPubKeys {
+			var validateKey interface{}
+			// If there is a valid x5c chain, do chain validation and use the
+			// provided CA (first cert of chain as the public key) which acts
+			// as the intermediary.
+			validateKey, err := validateCertChain([]byte(key), parsedJWT)
+			if err != nil {
+				// If can't validate cert chain, use the rootCA public key
+				fmt.Printf("Couldn't validate cert chain\n")
+				validateKey = config.ParsedJWTPubKeys[i]
+			}
+
+			if err := parsedJWT.Claims(validateKey, &claims, &allClaims); err == nil {
 				valid = true
 				break
 			}

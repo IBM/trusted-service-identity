@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 #ibmcloud plugin install cloud-object-storage
 export PLUGIN="vault-plugin-auth-ti-jwt"
