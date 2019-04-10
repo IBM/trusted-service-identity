@@ -101,13 +101,14 @@ def main(args):
     if exists(x5cfile):
         try:
             with open(x5cfile) as x:
-                x5c = x.read().strip()
+                # serialize the given x5c as json Sring[]
+                x5c = x.read().strip()[1:-1].replace('"', '').split(',')
                 token = jwt.JWT(header={"alg": "RS256", "x5c":x5c, "typ": "JWT", "kid": key.key_id},
                     claims=payload)
                 token.make_signed_token(key)
                 return token.serialize()
         except:
-            print "Error opening opening x5c file"
+            print "Error opening/processing x5c file"
     token = jwt.JWT(header={"alg": "RS256", "typ": "JWT", "kid": key.key_id},claims=payload)
     token.make_signed_token(key)
     return token.serialize()

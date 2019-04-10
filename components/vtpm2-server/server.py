@@ -1,8 +1,6 @@
-from flask import Flask
-from flask import request
-#import threading
+from flask import Flask, request
 import os
-from os.path import join
+from os.path import join, exists
 import subprocess
 
 app = Flask(__name__)
@@ -29,6 +27,7 @@ def get():
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer', claims])
     return str(out)
 
+# to be depricated
 @app.route('/getJWKS')
 def getJWKS():
     statedir = os.getenv('STATEDIR') or '/tmp'
@@ -42,8 +41,7 @@ def getJWKS():
         return str(jwks)
     return str(out)
 
-
-@app.route('/getCSR')
+@app.route('/public/getCSR')
 def getCSR():
     statedir = os.getenv('STATEDIR') or '/tmp'
     csrfile = join(statedir,"server.csr")
@@ -53,20 +51,19 @@ def getCSR():
 
 @app.route('/public/postX5c', methods=["POST"])
 def postX5c():
-
-
-    error = ''
     try:
-
         statedir = os.getenv('STATEDIR') or '/tmp'
         x5cfile = join(statedir, "x5c")
+        # if file already exists, don't all to override it
         if exists(x5cfile):
-            return "File already exists."
-
-        new_x5c = request.form['x5c']
-        with open(x5cfile, "w+") as f:
-            f.write(new_x5c)
-        f.close
+            # return 403 Forbidden, 406 Not Accesptable or 409 Conflict
+            return "File already exists.", 403
+        if request.method == 'POST':
+            with open(x5cfile, "w+") as f:
+                f.write(request.data)
+                f.close()
+                return "Upload of x5c successful"
     except Exception as e:
+        print (e)
         #flash(e)
-        return "Error "
+        return ("Error %s" % e)
