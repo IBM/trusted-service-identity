@@ -18,8 +18,13 @@ This helm chart installs environment for Trusted Identity
     createVaultCert: {{ index .Values "ti-key-release-1" "createVaultCert" }}
 
   vTPM service is available from any container in the {{ index .Values "ti-key-release-1" "namespace" }} namespace
-  To get JWKS:
+  To get JWKS (to be depricated):
     curl http://{{ index .Values "ti-key-release-1" "vtpmService" "name" }}:{{ index .Values "ti-key-release-1" "vtpmService" "port" }}/getJWKS
+  To get CSR:
+    curl http://{{ index .Values "ti-key-release-1" "vtpmService" "name" }}:{{ index .Values "ti-key-release-1" "vtpmService" "port" }}/public/getCSR
+
+  Ingress allows a public access to vTPM CSR:
+    curl http://{{ index .Values "ti-key-release-1" "ingress" "host" }}:{{ index .Values "ti-key-release-1" "ingress" "path" }}public/getCSR 
 
 Execute test:
   kubectl create -f examples/myubuntu.yaml -n trusted-identity

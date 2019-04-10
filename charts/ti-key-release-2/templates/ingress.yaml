@@ -1,0 +1,16 @@
+{{- if index .Values "ti-key-release-1" "ingress" "enabled" -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: vtpm-ingress
+  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
+spec:
+  rules:
+  - host: {{ index .Values "ti-key-release-1" "ingress" "host" }}
+    http:
+      paths:
+        - path: {{ index .Values "ti-key-release-1" "ingress" "path" }}
+          backend:
+            serviceName: {{ index .Values "ti-key-release-1" "vtpmService" "name" }}
+            servicePort: {{ index .Values "ti-key-release-1" "vtpmService" "port" }}
+{{- end }}

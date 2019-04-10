@@ -30,6 +30,16 @@ ti-key-release-1:
   vtpmService:
     name: vtpm-service
     port: 8012
+  # ingress - some vTPM calls are publicly available via ingress
+  ingress:
+    enabled: true
+    path: /
+    # host: specify here the access to the ingress
+    # for IKS: `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
+    # for ICP: set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
+    host:
+    #  - mycluster.eu-de.containers.appdomain.cloud
+
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands

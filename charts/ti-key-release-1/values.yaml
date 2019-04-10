@@ -19,10 +19,20 @@ jwt:
   expireSec: 30
   issuer: wsched@us.ibm.com
 
-# vtpmService - vTPM Service is accessable only from within the namespace
+# vtpmService - main vTPM Service is accessable only from within the namespace
 vtpmService:
   name: vtpm-service
   port: 8012
+
+# ingress - some vTPM calls are publicly available via ingress
+ingress:
+  enabled: true
+  path: /
+  # host: specify here the access to the ingress
+  # for IKS: `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
+  # for ICP: set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
+  host:
+  #  - mycluster.eu-de.containers.appdomain.cloud
 
 # createVaultCert - if true, unique certs will be created
 # during Init Containers and inserted to Vault
