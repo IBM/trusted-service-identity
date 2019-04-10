@@ -8,32 +8,45 @@ helpme()
 {
   cat <<HELPMEHELPME
 
-Syntax: ${0} <token> <vault_addr>
+Syntax: ${0} <vault_token> <vault_addr> <vtpm_addr>
 Where:
   token      - vault root token to setup the plugin
-  vault_addr - vault address in format http://vault.server:8200
+  vault_addr - vault address (or ingress) in format http://vault.server:8200
+  vtpm_addr  - vtpm address (or ingress) in format http://vtpm.server
+
+Currently:
+   ROOT_TOKEN=${ROOT_TOKEN}
+   VAULT_ADDR=${VAULT_ADDR}
+   VTPM_ADDR=${VTPM_ADDR}
 
 HELPMEHELPME
 }
 
-setupVault()
+register()
 {
+  # first obtain CSR from vTPM.
+  curl ${VTPM_ADDR}/public/getCSR > vtpm.csr
+
   echo "Root Token: ${ROOT_TOKEN}"
   vault login ${ROOT_TOKEN}
   # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
   export VAULT_TOKEN=
 
   # Obtain the CSR from vTPM. Connect to any container deployed in `trusted-identity`
-  # namespace and get it using `curl http://vtpm-service:8012/getCSR` vtpm.csr
+  # namespace and get it using `curl http://vtpm-service:8012/getCSR` > vtpm.csr
+  # NOT THIS: curl localhost:5000/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
 
   #vault write pki/root/sign-intermediate csr=@vtpm.csr format=pem_bundle ttl=43800h
 
-  vault write pki/root/sign-intermediate csr=@vtpm.csr format=pem_bundle ttl=43800h -format=json > out
+  # create a certificate for 50 years
+  vault write pki/root/sign-intermediate csr=@vtpm.csr format=pem_bundle ttl=438000h -format=json > out
   CERT=$(cat out | jq -r '.["data"].certificate' | grep -v '\-\-\-')
   CHAIN=$(cat out | jq -r '.["data"].issuing_ca' | grep -v '\-\-\-')
   echo "[\"${CERT}\",\"${CHAIN}\"]" > x5c
 
   cat x5c
+  RESP=$(curl -X POST -H "Content-Type: application/json" -d @x5c ${VTPM_ADDR}/public/postX5c)
+  echo $RESP
 
   # Take both output certificates, comma separated move to JSS as 'x5c' format:
   # based on spec: https://tools.ietf.org/html/rfc7515#appendix-B
@@ -48,14 +61,17 @@ fi
 if [ ! "$2" == "" ] ; then
   export VAULT_ADDR=$2
 fi
+if [ ! "$3" == "" ] ; then
+  export VTPM_ADDR=$3
+fi
 
 # validate the arguments
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
 #check if token exists:
-elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
-  echo "ROOT_TOKEN or VAULT_ADDR not set"
+elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" || "$VTPM_ADDR" == "" ]] ; then
+  echo "ROOT_TOKEN, VAULT_ADDR or VTPM_ADDR not set"
   helpme
 else
-  setupVault $1 $2
+  register
 fi
