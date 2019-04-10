@@ -194,13 +194,20 @@ Your new helm charts are ready to deploy.
 TI helm charts are included with this repo under [charts/](./charts/) directory.
 You can use them directly or use the charts that you just created above.
 
-In order to setup your Trusted Identity environment, provide the cluster information
-during the helm install. Replace X.X.X with a proper version numbers.
+The following information is required to deploy TI helm charts:
+* cluster name - name of the cluster. This should correspond to actual name of the cluster
+* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
+in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
+command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
+
+Replace X.X.X with a proper version numbers.
 
 ```console
 helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
---set ti-key-release-1.cluster.name=mycluster-name \
---set ti-key-release-1.cluster.region=dal01
+--set ti-key-release-1.cluster.name=ti-fra02 \
+--set ti-key-release-1.cluster.region=eu-de \
+--set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
 ```
 
 Complete list of available setup parameters can be obtained as follow:
@@ -213,15 +220,33 @@ helm upgrade -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 ```
 
 ### Testing Deployment
-Once environment deployed, execute a test by deploying the following file:
-```console
+Once environment deployed, follow the output dynamically created by helm install:
+
+For example:
+
+```
+Ingress allows a public access to vTPM CSR:
+  curl http://ti-fra02.eu-de.containers.appdomain.cloud:/public/getCSR
+
+$ curl http://ti-fra02.eu-de.containers.appdomain.cloud:/public/getCSR
+  -----BEGIN CERTIFICATE REQUEST-----
+  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
+  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
+  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
+  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
+  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
+  -----END CERTIFICATE REQUEST-----
+
+Execute test:
+    kubectl create -f examples/myubuntu.yaml -n trusted-identity
 kubectl -n trusted-identity create -f examples/myubuntu.yaml
 kubectl -n trusted-identity get pods
-kubectl -n trusted-identity exec -it {pod_id} /bin/bash
+kubectl -n trusted-identity exec -it {pod_id} cat /jwt-tokens/token
 ```
-The main container `myubuntu` should have a JWT token in `/jwt-tokens`
 
 ### Sample JWT claims
+One can inspect the content of the token by simply pasting it contant into
+[Debugger](https://jwt.io/) in Encoded window.
 
 ```json
 {
@@ -236,14 +261,6 @@ The main container `myubuntu` should have a JWT token in `/jwt-tokens`
   "pod": "myubuntu-698b749889-m9xz9",
   "sub": "wsched@us.ibm.com"
 }
-```
-
-### Obtain JWKS
-In order to obtain the public JWKS in PEM format for JWT signature validation, execute call to
-vTPM Server. Access to the server is available from any container in
-the trusted-identity namespace:
-```console
-  curl http://vtpm-service:8012/getJWKS
 ```
 
 ### Run Sample Demo
@@ -315,8 +332,9 @@ either via CLI:
 
 ```console
 helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
---set ti-key-release-1.cluster.name=mycluster-name \
---set ti-key-release-1.cluster.region=dal01 \
+--set ti-key-release-1.cluster.name=ti-fra02 \
+--set ti-key-release-1.cluster.region=eu-de \
+--set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
 --set ti-key-release-1.createVaultCert=true
 ```
 or by modifying the configuration values:
@@ -325,16 +343,6 @@ helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
 # modify config.yaml with ti-key-release-1.createVaultCert=true
 helm install -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 ```
-### Testing Deployment
-Once environment deployed, execute a test by deploying the following file:
-```console
-kubectl -n trusted-identity create -f examples/myubuntu.yaml
-kubectl -n trusted-identity get pods
-kubectl -n trusted-identity exec -it {pod_id} /bin/bash
-```
-The main container `myubuntu` should have a new key and certificate in `/vault-certs` directory
-for accessing the Vault and JWT token in `/jwt-tokens`
-
 
 ## Create your own private key and public JSON Web Key Set (JWKS)
 Before enabling the JWT policy in Istio, you need to first create a private key
