@@ -45,18 +45,40 @@ create your own images, follow the steps to [build](../README.md#build-and-insta
 
 ## Deploy TI framework
 Follow the [steps](../README.md#ti-key-release-helm-deployment) to setup `regcred`
-secret, then deploy TI. Make sure to specify a cluster name and region.
+secret, then deploy TI.
+The following information is required to deploy TI helm charts:
+* cluster name - name of the cluster. This should correspond to actual name of the cluster
+* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
+in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
+command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
 
-Example:
+Example. Replace X.X.X with a proper version numbers.
 
 ```console
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-demo \
---set ti-key-release-1.cluster.name=EUcluster \
---set ti-key-release-1.cluster.region=eu-de
+helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+--set ti-key-release-1.cluster.name=ti-fra02 \
+--set ti-key-release-1.cluster.region=eu-de \
+--set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
 ```
 
-Once successful, try to deploy a sample pod:
+Once environment deployed, follow the output dynamically created by helm install:
+Test if you can obtain CSR from vTPM:
 
-```console
+```
+Ingress allows a public access to vTPM CSR:
+  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
+
+$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
+  -----BEGIN CERTIFICATE REQUEST-----
+  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
+  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
+  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
+  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
+  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
+  -----END CERTIFICATE REQUEST-----
+
+Try to deploy a sample pod:
+
 kubectl create -f examples/myubuntu.yaml -n trusted-identity
 ```

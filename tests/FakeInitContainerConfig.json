@@ -2,7 +2,7 @@
     "InitContainers": [
         {
             "name": "gen-vault-cert",
-            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.13",
+            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.14",
             "resources": {},
             "volumeMounts": [
                 {
@@ -43,7 +43,7 @@
     "SidecarContainers": [
         {
             "name": "jwt-sidecar",
-            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.13",
+            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.14",
             "command": [
                 "/bin/sh",
                 "-c",

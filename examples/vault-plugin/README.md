@@ -47,9 +47,38 @@ ibmcloud ks clusters
 # then use the cluster name to get the Ingress info:
 ibmcloud ks cluster-get <cluster_name> | grep Ingress
 ```
+Before starting a new ingress deployment, make sure there is not other ingress deployed
+in this namespace. Typical TI deployment already has an ingress running to support
+access to vTPM service.
+Check if the `vtpm-ingress` is created:
 
-Build an ingress file from `ingress-IKS.template.yaml`, using the `Ingress Subdomain` information
- obtained above:
+```
+kubectl -n trusted-identity get ingress vtpm-ingress
+# if the ingress already exists, dump it to the local file
+kubectl -n trusted-identity get ingress vtpm-ingress -o yaml > ti-ingress.yaml
+```
+
+If exists, append the section for `ti-vault`. It should look like this:
+```
+. . .
+http:
+  paths:
+  - backend:
+      serviceName: vtpm-service
+      servicePort: 8012
+    path: /public
+  - backend:
+      serviceName: ti-vault
+      servicePort: 8200
+    path: /
+```
+Then just apply the update:
+
+```
+kubectl -n trusted-identity apply -f ti-ingress.yaml
+```
+If the ingress does not exist, build an ingress file from `ingress-IKS.template.yaml`,
+using the `Ingress Subdomain` information obtained above:
 ```yaml
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -74,50 +103,36 @@ create ingress:
 kubectl -n trusted-identity create -f ingress-IKS.yaml
 ```
 
-Test the connection:
+Test the connection to vault:
 ```console
 $ curl  http://<Ingress Subdomain or ICP master IP>/
 <a href="/ui/">Temporary Redirect</a>.
 ```
 At this point, this is an expected result.
 
+Test the connection to vTPM:
+```console
+$ curl  http://<Ingress Subdomain or ICP master IP>/public/getCSR
+  -----BEGIN CERTIFICATE REQUEST-----
+  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
+  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
+  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
+  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
+  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
+  -----END CERTIFICATE REQUEST-----
+```
+
+
 ### Configure Vault Plugin
+To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
+installation.
 
-#### Obtain public JWKS for each vTPM deployment
-For every deployment of vTPM, obtain JWKS to configure Vault Plugin.
-
-In order to obtain JWKS, connect to any container deployed in the same
-`trusted-identity` namespace as vTPM and get it using `curl http://vtpm-service:8012/getJWKS`.
-
-Or get it directly from vTPM server:
-
-```console
-$ alias k="kubectl -n trusted-identity"
-$ k exec -it $(k get po | grep vtpm-server | awk '{print $1}') /bin/bash
-[root@vtpm-server-5d6fc78c8b-vjm8f /]#
-
-```
-Get the public JWKS Pem, with encoded end-of-line:
-```console
-[root@vtpm-server-5d6fc78c8b-vjm8f /]# curl localhost:5000/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
-```
-
-Copy the `jwks.json` to your development machine where you have cloned this repo,
-to complete the Vault plugin setup.
-
-NOTE: If you have multiple clusters, each running different vTPM, copy the PEMs
-into a single `jwks.json` file, comma separating the values.
-
-For example `jwks.json`:
-
-```json
-{ "jwt_validation_pubkeys": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCvNxV+00o5HDc55lHGf74eoMNl\n644gqQiDMvimhygqU/Wg/LNKPvG8Y2hE6qNad3BWgZ4D2rpgFIQdThq7OsZnifbA\ngaML1YtUqOFh3fRGc27PmjTB9zKWAr7qQuxp1GKF+4IeRFjnuUkNN6SDcUgRB4+G\n5HzPdQq0txWhwWh5pwIDAQAB\n-----END PUBLIC KEY-----\n,-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCeud9RtyWaAq2WD/W3d/IYCx5S\n2A26dr0jb+vxPVQpdMy+sQRynTfCkR3tXom7sUfddwCEvck/CwHUbwMOfIfJ+JFR\nrmqvIedxHtPE6GbUuZsmjB2S1zrI5rk12TyzHaGEmxkxmuVa2lWnoqDvrL4mYH1a\nUvHejrAU0yCp+At8FQIDAQAB\n-----END PUBLIC KEY-----\n,-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsGsE1gzyRW69P+qzRA6OfE45H\nTrX5863tBKr/lPF++cowSobfKFo8SvvmR9u1AKwwZHHhsy6G3Gu61YWQcBLNuGfd\nYhZX6acSWCWw5P41cUY+ubUWnMnENW07BS6hmdoMteh5UnDfPZ9FgQEf5REyPHZK\nk86g36f24c0BsyxxTwIDAQAB\n-----END PUBLIC KEY-----" }
-
-```
+### Vault Setup
 
 Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
 
 ```sh
+$ alias k="kubectl -n trusted-identity"
 $ export ROOT_TOKEN=$(k logs $(k get po | grep ti-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
 ```
 
@@ -126,15 +141,46 @@ Assign the Vault address (using Ingress tested above):
 ```sh
 $ export VAULT_ADDR=http://<vault_address>
 ```
-Once you have `ROOT_TOKEN` and `VAULT_ADDR` environment variables defined, execute
-the Vault plugin setup script.
+Once you have `ROOT_TOKEN` and `VAULT_ADDR` environment variables defined, test
+the connection
+
+```sh
+vault login $ROOT_TOKEN
+vault status
+```
+
+ Then execute the Vault plugin setup script.
 
 ```sh
 $ ./demo.vault-setup.sh
 ```
 
+
+### vTPM registration with Vault
+Once the Vault is setup and the plugin enabled, it is time to register each
+TI cluster (vTPM) with Vault.
+
+By now, you should have ROOT_TOKEN and VAULT_ADDR setup completed. Now we need
+the VTPM_ADDR for each cluster (individual vTPM). This the ingress associated
+with the cluster.
+
+e.g:
+```
+export VTPM_ADDR=http://ti-fra02.eu-de.containers.appdomain.cloud
+```
+
+Than execute the registration:
+
+```sh
+$ ./demo.registerJSS.sh
+. . . .
+Upload of x5c successful
+```
+Repeat this for each vTPM that is using this Vault service.
+
+
 ### Define sample policies and roles
-Policies are structured as paths for keys based on claims provided in JWT. 
+Policies are structured as paths for keys based on claims provided in JWT.
 By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
 directory. One can inspect the content of the token by simply pasting it into
 [Debugger](https://jwt.io/) in Encoded window.

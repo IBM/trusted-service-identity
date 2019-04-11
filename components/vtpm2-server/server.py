@@ -1,8 +1,6 @@
-from flask import Flask
-from flask import request
-#import threading
+from flask import Flask, request
 import os
-from os.path import join
+from os.path import join, exists
 import subprocess
 
 app = Flask(__name__)
@@ -26,10 +24,10 @@ def get():
     tpmkeyfile = join(statedir, "tpmkeyurl")
     with open(tpmkeyfile) as f:
         tpmkey = f.read().strip()
-        print tpmkey
     out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer', claims])
     return str(out)
 
+# to be depricated
 @app.route('/getJWKS')
 def getJWKS():
     statedir = os.getenv('STATEDIR') or '/tmp'
@@ -40,15 +38,32 @@ def getJWKS():
     jwksfile = join(statedir, "jwks.json")
     with open(jwksfile) as f:
         jwks = f.read().strip()
-        print jwks
         return str(jwks)
     return str(out)
 
-
-@app.route('/getCSR')
+@app.route('/public/getCSR')
 def getCSR():
     statedir = os.getenv('STATEDIR') or '/tmp'
     csrfile = join(statedir,"server.csr")
     with open(csrfile) as f:
         csr = f.read().strip()
         return str(csr)
+
+@app.route('/public/postX5c', methods=["POST"])
+def postX5c():
+    try:
+        statedir = os.getenv('STATEDIR') or '/tmp'
+        x5cfile = join(statedir, "x5c")
+        # if file already exists, don't all to override it
+        if exists(x5cfile):
+            # return 403 Forbidden, 406 Not Accesptable or 409 Conflict
+            return "File already exists.", 403
+        if request.data and len(request.data) > 0:
+            with open(x5cfile, "w+") as f:
+                f.write(request.data)
+                f.close()
+                return "Upload of x5c successful"
+    except Exception as e:
+        print (e)
+        #flash(e)
+        return ("Error %s" % e), 500

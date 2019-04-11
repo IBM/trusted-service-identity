@@ -25,7 +25,7 @@ ingress:
   path: /
   # hosts: specify here the access to the ingress
   # for IKS: `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-  # for CIP, keep the hosts empty and use IPs directly (typically master or proxy IP)
+  # for ICP: set ingress enabled to false, keep the hosts empty and use IPs directly (typically master or proxy IP)
   hosts:
   #  - mycluster.eu-de.containers.appdomain.cloud
   tls: []

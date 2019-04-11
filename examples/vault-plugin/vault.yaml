@@ -30,5 +30,5 @@ spec:
       - name: regcred
       containers:
         - name: ti-vault
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-vault:v0.1
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-vault:v0.2
           imagePullPolicy: Always

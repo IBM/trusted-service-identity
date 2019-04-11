@@ -22,8 +22,10 @@ def get():
             claims = claims + k + ":" + args[k] + "|"
     with open("/tmp/tpmkeyurl") as f:
         tpmkey = f.read().strip()
-        print tpmkey
-    out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer', claims])
+    with open("/tmp/x5c") as x:
+        x5c = x.read().strip()
+
+    out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',tpmkey,'--iss','example-issuer','--x5c',x5c,claims])
     return str(out)
 
 @app.route('/getJWKS')
