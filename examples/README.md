@@ -67,9 +67,9 @@ Test if you can obtain CSR from vTPM:
 
 ```
 Ingress allows a public access to vTPM CSR:
-  curl http://ti-fra02.eu-de.containers.appdomain.cloud:/public/getCSR
+  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
 
-$ curl http://ti-fra02.eu-de.containers.appdomain.cloud:/public/getCSR
+$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
   -----BEGIN CERTIFICATE REQUEST-----
   MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
   KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc

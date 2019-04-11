@@ -58,7 +58,7 @@ def postX5c():
         if exists(x5cfile):
             # return 403 Forbidden, 406 Not Accesptable or 409 Conflict
             return "File already exists.", 403
-        if request.method == 'POST':
+        if request.data and len(request.data) > 0:
             with open(x5cfile, "w+") as f:
                 f.write(request.data)
                 f.close()
@@ -66,4 +66,4 @@ def postX5c():
     except Exception as e:
         print (e)
         #flash(e)
-        return ("Error %s" % e)
+        return ("Error %s" % e), 500
