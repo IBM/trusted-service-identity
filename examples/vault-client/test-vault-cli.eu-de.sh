@@ -1,7 +1,26 @@
 #!/bin/bash
 
+# Trusted Servie Identiy plugin name
 export PLUGIN="vault-plugin-auth-ti-jwt"
-export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
+# test image name
+export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
+export IMGSHA=
+# export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
+
+# sha-256 encoded file name based on the OS:
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+  # Linux
+  IMGSHA=$(echo -n "$IMG" | sha256sum | awk '{print $1}')
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+  # POSIX compatibility layer and Linux environment emulation for Windows
+  IMGSHA=
+else
+  # Unknown.
+  IMGSHA=
+fi
 
 test()
 {
