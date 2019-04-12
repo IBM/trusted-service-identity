@@ -4,7 +4,6 @@
 export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image name
 export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
-export IMGSHA=
 # export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
 
 # sha-256 encoded file name based on the OS:
@@ -14,12 +13,10 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Mac OSX
   IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')
-elif [[ "$OSTYPE" == "cygwin" ]]; then
-  # POSIX compatibility layer and Linux environment emulation for Windows
-  IMGSHA=
 else
   # Unknown.
-  IMGSHA=
+  echo "Unsupported plaftorm to execute this test. Set the IMGSHA environment"
+  echo "variable to represent sha 256 encoded name of the test image"
 fi
 
 ## create help menu:
@@ -35,6 +32,9 @@ HELPMEHELPME
 
 loadVault()
 {
+  if [[ "$IMGSHA" == "" ]]; then
+    return 1
+  fi
 
   #docker run -d --name=dev-vault -v ${PWD}/local.json:/vault/config/local.json -v ${PWD}/pkg/linux_amd64/${PLUGIN}:/plugins/${PLUGIN} -p 127.0.0.1:8200:8200/tcp vault
   echo "Root Token: ${ROOT_TOKEN}"
