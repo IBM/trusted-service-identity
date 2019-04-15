@@ -1,7 +1,23 @@
 #!/bin/bash
 
+# Trusted Servie Identiy plugin name
 export PLUGIN="vault-plugin-auth-ti-jwt"
-export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
+# test image name
+export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
+# export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
+
+# sha-256 encoded file name based on the OS:
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+  # Linux
+  IMGSHA=$(echo -n "$IMG" | sha256sum | awk '{print $1}')
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')
+else
+  # Unknown.
+  echo "Unsupported plaftorm to execute this test. Set the IMGSHA environment"
+  echo "variable to represent sha 256 encoded name of the test image"
+fi
 
 test()
 {
@@ -44,6 +60,10 @@ HELPMEHELPME
 
 tests()
 {
+  if [[ "$IMGSHA" == "" ]]; then
+    return 1
+  fi
+
   echo "Testing the default $VAULT_ROLE role: "
   #export TOKEN=$(cat /jwt-tokens/token)
   #export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${VAULT_ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
