@@ -96,7 +96,7 @@ make docker
 ```
 
 In order to push the image to public Artifactory registry, you need to obtain an
-access and create an [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key). The repository name is `res-kompass-kompass-docker-local.artifactory.swg-devops.com`
+access and create an [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key) from [https://na.artifactory.swg-devops.com/artifactory/webapp/#/home](https://na.artifactory.swg-devops.com/artifactory/webapp/#/home). The repository name is `res-kompass-kompass-docker-local.artifactory.swg-devops.com`
 
 Execute the docker login and push the image:
 
