@@ -166,7 +166,8 @@ Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and A
 (This needs to be done every-time the new namespace is created)
 
 ```console
-kubectl -n trusted-identity create secret docker-registry regcred \ --docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com
+kubectl -n trusted-identity create secret docker-registry regcred \ 
+--docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com \
 --docker-username=user@ibm.com \
 --docker-password=${API_KEY} \
 --docker-email=user@ibm.com
