@@ -62,13 +62,15 @@ helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
 ```
 
-Once environment deployed, follow the output dynamically created by helm install:
-Test if you can obtain CSR from vTPM:
+Once environment deployed, follow the output dynamically created by helm install and test if you can obtain CSR from vTPM. 
+Here is the sample from above example
 
 ```
 Ingress allows a public access to vTPM CSR:
   curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-
+```
+Try it:
+```
 $ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
   -----BEGIN CERTIFICATE REQUEST-----
   MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
@@ -78,7 +80,10 @@ $ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
   PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
   -----END CERTIFICATE REQUEST-----
 
+```
+
 Try to deploy a sample pod:
 
+```
 kubectl create -f examples/myubuntu.yaml -n trusted-identity
 ```
