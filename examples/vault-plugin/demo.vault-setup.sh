@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 #ibmcloud plugin install cloud-object-storage
 export PLUGIN="vault-plugin-auth-ti-jwt"
@@ -50,6 +50,7 @@ setupVault()
       ttl=876000h -format=json)
   echo "$OUT"
 
+  # capture the public key as plugin-config.json
   CERT=$(echo "$OUT" | jq -r '.["data"].issuing_ca'| awk '{printf "%s\\n", $0}')
   echo "{ \"jwt_validation_pubkeys\": \"${CERT}\" }" > ${CONFIG}
 
@@ -61,6 +62,7 @@ setupVault()
   # otherwise, you can obtain it by going directly to the vault server:
   # export SHA256=$(kubectl -n trusted-identity exec $(kubectl -n trusted-identity get po | grep ti-vault-| awk '{print $1}') /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
 
+  # register the trusted-identity plugin
   vault write sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt sha_256="${SHA256}" command="vault-plugin-auth-ti-jwt"
   RT=$?
   if [ $RT -ne 0 ] ; then
@@ -68,6 +70,7 @@ setupVault()
      exit 1
   fi
   vault read sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt -format=json
+  # then enable this plugin
   vault auth enable -path="trusted-identity" -plugin-name="vault-plugin-auth-ti-jwt" plugin
   RT=$?
   if [ $RT -ne 0 ] ; then
