@@ -26,9 +26,19 @@ register()
 {
   # first obtain CSR from vTPM.
   curl ${VTPM_ADDR}/public/getCSR > vtpm.csr
-
+  if [[ $(cat vtpm.csr) == *errors* ]] ; then
+    echo "Invalid CRS from vTPM. Please make sure your Ingress is correctly set."
+    echo "Test it via: 'curl ${VTPM_ADDR}/public/getCSR'"
+    exit 1
+  fi
   echo "Root Token: ${ROOT_TOKEN}"
   vault login ${ROOT_TOKEN}
+  RT=$?
+  if [ $RT -ne 0 ] ; then
+     echo "ROOT_TOKEN is not correctly set"
+     echo "ROOT_TOKEN=${ROOT_TOKEN}"
+     exit 1
+  fi
   # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
   export VAULT_TOKEN=
 
