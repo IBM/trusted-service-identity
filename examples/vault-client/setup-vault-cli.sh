@@ -1,5 +1,9 @@
 #!/bin/bash
-TOKENFILE=/jwt-tokens/token
+JWTFILE=/jwt-tokens/token
+if [ ! -s "$JWTFILE" ]; then
+   echo "$JWTFILE does not exist. Make sure Trusted Identity is setup correctly"
+   exit 1
+fi
 
 ## create help menu:
 helpme()
@@ -22,7 +26,7 @@ getToken()
    export ROLE="$1"
  fi
 
- export TOKEN=$(cat ${TOKENFILE})
+ export TOKEN=$(cat ${JWTFILE})
  export RESP=$(curl -s --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login)
  export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
  if [ "$VAULT_TOKEN" == "null" ] ; then
@@ -35,9 +39,6 @@ getToken()
 # validate the arguments
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
-#check if token exists:
-elif [ ! -f "$TOKENFILE" ]; then
-  echo "Token file $TOKENFILE is missing"
 else
   getToken
 fi
