@@ -24,6 +24,6 @@ spec:
           env:
             - name: VAULT_ADDR
               # provide the public access to the Vault server with TI plugin
-              # value: "http://mycluster.eu-de.containers.appdomain.cloud:8200"
+            # value: "http://mycluster.eu-de.containers.appdomain.cloud:80"
             - name: VAULT_ROLE
               value: "demo"

@@ -224,7 +224,7 @@ Once the pod is operational, get inside to run some testing.
 
 ```console
 $ kubectl -n trusted-identity get pods
-$ kubectl -n trusted-identity vault-cli-xxxx /bin/bash
+$ kubectl -n trusted-identity exec -it vault-cli-xxxx /bin/bash
 ```
 To login and obtain the Vault access token associated with a default TI role `demo`,
 source the `setup-vault-cli.sh`:

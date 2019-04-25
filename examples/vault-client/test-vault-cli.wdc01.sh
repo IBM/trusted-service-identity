@@ -5,6 +5,11 @@ export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image name
 export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
 # export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
+# make sure that JWT file exists
+if [ ! -s "$JWTFILE" ]; then
+   echo "$JWTFILE does not exist. Make sure Trusted Identity is setup correctly"
+   exit 1
+fi
 
 # sha-256 encoded file name based on the OS:
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
@@ -37,7 +42,7 @@ fi
 login()
 {
 local ROLE=$1
-local TOKEN=$(cat /jwt-tokens/token)
+local TOKEN=$(cat $JWTFILE)
 local RESP=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login 2> /dev/null)
 local RT=$?
 if [ "$RT" == "0" ]; then
