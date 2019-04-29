@@ -53,6 +53,13 @@ The following information is required to deploy TI helm charts:
 in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
 command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
 
+*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
+the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
+As a quick fix you can do a following (see [this](https://cloud.ibm.com/docs/containers?topic=containers-cs_versions#112_before) for more details):
+
+```console
+kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
+```
 Example. Replace X.X.X with a proper version numbers.
 
 ```console
