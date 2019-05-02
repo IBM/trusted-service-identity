@@ -14,23 +14,8 @@ in form of a JSON Web Token (JWT) as a digital biometric identity that is bound
 to the process and signed by a chain of trust that originates from
 physical hardware. Secrets are released to the application based on this identity.
 
-Optionally, TI can additionally create a unique set of a certificate and private
-key that is automatically registered with Vault service. For more information about
-this option, read the [Create Vault Certificate](./README.md#create-vault-certificate)
-chapter below.  
+# Clone this repository
 
-Detailed description of the *TI demo* is available [here](examples/README.md)
-
-## Prerequisites
-
-1. Make sure you have an IBM Cloud (formerly Bluemix) account and you have the [IBM Cloud CLI](https://console.bluemix.net/docs/cli/reference/bluemix_cli/get_started.html#getting-started) installed
-2. Make sure you have a running kubernetes cluster, e.g.
-[IBM Container service](https://console.bluemix.net/docs/containers/container_index.html#container_index) or [minikube](https://github.com/kubernetes/minikube) and that kubectl is configured to access that cluster. Test the access with
-```console
-kubectl get pods --all-namespaces
-```
-
-## Build and Install
 Clone this project in a local directory, in your GOPATH
 
 ```console
@@ -43,6 +28,175 @@ cd TI-KeyRelease
 If you cannot clone the project with the git ssh protocol, make sure [you add your
 ssh public key to your IBM GitHub Enterprise Account](https://help.github.com/enterprise/2.13/user/articles/adding-a-new-ssh-key-to-your-github-account/).
 
+## Index
+- [Prerequisites](./README.md#prerequisites)
+- [Install Trusted Service Identity framework](./REAMDE.md#install-trusted-service-identity-framework)
+- [Develop Trusted Service Identity](./REAMDE.md#develop-trusted-service-identity)
+- [Demos and Examples](examples/README.md)
+- [Application Developer Guide](examples/README-AppDeveloper.md)
+- [Automated Vault Certificate Management](./REAMDE.md#automate-vault-certificates)
+
+## Prerequisites
+Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](www.ibm.com/Kubernetes/Service‎),
+[IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube)
+1. Make sure the Kuberenetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
+1. Make sure the `KUBECONFIG` is properly set and you can access the cluster. Test the access with
+```console
+export KUBECONFIG=<location of your kubernetes config. files, as per documentation for your cluster>
+kubectl get pods --all-namespaces
+```
+
+### Install and initialize Helm environment
+This project requires Helm v2.10.0 or higher.
+
+Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
+```bash
+  brew install kubernetes-helm
+  # or to upgrade the existing helm
+  brew upgrade kubernetes-helm
+  # then initialize (assuming your KUBECONFIG for the current cluster is already setup)
+  helm init
+```
+
+### Setup access to installation images
+Currently the images for Trusted Identity project are stored in Artifactory. In order to
+use them, user has to be authenticated. You must obtain the [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key)
+as described here. Simply generate one [here](https://na.artifactory.swg-devops.com/artifactory/webapp/#/profile)
+
+Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
+(This needs to be done every-time the new namespace is created)
+
+```console
+kubectl -n trusted-identity create secret docker-registry regcred \ --docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com
+--docker-username=user@ibm.com \
+--docker-password=${API_KEY} \
+--docker-email=user@ibm.com
+
+# to check your secret:
+kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+```
+or update the [init-namespace.sh](./init-namespace.sh) script.
+
+The deployment is done in `trusted-identity` namespace. If you are testing or developing
+the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
+This would remove all the components and artifacts, then recreate a new, empty namespace:
+
+```console
+./cleanup.sh
+./init-namespace.sh
+```
+
+
+## Install Trusted Service Identity framework
+Make sure all the [prerequisites](./README.md#prerequisites) are satisfied.
+
+### Deploy Helm charts
+TI helm charts are included with this repo under [charts/](./charts/) directory.
+You can use them directly or use the charts that you created (see instructions below).
+
+The following information is required to deploy TI helm charts:
+* cluster name - name of the cluster. This should correspond to actual name of the cluster
+* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
+in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
+command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
+
+*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
+the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
+Running the helm install there might cause a following error:
+```
+Error: customresourcedefinitions.apiextensions.k8s.io "clustertis.trusted.identity" is forbidden: User "system:serviceaccount:kube-system:default" cannot delete resource "customresourcedefinitions" in API group "apiextensions.k8s.io" at the cluster scope
+```
+
+As a quick fix you can do a following (see [this](https://cloud.ibm.com/docs/containers?topic=containers-cs_versions#112_before) for more details):
+
+```console
+kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
+```
+
+Replace X.X.X with a proper version numbers.
+
+```console
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+--set ti-key-release-1.cluster.name=ti-fra02 \
+--set ti-key-release-1.cluster.region=eu-de \
+--set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
+```
+
+Complete list of available setup parameters can be obtained as follow:
+```console
+helm inspect values charts/ti-key-release-2-X.X.X.tgz > config.yaml
+# modify config.yaml
+helm install -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
+# or upgrade existing deployment
+helm upgrade -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
+```
+
+### Testing Deployment
+Once environment deployed, follow the output dynamically created by helm install:
+
+For example:
+
+```
+Ingress allows a public access to vTPM CSR:
+  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
+
+```
+
+```console
+$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
+  -----BEGIN CERTIFICATE REQUEST-----
+  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
+  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
+  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
+  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
+  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
+  -----END CERTIFICATE REQUEST-----
+
+Execute test:
+    kubectl create -f examples/myubuntu.yaml -n trusted-identity
+    kubectl -n trusted-identity create -f examples/myubuntu.yaml
+    kubectl -n trusted-identity get pods
+    kubectl -n trusted-identity exec -it {pod_id} cat /jwt-tokens/token
+```
+
+### Sample JWT claims
+One can inspect the content of the token by simply pasting its content into
+[Debugger](https://jwt.io/) in Encoded window.
+
+```json
+{
+  "cluster-name": "EUcluster",
+  "cluster-region": "eu-de",
+  "exp": 1547224830,
+  "iat": 1547224800,
+  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "iss": "wsched@us.ibm.com",
+  "machineid": "266c2075dace453da02500b328c9e325",
+  "namespace": "trusted-identity",
+  "pod": "myubuntu-698b749889-m9xz9",
+  "sub": "wsched@us.ibm.com"
+}
+```
+
+### Run Sample Demo
+Trusted Identity is ready for [a demo](examples/README.md)
+
+### Cleanup
+Remove all the resources created for Trusted Identity
+```console
+./cleanup.sh
+```
+Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
+
+
+## Develop Trusted Service Identity
+
+* Make sure all the [prerequisites](./README.md#prerequisites) are satisfied.
+*  Make sure you have an IBM Cloud (formerly Bluemix) account and you have the [IBM Cloud CLI](https://console.bluemix.net/docs/cli/reference/bluemix_cli/get_started.html#getting-started) installed
+
+
+### Build and Install
 Execute `dep` to manage GoLang dependencies for this project.
 
 On MacOS you can install or upgrade to the latest released version with Homebrew:
@@ -95,22 +249,6 @@ Now you can create a docker image:
 make docker
 ```
 
-In order to push the image to public Artifactory registry, you need to obtain an
-access and create an [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key). The repository name is `res-kompass-kompass-docker-local.artifactory.swg-devops.com`
-
-Execute the docker login and push the image:
-
-```console
-docker login res-kompass-kompass-docker-local.artifactory.swg-devops.com
-Username: <your-user-id>
-Password: <API-key>
-
-make docker-push
-# or simply do it all at once:
-make all
-make docker-push
-```
-
 Compile and create images for other sub-components
 
 ```console
@@ -136,43 +274,17 @@ make all -C examples/jwt-client/
 make all -C examples/jwt-server/
 ```
 
-### Install and initialize Helm environment
-This project requires Helm v2.10.0 or higher.
-
-Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
-```bash
-  brew install kubernetes-helm
-  # or to upgrade the existing helm
-  brew upgrade kubernetes-helm
-  # then initialize (assuming your KUBECONFIG for the current cluster is already setup)
-  helm init
-```
-
 ### TI Key Release Helm Deployment
 The deployment is done in `trusted-identity` namespace. If you are testing or developing
-the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
-This would remove all the components and artifacts, then recreate a new, empty namespace:
+the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment.  
+
+Update [init-namespace.sh](./init-namespace.sh) per instructions above.
+Run cleanup first, then init to initialize the namespace. This would remove all
+the components and artifacts, then recreate a new, empty namespace:
 
 ```console
 ./cleanup.sh
 ./init-namespace.sh
-```
-
-Currently the images for Trusted Identity project are stored in Artifactory. In order to
-use them, user has to be authenticated. You must obtain the [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key)
-as described above.
-
-Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
-(This needs to be done every-time the new namespace is created)
-
-```console
-kubectl -n trusted-identity create secret docker-registry regcred \ --docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com
---docker-username=user@ibm.com \
---docker-password=${API_KEY} \
---docker-email=user@ibm.com
-
-# to check your secret:
-kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
 ```
 
 ### Build Helm Charts
@@ -190,101 +302,13 @@ helm package --dependency-update charts/ti-key-release-2
 ```
 Your new helm charts are ready to deploy.
 
-### Deploy Helm charts
-TI helm charts are included with this repo under [charts/](./charts/) directory.
-You can use them directly or use the charts that you just created above.
+Once the helm charts are created, you can now proceed with [install](./REAMDE.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework
 
-The following information is required to deploy TI helm charts:
-* cluster name - name of the cluster. This should correspond to actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
-in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
-
-*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
-the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
-As a quick fix you can do a following (see [this](https://cloud.ibm.com/docs/containers?topic=containers-cs_versions#112_before) for more details):
-
-```console
-kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
-```
-
-Replace X.X.X with a proper version numbers.
-
-```console
-helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
---set ti-key-release-1.cluster.name=ti-fra02 \
---set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
-```
-
-Complete list of available setup parameters can be obtained as follow:
-```console
-helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
-# modify config.yaml
-helm install -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
-# or upgrade existing deployment
-helm upgrade -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
-```
-
-### Testing Deployment
-Once environment deployed, follow the output dynamically created by helm install:
-
-For example:
-
-```
-Ingress allows a public access to vTPM CSR:
-  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-
-$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-  -----BEGIN CERTIFICATE REQUEST-----
-  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
-  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
-  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
-  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
-  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
-  -----END CERTIFICATE REQUEST-----
-
-Execute test:
-    kubectl create -f examples/myubuntu.yaml -n trusted-identity
-kubectl -n trusted-identity create -f examples/myubuntu.yaml
-kubectl -n trusted-identity get pods
-kubectl -n trusted-identity exec -it {pod_id} cat /jwt-tokens/token
-```
-
-### Sample JWT claims
-One can inspect the content of the token by simply pasting it contant into
-[Debugger](https://jwt.io/) in Encoded window.
-
-```json
-{
-  "cluster-name": "EUcluster",
-  "cluster-region": "eu-de",
-  "exp": 1547224830,
-  "iat": 1547224800,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
-  "iss": "wsched@us.ibm.com",
-  "machineid": "266c2075dace453da02500b328c9e325",
-  "namespace": "trusted-identity",
-  "pod": "myubuntu-698b749889-m9xz9",
-  "sub": "wsched@us.ibm.com"
-}
-```
-
-### Run Sample Demo
-Trusted Identity is ready for [a demo](examples/README.md)
-
-## Cleanup
-Remove all the resources created for Trusted Identity
-```console
-./cleanup.sh
-```
-Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
-
-## Create Vault Certificate
-In addition to creating JWT tokens, TI is capable of creating certificates with
-x509v3 extended attributes to enclose the claims in the tokens. The difference is
-that these certificates are not set to have a short expiry.
+## Automate Vault Certificates
+Optionally, Trusted Service Identity can additionally create a unique set of a
+certificate and private key that is automatically registered with Vault service.
+The certificates with x509v3 extended attributes are enclosed in the claims in the tokens.
+The difference is that these certificates are not set to have a short expiry.
 Once the pod is removed, the certificates would be revoked from the Vault.
 In order to use this feature, one time host setup is required. See below.
 
@@ -351,6 +375,8 @@ helm inspect values ti-key-release-2-X.X.X.tgz > config.yaml
 # modify config.yaml with ti-key-release-1.createVaultCert=true
 helm install -i --values=config.yaml ti-test ti-key-release-2-X.X.X.tgz
 ```
+
+# OLD DOCUMENTATION. It might not be relevant anymore...
 
 ## Create your own private key and public JSON Web Key Set (JWKS)
 Before enabling the JWT policy in Istio, you need to first create a private key
