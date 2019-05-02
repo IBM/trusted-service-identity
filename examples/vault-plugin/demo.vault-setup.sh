@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 #ibmcloud plugin install cloud-object-storage
 export PLUGIN="vault-plugin-auth-ti-jwt"
@@ -62,7 +62,11 @@ setupVault()
   # another way to obtain this SHA, use a local plugin created by the build process
   # assuming it is identical to the one one deployed in Vault container.
   # SHA256=$(shasum -a 256 "${PWD}/pkg/linux_amd64/${PLUGIN}" | cut -d' ' -f1)
-  
+  if [ "$SHA256" == "" ]; then
+     echo "Failed to obtain plugin SHA256 from the Vault container. Please check if the container is operational"
+     exit 1
+  fi
+
   # register the trusted-identity plugin
   vault write sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt sha_256="${SHA256}" command="vault-plugin-auth-ti-jwt"
   RT=$?
@@ -107,8 +111,8 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   echo "ROOT_TOKEN or VAULT_ADDR not set"
   helpme
-elif [ ! -f "${PWD}/pkg/linux_amd64/${PLUGIN}" ]; then
-  echo "Plugin directory missing \"${PWD}/pkg/linux_amd64/${PLUGIN}\""
+# elif [ ! -f "${PWD}/pkg/linux_amd64/${PLUGIN}" ]; then
+#   echo "Plugin directory missing \"${PWD}/pkg/linux_amd64/${PLUGIN}\""
 else
   setupVault "$1 $2"
 fi
