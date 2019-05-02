@@ -19,13 +19,6 @@ HELPMEHELPME
 
 getToken()
 {
- #validate the external parameters
- if [ "$1" == "" ] ; then
-   export ROLE="${VAULT_ROLE}"
- else
-   export ROLE="$1"
- fi
-
  export TOKEN=$(cat ${JWTFILE})
  export RESP=$(curl -s --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login)
  export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
@@ -39,6 +32,10 @@ getToken()
 # validate the arguments
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
+elif [ "$1" == "" ] ; then
+  export ROLE="${VAULT_ROLE}"
+  getToken
 else
+  export ROLE="$1"
   getToken
 fi

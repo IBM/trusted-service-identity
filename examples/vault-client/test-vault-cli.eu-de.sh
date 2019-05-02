@@ -92,9 +92,9 @@ tests()
   test "vault kv get secret/ti-demo-all/dal12/${CLNAME}/${NS}/${IMAGES}/dummy" 2 A07
   test "vault kv get secret/ti-demo-all/wdc01/${CLNAME}/${NS}/${IMAGES}/dummy" 2 A08
 
-  test "vault kv get secret/ti-demo-all/eu-de/EUcluster/trusted-identity/${IMGSHA}/dummy" 0 A09
+  test "vault kv get secret/ti-demo-all/eu-de/${CLNAME}/trusted-identity/${IMGSHA}/dummy" 0 A09
   test "vault kv get secret/ti-demo-r/eu-de/dummy" 2 A10
-  test "vault kv get secret/ti-demo-all/eu-de/EUcluster/trusted-identity/${IMGSHA}/dummy" 0 A11
+  test "vault kv get secret/ti-demo-all/eu-de/${CLNAME}/trusted-identity/${IMGSHA}/dummy" 0 A11
   test "vault kv get secret/ti-demo-all/eu-de/XXcluster/trusted-identity/${IMGSHA}/dummy" 2 A12
   test "vault kv get secret/ti-demo-all/dal01/UScluster/trusted-identity/${IMGSHA}/dummy" 2 A13
   test "vault kv get secret/ti-demo-all/wdc01/UScluster/trusted-identity/${IMGSHA}/dummy" 2 A14
@@ -117,9 +117,9 @@ tests()
   test "vault kv get secret/ti-demo-all/dal12/${CLNAME}/${NS}/${IMAGES}/dummy" 2 D07
   test "vault kv get secret/ti-demo-all/wdc01/${CLNAME}/${NS}/${IMAGES}/dummy" 2 D08
 
-  test "vault kv get secret/ti-demo-all/eu-de/EUcluster/trusted-identity/${IMGSHA}/dummy" 0 D09
+  test "vault kv get secret/ti-demo-all/eu-de/${CLNAME}/trusted-identity/${IMGSHA}/dummy" 0 D09
   test "vault kv get secret/ti-demo-r/eu-de/dummy" 2  D10
-  test "vault kv get secret/ti-demo-all/eu-de/EUcluster/trusted-identity/${IMGSHA}/dummy" 0 D11
+  test "vault kv get secret/ti-demo-all/eu-de/${CLNAME}/trusted-identity/${IMGSHA}/dummy" 0 D11
   test "vault kv get secret/ti-demo-all/eu-de/XXcluster/trusted-identity/${IMGSHA}/dummy" 2 D12
   test "vault kv get secret/ti-demo-all/dal01/UScluster/trusted-identity/${IMGSHA}/dummy" 2 D13
   test "vault kv get secret/ti-demo-all/wdc01/UScluster/trusted-identity/${IMGSHA}/dummy" 2 D14
@@ -142,7 +142,7 @@ tests()
   test "vault kv get secret/ti-demo-n/XXX/${CLNAME}/${NS}/dummy" 2 N03
   test "vault kv get secret/ti-demo-n/${REGION}/XXX/${NS}/dummy" 2 N04
   test "vault kv get secret/ti-demo-n/${REGION}/${CLNAME}/XXX/dummy" 2 N05
-  test "vault kv get secret/ti-demo-n/eu-de/EUcluster/trusted-identity/dummy" 0 N06
+  test "vault kv get secret/ti-demo-n/eu-de/${CLNAME}/trusted-identity/dummy" 0 N06
   test "vault kv get secret/ti-demo-n/eu-de/XXcluster/trusted-identity/dummy" 2 N07
   test "vault kv get secret/ti-demo-n/dal01/UScluster/trusted-identity/dummy" 2 N08
   test "vault kv get secret/ti-demo-n/wdc01/UScluster/trusted-identity/dummy" 2 N09
