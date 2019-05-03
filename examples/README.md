@@ -35,4 +35,4 @@ This demo sets up Key Server and sample JWT Cloudant client to demonstrate
 how sample application can retrieve data securely from the Key Server using
 Trusted Identity.
 
-[Simple Key Store Demo](./jwt-server/README.md) steps:
+Please follow the [Simple Key Store Demo](./jwt-server/README.md) steps.
