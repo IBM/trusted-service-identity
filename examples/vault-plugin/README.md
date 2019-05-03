@@ -12,7 +12,7 @@ This document describes the Trusted Identity demo example and provides guidance
 for plugin development.
 
 ## Trusted Identity Demo
-Demo steps:
+Demo with Vault Plugin steps:
 * Make sure [TI Prerequisites](../../README.md#prerequisites) are met
 * Install [Trusted Service Identity framework](../../REAMDE.md#install-trusted-service-identity-framework)
 * [Deploy Vault Service](./README.md#deploy-vault-service)
@@ -338,7 +338,7 @@ D02 Test successful! RT: 2
 D03 Test successful! RT: 2
 D04 Test successful! RT: 2
 D05 Test successful! RT: 2
-Testing the 'demo-n' role: 
+Testing the 'demo-n' role:
 N01 Test successful! RT: 0
 N02 Test successful! RT: 2
 N03 Test successful! RT: 2
