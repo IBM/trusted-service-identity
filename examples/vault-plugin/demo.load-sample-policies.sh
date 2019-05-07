@@ -23,9 +23,9 @@ loadVault()
   export MOUNT_ACCESSOR=$(curl --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET ${VAULT_ADDR}/v1/sys/auth | jq -r '.["trusted-identity/"].accessor')
 
   # Use policy templates to create policy files.
-  # The example below uses 3 different policies with the following contstrains:
-  #  - all - uses cluster-region, cluser-name, namespace and images
-  #  - n - uses cluster-region, cluser-name, namespace
+  # The example below uses 3 different policies with the following constraints:
+  #  - all - uses cluster-region, cluster-name, namespace and images
+  #  - n - uses cluster-region, cluster-name, namespace
   #  - r - uses cluster-region
 
   # replace mount accessor in policy

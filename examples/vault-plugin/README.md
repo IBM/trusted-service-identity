@@ -128,8 +128,8 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/public/getCSR
 To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
 installation.
 
-### Vault Setup
-
+### Vault Setup (as Valut Admin)
+To obtain access to Vault, you have to be a Vault admin.
 Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
 
 ```sh
@@ -187,15 +187,15 @@ Sample Payload:
 
 ```json
 {
-  "cluster-name": "mycluster",
-  "cluster-region": "dal13",
-  "exp": 1550871343,
-  "iat": 1550871313,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "cluster-name": "ti_demo",
+  "cluster-region": "dal09",
+  "exp": 1557170306,
+  "iat": 1557170276,
+  "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
   "iss": "wsched@us.ibm.com",
-  "machineid": "266c2075dace453da02500b328c9e325",
+  "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",
-  "pod": "myubuntu-698b749889-vvgts",
+  "pod": "vault-cli-84c8d647c-s6cgb",
   "sub": "wsched@us.ibm.com"
 }
 ```
@@ -208,7 +208,8 @@ $ ./demo.load-sample-policies.sh
 ```
 
 ### Start the Vault client
-
+To start Vault client you don't need to be Vault admin (as above). You only need
+access to the cluster (`KUBECONFIG`).
 The vault client must be started in the cluster that has Trusted Identity installed.
 Using provided template [../vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml),
 build the deployment file `vault-cli.yaml`, using the Vault remote address (e.g.
