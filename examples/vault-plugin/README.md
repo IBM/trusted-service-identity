@@ -33,7 +33,7 @@ can access it.
 For simplicity, we will deploy the Vault Service in the same cluster and the
 same `trusted-identity` namespace as Trusted Identity framework
 
-Make sure the KUBECONFIG is properly set then execute:
+Make sure the `KUBECONFIG` is properly set then execute:
 
 ```sh
 $ kubectl -n trusted-identity create -f vault.yaml
@@ -159,8 +159,8 @@ If no errors, proceed to the JSS registration
 
 ### Register JWT Signing Service (JSS) with Vault
 Each cluster with JSS needs to be registered with Vault.
-Env. variables ROOT_TOKEN and VAULT_ADDR should be already defined. Now we need
-the VTPM_ADDR for each cluster (individual vTPM). This the ingress associated
+Env. variables `ROOT_TOKEN` and `VAULT_ADDR` should be already defined. Now we need
+the `VTPM_ADDR` for each cluster (individual vTPM). This the ingress associated
 with the cluster.
 
 e.g:
@@ -233,7 +233,7 @@ be released to the application.
 
 ```console
 $ demo.load-sample-keys.sh --help
-$ demo.load-sample-keys.sh [region] [cluster]  
+$ demo.load-sample-keys.sh [region] [cluster]
 ```
 
 Then get inside to run some testing.
