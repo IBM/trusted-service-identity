@@ -12,7 +12,7 @@ are satisfied.
 ## Build and Install
 Execute `dep` to manage GoLang dependencies for this project.
 
-On MacOS you can install or upgrade to the latest released version with Homebrew:
+On MacOS you can [install or upgrade](https://github.com/golang/dep#installation) to the latest version with Homebrew:
 
 ```console
 brew install dep
