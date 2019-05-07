@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Trusted Servie Identiy plugin name
+# Trusted Service Identiy plugin name
 export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image name
 export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
@@ -76,34 +76,57 @@ loadVault()
   # # write some data to be read later on
   # # testing rule `demo` with ti-policy-all
   vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${IMGSHA}/dummy all=good
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy all=xxxxNamespace
-  vault kv put secret/ti-demo-all/${REGION}/xxxx/trusted-identity/${IMGSHA}/dummy all=xxxCluster
-  vault kv put secret/ti-demo-all/xxxx/${CLUSTER}/trusted-identity/${IMGSHA}/dummy all=xxxxRegion
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/xxxx/dummy all=xxxImage
-
   vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${IMGSHA}/dummy
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy
-  vault kv get secret/ti-demo-all/${REGION}/xxxx/trusted-identity/${IMGSHA}/dummy
-  vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/trusted-identity/${IMGSHA}/dummy
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/xxxx/dummy
 
   # testing rule demo-n with policy ti-policy-n
   vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/dummy policy-n=good
-  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/xxxx/dummy policy-n=xxxxNamespace
-  vault kv put secret/ti-demo-n/${REGION}/xxxx/trusted-identity/dummy policy-n=xxxCluster
-  vault kv put secret/ti-demo-n/xxxx/${CLUSTER}/trusted-identity/dummy policy-n=xxxxRegion
-
   vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/dummy
-  vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/xxxx/dummy
-  vault kv get secret/ti-demo-n/${REGION}/xxxx/trusted-identity/dummy
-  vault kv get secret/ti-demo-n/xxxx/${CLUSTER}/trusted-identity/dummy
 
   # testing rule demo-r with policy ti-demo-r
   vault kv put secret/ti-demo-r/${REGION}/dummy region=good
-  vault kv put secret/ti-demo-r/xxxx/dummy region=xxxxRegion
-
   vault kv get secret/ti-demo-r/${REGION}/dummy
-  vault kv get secret/ti-demo-r/xxxx/dummy
+
+  # pass JSON as a value:
+  echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/ti-demo-r/${REGION}/password -
+  vault kv get secret/ti-demo-r/${REGION}/password
+
+  # demonstrate passing a JSON file as value
+  cat >./test.json <<EOF
+  {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+          "creationTimestamp": "2019-05-02T15:24:32Z",
+          "name": "ti-vault",
+          "namespace": "trusted-identity",
+          "resourceVersion": "1078959",
+          "selfLink": "/api/v1/namespaces/trusted-identity/services/ti-vault",
+          "uid": "627b7e94-6cee-11e9-9e35-fafb83f6879f"
+      },
+      "spec": {
+          "externalTrafficPolicy": "Cluster",
+          "ports": [
+              {
+                  "nodePort": 32125,
+                  "port": 8200,
+                  "protocol": "TCP",
+                  "targetPort": 8200
+              }
+          ],
+          "selector": {
+              "app": "ti-vault"
+          },
+          "sessionAffinity": "None",
+          "type": "NodePort"
+      },
+      "status": {
+          "loadBalancer": {}
+      }
+  }
+EOF
+
+  vault kv put secret/ti-demo-r/${REGION}/test.json @test.json
+  vault kv get secret/ti-demo-r/${REGION}/test.json
   }
 
 # validate the arguments

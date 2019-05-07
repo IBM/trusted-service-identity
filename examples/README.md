@@ -1,96 +1,40 @@
 # Trusted Identity Examples - Demo
-To demonstrate the capabilities of Trusted Identity we prepared several examples:
-* [vault-plugin](./vault-plugin) - plugin extension to Hashicorp Vault
+To demonstrate the capabilities of Trusted Identity, we prepared several examples:
+* demo using **Vault with auth plugin** - this demo stands up a Vault server instance,
+populates it with sample policies and secrets, then shows how the application retrieves
+the secrets using Vault client
+* demo using **Custom Key Manager** - this demo stands up a custom key manager server,
+populates it with sample policies and secrets, then shows how the sample application
+retrieves the secrets.
+
+For a guidance how to create a custom application that is using Trusted Identity
+* with Vault - refer to [Application Developer Guide](./README-AppDeveloperVault.md)
+* with Key Server - refer to [Application Developer Guide](./README-AppDeveloperKeyServer.md)
+
+## Demo with Vault
+Before executing the demo, make sure all the [TI Prerequisites](../README.md#prerequisites)
+are met and the [Trusted Service Identity framework](../README.md#install-trusted-service-identity-framework) is installed
+
+[Vault Plugin Demo](./vault-plugin/README.md) components:
+* [vault-plugin](./vault-plugin) - authentication plugin extension to Hashicorp Vault
 * [vault-client](./vault-client) - sample client that demonstrates how to retrieve
 secrets from Vault
+
+[Application Developer Guide](./README-AppDeveloperVault.md) to use with Vault.
+
+
+## Demo with Key Manager
+Before executing the demo, make sure all the [TI Prerequisites](../README.md#prerequisites)
+are met and the [Trusted Service Identity framework](../README.md#install-trusted-service-identity-framework) is installed
+
+[Simple Key Store Demo](./jwt-server/README.md) components:
 * [jwt-server](./jwt-server) - simple key server that stores access keys to
 Cloudant
 * [jwt-client](./jwt-client) - sample code that calls `jwt-server` with JWT token
 to obtain keys to Cloudant.
 
-For a guidance how to create a custom application that is using Trusted Identity
-see the following [Application Developer Guide](./README-AppDeveloper.md)
-
 This demo sets up Key Server and sample JWT Cloudant client to demonstrate
 how sample application can retrieve data securely from the Key Server using
 Trusted Identity.
 
-[Vault Plugin demo](./vault-plugin/README.md) steps:
-* Prerequisites
-* Deploy TI framework
-* Deploy Vault Server with plugin
-* Deploy Vault Client
-* For each cluster register JWKS/Pems from all the user nodes (vTPM deployment).
-* Define sample policies and roles
-* Execute sample transactions
-
-
-[Simple Key Store Demo](./jwt-server/README.md) steps:
-* Prerequisites
-* Deploy TI framework
-* Deploy Key Server
-* Deploy JWT Cloudant client
-* Install JWKS keys for each vTPM deployment  
-* Define sample policies
-* Execute sample transactions
-
-
-## Prerequisites
-
-1. Make sure the all the [TI Prerequisites](../README.md#prerequisites) are met.
-2. Images are already built and published in artifactory, although if you like to
-create your own images, follow the steps to [build](../README.md#build-and-install)
-3. Make sure you have [Helm installed](../README.md#install-and-initialize-helm-environment)
-
-
-## Deploy TI framework
-Follow the [steps](../README.md#ti-key-release-helm-deployment) to setup `regcred`
-secret, then deploy TI.
-The following information is required to deploy TI helm charts:
-* cluster name - name of the cluster. This should correspond to actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
-in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
-
-*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
-the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
-As a quick fix you can do a following (see [this](https://cloud.ibm.com/docs/containers?topic=containers-cs_versions#112_before) for more details):
-
-```console
-kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
-```
-Example. Replace X.X.X with a proper version numbers.
-
-```console
-helm install ti-key-release-2-X.X.X.tgz --debug --name ti-test \
---set ti-key-release-1.cluster.name=ti-fra02 \
---set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
-```
-
-Once environment deployed, follow the output dynamically created by helm install and test if you can obtain CSR from vTPM. 
-Here is the sample from above example
-
-```
-Ingress allows a public access to vTPM CSR:
-  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-```
-Try it:
-```
-$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-  -----BEGIN CERTIFICATE REQUEST-----
-  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
-  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
-  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
-  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
-  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
-  -----END CERTIFICATE REQUEST-----
-
-```
-
-Try to deploy a sample pod:
-
-```
-kubectl create -f examples/myubuntu.yaml -n trusted-identity
-```
+[Application Developer Guide](./README-AppDeveloperKeyServer.md) to use with Key Server.

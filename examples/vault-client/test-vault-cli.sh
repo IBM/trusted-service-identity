@@ -127,10 +127,11 @@ tests()
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
   REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
 
-  # # for testing rule demo-r
-
+  # testing rule demo-r
   test "vault kv get secret/ti-demo-r/${REGION}/dummy" 0 R01
   test "vault kv get secret/ti-demo-r/xxxx/dummy" 2 R02
+  test "vault kv get secret/ti-demo-r/${REGION}/password" 0 R03
+  test "vault kv get secret/ti-demo-r/${REGION}/test.json" 0 R04
 
   echo "Testing non-existing role"
   RESP=$(login xxxx_role)

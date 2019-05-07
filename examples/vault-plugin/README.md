@@ -12,16 +12,17 @@ This document describes the Trusted Identity demo example and provides guidance
 for plugin development.
 
 ## Trusted Identity Demo
-Demo steps:
-* [Prerequisites](./../README.md#prerequisites)
-* [Deploy TI framework](./../README.md#deploy-ti-framework)
+Demo with Vault Plugin steps:
+* Make sure [TI Prerequisites](../../README.md#prerequisites) are met
+* Install [Trusted Service Identity framework](../../REAMDE.md#install-trusted-service-identity-framework)
 * [Deploy Vault Service](./README.md#deploy-vault-service)
 * Configure the Vault Plugin
+* Register JWT Signing Service (JSS) with Vault
 * Define sample policies and roles
 * Deploy Vault Client
 * Execute sample transactions
 
-## TI Plugin Development
+## Trusted Identity Vault Authentication Plugin Development
 [This section](./README.md#plugin-development) below describes the plugin development
 
 
@@ -30,9 +31,9 @@ The Vault service can be started anywhere, as long as the Trusted Identity conta
 can access it.
 
 For simplicity, we will deploy the Vault Service in the same cluster and the
-same `trusted-identity` namespace as the initial TI demo.
+same `trusted-identity` namespace as Trusted Identity framework
 
-Make sure the KUBECONFIG is properly set then execute:
+Make sure the `KUBECONFIG` is properly set then execute:
 
 ```sh
 $ kubectl -n trusted-identity create -f vault.yaml
@@ -127,13 +128,13 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/public/getCSR
 To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
 installation.
 
-### Vault Setup
-
+### Vault Setup (as Valut Admin)
+To obtain access to Vault, you have to be a Vault admin.
 Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
 
 ```sh
-$ alias k="kubectl -n trusted-identity"
-$ export ROOT_TOKEN=$(k logs $(k get po | grep ti-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
+$ alias kk="kubectl -n trusted-identity"
+$ export ROOT_TOKEN=$(kk logs $(kk get po | grep ti-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
 ```
 
 Assign the Vault address (using Ingress tested above):
@@ -154,14 +155,12 @@ vault status
 ```sh
 $ ./demo.vault-setup.sh
 ```
+If no errors, proceed to the JSS registration
 
-
-### vTPM registration with Vault
-Once the Vault is setup and the plugin enabled, it is time to register each
-TI cluster (vTPM) with Vault.
-
-By now, you should have ROOT_TOKEN and VAULT_ADDR setup completed. Now we need
-the VTPM_ADDR for each cluster (individual vTPM). This the ingress associated
+### Register JWT Signing Service (JSS) with Vault
+Each cluster with JSS needs to be registered with Vault.
+Env. variables `ROOT_TOKEN` and `VAULT_ADDR` should be already defined. Now we need
+the `VTPM_ADDR` for each cluster (individual vTPM). This the ingress associated
 with the cluster.
 
 e.g:
@@ -176,61 +175,80 @@ $ ./demo.registerJSS.sh
 . . . .
 Upload of x5c successful
 ```
-Repeat this for each vTPM that is using this Vault service.
+Repeat this for each JSS with vTPM that is using this Vault service.
 
 
 ### Define sample policies and roles
 Policies are structured as paths for keys based on claims provided in JWT.
-By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
-directory. One can inspect the content of the token by simply pasting it into
+By default JWT Tokens are created every 30 seconds and they are placed in `/jwt-tokens`
+directory of the application. One can inspect the content of the token by simply pasting it into
 [Debugger](https://jwt.io/) in Encoded window.
 Sample Payload:
 
 ```json
 {
-  "cluster-name": "mycluster",
-  "cluster-region": "dal13",
-  "exp": 1550871343,
-  "iat": 1550871313,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "cluster-name": "ti_demo",
+  "cluster-region": "dal09",
+  "exp": 1557170306,
+  "iat": 1557170276,
+  "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
   "iss": "wsched@us.ibm.com",
-  "machineid": "266c2075dace453da02500b328c9e325",
+  "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",
-  "pod": "myubuntu-698b749889-vvgts",
+  "pod": "vault-cli-84c8d647c-s6cgb",
   "sub": "wsched@us.ibm.com"
 }
 ```
 
-
-Load the Vault Server with some sample polices. Review the `ti.policy.X.hcl.tpl`
-templates and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
+Load the Vault Server with some sample polices. Review the policy templates `ti.policy.X.hcl.tpl`
+and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
 
 ```sh
 $ ./demo.load-sample-policies.sh
 ```
 
 ### Start the Vault client
-
+To start Vault client you don't need to be Vault admin (as above). You only need
+access to the cluster (`KUBECONFIG`).
 The vault client must be started in the cluster that has Trusted Identity installed.
 Using provided template [../vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml),
 build the deployment file `vault-cli.yaml`, using the Vault remote address (e.g.
 ingress from the steps above)
 
+
+Start the vault client, then dump JWT token to be inspected.
 ```sh
 $ kubectl -n trusted-identity create -f ../vault-client/vault-cli.yaml
+$ kubectl -n trusted-identity get pods
+$ kubectl -n trusted-identity exec -it {vault-cli-pod-id} cat /jwt-tokens/token
+```
+You can inspect the content of the token by simply pasting its content into
+[Debugger](https://jwt.io/) in Encoded window.
+
+
+### Load sample keys
+Using the values obtained from the token above (cluster-region, cluster-name) execute
+the script to populate the Vault with sample keys. These are the secrets that would
+be released to the application.
+
+```console
+$ demo.load-sample-keys.sh --help
+$ demo.load-sample-keys.sh [region] [cluster]
 ```
 
-Once the pod is operational, get inside to run some testing.
+Then get inside to run some testing.
 
 ```console
 $ kubectl -n trusted-identity get pods
-$ kubectl -n trusted-identity exec -it vault-cli-xxxx /bin/bash
+$ kubectl -n trusted-identity exec -it vault-cli-xxx /bin/bash
 ```
 To login and obtain the Vault access token associated with a default TI role `demo`,
-source the `setup-vault-cli.sh`:
+source the `setup-vault-cli.sh`. To login with another role (e.g. demo-r or demo-n)
+as specified in [demo.load-sample-policies.sh](demo.load-sample-policies.sh)
+issue ` source setup-vault-cli.sh demo-r`:
 
 ```console
-root@vault-cli-fd855bc5f-2cs4d:/# . ./setup-vault-cli.sh
+root@vault-cli-fd855bc5f-2cs4d:/# source ./setup-vault-cli.sh
 VAULT_TOKEN=s.UCTvGwi4BcqTSBmDGt75ivd7
 
 # if successful, view the environment related to vault:
@@ -304,67 +322,37 @@ root@vault-cli-fd855bc5f-2cs4d:/#
 ```
 The measurements are grouped under "metadata" section.
 
-Review the test scripts `test-vault-cli.xx.sh`
+Review the test script `test-vault-cli.sh`
 For example, this one is customized for `eu-de` cluster:
 
 ```console
-root@vault-cli-fd855bc5f-2cs4d:/# ./test-vault-cli.eu-de.sh
+root@vault-cli-fd855bc5f-2cs4d:/# ./test-vault-cli.sh
 Testing the default demo role:
 A01 Test successful! RT: 0
 A02 Test successful! RT: 2
 A03 Test successful! RT: 2
 A04 Test successful! RT: 2
 A05 Test successful! RT: 2
-A06 Test successful! RT: 0
-A07 Test successful! RT: 2
-A08 Test successful! RT: 2
-A09 Test successful! RT: 0
-A10 Test successful! RT: 2
-A11 Test successful! RT: 0
-A12 Test successful! RT: 2
-A13 Test successful! RT: 2
-A14 Test successful! RT: 2
 Testing the 'demo' role:
 D01 Test successful! RT: 0
 D02 Test successful! RT: 2
 D03 Test successful! RT: 2
 D04 Test successful! RT: 2
 D05 Test successful! RT: 2
-D06 Test successful! RT: 0
-D07 Test successful! RT: 2
-D08 Test successful! RT: 2
-D09 Test successful! RT: 0
-D10 Test successful! RT: 2
-D11 Test successful! RT: 0
-D12 Test successful! RT: 2
-D13 Test successful! RT: 2
-D14 Test successful! RT: 2
-D15 Test successful! RT: 2
-D16 Test successful! RT: 2
 Testing the 'demo-n' role:
-N01 Test successful! RT: 2
-N02 Test successful! RT: 0
+N01 Test successful! RT: 0
+N02 Test successful! RT: 2
 N03 Test successful! RT: 2
 N04 Test successful! RT: 2
-N05 Test successful! RT: 2
-N06 Test successful! RT: 0
-N07 Test successful! RT: 2
-N08 Test successful! RT: 2
-N09 Test successful! RT: 2
-N10 Test successful! RT: 2
 Testing the 'demo-r' role:
-R01 Test successful! RT: 2
-R02 Test successful! RT: 0
-R03 Test successful! RT: 0
-R04 Test successful! RT: 2
-R05 Test successful! RT: 2
-R06 Test successful! RT: 2
+R01 Test successful! RT: 0
+R02 Test successful! RT: 2
 Testing non-existing role
 E01 Test successful! RT: 0
 Testing access w/o token
 E02 Test successful! RT: 2
 E03 Test successful! RT: 2
-Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values
+Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment value
 ```
 
 

@@ -1,5 +1,17 @@
-# Trusted Identity Examples - Application Developer
-This document guides through adapting your application to be used with Trusted Service Identity
+# Trusted Service Identity Application Developer - using Key Server
+This document guides through adapting your application to be used with Trusted
+Service Identity with a Key Server.
+
+Before starting to integrate your application with TIS, please make sure to run
+the [Demo with Key Server](./jwt-server/README.md) first.
+
+Demo components:
+* [jwt-server](./jwt-server) - simple key server that stores access keys to
+Cloudant
+* [jwt-client](./jwt-client) - sample code that calls `jwt-server` with JWT token
+to obtain keys to Cloudant.
+
+If you like to see the Guide for Vault example, see it [here](./README-AppDeveloperVault.md).
 
 ## Assumptions
 We assume that at this point you have a working K8s cluster with Trusted Service Identity
@@ -21,13 +33,13 @@ Sample Payload:
 
 ```json
 {
-  "cluster-name": "mycluster",
-  "cluster-region": "dal13",
-  "exp": 1550871343,
-  "iat": 1550871313,
-  "images": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "cluster-name": "ti_demo",
+  "cluster-region": "dal09",
+  "exp": 1557170306,
+  "iat": 1557170276,
+  "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
   "iss": "wsched@us.ibm.com",
-  "machineid": "266c2075dace453da02500b328c9e325",
+  "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",
   "pod": "myubuntu-698b749889-vvgts",
   "sub": "wsched@us.ibm.com"
