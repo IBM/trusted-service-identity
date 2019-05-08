@@ -10,22 +10,7 @@ are satisfied.
 
 
 ## Build and Install
-Execute `dep` to manage GoLang dependencies for this project.
-
-On MacOS you can [install or upgrade](https://github.com/golang/dep#installation) to the latest version with Homebrew:
-
-```console
-brew install dep
-brew upgrade dep
-```
-
-On other platforms you can use the install.sh script:
-
-```
-curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-```
-
-It will install into your $GOPATH/bin directory by default or any other directory you specify using the INSTALL_DIRECTORY environment variable.
+[Install](https://github.com/golang/dep#installation) and execute `dep` to manage GoLang dependencies for this project.
 
 To compile and build the image, get and test the dependencies:
 
