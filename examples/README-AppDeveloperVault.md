@@ -3,7 +3,7 @@ This document guides through adapting your application to be used with Trusted
 Service Identity with a Vault.
 
 Before starting to integrate your application with TIS, please make sure to run
-the [Demo with Vault Plugin](./vault-plugin/README.md) firts.
+the [Demo with Vault Plugin](./vault-plugin/README.md) first.
 
 Demo components:
 * [vault-plugin](./vault-plugin) - authentication plugin extension to Hashicorp Vault
