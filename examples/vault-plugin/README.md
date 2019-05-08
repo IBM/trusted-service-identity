@@ -192,6 +192,7 @@ Sample Payload:
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
+  "images-names": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
   "iss": "wsched@us.ibm.com",
   "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",
