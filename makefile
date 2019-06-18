@@ -14,7 +14,7 @@ MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.15
 all: dep get-deps fmt test build docker timestamp
 
 dep:
-	go mod tidy
+	go get -u github.com/golang/dep/cmd/dep
 
 get-deps: test-deps build-deps
 
@@ -42,6 +42,7 @@ timestamp:
 	date
 
 build-deps: dep
+	dep ensure -v -vendor-only
 
 fmt:
 	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Please run gofmt -l -w $GOFILES on your code.' && exit 1; fi
