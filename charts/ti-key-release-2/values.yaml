@@ -6,7 +6,7 @@
 # cannot use the value from `ti-key-release-1`
 # parsing problem:
 #    `error converting YAML to JSON`
-tiVersion: v0.15
+tiVersion: v0.17
 
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
