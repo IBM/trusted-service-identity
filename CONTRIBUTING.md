@@ -53,8 +53,12 @@ Compile and create images for other sub-components
 make all -C components/gen-vault-cert/
 make all -C components/jwt-sidecar/
 make all -C components/revoker/
-make all -C components/vtpm-server/
 make all -C components/vtpm2-server/
+```
+We retired the older version of vTPM v1, but if you need to build one:
+
+```conosole
+make all -C components/vtpm-server/
 ```
 
 To deploy manually:
@@ -98,10 +102,11 @@ helm package charts/ti-key-release-1
 helm dep update charts/ti-key-release-2
 helm package --dependency-update charts/ti-key-release-2
 ```
-Your new helm charts are ready to deploy.
-To be consistent, move the newly created charts packages into `charts` directory.
+Your new helm chart, `ti-key-release-2-x.X.x.tgs` already contains `ti-key-release-1`
+and it is ready deploy.
+To be consistent, move the newly created chart package into `charts` directory.
 
-Once the helm charts are created, you can now proceed with [install](./REAMDE.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework
+Once the helm charts are created, you can proceed with [install](./REAMDE.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework
 
 ## Automate Vault Certificates
 Optionally, Trusted Service Identity can additionally create a unique set of a

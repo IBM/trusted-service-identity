@@ -36,6 +36,7 @@ same `trusted-identity` namespace as Trusted Identity framework
 Make sure the `KUBECONFIG` is properly set then execute:
 
 ```sh
+$ cd examples/vault-plugin/
 $ kubectl -n trusted-identity create -f vault.yaml
 ```
 
