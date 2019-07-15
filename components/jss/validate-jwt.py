@@ -4,7 +4,7 @@ import argparse
 import os
 
 from jwcrypto import jwt, jwk
-from EngineJWK import EngineJWK
+# from EngineJWK import EngineJWK
 
 def main(args):
     if os.path.isfile(args.key):
@@ -14,9 +14,9 @@ def main(args):
 
         key = jwk.JWK.from_pem(pem_data)
     else:
-        if str.startswith(args.key, 'ibmtss2:'):
-            key = EngineJWK('tpm2', args.key[8:])
-        else:
+        # if str.startswith(args.key, 'ibmtss2:'):
+        #     key = EngineJWK('tpm2', args.key[8:])
+        # else:
             raise Exception('Unhandled key type: %s' % args.key)
 
     with open(args.jwt) as f:

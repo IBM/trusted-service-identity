@@ -27,7 +27,7 @@ import os
 from os.path import join, exists
 
 from jwcrypto import jwt, jwk
-from EngineJWK import EngineJWK
+#from EngineJWK import EngineJWK
 
 expire = int(os.getenv('TTL_SEC', 30))
 iss = os.getenv('ISS', 'wsched@us.ibm.com')
@@ -43,24 +43,24 @@ def main(args):
 
         key = jwk.JWK.from_pem(pem_data)
     else:
-        if str.startswith(args.key, 'ibmtss2:'):
-            key = EngineJWK('tpm2', args.key[8:])
-        else:
+        # if str.startswith(args.key, 'ibmtss2:'):
+        #     key = EngineJWK('tpm2', args.key[8:])
+        # else:
             raise Exception('Unhandled key type: %s' % args.key)
     # End modification
 
-    if args.jwks:
-        with open(args.jwks, "w+") as fout:
-            # this is the old JWKS format
-            # fout.write("{ \"keys\":[ ")
-            # fout.write(key.export(private_key=False))
-            # fout.write("]}")
-
-            # this is the new PEM format
-            fout.write('{ "jwt_validation_pubkeys": "')
-            fout.write(key.public().export_to_pem())
-            fout.write('" }')
-        fout.close
+    # if args.jwks:
+    #     with open(args.jwks, "w+") as fout:
+    #         # this is the old JWKS format
+    #         # fout.write("{ \"keys\":[ ")
+    #         # fout.write(key.export(private_key=False))
+    #         # fout.write("]}")
+    #
+    #         # this is the new PEM format
+    #         fout.write('{ "jwt_validation_pubkeys": "')
+    #         fout.write(key.public().export_to_pem())
+    #         fout.write('" }')
+    #     fout.close
 
     now = int(time.time())
     payload = {
@@ -132,8 +132,8 @@ if __name__ == '__main__':
                         help="sub claim. If not provided, it is set to the same as iss claim.")
     parser.add_argument("-claims", "--claims",
                          help="Other claims in format name1:value1|name2:value2 etc. Only string values are supported. Use `|` to seperate each claim")
-    parser.add_argument("-jwks", "--jwks",
-                         help="Path to the output file for JWKS.")
+    # parser.add_argument("-jwks", "--jwks",
+    #                      help="Path to the output file for JWKS.")
     parser.add_argument("-expire", "--expire", type=int, default=3600,
                          help="JWT expiration time in second. Default is 1 hour.")
     print main(parser.parse_args())
