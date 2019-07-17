@@ -22,7 +22,7 @@ This helm chart installs environment for Trusted Identity
     curl http://{{ index .Values "ti-key-release-1" "jssService" "name" }}:{{ index .Values "ti-key-release-1" "jssService" "port" }}/public/getCSR
 
   Ingress allows a public access to vTPM CSR:
-    curl http://{{ index .Values "ti-key-release-1" "ingress" "host" }}{{ index .Values "ti-key-release-1" "ingress" "path" }}public/getCSR
+    curl http://{{ .Values.ingress.host }}{{ .Values.ingress.path }}public/getCSR
 
 Execute test:
   kubectl create -f examples/myubuntu.yaml -n trusted-identity

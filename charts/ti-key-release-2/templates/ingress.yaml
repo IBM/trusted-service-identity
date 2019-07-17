@@ -2,14 +2,14 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: vtpm-ingress
+  name: jss-ingress
   namespace: {{ index .Values "ti-key-release-1" "namespace" }}
 spec:
   rules:
-  - host: {{ index .Values "ti-key-release-1" "ingress" "host" }}
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
-        - path: {{ index .Values "ti-key-release-1" "ingress" "path" }}
+        - path: {{ .Values.ingress.path }}
           backend:
             serviceName: {{ index .Values "ti-key-release-1" "jssService" "name" }}
             servicePort: {{ index .Values "ti-key-release-1" "jssService" "port" }}

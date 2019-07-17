@@ -52,12 +52,12 @@ ibmcloud ks cluster-get <cluster_name> | grep Ingress
 Before starting a new ingress deployment, make sure there is not other ingress deployed
 in this namespace. Typical TI deployment already has an ingress running to support
 access to vTPM service.
-Check if the `vtpm-ingress` is created:
+Check if the `jss-ingress` is created:
 
 ```
-kubectl -n trusted-identity get ingress vtpm-ingress
+kubectl -n trusted-identity get ingress jss-ingress
 # if the ingress already exists, dump it to the local file
-kubectl -n trusted-identity get ingress vtpm-ingress -o yaml > ti-ingress.yaml
+kubectl -n trusted-identity get ingress jss-ingress -o yaml > ti-ingress.yaml
 ```
 
 If exists, append the section for `ti-vault`. It should look like this:

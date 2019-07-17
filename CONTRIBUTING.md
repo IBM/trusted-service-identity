@@ -173,7 +173,7 @@ either via CLI:
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.cluster.name=ti-fra02 \
 --set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
+--set ingress.host=ti-fra02.eu-de.containers.appdomain.cloud \
 --set ti-key-release-1.createVaultCert=true
 ```
 or by modifying the configuration values:
