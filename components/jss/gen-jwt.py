@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python script generates a JWT signed with custom private key.
-issuer(iss) is passed as env. var. (ISS)
-token expiration is passed as env. var (TTL_SEC)
+"""Python script generates a JWT signed witha private key and appends
+chain of trust (x5c) to the header.
+- issuer(iss) is passed as env. var. (ISS)
+- token expiration is passed as env. var (TTL_SEC)
 
 Example:
 ./gen-jwt.py  --aud foo,bar --claims=email:foo@google.com|images:img1,img2 key.pem
@@ -27,40 +28,22 @@ import os
 from os.path import join, exists
 
 from jwcrypto import jwt, jwk
-#from EngineJWK import EngineJWK
 
+# obtaind evn. variables:
 expire = int(os.getenv('TTL_SEC', 30))
 iss = os.getenv('ISS', 'wsched@us.ibm.com')
+statedir = os.getenv('STATEDIR', '/tmp')
 
 def main(args):
     """Generates a signed JSON Web Token from local private key."""
 
-    # Begin modification
     if os.path.isfile(args.key):
         with open(args.key) as f:
             pem_data = f.read()
-        f.closed
 
         key = jwk.JWK.from_pem(pem_data)
     else:
-        # if str.startswith(args.key, 'ibmtss2:'):
-        #     key = EngineJWK('tpm2', args.key[8:])
-        # else:
-            raise Exception('Unhandled key type: %s' % args.key)
-    # End modification
-
-    # if args.jwks:
-    #     with open(args.jwks, "w+") as fout:
-    #         # this is the old JWKS format
-    #         # fout.write("{ \"keys\":[ ")
-    #         # fout.write(key.export(private_key=False))
-    #         # fout.write("]}")
-    #
-    #         # this is the new PEM format
-    #         fout.write('{ "jwt_validation_pubkeys": "')
-    #         fout.write(key.public().export_to_pem())
-    #         fout.write('" }')
-    #     fout.close
+        raise Exception('Unhandled key type: %s' % args.key)
 
     now = int(time.time())
     payload = {
@@ -70,12 +53,6 @@ def main(args):
     }
     payload["iss"] = iss
     payload["sub"] = iss
-    # if args.iss:
-    #     payload["iss"] = args.iss
-    # if args.sub:
-    #     payload["sub"] = args.sub
-    # else:
-    #     payload["sub"] = args.iss
 
     if args.aud:
         if "," in args.aud:
@@ -95,7 +72,6 @@ def main(args):
             v = ':'.join(s[1:])
             payload[k] = v
 
-    statedir = os.getenv('STATEDIR') or '/tmp'
     # add chain of trust
     x5cfile = join(statedir, "x5c")
     if exists(x5cfile):
@@ -109,10 +85,8 @@ def main(args):
                 return token.serialize()
         except:
             print "Error opening/processing x5c file"
-    token = jwt.JWT(header={"alg": "RS256", "typ": "JWT", "kid": key.key_id},claims=payload)
-    token.make_signed_token(key)
-    return token.serialize()
-
+    # using without x5c chain of trust should be disabled
+    raise Exception("System not initialized. Missing x5c file. Abort!")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -132,8 +106,6 @@ if __name__ == '__main__':
                         help="sub claim. If not provided, it is set to the same as iss claim.")
     parser.add_argument("-claims", "--claims",
                          help="Other claims in format name1:value1|name2:value2 etc. Only string values are supported. Use `|` to seperate each claim")
-    # parser.add_argument("-jwks", "--jwks",
-    #                      help="Path to the output file for JWKS.")
     parser.add_argument("-expire", "--expire", type=int, default=3600,
                          help="JWT expiration time in second. Default is 1 hour.")
     print main(parser.parse_args())

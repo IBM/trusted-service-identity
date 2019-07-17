@@ -22,24 +22,12 @@ def get():
             claims = claims + k + ":" + args[k] + "|"
     statedir = os.getenv('STATEDIR') or '/tmp'
     privkeyfile = join(statedir, "private.key")
-    with open(privkeyfile) as f:
-        privkey = f.read().strip()
-    out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',privkey,'--iss','example-issuer', claims])
-    return str(out)
-
-# to be depricated
-@app.route('/getJWKS')
-def getJWKS():
-    statedir = os.getenv('STATEDIR') or '/tmp'
-    privkeyfile = join(statedir, "private.key")
-    with open(privkeyfile) as f:
-        privkey = f.read().strip()
-    out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',privkey,'--jwks','/tmp/jwks.json'])
-    jwksfile = join(statedir, "jwks.json")
-    with open(jwksfile) as f:
-        jwks = f.read().strip()
-        return str(jwks)
-    return str(out)
+    try:
+        out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',privkeyfile,'--iss','example-issuer', claims])
+        return str(out)
+    except Exception as e:
+        print e.output
+        return ("Error: %s" % e.output), 503
 
 @app.route('/public/getCSR')
 def getCSR():
