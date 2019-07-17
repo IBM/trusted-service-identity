@@ -11,6 +11,6 @@ spec:
       paths:
         - path: {{ index .Values "ti-key-release-1" "ingress" "path" }}
           backend:
-            serviceName: {{ index .Values "ti-key-release-1" "vtpmService" "name" }}
-            servicePort: {{ index .Values "ti-key-release-1" "vtpmService" "port" }}
+            serviceName: {{ index .Values "ti-key-release-1" "jssService" "name" }}
+            servicePort: {{ index .Values "ti-key-release-1" "jssService" "port" }}
 {{- end }}

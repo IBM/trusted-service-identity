@@ -6,7 +6,7 @@
 # cannot use the value from `ti-key-release-1`
 # parsing problem:
 #    `error converting YAML to JSON`
-tiVersion: v0.17
+tiVersion: v0.18
 
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
@@ -15,7 +15,8 @@ ti-key-release-1:
   # createVaultCert - if true, unique certs will be created
   # during Init Containers and inserted to Vault
   createVaultCert: false
-  # vault endpoint:
+  # vault endpoint used for injecting pod specific unique key and cert.
+  # see: `Automate Vault Certificates` documentation
   vaultAddress: https://169.62.157.164:32654
   # Cluster Information
   cluster:
@@ -26,10 +27,16 @@ ti-key-release-1:
     # expireSec - Time To Live for JWT token (in seconds)
     expireSec: 30
     issuer: wsched@us.ibm.com
-  # vtpmService - vTPM Service is accessable only from within the namespace
-  vtpmService:
-    name: vtpm-service
+  # jssService - JSS Service is accessable only from within the namespace
+  jssService:
+    name: jss-service
     port: 8012
+    # jssSerivce.type: this is the name of the image used for building JSS server
+    # available options are:
+    #   - jss-server - standard JSS server (deafult)
+    #   - vtpm-server - vTPM v1
+    #   - vtpm2-server - vTPM v2
+    type: jss-server
   # ingress - some vTPM calls are publicly available via ingress
   ingress:
     enabled: true
