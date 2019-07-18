@@ -19,7 +19,7 @@ jwt:
   expireSec: 30
   issuer: wsched@us.ibm.com
 
-# jssService - main vTPM Service is accessable only from within the namespace
+# jssService - main JSS Service is accessable only from within the namespace
 jssService:
   name: jss-service
   port: 8012

@@ -43,7 +43,7 @@ register()
   export VAULT_TOKEN=
 
   # Obtain the CSR from vTPM. Connect to any container deployed in `trusted-identity`
-  # namespace and get it using `curl http:/jss-service:8012/getCSR` > jss.csr
+  # namespace and get it using `curl http://jss-service:8012/getCSR` > jss.csr
   # NOT THIS: curl localhost:5000/getJWKS | awk '{printf "%s\\n", $0}' > jwks.json
 
   #vault write pki/root/sign-intermediate csr=@jss.csr format=pem_bundle ttl=43800h
