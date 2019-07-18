@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v0.17
+tiVersion: v0.18
 
 # Cluster Information
 cluster:
@@ -19,12 +19,18 @@ jwt:
   expireSec: 30
   issuer: wsched@us.ibm.com
 
-# vtpmService - main vTPM Service is accessable only from within the namespace
-vtpmService:
-  name: vtpm-service
+# jssService - main JSS Service is accessable only from within the namespace
+jssService:
+  name: jss-service
   port: 8012
+  # jssSerivce.type: this is the name of the image used for building JSS server
+  # available options are:
+  #   - jss-server - standard JSS server (deafult)
+  #   - vtpm-server - vTPM v1
+  #   - vtpm2-server - vTPM v2
+  type: jss-server
 
-# ingress - some vTPM calls are publicly available via ingress
+# ingress - some JSS calls are publicly available via ingress
 ingress:
   enabled: true
   path: /

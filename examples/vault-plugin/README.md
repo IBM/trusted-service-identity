@@ -52,12 +52,12 @@ ibmcloud ks cluster-get <cluster_name> | grep Ingress
 Before starting a new ingress deployment, make sure there is not other ingress deployed
 in this namespace. Typical TI deployment already has an ingress running to support
 access to vTPM service.
-Check if the `vtpm-ingress` is created:
+Check if the `jss-ingress` is created:
 
 ```
-kubectl -n trusted-identity get ingress vtpm-ingress
+kubectl -n trusted-identity get ingress jss-ingress
 # if the ingress already exists, dump it to the local file
-kubectl -n trusted-identity get ingress vtpm-ingress -o yaml > ti-ingress.yaml
+kubectl -n trusted-identity get ingress jss-ingress -o yaml > ti-ingress.yaml
 ```
 
 If exists, append the section for `ti-vault`. It should look like this:
@@ -66,7 +66,7 @@ If exists, append the section for `ti-vault`. It should look like this:
 http:
   paths:
   - backend:
-      serviceName: vtpm-service
+      serviceName: jss-service
       servicePort: 8012
     path: /public
   - backend:
@@ -112,7 +112,7 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/
 ```
 At this point, this is an expected result.
 
-Test the connection to vTPM:
+Test the connection to JSS:
 ```console
 $ curl  http://<Ingress Subdomain or ICP master IP>/public/getCSR
   -----BEGIN CERTIFICATE REQUEST-----
@@ -161,12 +161,12 @@ If no errors, proceed to the JSS registration
 ### Register JWT Signing Service (JSS) with Vault
 Each cluster with JSS needs to be registered with Vault.
 Env. variables `ROOT_TOKEN` and `VAULT_ADDR` should be already defined. Now we need
-the `VTPM_ADDR` for each cluster (individual vTPM). This the ingress associated
+the `JSS_ADDR` for each cluster (individual vTPM). This the ingress associated
 with the cluster.
 
 e.g:
 ```
-export VTPM_ADDR=http://ti-fra02.eu-de.containers.appdomain.cloud
+export JSS_ADDR=http://ti-fra02.eu-de.containers.appdomain.cloud
 ```
 
 Than execute the registration:

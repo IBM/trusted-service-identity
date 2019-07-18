@@ -2,20 +2,20 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   namespace: {{ index .Values "ti-key-release-1" "namespace" }}
-  name: vtpm-server
+  name: jss-server
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: vtpm-server
+        app: jss-server
         version: v1
     spec:
       imagePullSecrets:
       - name: regcred
       containers:
-        - name: vtpm-server
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm2-server:{{ .Values.tiVersion }}
+        - name: jss-server
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS

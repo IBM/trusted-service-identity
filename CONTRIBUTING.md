@@ -53,12 +53,15 @@ Compile and create images for other sub-components
 make all -C components/gen-vault-cert/
 make all -C components/jwt-sidecar/
 make all -C components/revoker/
-make all -C components/vtpm2-server/
+make all -C components/jss-server/
 ```
-We retired the older version of vTPM v1, but if you need to build one:
+We abandoned the usage of vTPM, but if you like to still use it, either version
+vTPM v1 or v2, built them as shown below and then referenced accordingly in
+helm deployment.
 
-```conosole
+```console
 make all -C components/vtpm-server/
+make all -C components/vtpm2-server/
 ```
 
 To deploy manually:
@@ -170,7 +173,7 @@ either via CLI:
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.cluster.name=ti-fra02 \
 --set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
+--set ingress.host=ti-fra02.eu-de.containers.appdomain.cloud \
 --set ti-key-release-1.createVaultCert=true
 ```
 or by modifying the configuration values:
