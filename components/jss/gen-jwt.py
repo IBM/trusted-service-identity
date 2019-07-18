@@ -52,7 +52,11 @@ def main(args):
         "iat": now,
     }
     payload["iss"] = iss
-    payload["sub"] = iss
+
+    if args.sub:
+        payload["sub"] = args.sub
+    else:
+        payload["sub"] = iss
 
     if args.aud:
         if "," in args.aud:
@@ -97,15 +101,10 @@ if __name__ == '__main__':
         'key',
         help='The path to the key pem file. The key can be generated with openssl command: `openssl genrsa -out key.pem 2048`')
     # optional arguments
-    parser.add_argument("-iss", "--iss",
-                        default="testing@secure.istio.io",
-                        help="iss claim. Default is `testing@secure.istio.io`")
     parser.add_argument("-aud", "--aud",
-                        help="aud claim. This is comma-separated-list of audiences")
+                        help="aud(audience) claim. This is comma-separated-list of audiences")
     parser.add_argument("-sub", "--sub",
-                        help="sub claim. If not provided, it is set to the same as iss claim.")
+                        help="sub(subject) claim. If not provided, it is set to the same as iss claim.")
     parser.add_argument("-claims", "--claims",
                          help="Other claims in format name1:value1|name2:value2 etc. Only string values are supported. Use `|` to seperate each claim")
-    parser.add_argument("-expire", "--expire", type=int, default=3600,
-                         help="JWT expiration time in second. Default is 1 hour.")
     print main(parser.parse_args())
