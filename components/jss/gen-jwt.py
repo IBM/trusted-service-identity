@@ -20,7 +20,7 @@ chain of trust (x5c) to the header.
 - token expiration is passed as env. var (TTL_SEC)
 
 Example:
-./gen-jwt.py  --aud foo,bar --claims=email:foo@google.com|images:img1,img2 key.pem
+./gen-jwt.py --aud foo,bar --claimms name:tt|cluster-name:EUcluster|cluster-region:eu-de|images:res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0,ubuntu:latest private-key.pem
 """
 import argparse
 import time
@@ -32,7 +32,7 @@ from jwcrypto import jwt, jwk
 # obtaind evn. variables:
 expire = int(os.getenv('TTL_SEC', 30))
 iss = os.getenv('ISS', 'wsched@us.ibm.com')
-statedir = os.getenv('STATEDIR', '/tmp')
+statedir = os.getenv('STATEDIR', '/host/tsi-secure')
 
 def main(args):
     """Generates a signed JSON Web Token from local private key."""

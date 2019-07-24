@@ -1,0 +1,9 @@
+This Helm chart initializes the TSI nodes.
+
+   app: {{ template "tsi-node-setup.name" . }}
+   chart: {{ template "tsi-node-setup.chart" . }}
+   release: {{ .Release.Name }}
+   namespace: {{ .Values.namespace }}
+
+After successful execution, this Helm chart must be deleted:
+   helm delete --purge --debug {{ .Release.Name }}

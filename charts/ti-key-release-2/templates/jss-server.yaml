@@ -27,3 +27,20 @@ spec:
           - name: http
             containerPort: 5000
             protocol: TCP
+          volumeMounts:
+          - mountPath: /host/tsi-secure
+            name: ti-volume
+          - mountPath: /logs
+            name: host-logs
+      volumes:
+      - name: ti-volume
+        hostPath:
+          # directory location on host
+           path: /ti-secret
+           # directory might not exist
+           type: DirectoryOrCreate
+      - name: host-logs
+        hostPath:
+          # directory location on host
+           path: /var/log
+           type: Directory

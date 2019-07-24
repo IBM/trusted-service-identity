@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "tsi-node-setup.fullname" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      name: ti-node-setup
+  template:
+    metadata:
+      labels:
+        name: ti-node-setup
+    spec:
+      #serviceAccountName: ti-setup-admin-sa
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: ti-node-setup
+          image: "res-kompass-kompass-docker-local.artifactory.swg-devops.com/node-setup:{{ .Values.tsiVersion }}"
+          imagePullPolicy: Always
+          env:
+            - name: RESET
+              value: "{{ .Values.reset }}"
+            - name: PRIVATEDIR
+              value: "/host/tsi-secure"
+          volumeMounts:
+          - mountPath: /host/tsi-secure
+            name: ti-volume
+          - mountPath: /host/etc
+            name: machine-id
+            readOnly: true
+          - mountPath: /logs
+            name: host-logs
+      volumes:
+      - name: ti-volume
+        hostPath:
+          # directory location on host
+           path: /ti-secret
+           # directory might not exist
+           type: DirectoryOrCreate
+      - name: machine-id
+        hostPath:
+          # directory location on host
+           path: /etc
+           type: Directory
+      - name: host-logs
+        hostPath:
+          # directory location on host
+           path: /var/log
+           type: Directory

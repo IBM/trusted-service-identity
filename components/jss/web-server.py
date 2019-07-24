@@ -20,10 +20,10 @@ def get():
         claims = "--claims="
         for k in args:
             claims = claims + k + ":" + args[k] + "|"
-    statedir = os.getenv('STATEDIR') or '/tmp'
+    statedir = os.getenv('STATEDIR') or '/host/tsi-secure'
     privkeyfile = join(statedir, "private.key")
     try:
-        out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',privkeyfile,'--iss','example-issuer', claims])
+        out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',privkeyfile, claims])
         return str(out)
     except Exception as e:
         print e.output
@@ -31,7 +31,7 @@ def get():
 
 @app.route('/public/getCSR')
 def getCSR():
-    statedir = os.getenv('STATEDIR') or '/tmp'
+    statedir = os.getenv('STATEDIR') or '/host/tsi-secure'
     csrfile = join(statedir,"server.csr")
     with open(csrfile) as f:
         csr = f.read().strip()
@@ -40,7 +40,7 @@ def getCSR():
 @app.route('/public/postX5c', methods=["POST"])
 def postX5c():
     try:
-        statedir = os.getenv('STATEDIR') or '/tmp'
+        statedir = os.getenv('STATEDIR') or '/host/tsi-secure'
         x5cfile = join(statedir, "x5c")
         # if file already exists, don't all to override it
         if exists(x5cfile):
