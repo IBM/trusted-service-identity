@@ -9,7 +9,7 @@ RUN apt update && \
 RUN apt install -y python-cryptography \
     && pip install jwcrypto
 
-COPY gen-jwt.sh gen-jwt.py init-jss.sh run-jss-server.sh validate-jwt.py /usr/local/bin/
+COPY gen-jwt.sh gen-jwt.py run-jss-server.sh validate-jwt.py /usr/local/bin/
 
 # RUN jwt=$(gen-jwt.sh \
 #        --iss example-issuer \

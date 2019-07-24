@@ -7,7 +7,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="ti-revoker"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.18
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.19
 
 all: build docker docker-push timestamp
 
