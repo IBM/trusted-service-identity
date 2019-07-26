@@ -1,15 +1,16 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
   namespace: {{ index .Values "ti-key-release-1" "namespace" }}
   name: jss-server
 spec:
-  replicas: 1
+  selector:
+    matchLabels:
+      name: jss-server
   template:
     metadata:
       labels:
-        app: jss-server
-        version: v1
+        name: jss-server
     spec:
       imagePullSecrets:
       - name: regcred
@@ -27,6 +28,7 @@ spec:
           - name: http
             containerPort: 5000
             protocol: TCP
+            hostPort: 5000
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: ti-volume

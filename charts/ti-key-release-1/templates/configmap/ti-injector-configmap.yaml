@@ -37,6 +37,11 @@ data:
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
         volumeMounts:
           - name: jwt-shared-data
             mountPath: /usr/share/jwt

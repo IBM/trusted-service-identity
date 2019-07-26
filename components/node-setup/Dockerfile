@@ -1,5 +1,6 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 RUN apt update && \
+    apt install -y curl jq vim && \
     apt install -y openssl
 #    apt install -y openssl && \
 #    apt install -y python python-pip

@@ -18,16 +18,20 @@ echo "$now,$1" >> ${AUDIT_LOG}
 # output some info about the pod processing these operations
 logme "pod $HOSTNAME connected to host $(cat /host/etc/hostname) machineid: $(cat /host/etc/machine-id)"
 
+# reset the private key and all the other secure stuff
+if [ "$RESET" == "true" ]; then
+  # TODO maybe we should hardcode the location. Othewise someone could do
+  # a lot of damage to the host if passes wrong directory nama as a env. var
+  rm -rf ${PRIVATEDIR}
+  #rm ${PRIV_KEY} ${SERV_CSR}
+  logme "reset performed"
+fi
+
 if ! [ -d ${PRIVATEDIR} ]; then
   mkdir -p ${PRIVATEDIR}
   logme "directory ${PRIVATEDIR} created"
 fi
 
-# reset the private key
-if [ "$RESET" == "true" ]; then
-  rm ${PRIV_KEY} ${SERV_CSR}
-  logme "reset performed"
-fi
 
 # create a private key
 if ! [ -f ${PRIV_KEY} ]; then

@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         name: ti-node-setup
+        app: ti-node-setup
+        version: v1
     spec:
       #serviceAccountName: ti-setup-admin-sa
       imagePullSecrets:
@@ -24,6 +26,11 @@ spec:
               value: "{{ .Values.reset }}"
             - name: PRIVATEDIR
               value: "/host/tsi-secure"
+              # get the host IP and pass as env. var
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: ti-volume
