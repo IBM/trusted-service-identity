@@ -2,11 +2,13 @@
 
 # gather all the environemt variables and global parameters
 DIR="$(dirname "$0")"
-RESET=${RESET:-"false"}
+RESETALL=${RESETALL:-"false"}
+RESETX5C=${RESETX5C:-"true"}
 PRIVATEDIR=${PRIVATEDIR:-/host/tsi-secure}
 AUDIT_LOG=/logs/tsi-audit.log
 PRIV_KEY=${PRIVATEDIR}/private.key
 SERV_CSR=${PRIVATEDIR}/server.csr
+X5C=${PRIVATEDIR}/x5c
 
 # a handy function to format the audit log
 logme() {
@@ -19,13 +21,20 @@ echo "$now,$1" >> ${AUDIT_LOG}
 logme "pod $HOSTNAME connected to host $(cat /host/etc/hostname) machineid: $(cat /host/etc/machine-id)"
 
 # reset the private key and all the other secure stuff
-if [ "$RESET" == "true" ]; then
+if [ "$RESETALL" == "true" ]; then
   # TODO maybe we should hardcode the location. Othewise someone could do
   # a lot of damage to the host if passes wrong directory nama as a env. var
   rm -rf ${PRIVATEDIR}
   #rm ${PRIV_KEY} ${SERV_CSR}
-  logme "reset performed"
+  logme "full reset performed"
 fi
+
+# reset the private key and all the other secure stuff
+if [ "$RESETX5C" == "true" ]; then
+  rm ${X5C}
+  logme "x5c file reset performed"
+fi
+
 
 if ! [ -d ${PRIVATEDIR} ]; then
   mkdir -p ${PRIVATEDIR}

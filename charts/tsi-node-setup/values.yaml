@@ -8,8 +8,16 @@ namespace: trusted-identity
 # version of TSI components
 tsiVersion: v0.19
 
-# reset - indicates whether reset the setup process
-# if set to "true", the setup helm chart will override existing private key
-# and CRS, if set to "false", the private key existing on the host will be
-# preserved. New value created only if there is no previouse setup.
-reset: "true"
+# reset - indicates whether the setup will remove the existing securtiy
+# components and recreate them, or keep the existing ones as is.
+# if reset.all set to "true" the setup helm chart will remove the existing
+# private key, CSR and x5c and create new private key and CSR.
+#
+# if reset.x5c is set to "true", the helm chart will only remove the x5c
+# that allows creating a new one.
+#
+# Setting them to "false" would preserve the current values if they exist
+# or create new ones if they don't
+reset:
+  all: "false"
+  x5c: "true"
