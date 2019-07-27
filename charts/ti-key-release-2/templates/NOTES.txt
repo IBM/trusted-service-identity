@@ -17,12 +17,5 @@ This helm chart installs environment for Trusted Identity
     jwt.expireSec: {{ index .Values "ti-key-release-1" "jwt" "expireSec" }}
     createVaultCert: {{ index .Values "ti-key-release-1" "createVaultCert" }}
 
-  JSS service is available from any container in the {{ index .Values "ti-key-release-1" "namespace" }} namespace
-  To get CSR:
-    curl http://{{ index .Values "ti-key-release-1" "jssService" "name" }}:{{ index .Values "ti-key-release-1" "jssService" "port" }}/public/getCSR
-
-  Ingress allows a public access to vTPM CSR:
-    curl http://{{ .Values.ingress.host }}{{ .Values.ingress.path }}public/getCSR
-
 Execute test:
   kubectl create -f examples/myubuntu.yaml -n trusted-identity

@@ -129,5 +129,5 @@ jwtkey: |-
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
 hyperkube:
-  repository: quay.io/coreos/hyperkube
-  tag: v1.7.6_coreos.0
+  repository: gcr.io/google_containers/hyperkube
+  tag: v1.14.3

@@ -22,8 +22,10 @@ spec:
           image: "res-kompass-kompass-docker-local.artifactory.swg-devops.com/node-setup:{{ .Values.tsiVersion }}"
           imagePullPolicy: Always
           env:
-            - name: RESET
-              value: "{{ .Values.reset }}"
+            - name: RESETALL
+              value: "{{ .Values.reset.all }}"
+            - name: RESETX5C
+              value: "{{ .Values.reset.x5c }}"
             - name: PRIVATEDIR
               value: "/host/tsi-secure"
               # get the host IP and pass as env. var
