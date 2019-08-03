@@ -45,7 +45,7 @@ spec:
       - name: ti-volume
         hostPath:
           # directory location on host
-           path: /ti-secret
+           path: /tsi-secure
            # directory might not exist
            type: DirectoryOrCreate
       - name: machine-id

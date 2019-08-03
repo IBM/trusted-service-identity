@@ -10,24 +10,7 @@ if __name__ == '__main__':
 
 @app.route('/')
 def index():
-    return "JSS server"
-
-@app.route('/getJWT')
-def get():
-    args = request.args.copy()
-    claims = ""
-    if args:
-        claims = "--claims="
-        for k in args:
-            claims = claims + k + ":" + args[k] + "|"
-    statedir = os.getenv('STATEDIR') or '/host/tsi-secure'
-    privkeyfile = join(statedir, "private.key")
-    try:
-        out = subprocess.check_output(['/usr/local/bin/gen-jwt.py',privkeyfile, claims])
-        return str(out)
-    except Exception as e:
-        print e.output
-        return ("Error: %s" % e.output), 503
+    return "JSS pub server"
 
 @app.route('/public/getCSR')
 def getCSR():
