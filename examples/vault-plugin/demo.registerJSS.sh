@@ -97,12 +97,18 @@ elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   helpme
 else
   # get the list of all 'ti-node-setup' pods for each node instance
-  # TODO select only Running instances, to eliminate "Terminating" (helm operations)
-  for n in $(kubectl -n trusted-identity get pods --selector=app=ti-node-setup --output=jsonpath={.items..metadata.name})
-  #for n in $(kubectl -n trusted-identity get pods --selector=app=ti-node-setup -o custom-columns=NAME:.metadata.name,IP:.status.hostIP)
-    do
-      # for each pod representing a node, execute JSS node registration.
-      # echo "Processing $n pod..."
-      register $n
-    done
+  # select only Running instances, to eliminate "Terminating" (helm operations)
+  PODS=$(kubectl -n trusted-identity get pods --selector=app=ti-node-setup --field-selector=status.phase=Running --output=jsonpath={.items..metadata.name})
+  if [ -z "$PODS" ];  then
+        echo "ERROR!: There are no running 'ti-node-setup' pods. Cannot register JSS. Run 'helm install charts/tsi-node-setup'"
+  else
+      echo "\$PODS is NOT empty"
+      for n in ${PODS}
+      #for n in $(kubectl -n trusted-identity get pods --selector=app=ti-node-setup -o custom-columns=NAME:.metadata.name,IP:.status.hostIP)
+        do
+          # for each pod representing a node, execute JSS node registration.
+          # echo "Processing $n pod..."
+          register $n
+        done
+  fi
 fi

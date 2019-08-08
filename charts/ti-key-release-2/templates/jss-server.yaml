@@ -15,8 +15,9 @@ spec:
       imagePullSecrets:
       - name: regcred
       containers:
-        - name: jss-server
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+        - name: jss-server-pub
+          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-pub:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS
@@ -34,11 +35,31 @@ spec:
             name: ti-volume
           - mountPath: /logs
             name: host-logs
+        - name: jss-server-priv
+          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-priv:{{ .Values.tiVersion }}
+          imagePullPolicy: Always
+          env:
+            - name: ISS
+              # this doublequotes actually works :)
+              value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
+            - name: TTL_SEC
+              value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
+          ports:
+          - name: http
+            containerPort: 5001
+            protocol: TCP
+            hostPort: 5001
+          volumeMounts:
+          - mountPath: /host/tsi-secure
+            name: ti-volume
+          - mountPath: /logs
+            name: host-logs
       volumes:
       - name: ti-volume
         hostPath:
           # directory location on host
-           path: /ti-secret
+           path: /tsi-secure
            # directory might not exist
            type: DirectoryOrCreate
       - name: host-logs
