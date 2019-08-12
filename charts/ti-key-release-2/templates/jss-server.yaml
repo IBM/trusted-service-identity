@@ -32,7 +32,7 @@ spec:
             hostPort: 5000
           volumeMounts:
           - mountPath: /host/tsi-secure
-            name: ti-volume
+            name: tsi-secure
           - mountPath: /logs
             name: host-logs
         - name: jss-server-priv
@@ -52,15 +52,23 @@ spec:
             hostPort: 5001
           volumeMounts:
           - mountPath: /host/tsi-secure
-            name: ti-volume
+            name: tsi-secure
+          - mountPath: /host/sockets
+            name: tsi-sockets
           - mountPath: /logs
             name: host-logs
       volumes:
-      - name: ti-volume
+      - name: tsi-secure
         hostPath:
           # directory location on host
            path: /tsi-secure
-           # directory might not exist
+           # directory must exist
+           type: Directory
+      - name: tsi-sockets
+        hostPath:
+          # directory location on host
+           path: /tsi-secure/sockets
+           # directory might be created
            type: DirectoryOrCreate
       - name: host-logs
         hostPath:

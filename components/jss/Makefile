@@ -16,7 +16,7 @@ fast:
 	docker tag $(IMAGE_PUB) $(MUTABLE_IMAGE_PUB)
 	docker push $(IMAGE_PUB)
 	docker push $(MUTABLE_IMAGE_PUB)
-	docker build -t $(IMAGE_PRIV) -f Dockerfile.priv .
+	docker build -t $(IMAGE_PRIV) -f Dockerfile.privsock .
 	docker tag $(IMAGE_PRIV) $(MUTABLE_IMAGE_PRIV)
 	docker push $(IMAGE_PRIV)
 	docker push $(MUTABLE_IMAGE_PRIV)

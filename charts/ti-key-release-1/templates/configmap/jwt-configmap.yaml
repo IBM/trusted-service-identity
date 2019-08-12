@@ -21,6 +21,7 @@ data:
       echo -n "cluster-region=$(cat /pod-metadata/ti-cluster-region)&" >> /tmp/claims
       echo -n "machineid=$(cat /host/etc/machine-id)" >> /tmp/claims
       # curl http://{{ .Values.jssService.name }}:{{ .Values.jssService.port }}/getJWT?"$(cat /tmp/claims)" > /usr/share/jwt/token
-      curl http://${HOST_IP}:5001/getJWT?"$(cat /tmp/claims)" > /usr/share/jwt/token
+      #  http://${HOST_IP}:5001/getJWT?"$(cat /tmp/claims)" > /usr/share/jwt/token
+      curl --unix-socket /host/sockets/app.sock http://localhost/getJWT?"$(cat /tmp/claims)" > /usr/share/jwt/token
       sleep $(({{ int .Values.jwt.expireSec }} - 5))
     done

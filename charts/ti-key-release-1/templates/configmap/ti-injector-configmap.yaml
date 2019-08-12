@@ -48,6 +48,8 @@ data:
           - name: jwt-configmap
             mountPath: "/configmap/jwt"
             readOnly: true
+          - name: tsi-sockets
+            mountPath: "/host/sockets"
 
     {{- if .Values.createVaultCert }}
           - name: jwt-secret
@@ -89,6 +91,12 @@ data:
              type: Directory
     {{- end }}
 
+        - name: tsi-sockets
+          hostPath:
+            # directory location on host
+             path: /tsi-secure/sockets
+             # directory must exist
+             type: Directory
         - name: host-etc
           hostPath:
             # directory location on host
