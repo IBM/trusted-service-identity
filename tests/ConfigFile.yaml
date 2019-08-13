@@ -43,11 +43,6 @@ sidecarContainers:
 volumes:
   - name: jwt-shared-data
     emptyDir: {}
-  - name: jwt-configmap
-    configMap:
-      name: ti-jwt-configmap
-      # this makes the files executable
-      defaultMode: 0744
   - name: ti-host-volume
     hostPath:
       # directory location on host
