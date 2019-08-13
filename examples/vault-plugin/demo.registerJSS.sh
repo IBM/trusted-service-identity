@@ -102,7 +102,6 @@ else
   if [ -z "$PODS" ];  then
         echo "ERROR!: There are no running 'ti-node-setup' pods. Cannot register JSS. Run 'helm install charts/tsi-node-setup'"
   else
-      echo "\$PODS is NOT empty"
       for n in ${PODS}
       #for n in $(kubectl -n trusted-identity get pods --selector=app=ti-node-setup -o custom-columns=NAME:.metadata.name,IP:.status.hostIP)
         do

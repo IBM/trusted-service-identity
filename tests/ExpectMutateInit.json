@@ -47,18 +47,13 @@
             "command": [
                 "/bin/sh",
                 "-c",
-                "/configmap/jwt/execute-get-key.sh"
+                "/usr/local/bin/execute-get-key.sh"
             ],
             "resources": {},
             "volumeMounts": [
                 {
                     "name": "jwt-shared-data",
                     "mountPath": "/usr/share/jwt"
-                },
-                {
-                    "name": "jwt-configmap",
-                    "readOnly": true,
-                    "mountPath": "/configmap/jwt"
                 },
                 {
                     "name": "jwt-secret",
@@ -82,13 +77,6 @@
         {
             "name": "jwt-shared-data",
             "emptyDir": {}
-        },
-        {
-            "name": "jwt-configmap",
-            "configMap": {
-                "name": "ti-jwt-configmap",
-                "defaultMode": 484
-            }
         },
         {
             "name": "ti-host-volume",
@@ -214,4 +202,3 @@
         "admission.trusted.identity/ti-secret-key": "ti-secret-XXX"
     }
 }
-

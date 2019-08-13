@@ -264,12 +264,12 @@ kubectl create -f examples/jwt-policy-example.yaml -n trusted-identity
 ## Testing the JWT token created by the sidecar
 Every container created in `trusted-identity` namespace that conforms to [this
 policy](./charts/ti-key-release-1/templates/cti-policy-example.yaml) gets a sidecar
-that is creating JWT tokens as defined by `execute-get-key.sh` in [here](./charts/ti-key-release-1/templates/configmap/jwt-configmap.yaml)
+that is creating JWT tokens as defined by `execute-get-key.sh` in [here](./components/jwt-sidecar/execute-get-key.sh)
 This newly created token is available to the main container via shared mount (`/jwt-tokens/token`)
 
-For testing purposes the sidecar creates a token valid 25 seconds and the refresh
-rate is 30 seconds, so if the main container uses the token, every 25 seconds
-the authentication should fail for 5 seconds.
+For testing purposes the sidecar creates a token valid 30 seconds and the refresh
+rate is 25 seconds, so the application gets a new token 5 seconds before the old
+one expires.
 
 If you don't have the container running from previous steps, start it now:
 ```

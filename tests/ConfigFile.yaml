@@ -31,9 +31,6 @@ sidecarContainers:
   volumeMounts:
     - name: jwt-shared-data
       mountPath: /usr/share/jwt
-    - name: jwt-configmap
-      mountPath: "/configmap/jwt"
-      readOnly: true
     - name: jwt-secret
       mountPath: "/secret/jwt"
       readOnly: true
@@ -42,7 +39,7 @@ sidecarContainers:
       readOnly: true
     - name: host-etc
       mountPath: /host/etc
-  command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
+  command: ["/bin/sh", "-c", "/usr/local/bin/execute-get-key.sh"]
 volumes:
   - name: jwt-shared-data
     emptyDir: {}

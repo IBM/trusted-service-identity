@@ -110,7 +110,7 @@
          "command":[
             "/bin/sh",
             "-c",
-            "/configmap/jwt/execute-get-key.sh"
+            "/usr/local/bin/execute-get-key.sh"
          ],
          "resources":{
 

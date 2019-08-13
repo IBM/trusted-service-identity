@@ -25,7 +25,7 @@ fast:
 docker:
 	docker build --no-cache -t $(IMAGE_PUB) -f Dockerfile.pub .
 	docker tag $(IMAGE_PUB) $(MUTABLE_IMAGE_PUB)
-	docker build --no-cache -t $(IMAGE_PRIV) -f Dockerfile.priv .
+	docker build --no-cache -t $(IMAGE_PRIV) -f Dockerfile.privsock .
 	docker tag $(IMAGE_PRIV) $(MUTABLE_IMAGE_PRIV)
 
 docker-push:

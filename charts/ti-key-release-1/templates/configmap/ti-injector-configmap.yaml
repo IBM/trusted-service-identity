@@ -42,12 +42,11 @@ data:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
+        - name: JWT_TTL_SEC
+          value: {{ .Values.jwt.expireSec }}
         volumeMounts:
           - name: jwt-shared-data
             mountPath: /usr/share/jwt
-          - name: jwt-configmap
-            mountPath: "/configmap/jwt"
-            readOnly: true
           - name: tsi-sockets
             mountPath: "/host/sockets"
 
@@ -62,15 +61,9 @@ data:
             readOnly: true
           - name: host-etc
             mountPath: /host/etc
-        command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
       volumes:
         - name: jwt-shared-data
           emptyDir: {}
-        - name: jwt-configmap
-          configMap:
-            name: ti-jwt-configmap
-            # this makes the files executable
-            defaultMode: 0744
 
     {{- if .Values.createVaultCert }}
         - name: ti-host-volume

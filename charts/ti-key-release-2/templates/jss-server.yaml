@@ -45,11 +45,6 @@ spec:
               value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
             - name: TTL_SEC
               value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
-          ports:
-          - name: http
-            containerPort: 5001
-            protocol: TCP
-            hostPort: 5001
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: tsi-secure

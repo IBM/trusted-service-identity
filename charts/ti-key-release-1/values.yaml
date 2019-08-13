@@ -33,8 +33,9 @@ jssService:
 # createVaultCert - if true, unique certs will be created
 # during Init Containers and inserted to Vault
 createVaultCert: false
-
-# Values below are used to create a secret: `ti-keys-config`
+# if createVaultCert is set to 'true'
+# vault service endpoint is required for injecting pod specific unique key and cert.
+# see: `Automate Vault Certificates` documentation
 # vault-address e.g. https://1.1.1.1:32222
 vaultAddress: https://169.62.157.164:32654
 
