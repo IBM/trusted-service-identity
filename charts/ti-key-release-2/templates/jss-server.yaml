@@ -33,8 +33,6 @@ spec:
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: tsi-secure
-          - mountPath: /logs
-            name: host-logs
         - name: jss-server-priv
           #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
           image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-priv:{{ .Values.tiVersion }}
@@ -51,8 +49,6 @@ spec:
             readOnly: true
           - mountPath: /host/sockets
             name: tsi-sockets
-          - mountPath: /logs
-            name: host-logs
       volumes:
       - name: tsi-secure
         hostPath:
@@ -66,8 +62,3 @@ spec:
            path: /tsi-secure/sockets
            # directory might be created
            type: DirectoryOrCreate
-      - name: host-logs
-        hostPath:
-          # directory location on host
-           path: /var/log
-           type: Directory

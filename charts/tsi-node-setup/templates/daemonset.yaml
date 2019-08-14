@@ -39,7 +39,7 @@ spec:
           - mountPath: /host/etc
             name: machine-id
             readOnly: true
-          - mountPath: /logs
+          - mountPath: /host/logs
             name: host-logs
       volumes:
       - name: ti-volume
