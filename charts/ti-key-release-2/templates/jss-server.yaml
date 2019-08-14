@@ -48,6 +48,7 @@ spec:
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: tsi-secure
+            readOnly: true
           - mountPath: /host/sockets
             name: tsi-sockets
           - mountPath: /logs

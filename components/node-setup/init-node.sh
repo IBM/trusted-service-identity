@@ -52,7 +52,7 @@ if ! [ -f ${PRIV_KEY} ]; then
  openssl req -new -sha256 -key ${PRIV_KEY} -out ${SERV_CSR} -subj "/CN=jss-jwt-server"
  logme "private key ${PRIV_KEY} and ${SERV_CSR} created"
 else
-  logme "privte key ${PRIV_KEY} and ${SERV_CSR} already exist. Do nothing"
+ logme "private key ${PRIV_KEY} and ${SERV_CSR} already exist. Do nothing"
 fi
 
 # end of the audit log

@@ -61,6 +61,7 @@ data:
             readOnly: true
           - name: host-etc
             mountPath: /host/etc
+            readOnly: true
       volumes:
         - name: jwt-shared-data
           emptyDir: {}
