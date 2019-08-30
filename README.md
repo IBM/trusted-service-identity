@@ -162,38 +162,8 @@ helm upgrade -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
 ### Boostrapping - CI/CD pipeline
 The bootstrapping process is shown in details under the [Vault demo](examples/README.md)
 
-### Testing TSI Deployment
-Once environment deployed, test if the services are ready for the Bootstrapping
-CI/CD pipeline (demo).
-
-Setup an alias to simplif
-
-follow the output dynamically created by helm install:
-
-For example:
-
-```
-Ingress allows a public access to vTPM CSR:
-  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-
-```
-
-```console
-$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-  -----BEGIN CERTIFICATE REQUEST-----
-  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
-  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
-  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
-  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
-  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
-  -----END CERTIFICATE REQUEST-----
-
-Execute test:
-    kubectl create -f examples/myubuntu.yaml -n trusted-identity
-    kubectl -n trusted-identity create -f examples/myubuntu.yaml
-    kubectl -n trusted-identity get pods
-    kubectl -n trusted-identity exec -it myubuntu-xxx cat /jwt-tokens/token
-```
+## Run Demo
+For next steps, review [demo](examples/README.md) examples. 
 
 ## Sample JWT claims
 Once the TSI environment is operational, the application container will have
