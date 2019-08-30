@@ -17,6 +17,7 @@ physical hardware. Secrets are released to the application based on this identit
 ## Table of Contents
 - [Installation](./README.md#installation)
   - [Prerequisites](./README.md#prerequisites)
+  - [Setup Cluster](./README.md#setup-cluster)
   - [Install](./README.md#install-trusted-service-identity-framework)
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
@@ -82,28 +83,45 @@ kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.docke
 or update the [init-namespace.sh](./init-namespace.sh) script.
 
 The deployment is done in `trusted-identity` namespace. If you are testing or developing
-the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
+the code and execute the deployment several times, it is a good idea to cleanup
+the namespace before executing another deployment. Run cleanup first, then init
+to initialize the namespace.This would remove all the components and artifacts.
 
-This would remove all the components and artifacts, then recreate a new, empty namespace:
+Then recreate a new, empty namespace:
 
 ```console
 ./cleanup.sh
 ./init-namespace.sh
 ```
 
+### Setup Cluster
+In order to install and run Trusted Service Identity, all worker nodes have to be
+setup with a private key, either directly or through vTPM (virtual Trusted Platform Module).
+This operation needs to be executed only once.
+
+If you are running this for the first time or like to override previous setup values:
+```console
+helm install charts/tsi-node-setup --debug --name tsi-setup --set reset.all=true
+```
+
+To keep the existing private key, but just reset the intermediate CA (`x5c`)
+```console
+helm install charts/tsi-node-setup --debug --name tsi-setup --set reset.x5c=true
+```
+
+Once the worker nodes are setup, deploy the TSI environment
+
+
 ### Install Trusted Service Identity framework
 Make sure all the [prerequisites](./README.md#prerequisites) are satisfied.
 
 #### Deploy Helm charts
 TI helm charts are included with this repo under [charts/](./charts/) directory.
-You can use them directly or use the charts that you created (see instructions below).
+You can use them directly or use the charts that you built yourself (see instructions below).
 
-The following information is required to deploy TI helm charts:
+The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
-in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
 
 *NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
 the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
@@ -122,9 +140,14 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 
 ```console
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+--set ti-key-release-1.cluster.name=CLUSTER_NAME \
+--set ti-key-release-1.cluster.region=CLUSTER_REGION
+```
+For example:
+```console
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.cluster.name=ti-fra02 \
---set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
+--set ti-key-release-1.cluster.region=eu-de
 ```
 
 Complete list of available setup parameters can be obtained as follow:
@@ -136,8 +159,16 @@ helm install -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
 helm upgrade -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
 ```
 
-### Testing Deployment
-Once environment deployed, follow the output dynamically created by helm install:
+### Boostrapping - CI/CD pipeline
+The bootstrapping process is shown in details under the [Vault demo](examples/README.md)
+
+### Testing TSI Deployment
+Once environment deployed, test if the services are ready for the Bootstrapping
+CI/CD pipeline (demo).
+
+Setup an alias to simplif
+
+follow the output dynamically created by helm install:
 
 For example:
 
@@ -164,10 +195,11 @@ Execute test:
     kubectl -n trusted-identity exec -it myubuntu-xxx cat /jwt-tokens/token
 ```
 
-#### Sample JWT claims
-One can inspect the content of the token by simply pasting its content into
-[Debugger](https://jwt.io/) in Encoded window.
+## Sample JWT claims
+Once the TSI environment is operational, the application container will have
+access to JWT Token. The token can be inspected in the JWT [Debugger](https://jwt.io/) in Encoded window.
 
+Sample JWT Claims:
 ```json
 {
   "cluster-name": "ti_demo",
@@ -184,12 +216,9 @@ One can inspect the content of the token by simply pasting its content into
 }
 ```
 
-#### Run Sample Demo
-Trusted Identity is ready for [a demo](examples/README.md)
-
 ### Cleanup
 Remove all the resources created for Trusted Identity
 ```console
 ./cleanup.sh
 ```
-Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
+To start a fresh deployment, make sure to run `./init.sh` again after the cleanup.
