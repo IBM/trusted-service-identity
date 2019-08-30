@@ -94,7 +94,7 @@ At this point, this is an expected result.
 For every worker node there will be a running `jss-server` and `tsi-node-setup` pod.
 
 Test the connection to public JSS interface using the node-setup containers deployed
-during the [Setup Cluster](../../REAMDE.md#setup-cluster) process earlier:
+during the [Setup Cluster](../../README.md#setup-cluster) process earlier:
 
 ```console
 # list the running pods
