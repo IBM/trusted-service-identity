@@ -5,5 +5,5 @@ This Helm chart initializes the TSI nodes.
    release: {{ .Release.Name }}
    namespace: {{ .Values.namespace }}
 
-After successful execution, this Helm chart must be deleted:
+After successful cluster setup, this Helm chart must be deleted:
    helm delete --purge --debug {{ .Release.Name }}
