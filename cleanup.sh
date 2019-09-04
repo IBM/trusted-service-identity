@@ -4,6 +4,7 @@
 if [ -x "$(command -v helm)" ]; then
   echo "Helm installed"
   helm ls --all | grep ti-key-release | awk '{print $1}' | sort -r| xargs helm delete --purge
+  helm ls --all | grep tsi-node-setup | awk '{print $1}' | sort -r| xargs helm delete --purge
 else "Helm NOT installed"
 fi
 

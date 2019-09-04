@@ -1,21 +1,23 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1
+kind: DaemonSet
 metadata:
   namespace: {{ index .Values "ti-key-release-1" "namespace" }}
   name: jss-server
 spec:
-  replicas: 1
+  selector:
+    matchLabels:
+      name: jss-server
   template:
     metadata:
       labels:
-        app: jss-server
-        version: v1
+        name: jss-server
     spec:
       imagePullSecrets:
       - name: regcred
       containers:
-        - name: jss-server
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+        - name: jss-server-pub
+          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-pub:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS
@@ -27,3 +29,36 @@ spec:
           - name: http
             containerPort: 5000
             protocol: TCP
+            hostPort: 5000
+          volumeMounts:
+          - mountPath: /host/tsi-secure
+            name: tsi-secure
+        - name: jss-server-priv
+          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-priv:{{ .Values.tiVersion }}
+          imagePullPolicy: Always
+          env:
+            - name: ISS
+              # this doublequotes actually works :)
+              value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
+            - name: TTL_SEC
+              value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
+          volumeMounts:
+          - mountPath: /host/tsi-secure
+            name: tsi-secure
+            readOnly: true
+          - mountPath: /host/sockets
+            name: tsi-sockets
+      volumes:
+      - name: tsi-secure
+        hostPath:
+          # directory location on host
+           path: /tsi-secure
+           # directory must exist
+           type: Directory
+      - name: tsi-sockets
+        hostPath:
+          # directory location on host
+           path: /tsi-secure/sockets
+           # directory might be created
+           type: DirectoryOrCreate

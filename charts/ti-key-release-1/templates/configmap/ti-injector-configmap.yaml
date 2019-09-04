@@ -37,12 +37,18 @@ data:
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: JWT_TTL_SEC
+          value: {{ .Values.jwt.expireSec }}
         volumeMounts:
           - name: jwt-shared-data
             mountPath: /usr/share/jwt
-          - name: jwt-configmap
-            mountPath: "/configmap/jwt"
-            readOnly: true
+          - name: tsi-sockets
+            mountPath: "/host/sockets"
 
     {{- if .Values.createVaultCert }}
           - name: jwt-secret
@@ -55,15 +61,10 @@ data:
             readOnly: true
           - name: host-etc
             mountPath: /host/etc
-        command: ["/bin/sh", "-c", "/configmap/jwt/execute-get-key.sh"]
+            readOnly: true
       volumes:
         - name: jwt-shared-data
           emptyDir: {}
-        - name: jwt-configmap
-          configMap:
-            name: ti-jwt-configmap
-            # this makes the files executable
-            defaultMode: 0744
 
     {{- if .Values.createVaultCert }}
         - name: ti-host-volume
@@ -84,6 +85,12 @@ data:
              type: Directory
     {{- end }}
 
+        - name: tsi-sockets
+          hostPath:
+            # directory location on host
+             path: /tsi-secure/sockets
+             # directory must exist
+             type: Directory
         - name: host-etc
           hostPath:
             # directory location on host

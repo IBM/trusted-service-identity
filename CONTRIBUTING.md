@@ -51,23 +51,18 @@ Compile and create images for other sub-components
 
 ```console
 make all -C components/gen-vault-cert/
+make all -C components/jss/
 make all -C components/jwt-sidecar/
+make all -C components/node-setup/
 make all -C components/revoker/
-make all -C components/jss-server/
 ```
-We abandoned the usage of vTPM, but if you like to still use it, either version
-vTPM v1 or v2, built them as shown below and then referenced accordingly in
+vTPM is no longer a required component, but if you like to still use it, either version
+vTPM v1 or v2, built them as shown below and then referenced accordingly in the
 helm deployment.
 
 ```console
 make all -C components/vtpm-server/
 make all -C components/vtpm2-server/
-```
-
-To deploy manually:
-
-```console
-./deploy.sh
 ```
 
 Compile and build examples (JWT server and client)
@@ -92,8 +87,20 @@ the components and artifacts, then recreate a new, empty namespace:
 ./init-namespace.sh
 ```
 
-## Build Helm Charts
-Currently there are 2 charts to deploy TI KeyRelease:
+## New cluster setup
+All the worker hosts are required to be initialized with private keys, either directly
+or via vTPM. This operation needs to be executed only once.
+
+### Build Node Setup chart
+Package the helm chart:
+```console
+helm package charts/tsi-node-setup
+```
+
+Now, follow the steps to [setup cluster](./README.md#setup-cluster)
+
+## Build Trusted Service Identity framework charts
+Currently there are 2 charts to deploy Trusted Service Identity:
 * ti-key-release-1
 * ti-key-release-2
 
@@ -111,6 +118,9 @@ To be consistent, move the newly created chart package into `charts` directory.
 
 Once the helm charts are created, you can proceed with [install](./REAMDE.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework
 
+
+
+
 ## Automate Vault Certificates
 Optionally, Trusted Service Identity can additionally create a unique set of a
 certificate and private key that is automatically registered with Vault service.
@@ -118,18 +128,6 @@ The certificates with x509v3 extended attributes are enclosed in the claims in t
 The difference is that these certificates are not set to have a short expiry.
 Once the pod is removed, the certificates would be revoked from the Vault.
 In order to use this feature, one time host setup is required. See below.
-
-### Host Setup - one time  initialization
-All the worker hosts are required to be initialized with private keys and root CA
-(to be replaced by TPM in the future). This operation needs to be executed only once.
-
-### Build TI Setup helm charts
-
-Package the helm chart:
-```console
-cd TI-KeyRelease
-helm package charts/ti-setup
-```
 
 ### Deploy TI Setup
 
@@ -264,12 +262,12 @@ kubectl create -f examples/jwt-policy-example.yaml -n trusted-identity
 ## Testing the JWT token created by the sidecar
 Every container created in `trusted-identity` namespace that conforms to [this
 policy](./charts/ti-key-release-1/templates/cti-policy-example.yaml) gets a sidecar
-that is creating JWT tokens as defined by `execute-get-key.sh` in [here](./charts/ti-key-release-1/templates/configmap/jwt-configmap.yaml)
+that is creating JWT tokens as defined by `execute-get-key.sh` in [here](./components/jwt-sidecar/execute-get-key.sh)
 This newly created token is available to the main container via shared mount (`/jwt-tokens/token`)
 
-For testing purposes the sidecar creates a token valid 25 seconds and the refresh
-rate is 30 seconds, so if the main container uses the token, every 25 seconds
-the authentication should fail for 5 seconds.
+For testing purposes the sidecar creates a token valid 30 seconds and the refresh
+rate is 25 seconds, so the application gets a new token 5 seconds before the old
+one expires.
 
 If you don't have the container running from previous steps, start it now:
 ```

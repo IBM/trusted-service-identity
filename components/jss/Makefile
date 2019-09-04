@@ -1,27 +1,38 @@
 GIT_COMMIT_SHA="$(shell git rev-parse --short HEAD 2>/dev/null)"
 GIT_REMOTE_URL="$(shell git config --get remote.origin.url 2>/dev/null)"
 BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
-BINARY_NAME="jss-server"
+BINARY_NAME_PUB="jss-server-pub"
+BINARY_NAME_PRIV="jss-server-priv"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
-IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.18
+IMAGE_PUB := $(REPO)/$(BINARY_NAME_PUB):$(GIT_COMMIT_SHA)
+MUTABLE_IMAGE_PUB := $(REPO)/$(BINARY_NAME_PUB):v0.19
+IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):$(GIT_COMMIT_SHA)
+MUTABLE_IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):v0.19
 
 all: docker docker-push timestamp
 
 fast:
-	docker build -t $(IMAGE) .
-	docker tag $(IMAGE) $(MUTABLE_IMAGE)
-	docker push $(IMAGE)
-	docker push $(MUTABLE_IMAGE)
+	docker build -t $(IMAGE_PUB) -f Dockerfile.pub .
+	docker tag $(IMAGE_PUB) $(MUTABLE_IMAGE_PUB)
+	docker push $(IMAGE_PUB)
+	docker push $(MUTABLE_IMAGE_PUB)
+	docker build -t $(IMAGE_PRIV) -f Dockerfile.privsock .
+	docker tag $(IMAGE_PRIV) $(MUTABLE_IMAGE_PRIV)
+	docker push $(IMAGE_PRIV)
+	docker push $(MUTABLE_IMAGE_PRIV)
 	date
 
 docker:
-	docker build --no-cache -t $(IMAGE) .
-	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	docker build --no-cache -t $(IMAGE_PUB) -f Dockerfile.pub .
+	docker tag $(IMAGE_PUB) $(MUTABLE_IMAGE_PUB)
+	docker build --no-cache -t $(IMAGE_PRIV) -f Dockerfile.privsock .
+	docker tag $(IMAGE_PRIV) $(MUTABLE_IMAGE_PRIV)
 
 docker-push:
-	docker push $(IMAGE)
-	docker push $(MUTABLE_IMAGE)
+	docker push $(IMAGE_PUB)
+	docker push $(MUTABLE_IMAGE_PUB)
+	docker push $(IMAGE_PRIV)
+	docker push $(MUTABLE_IMAGE_PRIV)
 
 timestamp:
 	date

@@ -6,7 +6,7 @@
 # cannot use the value from `ti-key-release-1`
 # parsing problem:
 #    `error converting YAML to JSON`
-tiVersion: v0.18
+tiVersion: v0.19
 
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
@@ -15,7 +15,8 @@ ti-key-release-1:
   # createVaultCert - if true, unique certs will be created
   # during Init Containers and inserted to Vault
   createVaultCert: false
-  # vault endpoint used for injecting pod specific unique key and cert.
+  # if createVaultCert is set to 'true'
+  # vault service endpoint is required for injecting pod specific unique key and cert.
   # see: `Automate Vault Certificates` documentation
   vaultAddress: https://169.62.157.164:32654
   # Cluster Information
@@ -38,19 +39,8 @@ ti-key-release-1:
     #   - vtpm2-server - vTPM v2
     type: jss-server
 
-# ingress - some JSS calls are publicly available via ingress
-ingress:
-  enabled: true
-  path: /
-  # host: specify here the access to the ingress
-  # for IKS: `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-  # for ICP: set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
-  host:
-  #  - mycluster.eu-de.containers.appdomain.cloud
-
-
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
 hyperkube:
-  repository: quay.io/coreos/hyperkube
-  tag: v1.7.6_coreos.0
+  repository: gcr.io/google_containers/hyperkube
+  tag: v1.14.3

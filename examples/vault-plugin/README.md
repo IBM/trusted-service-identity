@@ -12,19 +12,21 @@ This document describes the Trusted Identity demo example and provides guidance
 for plugin development.
 
 ## Trusted Identity Demo
-Demo with Vault Plugin steps:
+Demo with Vault Plugin steps. "bootstrapping" label indicates the operations that
+will be done by the initial bootstrapping in CI/CD pipeline.
 * Make sure [TI Prerequisites](../../README.md#prerequisites) are met
-* Install [Trusted Service Identity framework](../../REAMDE.md#install-trusted-service-identity-framework)
+* (bootstrapping) Install [Trusted Service Identity framework](../../REAMDE.md#install-trusted-service-identity-framework)
 * [Deploy Vault Service](./README.md#deploy-vault-service)
-* Configure the Vault Plugin
-* Register JWT Signing Service (JSS) with Vault
+* (bootstrapping) Configure the Vault Plugin
+* (bootstrapping) Register JWT Signing Service (JSS) with Vault
 * Define sample policies and roles
 * Deploy Vault Client
 * Execute sample transactions
 
+Setup `kk` [alias](../../README.md#setup-kubectl-alias) to save on typing
+
 ## Trusted Identity Vault Authentication Plugin Development
 [This section](./README.md#plugin-development) below describes the plugin development
-
 
 ### Deploy Vault Service
 The Vault service can be started anywhere, as long as the Trusted Identity containers
@@ -37,50 +39,23 @@ Make sure the `KUBECONFIG` is properly set then execute:
 
 ```sh
 $ cd examples/vault-plugin/
-$ kubectl -n trusted-identity create -f vault.yaml
+$ kk create -f vault.yaml
 ```
+
 
 In order to access this service remotely, some deployments (like IKS) require
 ingress access.
 For IKS, obtain the ingress name using `ibmcloud` cli:
 ```console
-# first obtain the cluster name:
-ibmcloud ks clusters
-# then use the cluster name to get the Ingress info:
-ibmcloud ks cluster-get <cluster_name> | grep Ingress
+$ # first obtain the cluster name:
+$ ibmcloud ks clusters
+$ # then use the cluster name to get the Ingress info:
+$ ibmcloud ks cluster-get <cluster_name> | grep Ingress
 ```
-Before starting a new ingress deployment, make sure there is not other ingress deployed
-in this namespace. Typical TI deployment already has an ingress running to support
-access to vTPM service.
-Check if the `jss-ingress` is created:
+Build an ingress file from `ingress-IKS.template.yaml`,
+using the `Ingress Subdomain` information obtained above.
+Here is an example using `my-ti-cluster.eu-de.containers.appdomain.cloud`
 
-```
-kubectl -n trusted-identity get ingress jss-ingress
-# if the ingress already exists, dump it to the local file
-kubectl -n trusted-identity get ingress jss-ingress -o yaml > ti-ingress.yaml
-```
-
-If exists, append the section for `ti-vault`. It should look like this:
-```
-. . .
-http:
-  paths:
-  - backend:
-      serviceName: jss-service
-      servicePort: 8012
-    path: /public
-  - backend:
-      serviceName: ti-vault
-      servicePort: 8200
-    path: /
-```
-Then just apply the update:
-
-```
-kubectl -n trusted-identity apply -f ti-ingress.yaml
-```
-If the ingress does not exist, build an ingress file from `ingress-IKS.template.yaml`,
-using the `Ingress Subdomain` information obtained above:
 ```yaml
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -90,8 +65,7 @@ metadata:
 spec:
   rules:
     # provide the actual Ingress for `host` value:
-# - host: my-ti-cluster.eu-de.containers.appdomain.cloud
-  - host:
+  - host: my-ti-cluster.eu-de.containers.appdomain.cloud
     http:
       paths:
       - backend:
@@ -102,7 +76,7 @@ spec:
 
 create ingress:
 ```console
-kubectl -n trusted-identity create -f ingress-IKS.yaml
+$ kk create -f ingress-IKS.yaml
 ```
 
 Test the connection to vault:
@@ -112,18 +86,29 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/
 ```
 At this point, this is an expected result.
 
-Test the connection to JSS:
-```console
-$ curl  http://<Ingress Subdomain or ICP master IP>/public/getCSR
-  -----BEGIN CERTIFICATE REQUEST-----
-  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
-  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
-  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
-  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
-  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
-  -----END CERTIFICATE REQUEST-----
-```
+### Test access to public JSS interface
+For every worker node there will be a running `jss-server` and `tsi-node-setup` pod.
 
+Test the connection to public JSS interface using the node-setup containers deployed
+during the [Setup Cluster](../../README.md#setup-cluster) process earlier:
+
+```console
+# list the running pods
+$ kk get pods
+
+# select one tsi-node-setup pod and execute:
+$ kk exec -it tsi-setup-tsi-node-setup-xxxx -- sh -c 'curl $HOST_IP:5000/public/getCSR'
+
+-----BEGIN CERTIFICATE REQUEST-----
+MIICXjCCAUYCAQAwGTEXMBUGA1UEAwwOanNzLWp3dC1zZXJ2ZXIwggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCqeUM+TDlqhyMoRdFJA1OcPcpp4bSEDQ9W
+1pgDBabCyzClJJX8BElsDi1DIf2PIhjazWMQ+rvSEP3eW0o3eLVC+XWIzIEwk/7h
+o.........................................MZsg8vXKAVJdlX7npWW8Gs
+yJEX/CjVKeiUZW2WLcwkFk27uDWSGXXca8Bm1kuuc01O5ENr52DEyBcjqRhMtyGb
+8TYyvgfamDAth1Ph05HElSvg2mI/9Sc+qk5hLwYRC2zp8UMuKVcIlthX6t3v3ZV3
+D8CthBFev8ZBzuqFQiboNG0YgJ5+JxwyVhGFPUse9fYsjQ==
+-----END CERTIFICATE REQUEST-----
+```
 
 ### Configure Vault Plugin
 To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
@@ -134,14 +119,15 @@ To obtain access to Vault, you have to be a Vault admin.
 Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
 
 ```sh
-$ alias kk="kubectl -n trusted-identity"
 $ export ROOT_TOKEN=$(kk logs $(kk get po | grep ti-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
 ```
 
-Assign the Vault address (using Ingress tested above):
+Assign the Vault address (using Vault Ingress tested above):
 
 ```sh
 $ export VAULT_ADDR=http://<vault_address>
+# e.g.
+$ export VAULT_ADDR=http://ti-fra02.eu-de.containers.appdomain.cloud
 ```
 Once you have `ROOT_TOKEN` and `VAULT_ADDR` environment variables defined, test
 the connection
@@ -176,8 +162,30 @@ $ ./demo.registerJSS.sh
 . . . .
 Upload of x5c successful
 ```
-Repeat this for each JSS with vTPM that is using this Vault service.
+This script registers every JSS node with Vault. Once the registration of all
+JSS nodes completes, the public interface to JSS will shut down. Testing again
+should return "Connection refused" failures:
 
+```console
+$ # list the running pods
+$ kk get pods
+$ # select one tsi-node-setup pod and execute:
+$ kk exec -it tsi-setup-tsi-node-setup-xxxx -- sh -c 'curl $HOST_IP:5000/public/getCSR'
+curl: (7) Failed to connect to 10.X.X.X port 5000: Connection refused
+command terminated with exit code 7
+```
+It might take up to 30 seconds for shutting down the public interfaces
+
+### Remove the Node Setup helm chart
+At this point all nodes are registered with Vault and bootstrapping process is complete.
+Remove all the node-setup containers:
+
+```console
+$ helm ls
+$ helm delete --purge tsi-setup
+$ # or simply use the following script:
+$ helm ls --all | grep tsi-node-setup | awk '{print $1}' | sort -r| xargs helm delete --purge
+```
 
 ### Define sample policies and roles
 Policies are structured as paths for keys based on claims provided in JWT.
@@ -202,7 +210,7 @@ Sample Payload:
 }
 ```
 
-Load the Vault Server with some sample polices. Review the policy templates `ti.policy.X.hcl.tpl`
+Load some sample policies to Vault. Review the policy templates `ti.policy.X.hcl.tpl`
 and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
 
 ```sh
@@ -220,9 +228,9 @@ ingress from the steps above)
 
 Start the vault client, then dump JWT token to be inspected.
 ```sh
-$ kubectl -n trusted-identity create -f ../vault-client/vault-cli.yaml
-$ kubectl -n trusted-identity get pods
-$ kubectl -n trusted-identity exec -it {vault-cli-pod-id} cat /jwt-tokens/token
+$ kk create -f ../vault-client/vault-cli.yaml
+$ kk get pods
+$ kk exec -it {vault-cli-pod-id} cat /jwt-tokens/token
 ```
 You can inspect the content of the token by simply pasting its content into
 [Debugger](https://jwt.io/) in Encoded window.
@@ -238,11 +246,50 @@ $ demo.load-sample-keys.sh --help
 $ demo.load-sample-keys.sh [region] [cluster]
 ```
 
-Then get inside to run some testing.
+### Test the vault-client
+Run the test included with `vault-client`.
+If everything was done correctly this test should return success.
 
 ```console
-$ kubectl -n trusted-identity get pods
-$ kubectl -n trusted-identity exec -it vault-cli-xxx /bin/bash
+$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') /test-vault-cli.sh
+
+Defaulting container name to vault-cli.
+Use 'kubectl describe pod/vault-cli-7cfc4bc4c9-qg854 -n trusted-identity' to see all of the containers in this pod.
+Testing the default demo role:
+A01 Test successful! RT: 0
+A02 Test successful! RT: 2
+A03 Test successful! RT: 2
+A04 Test successful! RT: 2
+A05 Test successful! RT: 2
+Testing the 'demo' role:
+D01 Test successful! RT: 0
+D02 Test successful! RT: 2
+D03 Test successful! RT: 2
+D04 Test successful! RT: 2
+D05 Test successful! RT: 2
+Testing the 'demo-n' role:
+N01 Test successful! RT: 0
+N02 Test successful! RT: 2
+N03 Test successful! RT: 2
+N04 Test successful! RT: 2
+Testing the 'demo-r' role:
+R01 Test successful! RT: 0
+R02 Test successful! RT: 2
+R03 Test successful! RT: 0
+R04 Test successful! RT: 0
+Testing non-existing role
+E01 Test successful! RT: 0
+Testing access w/o token
+E02 Test successful! RT: 2
+E03 Test successful! RT: 2
+Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values
+```
+
+Now you can get inside the `vault-cli` container and run other tests:
+
+```console
+$ kk get pods | grep vault-cli
+$ kk exec -it vault-cli-xxx /bin/bash
 ```
 To login and obtain the Vault access token associated with a default TI role `demo`,
 source the `setup-vault-cli.sh`. To login with another role (e.g. demo-r or demo-n)
@@ -323,40 +370,6 @@ root@vault-cli-fd855bc5f-2cs4d:/# curl -s --request POST --data '{"jwt": "'"$(ca
 root@vault-cli-fd855bc5f-2cs4d:/#
 ```
 The measurements are grouped under "metadata" section.
-
-Review the test script `test-vault-cli.sh`
-For example, this one is customized for `eu-de` cluster:
-
-```console
-root@vault-cli-fd855bc5f-2cs4d:/# ./test-vault-cli.sh
-Testing the default demo role:
-A01 Test successful! RT: 0
-A02 Test successful! RT: 2
-A03 Test successful! RT: 2
-A04 Test successful! RT: 2
-A05 Test successful! RT: 2
-Testing the 'demo' role:
-D01 Test successful! RT: 0
-D02 Test successful! RT: 2
-D03 Test successful! RT: 2
-D04 Test successful! RT: 2
-D05 Test successful! RT: 2
-Testing the 'demo-n' role:
-N01 Test successful! RT: 0
-N02 Test successful! RT: 2
-N03 Test successful! RT: 2
-N04 Test successful! RT: 2
-Testing the 'demo-r' role:
-R01 Test successful! RT: 0
-R02 Test successful! RT: 2
-Testing non-existing role
-E01 Test successful! RT: 0
-Testing access w/o token
-E02 Test successful! RT: 2
-E03 Test successful! RT: 2
-Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment value
-```
-
 
 ## Plugin Development
 ### Getting Started

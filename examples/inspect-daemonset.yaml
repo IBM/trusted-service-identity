@@ -17,7 +17,7 @@ spec:
       # - name: regcred
       containers:
         - name: hyperkube
-          image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
+          image: gcr.io/google_containers/hyperkube:v1.14.3
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "--" ]
           args: [ "while true; do cat /mydata; sleep 5; done;" ]

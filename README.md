@@ -17,6 +17,7 @@ physical hardware. Secrets are released to the application based on this identit
 ## Table of Contents
 - [Installation](./README.md#installation)
   - [Prerequisites](./README.md#prerequisites)
+  - [Setup Cluster](./README.md#setup-cluster)
   - [Install](./README.md#install-trusted-service-identity-framework)
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
@@ -50,6 +51,15 @@ export KUBECONFIG=<location of your kubernetes config. files, as per documentati
 kubectl get pods --all-namespaces
 ```
 
+#### Setup kubectl alias
+Through out this whole project we will be working with this newly created namespace.
+Let's setup an alias `kk` to make typing faster:
+```console
+$ alias k="kubectl -n trusted-identity"
+$ # list all the pods to test it
+$ kk get po
+```
+
 #### Install and initialize Helm environment
 This project requires Helm v2.10.0 or higher.
 Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
@@ -69,41 +79,58 @@ as described here. Simply generate one [here](https://na.artifactory.swg-devops.
 Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
 (This needs to be done every-time the new namespace is created)
 ```console
-kubectl -n trusted-identity create secret docker-registry regcred \
+$ kk create secret docker-registry regcred \
 --docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com \
 --docker-username=user@ibm.com \
 --docker-password=${API_KEY} \
 --docker-email=user@ibm.com
 
-# to check your secret:
-kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+$ # to check your secret:
+$ kk get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
 ```
 
 or update the [init-namespace.sh](./init-namespace.sh) script.
 
 The deployment is done in `trusted-identity` namespace. If you are testing or developing
-the code and execute the deployment several time, it is a good idea to cleanup the namespace before executing another deployment. Run cleanup first, then init to initialize the namespace.
+the code and execute the deployment several times, it is a good idea to cleanup
+the namespace before executing another deployment. Run cleanup first, then init
+to initialize the namespace.This would remove all the components and artifacts.
 
-This would remove all the components and artifacts, then recreate a new, empty namespace:
+Then recreate a new, empty namespace:
 
 ```console
 ./cleanup.sh
 ./init-namespace.sh
 ```
 
+### Setup Cluster
+In order to install and run Trusted Service Identity, all worker nodes have to be
+setup with a private key, either directly or through vTPM (virtual Trusted Platform Module).
+This operation needs to be executed only once.
+
+If you are running this for the first time or like to override previous setup values:
+```console
+helm install charts/tsi-node-setup --debug --name tsi-setup --set reset.all=true
+```
+
+To keep the existing private key, but just reset the intermediate CA (`x5c`)
+```console
+helm install charts/tsi-node-setup --debug --name tsi-setup --set reset.x5c=true
+```
+
+Once the worker nodes are setup, deploy the TSI environment
+
+
 ### Install Trusted Service Identity framework
 Make sure all the [prerequisites](./README.md#prerequisites) are satisfied.
 
 #### Deploy Helm charts
 TI helm charts are included with this repo under [charts/](./charts/) directory.
-You can use them directly or use the charts that you created (see instructions below).
+You can use them directly or use the charts that you built yourself (see instructions below).
 
-The following information is required to deploy TI helm charts:
+The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* ingress host - this is required to setup the vTPM service remotely, by CI/CD pipeline scripts. for example,
-in IBM Cloud IKS, the ingress information can be obtained using  `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-command. For ICP, set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
 
 *NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
 the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
@@ -122,9 +149,14 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 
 ```console
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+--set ti-key-release-1.cluster.name=CLUSTER_NAME \
+--set ti-key-release-1.cluster.region=CLUSTER_REGION
+```
+For example:
+```console
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
 --set ti-key-release-1.cluster.name=ti-fra02 \
---set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.ingress.host=ti-fra02.eu-de.containers.appdomain.cloud
+--set ti-key-release-1.cluster.region=eu-de
 ```
 
 Complete list of available setup parameters can be obtained as follow:
@@ -136,38 +168,17 @@ helm install -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
 helm upgrade -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
 ```
 
-### Testing Deployment
-Once environment deployed, follow the output dynamically created by helm install:
+### Boostrapping - CI/CD pipeline
+The bootstrapping process is shown in details under the [Vault demo](examples/README.md)
 
-For example:
+## Run Demo
+For next steps, review [demo](examples/README.md) examples.
 
-```
-Ingress allows a public access to vTPM CSR:
-  curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
+## Sample JWT claims
+Once the TSI environment is operational, the application container will have
+access to JWT Token. The token can be inspected in the JWT [Debugger](https://jwt.io/) in Encoded window.
 
-```
-
-```console
-$ curl http://ti-fra02.eu-de.containers.appdomain.cloud/public/getCSR
-  -----BEGIN CERTIFICATE REQUEST-----
-  MIICYDCCAUgCAQAwGzEZMBcGA1UEAwwQdnRwbTItand0LXNlcnZlcjCCASIwDQYJ
-  KoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2ZiVYAALSs6HmJPUZDZosMS6qPaQwc
-  . . . . . . . . . . . . . . . . . . .GUrDrCj7QnxyrYrgSiPu/xJvD+H
-  8kW4q7nvsZm2VGKpeRpbQxj3ZlcZD2/Xm+WsKChU0wGk9qHt85qwGAzOgDfEo5Z5
-  PgmLRl1PpyS3aVUBIpu8Xx+wsL5ZgVzUz1ScIi2qNPO7SqFU
-  -----END CERTIFICATE REQUEST-----
-
-Execute test:
-    kubectl create -f examples/myubuntu.yaml -n trusted-identity
-    kubectl -n trusted-identity create -f examples/myubuntu.yaml
-    kubectl -n trusted-identity get pods
-    kubectl -n trusted-identity exec -it myubuntu-xxx cat /jwt-tokens/token
-```
-
-#### Sample JWT claims
-One can inspect the content of the token by simply pasting its content into
-[Debugger](https://jwt.io/) in Encoded window.
-
+Sample JWT Claims:
 ```json
 {
   "cluster-name": "ti_demo",
@@ -184,12 +195,9 @@ One can inspect the content of the token by simply pasting its content into
 }
 ```
 
-#### Run Sample Demo
-Trusted Identity is ready for [a demo](examples/README.md)
-
 ### Cleanup
 Remove all the resources created for Trusted Identity
 ```console
 ./cleanup.sh
 ```
-Make sure to run `./init.sh` again after the cleanup to start the fresh deployment
+To start a fresh deployment, make sure to run `./init.sh` again after the cleanup.

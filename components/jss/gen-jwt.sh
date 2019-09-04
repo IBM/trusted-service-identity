@@ -7,7 +7,7 @@
 
 
 DIR="$(dirname "$0")"
-STATEDIR=${STATEDIR:-/tmp}
+STATEDIR=${STATEDIR:-/host/tsi-secure}
 mkdir -p ${STATEDIR}
 
 PRIV_KEY=${STATEDIR}/private.key

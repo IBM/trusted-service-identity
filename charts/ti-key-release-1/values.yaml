@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v0.18
+tiVersion: v0.19
 
 # Cluster Information
 cluster:
@@ -30,21 +30,12 @@ jssService:
   #   - vtpm2-server - vTPM v2
   type: jss-server
 
-# ingress - some JSS calls are publicly available via ingress
-ingress:
-  enabled: true
-  path: /
-  # host: specify here the access to the ingress
-  # for IKS: `ibmcloud ks cluster-get <cluster-name> | grep Ingress`
-  # for ICP: set ingress enabled to false, keep the host empty and use IPs directly (typically master or proxy IP)
-  host:
-  #  - mycluster.eu-de.containers.appdomain.cloud
-
 # createVaultCert - if true, unique certs will be created
 # during Init Containers and inserted to Vault
 createVaultCert: false
-
-# Values below are used to create a secret: `ti-keys-config`
+# if createVaultCert is set to 'true'
+# vault service endpoint is required for injecting pod specific unique key and cert.
+# see: `Automate Vault Certificates` documentation
 # vault-address e.g. https://1.1.1.1:32222
 vaultAddress: https://169.62.157.164:32654
 

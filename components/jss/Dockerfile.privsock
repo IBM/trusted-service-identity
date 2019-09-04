@@ -1,7 +1,8 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 RUN apt update && \
     apt install -y openssl && \
-    apt install -y python python-pip
+    apt install -y python python-pip && \
+    apt install -y uwsgi-core uwsgi-plugin-python uwsgi-plugin-python3
 
 
 # we absolutely need python2-cryptography otherwise we may pick up the one from pip
@@ -9,7 +10,7 @@ RUN apt update && \
 RUN apt install -y python-cryptography \
     && pip install jwcrypto
 
-COPY gen-jwt.sh gen-jwt.py init-jss.sh run-jss-server.sh validate-jwt.py /usr/local/bin/
+COPY gen-jwt.sh gen-jwt.py run-jss-server.sh validate-jwt.py /usr/local/bin/
 
 # RUN jwt=$(gen-jwt.sh \
 #        --iss example-issuer \
@@ -25,7 +26,7 @@ COPY gen-jwt.sh gen-jwt.py init-jss.sh run-jss-server.sh validate-jwt.py /usr/lo
 # Adding support for flask
 COPY requirements.txt /
 RUN pip install -r requirements.txt
-COPY run-web-server.sh web-server.py /usr/local/bin/
+COPY run-priv-sock-server.sh web-server-priv.py /usr/local/bin/
 
 # Default values for JWT, issuer and token expiration in seconds
 ARG DEFAULT_ISS="wsched@us.ibm.com"
@@ -33,4 +34,4 @@ ARG DEFAULT_TTL_SEC=30
 ENV ISS=${DEFAULT_ISS}
 ENV TTL_SEC=${DEFAULT_TTL_SEC}
 
-CMD ["/bin/bash", "-c", "/usr/local/bin/run-jss-server.sh"]
+CMD ["/bin/bash", "-c", "/usr/local/bin/run-priv-sock-server.sh"]

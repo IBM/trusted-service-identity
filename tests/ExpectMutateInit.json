@@ -2,7 +2,7 @@
     "InitContainers": [
         {
             "name": "gen-vault-cert",
-            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.18",
+            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.19",
             "resources": {},
             "volumeMounts": [
                 {
@@ -43,22 +43,17 @@
     "SidecarContainers": [
         {
             "name": "jwt-sidecar",
-            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.18",
+            "image": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.19",
             "command": [
                 "/bin/sh",
                 "-c",
-                "/configmap/jwt/execute-get-key.sh"
+                "/usr/local/bin/execute-get-key.sh"
             ],
             "resources": {},
             "volumeMounts": [
                 {
                     "name": "jwt-shared-data",
                     "mountPath": "/usr/share/jwt"
-                },
-                {
-                    "name": "jwt-configmap",
-                    "readOnly": true,
-                    "mountPath": "/configmap/jwt"
                 },
                 {
                     "name": "jwt-secret",
@@ -82,13 +77,6 @@
         {
             "name": "jwt-shared-data",
             "emptyDir": {}
-        },
-        {
-            "name": "jwt-configmap",
-            "configMap": {
-                "name": "ti-jwt-configmap",
-                "defaultMode": 484
-            }
         },
         {
             "name": "ti-host-volume",
@@ -214,4 +202,3 @@
         "admission.trusted.identity/ti-secret-key": "ti-secret-XXX"
     }
 }
-

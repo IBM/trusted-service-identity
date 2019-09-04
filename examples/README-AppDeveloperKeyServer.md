@@ -18,12 +18,13 @@ We assume that at this point you have a working K8s cluster with Trusted Service
 environment deployed, including the sample Key Store and public JWKS is
 registered with the Key Store. Otherwise, please see [examples/README.md](./README.md)
 
+Setup `kk` [alias](../README.md#setup-kubectl-alias) to save on typing
+
 ## Deploy sample application
 Deploy the sample application and exec into it:
 
 ```
-kubectl create -f examples/myubuntu.yaml -n trusted-identity
-alias k="kubectl -n trusted-identity"
+kk create -f examples/myubuntu.yaml
 k exec -it $(k get po | grep myubuntu | awk '{print $1}') /bin/bash
 ```
 By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`

@@ -12,9 +12,9 @@ spec:
       serviceAccountName: ti-install-sa
       containers:
       - name: my-hyperkube
-        image: quay.io/coreos/hyperkube:v1.7.6_coreos.0
+        image: gcr.io/google_containers/hyperkube:v1.14.3
         command: ["/bin/sleep","infinity"]
-        # command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"] 
+        # command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"]
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: "/tmp/ti-key-release"
