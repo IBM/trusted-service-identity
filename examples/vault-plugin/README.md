@@ -23,9 +23,10 @@ will be done by the initial bootstrapping in CI/CD pipeline.
 * Deploy Vault Client
 * Execute sample transactions
 
+Setup `kk` [alias](../../README.md#setup-kubectl-alias) to save on typing
+
 ## Trusted Identity Vault Authentication Plugin Development
 [This section](./README.md#plugin-development) below describes the plugin development
-
 
 ### Deploy Vault Service
 The Vault service can be started anywhere, as long as the Trusted Identity containers
@@ -38,23 +39,18 @@ Make sure the `KUBECONFIG` is properly set then execute:
 
 ```sh
 $ cd examples/vault-plugin/
-$ kubectl -n trusted-identity create -f vault.yaml
+$ kk create -f vault.yaml
 ```
 
-You can setup a `kk` alias to make typing faster:
-```console
-$ alias k="kubectl -n trusted-identity"
-$ kk get po
-```
 
 In order to access this service remotely, some deployments (like IKS) require
 ingress access.
 For IKS, obtain the ingress name using `ibmcloud` cli:
 ```console
-# first obtain the cluster name:
-ibmcloud ks clusters
-# then use the cluster name to get the Ingress info:
-ibmcloud ks cluster-get <cluster_name> | grep Ingress
+$ # first obtain the cluster name:
+$ ibmcloud ks clusters
+$ # then use the cluster name to get the Ingress info:
+$ ibmcloud ks cluster-get <cluster_name> | grep Ingress
 ```
 Build an ingress file from `ingress-IKS.template.yaml`,
 using the `Ingress Subdomain` information obtained above.
@@ -80,7 +76,7 @@ spec:
 
 create ingress:
 ```console
-kubectl -n trusted-identity create -f ingress-IKS.yaml
+$ kk create -f ingress-IKS.yaml
 ```
 
 Test the connection to vault:
@@ -171,9 +167,9 @@ JSS nodes completes, the public interface to JSS will shut down. Testing again
 should return "Connection refused" failures:
 
 ```console
-# list the running pods
+$ # list the running pods
 $ kk get pods
-# select one tsi-node-setup pod and execute:
+$ # select one tsi-node-setup pod and execute:
 $ kk exec -it tsi-setup-tsi-node-setup-xxxx -- sh -c 'curl $HOST_IP:5000/public/getCSR'
 curl: (7) Failed to connect to 10.X.X.X port 5000: Connection refused
 command terminated with exit code 7
@@ -187,7 +183,7 @@ Remove all the node-setup containers:
 ```console
 $ helm ls
 $ helm delete --purge tsi-setup
-# or simply use the following script:
+$ # or simply use the following script:
 $ helm ls --all | grep tsi-node-setup | awk '{print $1}' | sort -r| xargs helm delete --purge
 ```
 
@@ -232,9 +228,9 @@ ingress from the steps above)
 
 Start the vault client, then dump JWT token to be inspected.
 ```sh
-$ kubectl -n trusted-identity create -f ../vault-client/vault-cli.yaml
-$ kubectl -n trusted-identity get pods
-$ kubectl -n trusted-identity exec -it {vault-cli-pod-id} cat /jwt-tokens/token
+$ kk create -f ../vault-client/vault-cli.yaml
+$ kk get pods
+$ kk exec -it {vault-cli-pod-id} cat /jwt-tokens/token
 ```
 You can inspect the content of the token by simply pasting its content into
 [Debugger](https://jwt.io/) in Encoded window.
@@ -292,8 +288,8 @@ Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environmen
 Now you can get inside the `vault-cli` container and run other tests:
 
 ```console
-$ kubectl -n trusted-identity get pods | grep vault-cli
-$ kubectl -n trusted-identity exec -it vault-cli-xxx /bin/bash
+$ kk get pods | grep vault-cli
+$ kk exec -it vault-cli-xxx /bin/bash
 ```
 To login and obtain the Vault access token associated with a default TI role `demo`,
 source the `setup-vault-cli.sh`. To login with another role (e.g. demo-r or demo-n)

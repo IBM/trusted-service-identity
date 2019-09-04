@@ -51,6 +51,15 @@ export KUBECONFIG=<location of your kubernetes config. files, as per documentati
 kubectl get pods --all-namespaces
 ```
 
+#### Setup kubectl alias
+Through out this whole project we will be working with this newly created namespace.
+Let's setup an alias `kk` to make typing faster:
+```console
+$ alias k="kubectl -n trusted-identity"
+$ # list all the pods to test it
+$ kk get po
+```
+
 #### Install and initialize Helm environment
 This project requires Helm v2.10.0 or higher.
 Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
@@ -70,14 +79,14 @@ as described here. Simply generate one [here](https://na.artifactory.swg-devops.
 Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
 (This needs to be done every-time the new namespace is created)
 ```console
-kubectl -n trusted-identity create secret docker-registry regcred \
+$ kk create secret docker-registry regcred \
 --docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com \
 --docker-username=user@ibm.com \
 --docker-password=${API_KEY} \
 --docker-email=user@ibm.com
 
-# to check your secret:
-kubectl -n trusted-identity get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+$ # to check your secret:
+$ kk get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
 ```
 
 or update the [init-namespace.sh](./init-namespace.sh) script.
@@ -163,7 +172,7 @@ helm upgrade -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
 The bootstrapping process is shown in details under the [Vault demo](examples/README.md)
 
 ## Run Demo
-For next steps, review [demo](examples/README.md) examples. 
+For next steps, review [demo](examples/README.md) examples.
 
 ## Sample JWT claims
 Once the TSI environment is operational, the application container will have
