@@ -15,7 +15,7 @@ GOARCH=$(shell go env GOARCH)
 all: dep get-deps fmt test build docker timestamp
 
 dep:
-	go get -u github.com/golang/dep/cmd/dep
+	go mod tidy
 
 get-deps: test-deps build-deps
 
@@ -44,7 +44,7 @@ timestamp:
 	date
 
 build-deps: dep
-	dep ensure -v -vendor-only
+	go mod vendor
 
 fmt:
 	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Please run gofmt -l -w $GOFILES on your code.' && exit 1; fi
