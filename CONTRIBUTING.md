@@ -47,6 +47,12 @@ Now you can create a docker image:
 make docker
 ```
 
+If you have access to our registry, you can push your image now:
+
+```console
+make docker-push
+```
+
 Compile and create images for other sub-components
 
 ```console
