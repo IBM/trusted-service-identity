@@ -55,7 +55,7 @@ kubectl get pods --all-namespaces
 Through out this whole project we will be working with this newly created namespace.
 Let's setup an alias `kk` to make typing faster:
 ```console
-$ alias kk="kubectl -n trusted-identity"
+$ alias k="kubectl -n trusted-identity"
 $ # list all the pods to test it
 $ kk get po
 ```
@@ -69,30 +69,6 @@ Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). 
   brew upgrade kubernetes-helm
   # then initialize (assuming your KUBECONFIG for the current cluster is already setup)
   helm init
-```
-
-*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
-the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
-Executing any helm operations might cause a following error:
-```
-Error: customresourcedefinitions.apiextensions.k8s.io "clustertis.trusted.identity" is forbidden: User "system:serviceaccount:kube-system:default" cannot delete resource "customresourcedefinitions" in API group "apiextensions.k8s.io" at the cluster scope
-```
-
-As a quick fix you can do a following
-
-```console
-kubectl --namespace kube-system create serviceaccount tiller
-kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-helm init --service-account tiller --upgrade
-```
-or simply execute provided [script](./setup-tiller.sh):
-```console
-./setup-tiller.sh
-```
-
-another option (see [this](https://cloud.ibm.com/docs/containers?topic=containers-cs_versions#112_before) for more details):
-```console
-kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
 ```
 
 #### Setup access to installation images
@@ -155,6 +131,19 @@ You can use them directly or use the charts that you built yourself (see instruc
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+
+*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
+the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
+Running the helm install there might cause a following error:
+```
+Error: customresourcedefinitions.apiextensions.k8s.io "clustertis.trusted.identity" is forbidden: User "system:serviceaccount:kube-system:default" cannot delete resource "customresourcedefinitions" in API group "apiextensions.k8s.io" at the cluster scope
+```
+
+As a quick fix you can do a following (see [this](https://cloud.ibm.com/docs/containers?topic=containers-cs_versions#112_before) for more details):
+
+```console
+kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
+```
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
