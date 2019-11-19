@@ -16,8 +16,8 @@ spec:
       - name: regcred
       containers:
         - name: jss-server-pub
-          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-pub:{{ .Values.tiVersion }}
+          #image: {{ .Values.tiRepo }}/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/jss-server-pub:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS
@@ -34,8 +34,8 @@ spec:
           - mountPath: /host/tsi-secure
             name: tsi-secure
         - name: jss-server-priv
-          #image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/jss-server-priv:{{ .Values.tiVersion }}
+          #image: {{ .Values.tiRepo }}/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/jss-server-priv:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS

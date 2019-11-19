@@ -19,7 +19,7 @@ spec:
         - name: regcred
       containers:
         - name: ti-node-setup
-          image: "res-kompass-kompass-docker-local.artifactory.swg-devops.com/node-setup:{{ .Values.tsiVersion }}"
+          image: "{{ .Values.tsiRepo }}/node-setup:{{ .Values.tsiVersion }}"
           imagePullPolicy: Always
           env:
             - name: RESETALL

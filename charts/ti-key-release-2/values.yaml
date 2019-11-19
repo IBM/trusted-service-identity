@@ -8,6 +8,9 @@
 #    `error converting YAML to JSON`
 tiVersion: v0.19
 
+# target docker repo
+tiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
+
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
 ti-key-release-1:
