@@ -14,6 +14,8 @@ REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(IMG_NAME):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):v0.2
 
+ARCH=$(shell if [ `uname -m` "==" "x86_64" ]; then echo amd64 ; else echo `uname -m`; fi; )
+
 
 
 # bin generates the releaseable binaries for this plugin
@@ -64,7 +66,7 @@ deps:
 	@dep ensure -update
 
 docker:
-	docker build --no-cache -t $(IMAGE) .
+	docker build --build-arg ARCH=${ARCH} --no-cache -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
 	#rm $(IMG_NAME)
 
