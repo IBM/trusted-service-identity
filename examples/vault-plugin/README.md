@@ -146,25 +146,19 @@ If no errors, proceed to the JSS registration
 
 ### Register JWT Signing Service (JSS) with Vault
 Each cluster with JSS needs to be registered with Vault.
-Env. variables `ROOT_TOKEN` and `VAULT_ADDR` should be already defined. Now we need
-the `JSS_ADDR` for each cluster (individual vTPM). This the ingress associated
-with the cluster.
-
-e.g:
-```
-export JSS_ADDR=http://ti-fra02.eu-de.containers.appdomain.cloud
-```
-
-Than execute the registration:
+Env. variables `ROOT_TOKEN` and `VAULT_ADDR` should be already defined.
+Execute the registration:
 
 ```sh
 $ ./demo.registerJSS.sh
 . . . .
 Upload of x5c successful
 ```
-This script registers every JSS node with Vault. Once the registration of all
-JSS nodes completes, the public interface to JSS will shut down. Testing again
-should return "Connection refused" failures:
+This script registers every JSS node with Vault. Make sure the number `Upload of x5c successful`
+corresponds to the number of nodes in the cluster (`kubectl get nodes. Node xxx completed`).
+
+Once the registration of all JSS nodes completes, the public interface to JSS
+will shut down. Testing again should return "Connection refused" failures:
 
 ```console
 $ # list the running pods
