@@ -4,7 +4,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 IMG_NAME="vault-cli"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(IMG_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):v0.1
+MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):v0.3
 ARCH=$(shell if test `uname -m` = "x86_64"; then echo amd64 ; else echo `uname -m`; fi;)
 
 all: docker docker-push timestamp

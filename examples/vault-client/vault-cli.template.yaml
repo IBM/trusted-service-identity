@@ -19,7 +19,7 @@ spec:
       - name: regcred
       containers:
         - name: vault-cli
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1
+          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3
           imagePullPolicy: Always
           env:
             - name: VAULT_ADDR
