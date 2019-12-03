@@ -17,4 +17,4 @@ first part of the deployment.
 
 First helm deployment is completed. Now execute the second part. Make sure the
 second deployment is using the same namespace ( {{ .Values.namespace }} ):
-    helm install charts/ti-key-release-2 --debug --name ti-test2
+    helm install charts/ti-key-release-2 --debug --name tsi-install2

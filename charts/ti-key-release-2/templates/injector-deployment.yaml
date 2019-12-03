@@ -17,7 +17,7 @@ spec:
       - name: regcred
       containers:
         - name: ti-injector
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-webhook:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/ti-webhook:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           args:
             - -createVaultCert={{ index .Values "ti-key-release-1" "createVaultCert" }}

@@ -6,7 +6,10 @@
 namespace: trusted-identity
 
 # version of TSI components
-tsiVersion: v0.19
+tsiVersion: v0.20
+
+# target docker repo
+tsiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
 
 # reset - indicates whether the setup will remove the existing securtiy
 # components and recreate them, or keep the existing ones as is.

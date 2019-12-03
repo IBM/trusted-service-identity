@@ -3,7 +3,7 @@
 # Trusted Servie Identiy plugin name
 export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image name
-export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
+export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3"
 # export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
 JWTFILE="/jwt-tokens/token"
 

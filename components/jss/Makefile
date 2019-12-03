@@ -5,9 +5,9 @@ BINARY_NAME_PUB="jss-server-pub"
 BINARY_NAME_PRIV="jss-server-priv"
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE_PUB := $(REPO)/$(BINARY_NAME_PUB):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE_PUB := $(REPO)/$(BINARY_NAME_PUB):v0.19
+MUTABLE_IMAGE_PUB := $(REPO)/$(BINARY_NAME_PUB):v0.20
 IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):v0.19
+MUTABLE_IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):v0.20
 
 all: docker docker-push timestamp
 

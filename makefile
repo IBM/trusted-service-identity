@@ -7,7 +7,8 @@ BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BINARY_NAME=ti-webhook
 REPO ?= res-kompass-kompass-docker-local.artifactory.swg-devops.com
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.19
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v0.20
+GOARCH=$(shell go env GOARCH)
 
 .PHONY: all test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
 
@@ -27,7 +28,7 @@ test: test-deps
 	$(GOPATH)/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES}
 
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -o $(BINARY_NAME) -v
+	CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build -installsuffix cgo -o $(BINARY_NAME) -v
 
 docker: build
 	docker build --no-cache -t $(IMAGE) .

@@ -6,7 +6,10 @@
 # cannot use the value from `ti-key-release-1`
 # parsing problem:
 #    `error converting YAML to JSON`
-tiVersion: v0.19
+tiVersion: v0.20
+
+# target docker repo
+tiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
 
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment

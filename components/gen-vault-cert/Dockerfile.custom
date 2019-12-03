@@ -2,13 +2,16 @@ FROM ubuntu:18.04
 
 ARG ARCH
 
+RUN echo ${ARCH} ciao
+
 RUN apt update && \
     apt install -y curl && \
     apt install -y wget && \
     apt install -y unzip
+
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/${ARCH}/kubectl && chmod +x kubectl
-RUN wget https://releases.hashicorp.com/vault/0.10.3/vault_0.10.3_linux_amd64.zip && unzip vault_0.10.3_linux_amd64.zip
-RUN rm -f vault_0.10.3_linux_amd64.zip
+COPY vault ./
+
 RUN echo "gen-vault-cert " > /info
 CMD ["/bin/bash", "-c", "cat /pod-metadata/ti-secret && \
 cp /skeys/v3_ext v3_ext && \

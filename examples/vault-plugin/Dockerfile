@@ -1,3 +1,6 @@
-FROM vault:latest
-COPY ./pkg/linux_amd64/ /plugins/
+FROM vault:latest 
+
+ARG ARCH
+
+COPY ./pkg/linux_${ARCH}/ /plugins/
 COPY ./local.json /vault/config/local.json

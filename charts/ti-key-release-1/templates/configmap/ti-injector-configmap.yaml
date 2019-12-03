@@ -9,7 +9,7 @@ data:
       # configMap, but it will not be instantiated by the webhook
       initContainers:
       - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:{{ .Values.tiVersion }}
+        image: {{ .Values.tiRepo }}/ti-gen-vault-cert:{{ .Values.tiVersion }}
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred
@@ -33,7 +33,7 @@ data:
             readOnly: true
       sidecarContainers:
       - name: jwt-sidecar
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:{{ .Values.tiVersion }}
+        image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Values.tiVersion }}
         imagePullPolicy: Always
         imagePullSecrets:
         - name: regcred

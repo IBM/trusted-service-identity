@@ -1,0 +1,8 @@
+FROM ubuntu:18.04
+RUN apt update && \
+    apt install -y wget && \
+    apt install -y unzip
+COPY vault ./
+COPY ti-revoker /ti-revoker
+COPY vault_revoke.sh /vault_revoke.sh
+ENTRYPOINT ["/ti-revoker"]

@@ -124,7 +124,7 @@ export NAMESPACE="trusted-identity"
 
 To obtain obtain the SHA for any image name, do following:
 ```console
-export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.1"
+export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3"
 
 # on Mac:
 IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')

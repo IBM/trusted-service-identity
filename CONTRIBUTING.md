@@ -174,7 +174,7 @@ Make sure the `ti-key-release-1.createVaultCert=true`. This can be done
 either via CLI:
 
 ```console
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi-install \
 --set ti-key-release-1.cluster.name=ti-fra02 \
 --set ti-key-release-1.cluster.region=eu-de \
 --set ingress.host=ti-fra02.eu-de.containers.appdomain.cloud \
@@ -184,7 +184,7 @@ or by modifying the configuration values:
 ```
 helm inspect values charts/ti-key-release-2-X.X.X.tgz > config.yaml
 # modify config.yaml with ti-key-release-1.createVaultCert=true
-helm install -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
+helm install -i --values=config.yaml tsi-install charts/ti-key-release-2-X.X.X.tgz
 ```
 
 # OLD DOCUMENTATION. It might not be relevant anymore...

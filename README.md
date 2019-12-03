@@ -131,14 +131,17 @@ In order to install and run Trusted Service Identity, all worker nodes have to b
 setup with a private key, either directly or through vTPM (virtual Trusted Platform Module).
 This operation needs to be executed only once.
 
-If you are running this for the first time or like to override previous setup values:
+If you are running this for the first time or like to override previous setup values.
+
+Replace X.X.X with a proper version numbers (typically the highest, the most recent).
+
 ```console
-helm install charts/tsi-node-setup --debug --name tsi-setup --set reset.all=true
+helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=true
 ```
 
 To keep the existing private key, but just reset the intermediate CA (`x5c`)
 ```console
-helm install charts/tsi-node-setup --debug --name tsi-setup --set reset.x5c=true
+helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.x5c=true
 ```
 
 Once the worker nodes are setup, deploy the TSI environment
@@ -158,13 +161,13 @@ The following information is required to deploy TSI helm charts:
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
 ```console
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi-install \
 --set ti-key-release-1.cluster.name=CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=CLUSTER_REGION
 ```
 For example:
 ```console
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name ti-test \
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi-install \
 --set ti-key-release-1.cluster.name=ti-fra02 \
 --set ti-key-release-1.cluster.region=eu-de
 ```
@@ -173,9 +176,9 @@ Complete list of available setup parameters can be obtained as follow:
 ```console
 helm inspect values charts/ti-key-release-2-X.X.X.tgz > config.yaml
 # modify config.yaml
-helm install -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
+helm install -i --values=config.yaml tsi-install charts/ti-key-release-2-X.X.X.tgz
 # or upgrade existing deployment
-helm upgrade -i --values=config.yaml ti-test charts/ti-key-release-2-X.X.X.tgz
+helm upgrade -i --values=config.yaml tsi-install charts/ti-key-release-2-X.X.X.tgz
 ```
 
 ### Boostrapping - CI/CD pipeline
