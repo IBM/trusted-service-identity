@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v0.20
+tiVersion: v1.0
 
 # target docker repo
 tiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
@@ -36,12 +36,14 @@ jssService:
 # createVaultCert - if true, unique certs will be created
 # during Init Containers and inserted to Vault
 createVaultCert: false
-# if createVaultCert is set to 'true'
-# vault service endpoint is required for injecting pod specific unique key and cert.
-# see: `Automate Vault Certificates` documentation
-# vault-address e.g. https://1.1.1.1:32222
-vaultAddress: https://169.62.157.164:32654
 
+secrets:
+  # how often secrets should be retrieved from Vault
+  refreshSec: 45
+
+# specify the address of the Vault service that contains all
+# the TSI secrets to be retrieved by the sidecar
+vaultAddress: http://ti-test1.eu-de.containers.appdomain.cloud
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands

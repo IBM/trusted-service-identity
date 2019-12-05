@@ -6,7 +6,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.20
+        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v1.0
         imagePullSecrets:
         - name: regcred
         imagePullPolicy: Always
@@ -39,9 +39,6 @@ data:
               - path: "ti-images"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
-        - name: ti-vault-secret
-          secret:
-            secretName: ti-vault-
         - name: ti-keys
           secret:
             secretName: ti-keys-config
@@ -49,6 +46,6 @@ data:
           secret:
             secretName: ${TI_SA_TOKEN}
       addVolumeMounts:
-        - name: ti-vault-secret
-          mountPath: /vault-certs
+        - name: tsi-secrets
+          mountPath: /tsi-secrets
           readOnly: true

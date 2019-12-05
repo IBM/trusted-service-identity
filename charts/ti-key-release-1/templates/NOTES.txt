@@ -13,6 +13,7 @@ first part of the deployment.
    cluster.name: {{ .Values.cluster.name }}
    cluster.region: {{ .Values.cluster.region }}
    jwt.expireSec: {{ .Values.jwt.expireSec }}
+   secrets.refreshSec: {{ .Values.secrets.refreshSec }}
 
 
 First helm deployment is completed. Now execute the second part. Make sure the

@@ -2,7 +2,7 @@ apiVersion: v1
 appVersion: "1.0"
 description: A Helm chart for setting up TSI nodes
 name: tsi-node-setup
-version: 0.20.0
+version: 1.0.0
 home: https://github.ibm.com/kompass/TI-KeyRelease
 maintainers:
   - name: Brandon Lum

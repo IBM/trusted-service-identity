@@ -1,4 +1,4 @@
 dependencies:
   - name: ti-key-release-1
-    version: 0.20.0
+    version: 1.0.0
     repository: "file://../ti-key-release-1"

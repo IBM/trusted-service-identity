@@ -288,22 +288,21 @@ func addVolumeMount(target, added []corev1.VolumeMount, basePath string) (patch 
 }
 
 func updateAnnotation(target map[string]string, added map[string]string) (patch []patchOperation) {
-	for key, value := range added {
-		if target == nil || target[key] == "" {
-			target = map[string]string{}
-			patch = append(patch, patchOperation{
-				Op:    "add",
-				Path:  "/metadata/annotations",
-				Value: added,
-			})
-		} else {
-			patch = append(patch, patchOperation{
-				Op:    "replace",
-				Path:  "/metadata/annotations/" + key,
-				Value: value,
-			})
-		}
+
+	// cannot add individual path values. Must add the entire Annotation object
+	// so add/replace new values then patch it all at once
+	if target == nil {
+		target = map[string]string{}
 	}
+	for key, value := range added {
+		target[key] = value
+	}
+
+	patch = append(patch, patchOperation{
+		Op:    "replace",
+		Path:  "/metadata/annotations",
+		Value: target,
+	})
 	return patch
 }
 
