@@ -245,10 +245,8 @@ Run the test included with `vault-client`.
 If everything was done correctly this test should return success.
 
 ```console
-$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') /test-vault-cli.sh
+$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar /test-vault-cli.sh
 
-Defaulting container name to vault-cli.
-Use 'kubectl describe pod/vault-cli-7cfc4bc4c9-qg854 -n trusted-identity' to see all of the containers in this pod.
 Testing the default demo role:
 A01 Test successful! RT: 0
 A02 Test successful! RT: 2
@@ -277,6 +275,14 @@ Testing access w/o token
 E02 Test successful! RT: 2
 E03 Test successful! RT: 2
 Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values
+```
+Testing the secret injected into the container
+```console
+$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') cat tsi-secrets/mysecrets/secret-test1/dummy
+
+Defaulting container name to vault-cli.
+Use 'kubectl describe pod/vault-cli-7df67bf98d-jhq88 -n trusted-identity' to see all of the containers in this pod.
+{"all":"good"}
 ```
 
 Now you can get inside the `vault-cli` container and run other tests:

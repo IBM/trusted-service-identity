@@ -94,27 +94,35 @@ elif [ "$VAULT_PATH" == "secret/ti-demo-n" ]; then
         CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
 else
     echo "Unknown Vault path value!"
+    rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
     return 1
 fi
 
 #CMD="vault kv get -format=json secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
 #vault kv get -format=json secret/ti-demo-all/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy | jq -c '.data.data'
 
-# get the result in JSON format, then convert to string 
+# get the result in JSON format, then convert to string
+# Result can be also an error like this:
+#    No value found at secret/data/ti-demo-all/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
 JRESULT=$($CMD)
-RESULT=$(echo $JRESULT | jq -c '.data.data')
-
 local RT=$?
 if [ "$RT" == "0" ]; then
   echo "Test successful! RT: $RT"
-  echo "Result: $RESULT"
-  mkdir -p "${SECOUTDIR}/${SECOUT}"
-  echo $RESULT > "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+  RESULT=$(echo $JRESULT | jq -c '.data.data')
+  RT=$?
+  if [ "$RT" == "0" ]; then
+    echo "Parsing successful! RESULT: $RESULT"
+    mkdir -p "${SECOUTDIR}/${SECOUT}"
+    echo "$RESULT" > "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+  else
+    echo "Parsing failed. Result: $JRESULT"
+    rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+  fi
 else
-  echo "Test failed: RT: $RT, CMD: $CMD"
+  echo "Test failed: RT: $RT, CMD: $CMD, RESULT: $JRESULT"
+  rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
 fi
 }
-
 
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
   # for each requested secret parse its attributes
