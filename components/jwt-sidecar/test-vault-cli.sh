@@ -32,43 +32,44 @@ else
   # Unknown.
   echo "Unsupported plaftorm to execute this test. Set the IMGSHA environment"
   echo "variable to represent sha 256 encoded name of the test image"
+  exit 1
 fi
 
 test()
 {
-local CMD=$1
-local EXPECT=$2
-local ID=$3
-$CMD >/dev/null 2> /dev/null
-local RT=$?
+  local CMD=$1
+  local EXPECT=$2
+  local ID=$3
+  $CMD >/dev/null 2> /dev/null
+  local RT=$?
 
-if [ "$RT" == "$EXPECT" ]; then
-  echo "$ID Test successful! RT: $RT"
-else
-  echo "$ID Test failed: $CMD, RT: $RT, Expected: $EXPECT"
-fi
+  if [ "$RT" == "$EXPECT" ]; then
+    echo "$ID Test successful! RT: $RT"
+  else
+    echo "$ID Test failed: $CMD, RT: $RT, Expected: $EXPECT"
+  fi
 }
 
 login()
 {
-local ROLE=$1
-local TOKEN=$(cat $JWTFILE)
-local RESP=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login 2> /dev/null)
-# TODO we need better test if HTTP status code is 200
-# using `curl --request POST -w "%{http_code}"`
-# we can get HTTP code in a separate line, but it needs to be parsed, tested and stripped.
-# if [[ "$RESP" == *200 ]]; then
-#         echo "$RESP"
-# else
-#       echo "$LOGINFAIL"
-# fi
-#
-local RT=$?
-if [ "$RT" == "0" ]; then
-     echo $RESP
-else
-  echo "$LOGINFAIL"
-fi
+  local ROLE=$1
+  local TOKEN=$(cat $JWTFILE)
+  local RESP=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login 2> /dev/null)
+  # TODO we need better test if HTTP status code is 200
+  # using `curl --request POST -w "%{http_code}"`
+  # we can get HTTP code in a separate line, but it needs to be parsed, tested and stripped.
+  # if [[ "$RESP" == *200 ]]; then
+  #         echo "$RESP"
+  # else
+  #       echo "$LOGINFAIL"
+  # fi
+  #
+  local RT=$?
+  if [ "$RT" == "0" ]; then
+       echo $RESP
+  else
+    echo "$LOGINFAIL"
+  fi
 }
 
 ## create help menu:
