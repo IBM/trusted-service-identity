@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# test image name
-export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3"
 JWTFILE="/jwt/token"
 LOGINFAIL="Vault Login Failure!"
 
@@ -22,18 +20,18 @@ if [ ! -s "$JWTFILE" ]; then
 fi
 
 # sha-256 encoded file name based on the OS:
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-  # Linux
-  IMGSHA=$(echo -n "$IMG" | sha256sum | awk '{print $1}')
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  # Mac OSX
-  IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')
-else
-  # Unknown.
-  echo "Unsupported plaftorm to execute this test. Set the IMGSHA environment"
-  echo "variable to represent sha 256 encoded name of the test image"
-  exit 1
-fi
+# if [[ "$OSTYPE" == "linux-gnu" ]]; then
+#   # Linux
+#   IMGSHA=$(echo -n "$IMG" | sha256sum | awk '{print $1}')
+# elif [[ "$OSTYPE" == "darwin"* ]]; then
+#   # Mac OSX
+#   IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')
+# else
+#   # Unknown.
+#   echo "Unsupported plaftorm to execute this test. Set the IMGSHA environment"
+#   echo "variable to represent sha 256 encoded name of the test image"
+#   exit 1
+# fi
 
 test()
 {
@@ -84,10 +82,6 @@ HELPMEHELPME
 
 tests()
 {
-  if [[ "$IMGSHA" == "" ]]; then
-    return 1
-  fi
-
   echo "Testing the default $VAULT_ROLE role: "
   #export TOKEN=$(cat /jwt-tokens/token)
   #export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${VAULT_ROLE}"'"}' ${VAULT_ADDR}/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
@@ -100,11 +94,11 @@ tests()
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
 
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/dummy" 0 A01
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy" 2 A02
-  test "vault kv get secret/ti-demo-all/${REGION}/xxxx/${NS}/${IMGSHA}/dummy" 2 A03
-  test "vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 A04
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/xxxx/dummy" 2 A05
+  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/mysecret1" 0 A01
+  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/mysecret1" 2 A02
+  test "vault kv get secret/ti-demo-all/${REGION}/xxxx/${NS}/${IMGSHA}/mysecret1" 2 A03
+  test "vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/${NS}/${IMGSHA}/mysecret1" 2 A04
+  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/xxxx/mysecret1" 2 A05
 
 
   echo "Testing the 'demo' role: "
@@ -116,11 +110,11 @@ tests()
   IMAGES=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/dummy" 0 D01
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy" 2 D02
-  test "vault kv get secret/ti-demo-all/${REGION}/xxxx/${NS}/${IMGSHA}/dummy" 2 D03
-  test "vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 D04
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/xxxx/dummy" 2 D05
+  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/mysecret1" 0 D01
+  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/mysecret1" 2 D02
+  test "vault kv get secret/ti-demo-all/${REGION}/xxxx/${NS}/${IMGSHA}/mysecret1" 2 D03
+  test "vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/${NS}/${IMGSHA}/mysecret1" 2 D04
+  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/xxxx/mysecret1" 2 D05
 
   # testing rule demo-n with policy ti-policy-n
   echo "Testing the 'demo-n' role: "
@@ -132,10 +126,10 @@ tests()
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  test "vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/${NS}/dummy" 0 N01
-  test "vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/xxxx/dummy" 2 N02
-  test "vault kv get secret/ti-demo-n/${REGION}/xxxx/${NS}/dummy" 2 N03
-  test "vault kv get secret/ti-demo-n/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 N04
+  test "vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/${NS}/mysecret3" 0 N01
+  test "vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/xxxx/mysecret3" 2 N02
+  test "vault kv get secret/ti-demo-n/${REGION}/xxxx/${NS}/mysecret3" 2 N03
+  test "vault kv get secret/ti-demo-n/xxxx/${CLUSTER}/${NS}/${IMGSHA}/mysecret3" 2 N04
 
   # testing rule demo-r with policy ti-demo-r
   echo "Testing the 'demo-r' role: "
@@ -145,10 +139,11 @@ tests()
   REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
 
   # testing rule demo-r
-  test "vault kv get secret/ti-demo-r/${REGION}/dummy" 0 R01
-  test "vault kv get secret/ti-demo-r/xxxx/dummy" 2 R02
-  test "vault kv get secret/ti-demo-r/${REGION}/password" 0 R03
+  test "vault kv get secret/ti-demo-r/${REGION}/mysecret4" 0 R01
+  test "vault kv get secret/ti-demo-r/xxxx/mysecret4" 2 R02
+  test "vault kv get secret/ti-demo-r/${REGION}/mysecret5" 0 R03
   test "vault kv get secret/ti-demo-r/${REGION}/test.json" 0 R04
+  test "vault kv get secret/ti-demo-r/${REGION}/mysecret2.json" 0 R05
 
   echo "Testing non-existing role"
   RESP=$(login xxxx_role)
@@ -161,8 +156,8 @@ tests()
 
   echo "Testing access w/o token"
   export VAULT_TOKEN=
-  test "vault kv get secret/ti-demo-all/dal01/xxx/xxx/xxx/dummy" 2 E02
-  test "vault kv get secret/ti-demo-r/dal01/dummy" 2 E03
+  test "vault kv get secret/ti-demo-all/dal01/xxx/xxx/xxx/mysecret1" 2 E02
+  test "vault kv get secret/ti-demo-r/dal01/mysecret1" 2 E03
 
   echo "Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values"
 } # end of tests

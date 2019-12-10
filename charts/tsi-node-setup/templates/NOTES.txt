@@ -4,6 +4,9 @@ This Helm chart initializes the TSI nodes.
    chart: {{ template "tsi-node-setup.chart" . }}
    release: {{ .Release.Name }}
    namespace: {{ .Values.namespace }}
+   reset.all: {{ .Values.reset.all }}
+   reset.x5c: {{ .Values.reset.x5c }}
+
 
 After successful cluster setup, this Helm chart must be deleted:
    helm delete --purge --debug {{ .Release.Name }}

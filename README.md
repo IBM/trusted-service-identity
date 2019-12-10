@@ -52,7 +52,7 @@ kubectl get pods --all-namespaces
 ```
 
 #### Setup kubectl alias
-Through out this whole project we will be working with this newly created namespace.
+Through out this whole project we will be working with the newly created namespace: `trusted-identity`.
 Let's setup an alias `kk` to make typing faster:
 ```console
 $ alias kk="kubectl -n trusted-identity"
@@ -96,8 +96,8 @@ kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admi
 
 #### Setup access to installation images
 Currently the images for Trusted Identity project are stored in Artifactory. In order to
-use them, user has to be authenticated. You must obtain the [API key](https://pages.github.ibm.com/TAAS/tools_guide/artifactory/authentication/#authenticating-using-an-api-key)
-as described here. Simply generate one [here](https://na.artifactory.swg-devops.com/artifactory/webapp/#/profile).
+use them, user has to be authenticated. You must obtain the API key
+as described [here](https://taas.w3ibm.mybluemix.net/guides/create-apikey-in-artifactory.md). Simply generate one [here](https://na.artifactory.swg-devops.com/artifactory/webapp/#/profile).
 
 Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
 (This needs to be done every-time the new namespace is created)
@@ -157,19 +157,22 @@ You can use them directly or use the charts that you built yourself (see instruc
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+* vault address - the address of the Vault service that contains the TSI secrets to be retrieved by the sidecar (e.g: http://my-vault.eu-de.containers.appdomain.cloud)
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
 ```console
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi-install \
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=CLUSTER_NAME \
---set ti-key-release-1.cluster.region=CLUSTER_REGION
+--set ti-key-release-1.cluster.region=CLUSTER_REGION \
+--set ti-key-release-1.vaultAddress=VAULT_ADDR
 ```
 For example:
 ```console
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi-install \
+helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=ti-fra02 \
---set ti-key-release-1.cluster.region=eu-de
+--set ti-key-release-1.cluster.region=eu-de \
+--set ti-key-release-1.vaultAddress=http://ti-test1.eu-de.containers.appdomain.cloud
 ```
 
 Complete list of available setup parameters can be obtained as follow:

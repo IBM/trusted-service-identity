@@ -2,23 +2,26 @@
 
 # Trusted Service Identiy plugin name
 export PLUGIN="vault-plugin-auth-ti-jwt"
-# test image name
-export IMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3"
-# export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
-
+# test image names
+# VIMG - Vault Client image, UIMG - myubuntu image
+export VIMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3"
+export UIMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
 getSHA()
 {
 # sha-256 encoded file name based on the OS:
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   # Linux
-  IMGSHA=$(echo -n "$IMG" | sha256sum | awk '{print $1}')
+  VIMGSHA=$(echo -n "$VIMG" | sha256sum | awk '{print $1}')
+  UIMGSHA=$(echo -n "$UIMG" | sha256sum | awk '{print $1}')
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Mac OSX
-  IMGSHA=$(echo -n "$IMG" | shasum -a 256 | awk '{print $1}')
+  VIMGSHA=$(echo -n "$VIMG" | shasum -a 256 | awk '{print $1}')
+  UIMGSHA=$(echo -n "$UIMG" | shasum -a 256 | awk '{print $1}')
 else
   # Unknown.
   echo "Unsupported plaftorm to execute this test. Set the IMGSHA environment"
   echo "variable to represent sha 256 encoded name of the test image"
+  exit 1
 fi
 }
 
@@ -43,7 +46,7 @@ HELPMEHELPME
 
 loadVault()
 {
-  if [[ "$IMGSHA" == "" ]]; then
+  if [[ "$VIMGSHA" == "" || "$UIMGSHA" == "" ]]; then
     return 1
   fi
 
@@ -75,20 +78,22 @@ loadVault()
 
   # # write some data to be read later on
   # # testing rule `demo` with ti-policy-all
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${IMGSHA}/dummy all=good
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${IMGSHA}/dummy
+  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${VIMGSHA}/mysecret1 all=good
+  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${VIMGSHA}/mysecret1
+  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${UIMGSHA}/mysecret1 secret=very5ecret!value
+  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${UIMGSHA}/mysecret1
 
   # testing rule demo-n with policy ti-policy-n
-  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/dummy policy-n=good
-  vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/dummy
+  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/mysecret3 policy-n=good
+  vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/mysecret3
 
   # testing rule demo-r with policy ti-demo-r
-  vault kv put secret/ti-demo-r/${REGION}/dummy region=good
-  vault kv get secret/ti-demo-r/${REGION}/dummy
+  vault kv put secret/ti-demo-r/${REGION}/mysecret4 region=good
+  vault kv get secret/ti-demo-r/${REGION}/mysecret4
 
   # pass JSON as a value:
-  echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/ti-demo-r/${REGION}/password -
-  vault kv get secret/ti-demo-r/${REGION}/password
+  echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/ti-demo-r/${REGION}/mysecret5 -
+  vault kv get secret/ti-demo-r/${REGION}/mysecret5
 
   # demonstrate passing a JSON file as value
   cat >./test.json <<EOF
@@ -127,6 +132,8 @@ EOF
 
   vault kv put secret/ti-demo-r/${REGION}/test.json @test.json
   vault kv get secret/ti-demo-r/${REGION}/test.json
+  vault kv put secret/ti-demo-r/${REGION}/mysecret2.json @test.json
+  vault kv get secret/ti-demo-r/${REGION}/mysecret2.json
   }
 
 # validate the arguments

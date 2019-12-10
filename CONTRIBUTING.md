@@ -36,6 +36,13 @@ this will update the pkg/client directory. If everything OK, following message a
 diffing hack/../pkg against freshly generated codegen
 hack/../pkg up to date.
 ```
+To run a full build that creates helm packages, run the following:
+
+```console
+./buildTSI.sh
+```
+
+or if you like to build an individual components:
 
 ```console
 make build
@@ -123,9 +130,6 @@ and it is ready deploy.
 To be consistent, move the newly created chart package into `charts` directory.
 
 Once the helm charts are created, you can proceed with [install](./REAMDE.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework
-
-
-
 
 ## Automate Vault Certificates
 Optionally, Trusted Service Identity can additionally create a unique set of a

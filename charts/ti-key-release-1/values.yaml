@@ -43,7 +43,7 @@ secrets:
 
 # specify the address of the Vault service that contains all
 # the TSI secrets to be retrieved by the sidecar
-vaultAddress: http://ti-test1.eu-de.containers.appdomain.cloud
+vaultAddress: http://vault
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
