@@ -20,8 +20,6 @@ data:
           - name: ti-sa-mount
             mountPath: /var/run/secrets/kubernetes.io/serviceaccount
             readOnly: true
-          - name: ti-vault-secret
-            mountPath: /certs
           - name: ti-keys
             mountPath: /keys
             readOnly: true
@@ -44,9 +42,13 @@ data:
               fieldPath: status.hostIP
         - name: JWT_TTL_SEC
           value: {{ .Values.jwt.expireSec }}
+        - name: VAULT_ADDR
+          value: {{ .Values.vaultAddress }}
+        - name: SECRET_REFRESH_SEC
+          value: {{ .Values.secrets.refreshSec }}
         volumeMounts:
-          - name: jwt-shared-data
-            mountPath: /usr/share/jwt
+          - name: tsi-secrets
+            mountPath: /usr/share/secrets
           - name: tsi-sockets
             mountPath: "/host/sockets"
 
@@ -63,7 +65,7 @@ data:
             mountPath: /host/etc
             readOnly: true
       volumes:
-        - name: jwt-shared-data
+        - name: tsi-secrets
           emptyDir: {}
 
     {{- if .Values.createVaultCert }}
@@ -99,6 +101,9 @@ data:
         - name: pod-metadata
           downwardAPI:
             items:
+              - path: "tsi-secrets"
+                fieldRef:
+                 fieldPath: metadata.annotations['tsi.secrets']
               - path: "ti-secret"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-secret-key']
@@ -120,8 +125,6 @@ data:
               - path: "ti-cluster-region"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-cluster-region']
-        - name: ti-vault-secret
-          emptyDir: {}
         - name: ti-skeys
           secret:
             secretName: ti-keys-config
@@ -129,10 +132,7 @@ data:
           secret:
             secretName: ${TI_SA_TOKEN}
       addVolumeMounts:
-        - name: ti-vault-secret
-          mountPath: /vault-certs
-          readOnly: true
-        - name: jwt-shared-data
-          mountPath: /jwt-tokens
+        - name: tsi-secrets
+          mountPath: /tsi-secrets
           readOnly: true
 {{ end }}

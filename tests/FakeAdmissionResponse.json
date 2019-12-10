@@ -60,7 +60,7 @@
       "value":[
          {
             "name":"gen-vault-cert",
-            "image":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.20",
+            "image":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v1.0",
             "resources":{
 
             },
@@ -106,7 +106,7 @@
       "path":"/spec/containers/-",
       "value":{
          "name":"jwt-sidecar",
-         "image":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.20",
+         "image":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v1.0",
          "command":[
             "/bin/sh",
             "-c",
@@ -118,7 +118,7 @@
          "volumeMounts":[
             {
                "name":"jwt-shared-data",
-               "mountPath":"/usr/share/jwt"
+               "mountPath":"/usr/share/secrets"
             },
             {
                "name":"jwt-configmap",

@@ -1,6 +1,6 @@
 initContainers:
 - name: gen-vault-cert
-  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v0.20
+  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v1.0
   imagePullPolicy: Always
   imagePullSecrets:
   - name: regcred
@@ -11,8 +11,8 @@ initContainers:
     - name: ti-sa-mount
       mountPath: /var/run/secrets/kubernetes.io/serviceaccount
       readOnly: true
-    - name: ti-vault-secret
-      mountPath: /certs
+    - name: tsi-secrets
+      mountPath: /tsi-secrets
     - name: ti-keys
       mountPath: /keys
       readOnly: true
@@ -24,13 +24,13 @@ initContainers:
       readOnly: true
 sidecarContainers:
 - name: jwt-sidecar
-  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v0.20
+  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v1.0
   imagePullPolicy: Always
   imagePullSecrets:
   - name: regcred
   volumeMounts:
     - name: jwt-shared-data
-      mountPath: /usr/share/jwt
+      mountPath: /usr/share/secrets
     - name: jwt-secret
       mountPath: "/secret/jwt"
       readOnly: true
@@ -97,9 +97,6 @@ volumes:
     secret:
       secretName: ti-sa-token-7ptlx
 addVolumeMounts:
-  - name: ti-vault-secret
-    mountPath: /vault-certs
-    readOnly: true
-  - name: jwt-shared-data
-    mountPath: /jwt-tokens
+  - name: tsi-secrets
+    mountPath: /tsi-secrets
     readOnly: true
