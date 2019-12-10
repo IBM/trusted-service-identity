@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of TSI components
-tsiVersion: v1.0
+tsiVersion: v1.1
 
 # target docker repo
 tsiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
