@@ -1,6 +1,6 @@
 initContainers:
 - name: gen-vault-cert
-  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v1.0
+  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v1.1
   imagePullPolicy: Always
   imagePullSecrets:
   - name: regcred
@@ -24,7 +24,7 @@ initContainers:
       readOnly: true
 sidecarContainers:
 - name: jwt-sidecar
-  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v1.0
+  image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v1.1
   imagePullPolicy: Always
   imagePullSecrets:
   - name: regcred

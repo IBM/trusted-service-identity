@@ -11,8 +11,7 @@ RUN apt update && \
 # install yq required for xform YAML to JSON
 RUN apt-get install -y software-properties-common && \
     add-apt-repository ppa:rmescandon/yq && \
-    apt-get update && \
-    apt install -y yq
+    apt update && apt install -y yq
 
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
     chmod +x kubectl

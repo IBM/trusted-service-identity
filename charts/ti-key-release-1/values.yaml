@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v1.0
+tiVersion: v1.1
 
 # target docker repo
 tiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com

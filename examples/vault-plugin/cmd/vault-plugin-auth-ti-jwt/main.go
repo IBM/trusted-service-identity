@@ -7,7 +7,7 @@ import (
 	//"github.ibm.com/dpittner/vault-plugin-auth-ti-jwt"
 	"github.com/hashicorp/vault/helper/pluginutil"
 	"github.com/hashicorp/vault/logical/plugin"
-	"github.ibm.com/kompass/TI-KeyRelease/examples/vault-plugin"
+	"github.ibm.com/kompass/ti-keyrelease/examples/vault-plugin"
 )
 
 func main() {
