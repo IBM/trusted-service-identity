@@ -23,8 +23,6 @@ spec:
         hostPath:
           path: /ti/secrets/keys
           type: Directory
-      imagePullSecrets:
-      - name: regcred
       containers:
         - name: ti-revoker
           image: {{ .Values.tiRepo }}/ti-revoker:{{ .Values.tiVersion }}

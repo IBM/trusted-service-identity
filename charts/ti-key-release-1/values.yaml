@@ -9,7 +9,7 @@ namespace: trusted-identity
 tiVersion: v1.1
 
 # target docker repo
-tiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
+tiRepo: trustedseriviceidentity
 
 # Cluster Information
 cluster:

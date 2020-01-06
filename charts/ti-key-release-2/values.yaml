@@ -9,7 +9,7 @@
 tiVersion: v1.1
 
 # target docker repo
-tiRepo: res-kompass-kompass-docker-local.artifactory.swg-devops.com
+tiRepo: trustedseriviceidentity
 
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment

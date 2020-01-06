@@ -25,11 +25,9 @@ spec:
         app: vtpm-service
         version: v1
     spec:
-      imagePullSecrets:
-      - name: regcred
       containers:
         - name: vtpm-service
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/vtpm-server:v0.6
+          image: trustedseriviceidentity/vtpm-server:v0.6
           imagePullPolicy: Always
           ports:
           - name: http

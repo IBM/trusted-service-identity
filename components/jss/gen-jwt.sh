@@ -3,7 +3,7 @@
 # this script is use for debugging. It's not called by any of the components directly
 # assuming 'private.key' and 'x5c' files exist, here is the format to test it:
 #
-#     /usr/local/bin/gen-jwt.sh -sub test@test.com -claims "name:tt|cluster-name:EUcluster|cluster-region:eu-de|images:res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0,ubuntu:latest"
+#     /usr/local/bin/gen-jwt.sh -sub test@test.com -claims "name:tt|cluster-name:EUcluster|cluster-region:eu-de|images:trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0,ubuntu:latest"
 
 
 DIR="$(dirname "$0")"

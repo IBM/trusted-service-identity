@@ -23,11 +23,9 @@ spec:
         app: jwt-key-service
         version: v1
     spec:
-      imagePullSecrets:
-      - name: regcred
       containers:
       - name: jwt-key-service
-        image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-key-server:v0.2
+        image: trustedseriviceidentity/ti-jwt-key-server:v0.2
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

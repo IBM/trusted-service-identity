@@ -22,9 +22,9 @@ physical hardware. Secrets are released to the application based on this identit
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
 - [Usage (demo)](examples/README.md)
-- [Integrating TIS with your Application (Vault example)](examples/README-AppDeveloperVault.md)
-- [Integrating TIS with your Application (Key Store example)](examples/README-AppDeveloperKeyServer.md)
-- [Contributing (TIS Development)](./CONTRIBUTING.md)
+- [Integrating TSI with your Application (Vault example)](examples/README-AppDeveloperVault.md)
+- [Integrating TSI with your Application (Key Store example)](examples/README-AppDeveloperKeyServer.md)
+- [Contributing (TSI Development)](./CONTRIBUTING.md)
 - Extras
   - [Automated Vault Certificate Management](./CONTRIBUTING.md#automate-vault-certificates)
 
@@ -103,7 +103,7 @@ Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and A
 (This needs to be done every-time the new namespace is created)
 ```console
 $ kk create secret docker-registry regcred \
---docker-server=res-kompass-kompass-docker-local.artifactory.swg-devops.com \
+--docker-server=trustedseriviceidentity \
 --docker-username=user@ibm.com \
 --docker-password=${API_KEY} \
 --docker-email=user@ibm.com
@@ -202,7 +202,7 @@ Sample JWT Claims:
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
-  "images-names": "res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "images-names": "trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
   "iss": "wsched@us.ibm.com",
   "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",

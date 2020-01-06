@@ -26,9 +26,7 @@ spec:
         app: ti-vault
       name: ti-vault
     spec:
-      imagePullSecrets:
-      - name: regcred
       containers:
         - name: ti-vault
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-vault:v0.3
+          image: trustedseriviceidentity/ti-vault:v0.3
           imagePullPolicy: Always

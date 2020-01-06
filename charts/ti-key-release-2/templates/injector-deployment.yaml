@@ -13,8 +13,6 @@ spec:
         app: ti-injector
     spec:
       serviceAccountName: ti-sa
-      imagePullSecrets:
-      - name: regcred
       containers:
         - name: ti-injector
           image: {{ .Values.tiRepo }}/ti-webhook:{{ .Values.tiVersion }}

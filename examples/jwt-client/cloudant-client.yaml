@@ -30,11 +30,9 @@ spec:
         app: cl-client
       name: cl-client
     spec:
-      imagePullSecrets:
-      - name: regcred
       containers:
         - name: cl-client
-          image: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:20ce253a043f75941ec95643150a8b4a94c915188f2341276d0478919fb92670
+          image: trustedseriviceidentity/ti-jwt-client:v0.2@sha256:20ce253a043f75941ec95643150a8b4a94c915188f2341276d0478919fb92670
           imagePullPolicy: Always
           env:
             - name: TARGET_URL

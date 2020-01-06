@@ -12,8 +12,6 @@ spec:
       labels:
         name: jss-server
     spec:
-      imagePullSecrets:
-      - name: regcred
       containers:
         - name: jss-server-pub
           #image: {{ .Values.tiRepo }}/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}

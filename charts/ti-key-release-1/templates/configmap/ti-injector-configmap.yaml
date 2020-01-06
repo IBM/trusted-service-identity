@@ -11,8 +11,6 @@ data:
       - name: gen-vault-cert
         image: {{ .Values.tiRepo }}/ti-gen-vault-cert:{{ .Values.tiVersion }}
         imagePullPolicy: Always
-        imagePullSecrets:
-        - name: regcred
         volumeMounts:
           - name: pod-metadata
             mountPath: /pod-metadata
@@ -33,8 +31,6 @@ data:
       - name: jwt-sidecar
         image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Values.tiVersion }}
         imagePullPolicy: Always
-        imagePullSecrets:
-        - name: regcred
         env:
         - name: HOST_IP
           valueFrom:
