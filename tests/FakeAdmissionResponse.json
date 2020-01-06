@@ -6,7 +6,7 @@
          "admission.trusted.identity/status":"injected",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
-         "admission.trusted.identity/ti-images":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+         "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
          "admission.trusted.identity/ti-secret-key":"ti-secret-1b4405c4-696d-49aa-5b19-89d22e9289be"
       }
    },
@@ -17,7 +17,7 @@
          "admission.trusted.identity/status":"injected",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
-         "admission.trusted.identity/ti-images":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+         "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
          "admission.trusted.identity/ti-secret-key":"ti-secret-1b4405c4-696d-49aa-5b19-89d22e9289be"
       }
    },
@@ -28,7 +28,7 @@
          "admission.trusted.identity/status":"injected",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
-         "admission.trusted.identity/ti-images":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+         "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
          "admission.trusted.identity/ti-secret-key":"ti-secret-1b4405c4-696d-49aa-5b19-89d22e9289be"
       }
    },
@@ -39,7 +39,7 @@
          "admission.trusted.identity/status":"injected",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
-         "admission.trusted.identity/ti-images":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+         "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
          "admission.trusted.identity/ti-secret-key":"ti-secret-1b4405c4-696d-49aa-5b19-89d22e9289be"
       }
    },
@@ -50,7 +50,7 @@
          "admission.trusted.identity/status":"injected",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
-         "admission.trusted.identity/ti-images":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+         "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
          "admission.trusted.identity/ti-secret-key":"ti-secret-1b4405c4-696d-49aa-5b19-89d22e9289be"
       }
    },
@@ -60,7 +60,7 @@
       "value":[
          {
             "name":"gen-vault-cert",
-            "image":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-gen-vault-cert:v1.1",
+            "image":"trustedseriviceidentity/ti-gen-vault-cert:v1.1",
             "resources":{
 
             },
@@ -106,7 +106,7 @@
       "path":"/spec/containers/-",
       "value":{
          "name":"jwt-sidecar",
-         "image":"res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-sidecar:v1.1",
+         "image":"trustedseriviceidentity/ti-jwt-sidecar:v1.1",
          "command":[
             "/bin/sh",
             "-c",

@@ -136,7 +136,7 @@ the claim values:
 
 ```console
 root@myubuntu-698b749889-pdp78:/# curl --insecure ${KEYSTORE_URL} --header "Authorization: Bearer $(cat /jwt-tokens/token)"
-JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545313344, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1545313314, u'pod': u'myubuntu-698b749889-pdp78', u'sub': u'wsched@us.ibm.com'}
+JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545313344, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1545313314, u'pod': u'myubuntu-698b749889-pdp78', u'sub': u'wsched@us.ibm.com'}
 root@myubuntu-698b749889-pdp78:/#
 
 ```
@@ -192,7 +192,7 @@ Executing access to Cloudant tables...
 
 Container Identity
 
-JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545319065, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d', u'iat': 1545319035, u'pod': u'cl-client-69447875d9-jqscg', u'sub': u'wsched@us.ibm.com'}
+JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545319065, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d', u'iat': 1545319035, u'pod': u'cl-client-69447875d9-jqscg', u'sub': u'wsched@us.ibm.com'}
 
 ====
 
@@ -245,8 +245,8 @@ curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-value&secretVal=${KE
 NAME=tedistripsaildesswasounn
 KEY=224975fdbb1cdc1a232b5210c88d858a500c2a9b
 # assign to `eu-de` and specific signed image
-curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-name&secretVal=${NAME}&cluster-region=eu-de&images=res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d"
-curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-value&secretVal=${KEY}&cluster-region=eu-de&images=res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d"
+curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-name&secretVal=${NAME}&cluster-region=eu-de&images=trustedseriviceidentity/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d"
+curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-value&secretVal=${KEY}&cluster-region=eu-de&images=trustedseriviceidentity/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d"
 ```
 
 After setting above policies the output from cluster `EUcluster` and region `eu-de`
@@ -261,7 +261,7 @@ Executing access to Cloudant tables...
 
 Container Identity
 
-JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545325203, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d', u'iat': 1545325173, u'pod': u'cl-client-69447875d9-jqscg', u'sub': u'wsched@us.ibm.com'}
+JWT Claims: {u'cluster-name': u'EUcluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'eu-de', u'exp': 1545325203, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d', u'iat': 1545325173, u'pod': u'cl-client-69447875d9-jqscg', u'sub': u'wsched@us.ibm.com'}
 US data results
 
 	Williams Bruce 	SSN:-- phone:--- rating:0

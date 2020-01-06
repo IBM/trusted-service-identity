@@ -13,8 +13,6 @@ spec:
         name: ti-setter
     spec:
       serviceAccountName: ti-admin-sa
-      # imagePullSecrets:
-      # - name: regcred
       containers:
         - name: hyperkube
           image: "{{ .Values.hyperkube.repository }}:{{ .Values.hyperkube.tag }}"

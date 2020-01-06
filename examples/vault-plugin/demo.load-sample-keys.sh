@@ -4,8 +4,8 @@
 export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image names
 # VIMG - Vault Client image, UIMG - myubuntu image
-export VIMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3"
-export UIMG="res-kompass-kompass-docker-local.artifactory.swg-devops.com/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
+export VIMG="trustedseriviceidentity/vault-cli:v0.3"
+export UIMG="trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
 getSHA()
 {
 # sha-256 encoded file name based on the OS:
@@ -39,7 +39,7 @@ syntax:
 where:
       -region: eu-de, dal01, wdc01, ...
       -cluster: cluster name
-      -full image name (optional) e.g. res-kompass-kompass-docker-local.artifactory.swg-devops.com/vault-cli:v0.3
+      -full image name (optional) e.g. trustedseriviceidentity/vault-cli:v0.3
 
 HELPMEHELPME
 }

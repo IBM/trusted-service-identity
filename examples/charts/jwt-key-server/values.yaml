@@ -7,7 +7,7 @@ replicaCount: 1
 namespace: default
 
 image:
-  repository: res-kompass-kompass-docker-local.artifactory.swg-devops.com/ti-jwt-key-server
+  repository: trustedseriviceidentity/ti-jwt-key-server
   tag: v0.2
   pullPolicy: Always
   pullSecretName: regcred

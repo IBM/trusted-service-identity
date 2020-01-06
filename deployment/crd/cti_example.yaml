@@ -6,7 +6,7 @@ info:
   cluster-name: mycluster
   cluster-region: dal
 policy:
-  - image: "res-kompass-kompass-docker-local.artifactory.swg-devops.com/"
-    identity: id-res-kompass-kompass-docker-local.artifactory.swg-devops.com
+  - image: "trustedseriviceidentity/"
+    identity: id-trustedseriviceidentity
   - image: "ibmcom/"
     identity: id-ibm

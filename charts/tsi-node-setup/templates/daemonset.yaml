@@ -15,8 +15,6 @@ spec:
         version: v1
     spec:
       #serviceAccountName: ti-setup-admin-sa
-      imagePullSecrets:
-        - name: regcred
       containers:
         - name: ti-node-setup
           image: "{{ .Values.tsiRepo }}/node-setup:{{ .Values.tsiVersion }}"
