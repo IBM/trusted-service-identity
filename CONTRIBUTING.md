@@ -36,13 +36,15 @@ this will update the pkg/client directory. If everything OK, following message a
 diffing hack/../pkg against freshly generated codegen
 hack/../pkg up to date.
 ```
-To run a full build that creates helm packages, run the following:
+To run a full build that compiles the code, builds images and creates helm packages, run the following:
 
 ```console
 ./buildTSI.sh
 ```
 
-or if you like to build an individual components:
+When pushing the images to the registry, the user has to be logged in to Docker Hub with permissions to push images to `hub.docker.com/repository/docker/trustedseriviceidentity`. Make sure you are part of the Organization: [https://hub.docker.com/orgs/trustedseriviceidentity](https://hub.docker.com/orgs/trustedseriviceidentity)
+
+or if you like to build individual components:
 
 ```console
 make build

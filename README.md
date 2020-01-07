@@ -30,20 +30,15 @@ physical hardware. Secrets are released to the application based on this identit
 
 ## Installation
 ### Prerequisites
-#### Clone this project in a local directory, in your GOPATH
+#### Clone this project in a local directory, outside your GOPATH
 ```console
-cd $GOPATH
-mkdir -p $GOPATH/src/github.ibm.com/kompass/
-cd src/github.ibm.com/kompass/
-git clone git@github.ibm.com:kompass/TI-KeyRelease.git
-cd TI-KeyRelease
+git clone git@github.com:IBM/trusted-service-identity.git
+cd trusted-service-identity
 ```
-If you cannot clone the project with the git ssh protocol, make sure [you add your
-ssh public key to your IBM GitHub Enterprise Account](https://help.github.com/enterprise/2.13/user/articles/adding-a-new-ssh-key-to-your-github-account/).
 
 #### Kubernetes cluster
 * Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](www.ibm.com/Kubernetes/Service‎),
-[IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube)
+[IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube) or any other solution that provides Kubernetes cluster.
 * Make sure the Kuberenetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
 * Make sure the `KUBECONFIG` is properly set and you can access the cluster. Test the access with
 ```console
@@ -95,29 +90,13 @@ kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admi
 ```
 
 #### Setup access to installation images
-Currently the images for Trusted Identity project are stored in Artifactory. In order to
-use them, user has to be authenticated. You must obtain the API key
-as described [here](https://taas.w3ibm.mybluemix.net/guides/create-apikey-in-artifactory.md). Simply generate one [here](https://na.artifactory.swg-devops.com/artifactory/webapp/#/profile).
+The images are publicly available from Docker hub. For example, [https://hub.docker.com/repository/docker/trustedseriviceidentity/ti-webhook](https://hub.docker.com/repository/docker/trustedseriviceidentity/ti-webhook)
 
-Create a secret that contains your Artifactory user id (e.g. user@ibm.com) and API key.
-(This needs to be done every-time the new namespace is created)
-```console
-$ kk create secret docker-registry regcred \
---docker-server=trustedseriviceidentity \
---docker-username=user@ibm.com \
---docker-password=${API_KEY} \
---docker-email=user@ibm.com
-
-$ # to check your secret:
-$ kk get secret regcred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
-```
-
-or update the [init-namespace.sh](./init-namespace.sh) script.
-
-The deployment is done in `trusted-identity` namespace. If you are testing or developing
-the code and execute the deployment several times, it is a good idea to cleanup
-the namespace before executing another deployment. Run cleanup first, then init
-to initialize the namespace.This would remove all the components and artifacts.
+The deployment is done in `trusted-identity` namespace. If you are testing
+or developing the code and execute the deployment several times, it is a good
+idea to cleanup the namespace before executing another deployment. Run cleanup
+first, then init to initialize the namespace.
+This would remove all the components and artifacts.
 
 Then recreate a new, empty namespace:
 
@@ -131,7 +110,8 @@ In order to install and run Trusted Service Identity, all worker nodes have to b
 setup with a private key, either directly or through vTPM (virtual Trusted Platform Module).
 This operation needs to be executed only once.
 
-If you are running this for the first time or like to override previous setup values.
+If you are running this for the first time or like to override previous setup
+values, execute the helm command below.
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
@@ -157,7 +137,9 @@ You can use them directly or use the charts that you built yourself (see instruc
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* vault address - the address of the Vault service that contains the TSI secrets to be retrieved by the sidecar (e.g: http://my-vault.eu-de.containers.appdomain.cloud)
+* vault address - the address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. If you have no dedicated Vault, it will be created as
+a part of the [vault demo](examples/vault-plugin/README.md). Here is the example
+address for Vault running in IKS in `my-vault` cluster (e.g: http://my-vault.eu-de.containers.appdomain.cloud)
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
@@ -185,7 +167,7 @@ helm upgrade -i --values=config.yaml tsi-install charts/ti-key-release-2-X.X.X.t
 ```
 
 ### Boostrapping - CI/CD pipeline
-The bootstrapping process is shown in details under the [Vault demo](examples/README.md)
+The bootstrapping process is shown in details under the [Vault demo](examples/vault-plugin/README.md)
 
 ## Run Demo
 For next steps, review [demo](examples/README.md) examples.
