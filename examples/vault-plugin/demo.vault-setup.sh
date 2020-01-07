@@ -12,7 +12,7 @@ helpme()
 
 Syntax: ${0} <token> <vault_addr>
 Where:
-  token      - vault root token to setup the plugin
+  token      - vault root token to setup the plugin (optional, if set as ROOT_TOKEN)
   vault_addr - vault address in format http://vault.server:8200
 
 HELPMEHELPME
