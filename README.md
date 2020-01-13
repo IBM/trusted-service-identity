@@ -1,8 +1,8 @@
 # Trusted Service Identity (TSI)
 
-Trusted Service Identity is closing the gap of preventing access to secrets by
-an untrusted operator during the process of obtaining authorization for data
-access by the applications running in the public cloud.
+Trusted Service Identity by IBM Research is closing the gap of preventing access
+to secrets by an untrusted operator during the process of obtaining authorization
+for data access by the applications running in the public cloud.
 
 The project ties Key Management Service technologies with identity via host
 provenance and integrity.
@@ -24,10 +24,8 @@ physical hardware. Secrets are released to the application based on this identit
   - [Cleanup](./README.md#cleanup)
 - [Usage (demo)](examples/README.md)
 - [Integrating TSI with your Application (Vault example)](examples/README-AppDeveloperVault.md)
-- [Integrating TSI with your Application (Key Store example)](examples/README-AppDeveloperKeyServer.md)
 - [Contributing (TSI Development)](./CONTRIBUTING.md)
-- Extras
-  - [Automated Vault Certificate Management](./CONTRIBUTING.md#automate-vault-certificates)
+- [Maintainers List](./MAINTAINERS.md#maintaintainers-list)
 
 ## Installation
 ### Prerequisites
