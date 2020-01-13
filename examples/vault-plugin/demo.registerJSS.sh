@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 ## create help menu:
 helpme()
@@ -18,7 +18,7 @@ HELPMEHELPME
 }
 kk="kubectl -n trusted-identity"
 
-# this function registers individualx
+# this function registers individual node
 register()
 {
   nodeIP=$($kk get pod $1 --output=jsonpath={.status.hostIP})

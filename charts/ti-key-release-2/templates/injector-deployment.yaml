@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {{ index .Values "ti-key-release-1" "namespace" }}
@@ -7,6 +7,9 @@ metadata:
     app: ti-injector
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: ti-injector  
   template:
     metadata:
       labels:
