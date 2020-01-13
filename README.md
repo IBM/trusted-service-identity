@@ -17,7 +17,7 @@ physical hardware. Secrets are released to the application based on this identit
 ## Table of Contents
 - [Installation](./README.md#installation)
   - [Prerequisites](./README.md#prerequisites)
-  - [Setup Vault](.README.md#setup-vault)
+  - [Setup Vault](./README.md#setup-vault)
   - [Setup Cluster](./README.md#setup-cluster-nodes)
   - [Install](./README.md#install-trusted-service-identity-framework)
   - [Test](./README.md#testing-deployment)
@@ -117,7 +117,8 @@ deployment.apps/tsi-vault created
 ```
 
 #### Obtain remote access to Vault service
-For `minikube` obtain the current endpoint as follow:
+For `minikube` obtain the current endpoint as follow
+<details><summary>Click to view minikube steps</summary>
 
 ```console
 minikube service tsi-vault -n trusted-identity --url
@@ -125,8 +126,12 @@ http://192.168.99.105:30229
 # assign it to VAULT_ADDR env. variable:
 export VAULT_ADDR=http://192.168.99.105:30229
 ```
+</details>
+
 
 To access Vault remotely in `IKS`, setup ingress access.
+<details><summary>Click to view IKS steps</summary>
+
 Obtain the ingress name using `ibmcloud` cli:
 ```console
 $ # first obtain the cluster name:
@@ -160,6 +165,8 @@ create ingress:
 ```console
 $ kk create -f ingress-IKS.yaml
 ```
+</details>
+
 
 Test the remote connection to vault:
 ```console
