@@ -11,6 +11,6 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: ti-vault
+          serviceName: tsi-vault
           servicePort: 8200
         path: /

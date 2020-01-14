@@ -1,8 +1,8 @@
 # Trusted Service Identity (TSI)
 
-Trusted Service Identity is closing the gap of preventing access to secrets by
-an untrusted operator during the process of obtaining authorization for data
-access by the applications running in the public cloud.
+Trusted Service Identity by IBM Research is closing the gap of preventing access
+to secrets by an untrusted operator during the process of obtaining authorization
+for data access by the applications running in the public cloud.
 
 The project ties Key Management Service technologies with identity via host
 provenance and integrity.
@@ -17,16 +17,15 @@ physical hardware. Secrets are released to the application based on this identit
 ## Table of Contents
 - [Installation](./README.md#installation)
   - [Prerequisites](./README.md#prerequisites)
-  - [Setup Cluster](./README.md#setup-cluster)
+  - [Setup Vault](./README.md#setup-vault)
+  - [Setup Cluster](./README.md#setup-cluster-nodes)
   - [Install](./README.md#install-trusted-service-identity-framework)
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
 - [Usage (demo)](examples/README.md)
-- [Integrating TSI with your Application (Vault example)](examples/README-AppDeveloperVault.md)
-- [Integrating TSI with your Application (Key Store example)](examples/README-AppDeveloperKeyServer.md)
+- [Reporting security issues](./README.md#reporting-security-issues)
 - [Contributing (TSI Development)](./CONTRIBUTING.md)
-- Extras
-  - [Automated Vault Certificate Management](./CONTRIBUTING.md#automate-vault-certificates)
+- [Maintainers List](./MAINTAINERS.md##maintainers-list)
 
 ## Installation
 ### Prerequisites
@@ -39,10 +38,10 @@ cd trusted-service-identity
 #### Kubernetes cluster
 * Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](www.ibm.com/Kubernetes/Service‎),
 [IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube) or any other solution that provides Kubernetes cluster.
-* Make sure the Kuberenetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
+* Make sure the Kubernetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
 * Make sure the `KUBECONFIG` is properly set and you can access the cluster. Test the access with
 ```console
-export KUBECONFIG=<location of your kubernetes config. files, as per documentation for your cluster>
+export KUBECONFIG=<location of your kubernetes configuration files, as per documentation for your cluster>
 kubectl get pods --all-namespaces
 ```
 
@@ -56,7 +55,7 @@ $ kk get po
 ```
 
 #### Install and initialize Helm environment
-This project requires Helm v2.10.0 or higher.
+This project requires Helm v2.10.0 or higher, but not Helm v3 (yet...)
 Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
 ```bash
   brew install kubernetes-helm
@@ -65,7 +64,7 @@ Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). 
   # then initialize (assuming your KUBECONFIG for the current cluster is already setup)
   helm init
 ```
-*NOTE*: If you are using IBM Cloud Kuberenetes Service, with K8s version 1.12 or higher,
+*NOTE*: If you are using IBM Cloud Kubernetes Service, with K8s version 1.12 or higher,
 the kube-system default service account no longer has cluster-admin access to the Kubernetes API.
 Executing any helm operations might cause a following error:
 ```
@@ -89,7 +88,7 @@ another option (see [this](https://cloud.ibm.com/docs/containers?topic=container
 kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admin --serviceaccount=kube-system:default
 ```
 
-#### Setup access to installation images
+#### Installation images
 The images are publicly available from Docker hub. For example, [https://hub.docker.com/repository/docker/trustedseriviceidentity/ti-webhook](https://hub.docker.com/repository/docker/trustedseriviceidentity/ti-webhook)
 
 The deployment is done in `trusted-identity` namespace. If you are testing
@@ -105,7 +104,78 @@ Then recreate a new, empty namespace:
 ./init-namespace.sh
 ```
 
-### Setup Cluster
+### Setup Vault
+TSI requires Vault to store the secrets. If you have a Vault instance that can be
+used for this TSI installation, make sure you have admin privileges to access it.
+Otherwise, follow the simple steps below to create a Vault instance, as a pod and
+service, deployed in `trusted-identity` namespace in your cluster.
+
+```console
+kk create -f examples/vault-plugin/vault.yaml
+service/tsi-vault created
+deployment.apps/tsi-vault created
+```
+
+#### Obtain remote access to Vault service
+For `minikube` obtain the current endpoint as follow
+<details><summary>Click to view minikube steps</summary>
+
+```console
+minikube service tsi-vault -n trusted-identity --url
+http://192.168.99.105:30229
+# assign it to VAULT_ADDR env. variable:
+export VAULT_ADDR=http://192.168.99.105:30229
+```
+</details>
+
+
+To access Vault remotely in `IKS`, setup ingress access.
+<details><summary>Click to view IKS steps</summary>
+
+Obtain the ingress name using `ibmcloud` cli:
+```console
+$ # first obtain the cluster name:
+$ ibmcloud ks clusters
+$ # then use the cluster name to get the Ingress info:
+$ ibmcloud ks cluster-get <cluster_name> | grep Ingress
+```
+Build an ingress file from `ingress-IKS.template.yaml`,
+using the `Ingress Subdomain` information obtained above.
+Here is an example using `my-ti-cluster.eu-de.containers.appdomain.cloud`
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: vault-ingress
+  namespace: trusted-identity
+spec:
+  rules:
+    # provide the actual Ingress for `host` value:
+  - host: my-ti-cluster.eu-de.containers.appdomain.cloud
+    http:
+      paths:
+      - backend:
+          serviceName: tsi-vault
+          servicePort: 8200
+        path: /
+```
+
+create ingress:
+```console
+$ kk create -f ingress-IKS.yaml
+```
+</details>
+
+
+Test the remote connection to vault:
+```console
+$ curl  http://<Ingress Subdomain or ICP master IP>/
+<a href="/ui/">Temporary Redirect</a>.
+```
+At this point, this is an expected result.
+
+### Setup Cluster Nodes
 In order to install and run Trusted Service Identity, all worker nodes have to be
 setup with a private key, either directly or through vTPM (virtual Trusted Platform Module).
 This operation needs to be executed only once.
@@ -137,9 +207,7 @@ You can use them directly or use the charts that you built yourself (see instruc
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* vault address - the address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. If you have no dedicated Vault, it will be created as
-a part of the [vault demo](examples/vault-plugin/README.md). Here is the example
-address for Vault running in IKS in `my-vault` cluster (e.g: http://my-vault.eu-de.containers.appdomain.cloud)
+* vault address - the remote address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. Use the env. variable VAULT_ADDR set [above](.README.md#setup-vault)
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
@@ -147,14 +215,15 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=CLUSTER_REGION \
---set ti-key-release-1.vaultAddress=VAULT_ADDR
+--set ti-key-release-1.vaultAddress=$VAULT_ADDR
 ```
 For example:
 ```console
+export VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=ti-fra02 \
 --set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.vaultAddress=http://ti-test1.eu-de.containers.appdomain.cloud
+--set ti-key-release-1.vaultAddress=$VAULT_ADDR
 ```
 
 Complete list of available setup parameters can be obtained as follow:
@@ -199,3 +268,14 @@ Remove all the resources created for Trusted Identity
 ./cleanup.sh
 ```
 To start a fresh deployment, make sure to run `./init.sh` again after the cleanup.
+
+## Reporting security issues
+
+Our [maintainers](./MAINTAINERS.md) take security seriously. If you discover a security
+issue, please bring it to their attention right away!
+
+Please DO NOT file a public issue, they will be removed; instead please reach out
+to the maintainers privately.
+
+Security reports are greatly appreciated, and Trusted Service Identity team will
+publicly thank you for it.

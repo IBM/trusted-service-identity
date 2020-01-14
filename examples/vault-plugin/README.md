@@ -30,61 +30,7 @@ Setup `kk` [alias](../../README.md#setup-kubectl-alias) to save on typing
 
 ### Deploy Vault Service
 The Vault service can be started anywhere, as long as the Trusted Identity containers
-can access it.
-
-For simplicity, we will deploy the Vault Service in the same cluster and the
-same `trusted-identity` namespace as Trusted Identity framework
-
-Make sure the `KUBECONFIG` is properly set then execute:
-
-```sh
-$ cd examples/vault-plugin/
-$ kk create -f vault.yaml
-```
-
-
-In order to access this service remotely, some deployments (like IKS) require
-ingress access.
-For IKS, obtain the ingress name using `ibmcloud` cli:
-```console
-$ # first obtain the cluster name:
-$ ibmcloud ks clusters
-$ # then use the cluster name to get the Ingress info:
-$ ibmcloud ks cluster-get <cluster_name> | grep Ingress
-```
-Build an ingress file from `ingress-IKS.template.yaml`,
-using the `Ingress Subdomain` information obtained above.
-Here is an example using `my-ti-cluster.eu-de.containers.appdomain.cloud`
-
-```yaml
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: vault-ingress
-  namespace: trusted-identity
-spec:
-  rules:
-    # provide the actual Ingress for `host` value:
-  - host: my-ti-cluster.eu-de.containers.appdomain.cloud
-    http:
-      paths:
-      - backend:
-          serviceName: ti-vault
-          servicePort: 8200
-        path: /
-```
-
-create ingress:
-```console
-$ kk create -f ingress-IKS.yaml
-```
-
-Test the connection to vault:
-```console
-$ curl  http://<Ingress Subdomain or ICP master IP>/
-<a href="/ui/">Temporary Redirect</a>.
-```
-At this point, this is an expected result.
+can access it. Please follow the Vault installation steps from the main [README](../../README.md#setup-vault)
 
 ### Test access to public JSS interface
 For every worker node there will be a running `jss-server` and `tsi-node-setup` pod.
@@ -114,12 +60,12 @@ D8CthBFev8ZBzuqFQiboNG0YgJ5+JxwyVhGFPUse9fYsjQ==
 To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
 installation.
 
-### Vault Setup (as Valut Admin)
+### Vault Setup (as Vault Admin)
 To obtain access to Vault, you have to be a Vault admin.
 Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
 
 ```sh
-$ export ROOT_TOKEN=$(kk logs $(kk get po | grep ti-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
+$ export ROOT_TOKEN=$(kk logs $(kk get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
 ```
 
 Assign the Vault address (using Vault Ingress tested above):
@@ -240,7 +186,11 @@ kk create -f examples/myubuntu.yaml
 kk get po
 ```
 
-To see the keys loaded via 'demo.load-sample-policies.sh' and requested via pod annotation:
+The secrets will be mounted to your pad under `/tsi-secrets` directory, using
+the path requested via pod annotation.
+
+Get the sample keys loaded earlier via 'demo.load-sample-keys.sh'  script and
+requested via pod annotation:
 
 ```console
 kk get po
@@ -262,7 +212,8 @@ You can inspect the content of the token by simply pasting its content into
 
 
 ### Start the Vault client
-Another example uses preloaded Vault client to access an arbitrary Vault service using the secrets obtained from TSI Vault and injected to the pod.
+Another example uses preloaded Vault client to access an arbitrary Vault service
+using the secrets obtained from TSI Vault and injected to the pod.
 
 Using provided template [../vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml),
 build the deployment file `vault-cli.yaml`, using the Vault remote address.
@@ -425,7 +376,7 @@ $ make
 $ make dev
 ```
 
-Or execute `make all` to compile, build docker image and push to the artifactory repository.
+Or execute `make all` to compile, build docker image and push to the image repository.
 
 ```sh
 $ make all
