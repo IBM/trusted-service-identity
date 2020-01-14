@@ -3,7 +3,7 @@
 This guide is intended for maintainers - anybody with commit access to Trusted
 Service Identity repository.
 
-[Maintainers List](./MAINTAINERS.md#maintaintainers-list)
+[Maintainers List](./MAINTAINERS.md##maintainers-list)
 
 ## Methodology
 

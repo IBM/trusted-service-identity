@@ -18,7 +18,7 @@ HELPMEHELPME
 }
 kk="kubectl -n trusted-identity"
 
-# this function registers individual node
+# this function registers individual nodes
 register()
 {
   nodeIP=$($kk get pod $1 --output=jsonpath={.status.hostIP})

@@ -23,9 +23,9 @@ physical hardware. Secrets are released to the application based on this identit
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
 - [Usage (demo)](examples/README.md)
-- [Integrating TSI with your Application (Vault example)](examples/README-AppDeveloperVault.md)
+- [Reporting security issues](./README.md#reporting-security-issues)
 - [Contributing (TSI Development)](./CONTRIBUTING.md)
-- [Maintainers List](./MAINTAINERS.md#maintaintainers-list)
+- [Maintainers List](./MAINTAINERS.md##maintainers-list)
 
 ## Installation
 ### Prerequisites
@@ -268,3 +268,14 @@ Remove all the resources created for Trusted Identity
 ./cleanup.sh
 ```
 To start a fresh deployment, make sure to run `./init.sh` again after the cleanup.
+
+## Reporting security issues
+
+Our [maintainers](./MAINTAINERS.md) take security seriously. If you discover a security
+issue, please bring it to their attention right away!
+
+Please DO NOT file a public issue, they will be removed; instead please reach out
+to the maintainers privately.
+
+Security reports are greatly appreciated, and Trusted Service Identity team will
+publicly thank you for it.

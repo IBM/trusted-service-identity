@@ -3,18 +3,6 @@
 If you are interested in contributing and developing the Trusted Service Identity
 follow the steps below.
 
-## Reporting security issues
-
-Our [maintainers](./MAINTAINERS.md) take security seriously. If you discover a security
-issue, please bring it to their attention right away!
-
-Please DO NOT file a public issue, they will be removed; instead please reach out
-to the maintainers privately.
-
-Security reports are greatly appreciated, and Trusted Service Identity team will
-publicly thank you for it.
-
-
 ## Prerequisites
 * Before starting, please make sure all the [Prerequisites](./README.md#prerequisites)
 are satisfied.
