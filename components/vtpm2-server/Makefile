@@ -4,7 +4,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="vtpm2-server"
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.1
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.2
 
 all: docker docker-push timestamp
 

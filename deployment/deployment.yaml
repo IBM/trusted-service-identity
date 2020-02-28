@@ -17,7 +17,7 @@ spec:
       serviceAccountName: ti-sa
       containers:
         - name: ti-injector
-          image: trustedseriviceidentity/ti-webhook:v1.1
+          image: trustedseriviceidentity/ti-webhook:v1.2
           imagePullPolicy: Always
           args:
             - -createVaultCert=true

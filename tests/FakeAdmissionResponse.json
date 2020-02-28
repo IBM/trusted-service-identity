@@ -60,7 +60,7 @@
       "value":[
          {
             "name":"gen-vault-cert",
-            "image":"trustedseriviceidentity/ti-gen-vault-cert:v1.1",
+            "image":"trustedseriviceidentity/ti-gen-vault-cert:v1.2",
             "resources":{
 
             },
@@ -106,7 +106,7 @@
       "path":"/spec/containers/-",
       "value":{
          "name":"jwt-sidecar",
-         "image":"trustedseriviceidentity/ti-jwt-sidecar:v1.1",
+         "image":"trustedseriviceidentity/ti-jwt-sidecar:v1.2",
          "command":[
             "/bin/sh",
             "-c",

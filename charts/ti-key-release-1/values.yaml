@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v1.1
+tiVersion: v1.2
 
 # target docker repo
 tiRepo: trustedseriviceidentity

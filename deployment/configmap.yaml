@@ -6,7 +6,7 @@ data:
   initcontainerconfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: trustedseriviceidentity/ti-gen-vault-cert:v1.1
+        image: trustedseriviceidentity/ti-gen-vault-cert:v1.2
         imagePullSecrets:
         - name: regcred
         imagePullPolicy: Always
