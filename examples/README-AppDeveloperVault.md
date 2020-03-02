@@ -10,8 +10,6 @@ Demo components:
 * [vault-client](./vault-client) - sample client that demonstrates how to retrieve
 secrets from Vault
 
-If you like to see the Guide for Key Server example, see it [here](./README-AppDeveloperKeyServer.md).
-
 ## Assumptions
 We assume that at this point you have a working K8s cluster with Trusted Service Identity
 environment deployed, including the sample Vault server and client.
@@ -23,7 +21,7 @@ There are two roles needed to continue:
 * application cluster owner - the person with access to the cluster (KUBECONFIG)
 
 ## Test sample Vault client
-If the demo was successfully executed, there should be a Vault server ('ti-vault')
+If the demo was successfully executed, there should be a Vault server ('tsi-vault')
 and client (`vault-cli`) running.
 Open a new console and exec into the vault client container as an application
 cluster owner:

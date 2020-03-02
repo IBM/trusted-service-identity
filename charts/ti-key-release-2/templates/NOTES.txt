@@ -16,7 +16,6 @@ This helm chart installs environment for Trusted Identity
     cluster.region: {{ index .Values "ti-key-release-1" "cluster" "region" }}
     jwt.expireSec: {{ index .Values "ti-key-release-1" "jwt" "expireSec" }}
     secrets.refreshSec: {{ index .Values "ti-key-release-1" "secrets" "refreshSec" }}
-    createVaultCert: {{ index .Values "ti-key-release-1" "createVaultCert" }}
 
 Execute test:
   kubectl create -f examples/myubuntu.yaml -n trusted-identity

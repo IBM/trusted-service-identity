@@ -32,3 +32,5 @@ run "helm package charts/tsi-node-setup"
 run "helm package charts/ti-key-release-1"
 run "helm dep update charts/ti-key-release-2"
 run "helm package --dependency-update charts/ti-key-release-2"
+
+mv *.tgz charts/

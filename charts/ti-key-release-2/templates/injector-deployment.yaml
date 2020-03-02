@@ -9,7 +9,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ti-injector  
+      app: ti-injector
   template:
     metadata:
       labels:
@@ -21,7 +21,6 @@ spec:
           image: {{ .Values.tiRepo }}/ti-webhook:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           args:
-            - -createVaultCert={{ index .Values "ti-key-release-1" "createVaultCert" }}
             - -initcontainerCfgFile=/etc/webhook/config/initcontainerconfig.yaml
             - -tlsCertFile=/etc/webhook/certs/cert.pem
             - -tlsKeyFile=/etc/webhook/certs/key.pem

@@ -33,10 +33,6 @@ jssService:
   #   - vtpm2-server - vTPM v2
   type: jss-server
 
-# createVaultCert - if true, unique certs will be created
-# during Init Containers and inserted to Vault
-createVaultCert: false
-
 secrets:
   # how often secrets should be retrieved from Vault
   refreshSec: 45

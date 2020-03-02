@@ -12,7 +12,6 @@ kubectl -n trusted-identity delete -f examples/myubuntu.yaml
 kubectl -n trusted-identity delete -f examples/web-service.yaml
 kubectl -n trusted-identity delete -f examples/jwt-policy-example.yaml
 
-kubectl -n trusted-identity delete -f deployment/revoker-deployment.yaml
 kubectl -n trusted-identity delete -f deployment/deployment.yaml
 kubectl -n trusted-identity delete -f deployment/service.yaml
 kubectl -n trusted-identity delete -f deployment/configmap.yaml

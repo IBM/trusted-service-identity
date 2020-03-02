@@ -1,6 +1,8 @@
 package main
 
 import (
+	//"crypto/sha256"
+	//"crypto/sha256"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -18,26 +20,24 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 
-	"crypto/rand"
-
 	"k8s.io/client-go/rest"
 
 	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
 	cctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
 )
 
-func pseudoUUID() (string, error) {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return "", err
-	}
-
-	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-
-	return uuid, nil
-}
+// func pseudoUUID() (string, error) {
+// 	b := make([]byte, 16)
+// 	_, err := rand.Read(b)
+// 	if err != nil {
+// 		fmt.Println("Error: ", err)
+// 		return "", err
+// 	}
+//
+// 	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+//
+// 	return uuid, nil
+// }
 
 var (
 	runtimeScheme = runtime.NewScheme()
@@ -54,9 +54,9 @@ var ignoredNamespaces = []string{
 }
 
 const (
-	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
-	admissionWebhookAnnotationStatusKey     = "admission.trusted.identity/status"
-	admissionWebhookAnnotationSecretKey     = "admission.trusted.identity/ti-secret-key"
+	admissionWebhookAnnotationInjectKey = "admission.trusted.identity/inject"
+	admissionWebhookAnnotationStatusKey = "admission.trusted.identity/status"
+	//admissionWebhookAnnotationSecretKey     = "admission.trusted.identity/ti-secret-key"
 	admissionWebhookAnnotationImagesKey     = "admission.trusted.identity/ti-images"
 	admissionWebhookAnnotationClusterName   = "admission.trusted.identity/ti-cluster-name"
 	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/ti-cluster-region"
@@ -65,7 +65,6 @@ const (
 type WebhookServer struct {
 	initcontainerConfig *InitContainerConfig
 	server              *http.Server
-	createVaultCert     bool // true to inject keys on init
 	clusterInfo         ClusterInfoGetter
 }
 
@@ -349,13 +348,13 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		    }
 	*/
 	// Set volume
-	uuid, err := pseudoUUID()
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return nil, err
-	}
-
-	secretName := "ti-secret-" + uuid
+	// uuid, err := pseudoUUID()
+	// if err != nil {
+	// 	glog.Infof("Err: %v", err)
+	// 	return nil, err
+	// }
+	//
+	// secretName := "ti-secret-" + uuid
 
 	cti, err := whsvr.clusterInfo.GetClusterTI(namespace, "cluster-policy")
 	if err != nil {
@@ -412,7 +411,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	}
 
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "mutated"
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
+	//initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion
@@ -506,9 +505,6 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Create TI secret key to populate
 	glog.Infof("Creating patch")
-	// createVaultCert := whsvr.createVaultCert
-	// updateAll =
-	// 	glog.Infof("updateAll: %v", updateAll)
 	patchBytes, err := createPatch(&pod, initContainerConfig)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{

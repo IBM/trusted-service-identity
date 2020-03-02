@@ -68,14 +68,14 @@ func TestLoadInitFile(t *testing.T) {
 }
 
 // TestPseudoUUID - testing function to generate UUIDs
-func TestPseudoUUID(t *testing.T) {
-	uuid, err := pseudoUUID()
-	if err != nil {
-		t.Errorf("Error obtaining pseudo_uuid %v", err)
-		return
-	}
-	t.Logf("UUID: %v", uuid)
-}
+// func TestPseudoUUID(t *testing.T) {
+// 	uuid, err := pseudoUUID()
+// 	if err != nil {
+// 		t.Errorf("Error obtaining pseudo_uuid %v", err)
+// 		return
+// 	}
+// 	t.Logf("UUID: %v", uuid)
+//}
 
 // TestMutateInitialization - tests the results of calling `mutateInitialization` in webhook
 func TestMutateInitialization(t *testing.T) {
@@ -97,7 +97,6 @@ func TestMutateInitialization(t *testing.T) {
 	whsvr := &WebhookServer{
 		initcontainerConfig: icc,
 		server:              &http.Server{},
-		createVaultCert:     true,
 		clusterInfo:         clInfo,
 	}
 
@@ -107,12 +106,6 @@ func TestMutateInitialization(t *testing.T) {
 		t.Errorf("Error executing mutateInitialization %v", err)
 		return
 	}
-
-	// one of the Annotation fields is dynamically set (UUID), so it needs to be
-	// changed to static, for comparison
-	annot := result.Annotations
-	annot["admission.trusted.identity/ti-secret-key"] = "ti-secret-XXX"
-	result.Annotations = annot
 
 	err = validateResult(result, "tests/ExpectMutateInit.json")
 	if err != nil {

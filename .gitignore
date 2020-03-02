@@ -18,7 +18,6 @@
 vendor/
 
 charts/ti-key-release-2/requirements.lock
-components/revoker/ti-revoker
 
 # remove mac files
 *.DS_Store

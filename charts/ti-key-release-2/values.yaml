@@ -15,9 +15,6 @@ tiRepo: trustedseriviceidentity
 # target namespace for the deployment
 ti-key-release-1:
   namespace: trusted-identity
-  # createVaultCert - if true, unique certs will be created
-  # during Init Containers and inserted to Vault
-  createVaultCert: false
   # specify the address of the Vault service that contains all
   # the TSI secrets to be retrieved by the sidecar
   vaultAddress: http://vault

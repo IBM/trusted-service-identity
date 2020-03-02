@@ -24,9 +24,6 @@ data:
         - name: pod-metadata
           downwardAPI:
             items:
-              - path: "ti-secret"
-                fieldRef:
-                  fieldPath: metadata.annotations['admission.trusted.identity/ti-secret-key']
               - path: "ti-identity"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
