@@ -205,22 +205,16 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 		annotations = map[string]string{}
 	}
 
-	status := annotations[admissionWebhookAnnotationStatusKey]
-
-	// determine whether to perform mutation based on annotation for the target resource
+	// mutation is only executed if requested
 	var required bool
-	if strings.ToLower(status) == "injected" {
+	switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
+	default:
 		required = false
-	} else {
-		switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
-		default:
-			required = false
-		case "y", "yes", "true", "on":
-			required = true
-		}
+	case "y", "yes", "true", "on":
+		required = true
 	}
 
-	glog.Infof("Mutation policy for %v/%v: status: %q required:%v", metadata.Namespace, metadata.Name, status, required)
+	glog.Infof("Mutation policy for %v/%v: required:%v", metadata.Namespace, metadata.Name, required)
 	return required
 }
 
@@ -417,7 +411,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		}
 	}
 
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
+	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "mutated"
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
 	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
@@ -428,22 +422,37 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 }
 
 // create mutation patch for resoures
-func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]byte, error) {
+func createPatch(pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]byte, error) {
 	var patch []patchOperation
-	annotations := initcontainerConfig.Annotations
 
-	// additions
-	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
-	if createVaultCert {
-		patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
+	// by default, mutate the pod with the new sidecar and required volumes
+	var mutateAll bool = true
+
+	// check if the pod already mutated, if so, only update the annotations
+	currentAnnotations := pod.ObjectMeta.GetAnnotations()
+	if currentAnnotations != nil {
+		status := currentAnnotations[admissionWebhookAnnotationStatusKey]
+		if strings.ToLower(status) == "mutated" {
+			glog.Infof("Pod already mutated. Update only the annotations")
+			mutateAll = false
+		}
 	}
-	patch = append(patch, addContainer(pod.Spec.Containers, initcontainerConfig.SidecarContainers,
-		"/spec/containers")...)
-	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
 
-	for i, c := range pod.Spec.Containers {
-		glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
-		patch = append(patch, addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
+	// always get updated annotations
+	annotations := initcontainerConfig.Annotations
+	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
+	glog.Infof("Annotations are always updated. New values: %#v", annotations)
+
+	// update everything only if not mutated before
+	if mutateAll {
+		patch = append(patch, addContainer(pod.Spec.Containers, initcontainerConfig.SidecarContainers,
+			"/spec/containers")...)
+		patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
+
+		for i, c := range pod.Spec.Containers {
+			glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
+			patch = append(patch, addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
+		}
 	}
 
 	return json.Marshal(patch)
@@ -497,9 +506,10 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Create TI secret key to populate
 	glog.Infof("Creating patch")
-	createVaultCert := whsvr.createVaultCert
-	glog.Infof("createVaultCert: %v", createVaultCert)
-	patchBytes, err := createPatch(createVaultCert, &pod, initContainerConfig)
+	// createVaultCert := whsvr.createVaultCert
+	// updateAll =
+	// 	glog.Infof("updateAll: %v", updateAll)
+	patchBytes, err := createPatch(&pod, initContainerConfig)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
