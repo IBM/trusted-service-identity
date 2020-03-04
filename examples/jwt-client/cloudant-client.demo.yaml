@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: cl-client
-          image: trustedseriviceidentity/ti-jwt-client:v0.2@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d
+          image: trustedseriviceidentity/ti-jwt-client@sha256:a570310501a881d6cedd56ac91bca33e655df479b29d8ff8d71bf1297e7c7f8d
           imagePullPolicy: Always
           env:
             - name: TARGET_URL

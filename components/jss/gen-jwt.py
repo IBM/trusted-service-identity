@@ -20,7 +20,7 @@ chain of trust (x5c) to the header.
 - token expiration is passed as env. var (TTL_SEC)
 
 Example:
-./gen-jwt.py --aud foo,bar --claimms name:tt|cluster-name:EUcluster|cluster-region:eu-de|images:trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0,ubuntu:latest private-key.pem
+./gen-jwt.py --aud foo,bar --claimms name:tt|cluster-name:EUcluster|cluster-region:eu-de|images:trustedseriviceidentity/myubuntu@sha256:5b224e11f0,ubuntu:latest private-key.pem
 """
 import argparse
 import time

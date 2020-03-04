@@ -5,7 +5,7 @@ export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image names
 # VIMG - Vault Client image, UIMG - myubuntu image
 export VIMG="trustedseriviceidentity/vault-cli:v0.3"
-export UIMG="ubuntu:18.04@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4"
+export UIMG="ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4"
 getSHA()
 {
 # sha-256 encoded file name based on the OS:

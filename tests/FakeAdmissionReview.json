@@ -59,7 +59,7 @@
                 "containers": [
                     {
                         "name": "myubuntu",
-                        "image": "trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+                        "image": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
                         "command": [
                             "/bin/bash",
                             "-c",
