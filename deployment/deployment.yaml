@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ti-injector-webhook-deployment
+  name: tsi-mutate-webhook-deployment
   labels:
-    app: ti-injector
+    app: tsi-mutate
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ti-injector
+      app: tsi-mutate
   template:
     metadata:
       labels:
-        app: ti-injector
+        app: tsi-mutate
     spec:
       serviceAccountName: ti-sa
       containers:
-        - name: ti-injector
+        - name: tsi-mutate
           image: trustedseriviceidentity/ti-webhook:v1.2
           imagePullPolicy: Always
           args:
-            - -initcontainerCfgFile=/etc/webhook/config/initcontainerconfig.yaml
+            - -tsiMutateConfigFile=/etc/webhook/config/tsiMutateConfig.yaml
             - -tlsCertFile=/etc/webhook/certs/cert.pem
             - -tlsKeyFile=/etc/webhook/certs/key.pem
             - -alsologtostderr
@@ -37,7 +37,7 @@ spec:
       volumes:
         - name: webhook-certs
           secret:
-            secretName: ti-injector-webhook-certs
+            secretName: tsi-mutate-webhook-certs
         - name: webhook-config
           configMap:
-            name: ti-injector-webhook-configmap
+            name: tsi-mutate-webhook-configmap

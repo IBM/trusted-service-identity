@@ -5,10 +5,10 @@ set -e
 
 usage() {
     cat <<EOF
-Generate certificate suitable for use with an ti-injector webhook service.
+Generate certificate suitable for use with an tsi-mutate webhook service.
 
 This script uses k8s' CertificateSigningRequest API to a generate a
-certificate signed by k8s CA suitable for use with ti-injector webhook
+certificate signed by k8s CA suitable for use with tsi-mutate webhook
 services. This requires permissions to create and approve CSR. See
 https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster for
 detailed explantion and additional instructions.
@@ -47,8 +47,8 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && service=ti-injector-webhook-svc
-[ -z ${secret} ] && secret=ti-injector-webhook-certs
+[ -z ${service} ] && service=tsi-mutate-webhook-svc
+[ -z ${secret} ] && secret=tsi-mutate-webhook-certs
 [ -z ${namespace} ] && namespace=default
 
 if [ ! -x "$(command -v openssl)" ]; then

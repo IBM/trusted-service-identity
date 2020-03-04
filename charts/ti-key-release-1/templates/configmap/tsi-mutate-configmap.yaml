@@ -1,10 +1,10 @@
-{{ define "ti-injector-configmap.yaml.tpl" }}
+{{ define "tsi-mutate-configmap.yaml.tpl" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ti-injector-webhook-configmap
+  name: tsi-mutate-webhook-configmap
 data:
-  initcontainerconfig.yaml: |
+  tsiMutateConfig.yaml: |
       sidecarContainers:
       - name: jwt-sidecar
         image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Values.tiVersion }}

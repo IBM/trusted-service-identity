@@ -3,7 +3,7 @@
       "op":"add",
       "path":"/metadata/annotations",
       "value":{
-         "admission.trusted.identity/status":"injected",
+         "admission.trusted.identity/status":"mutated",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
          "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
@@ -13,7 +13,7 @@
       "op":"add",
       "path":"/metadata/annotations",
       "value":{
-         "admission.trusted.identity/status":"injected",
+         "admission.trusted.identity/status":"mutated",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
          "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
@@ -23,7 +23,7 @@
       "op":"add",
       "path":"/metadata/annotations",
       "value":{
-         "admission.trusted.identity/status":"injected",
+         "admission.trusted.identity/status":"imutated",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
          "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
@@ -33,7 +33,7 @@
       "op":"add",
       "path":"/metadata/annotations",
       "value":{
-         "admission.trusted.identity/status":"injected",
+         "admission.trusted.identity/status":"mutated",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
          "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
@@ -43,7 +43,7 @@
       "op":"add",
       "path":"/metadata/annotations",
       "value":{
-         "admission.trusted.identity/status":"injected",
+         "admission.trusted.identity/status":"mutated",
          "admission.trusted.identity/ti-cluster-name":"EUcluster",
          "admission.trusted.identity/ti-cluster-region":"eu-de",
          "admission.trusted.identity/ti-images":"trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"

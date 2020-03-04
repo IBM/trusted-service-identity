@@ -1,25 +1,3 @@
-initContainers:
-- name: gen-vault-cert
-  image: trustedseriviceidentity/ti-gen-vault-cert:v1.2
-  imagePullPolicy: Always
-  volumeMounts:
-    - name: pod-metadata
-      mountPath: /pod-metadata
-      readOnly: true
-    - name: ti-sa-mount
-      mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      readOnly: true
-    - name: tsi-secrets
-      mountPath: /tsi-secrets
-    - name: ti-keys
-      mountPath: /keys
-      readOnly: true
-    - name: ti-skeys
-      mountPath: /skeys
-      readOnly: true
-    - name: host-etc
-      mountPath: /host/etc
-      readOnly: true
 sidecarContainers:
 - name: jwt-sidecar
   image: trustedseriviceidentity/ti-jwt-sidecar:v1.2

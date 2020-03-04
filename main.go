@@ -18,7 +18,7 @@ type WhSvrParameters struct {
 	port                    int    // webhook server port
 	certFile                string // path to the x509 certificate for https
 	keyFile                 string // path to the x509 private key matching `CertFile`
-	initcontainerCfgFile    string // path to initContainer injector configuration file
+	tsiMutateConfigFile     string // path to tsiMutate configuration file
 	sidecarcontainerCfgFile string // path to sidecarContainer configuration file
 }
 
@@ -29,14 +29,14 @@ func main() {
 	flag.IntVar(&parameters.port, "port", 443, "Webhook server port.")
 	flag.StringVar(&parameters.certFile, "tlsCertFile", "/etc/webhook/certs/cert.pem", "File containing the x509 Certificate for HTTPS.")
 	flag.StringVar(&parameters.keyFile, "tlsKeyFile", "/etc/webhook/certs/key.pem", "File containing the x509 private key to --tlsCertFile.")
-	flag.StringVar(&parameters.initcontainerCfgFile, "initcontainerCfgFile", "/etc/webhook/config/initcontainerconfig.yaml", "File containing the mutation configuration.")
+	flag.StringVar(&parameters.tsiMutateConfigFile, "tsiMutateConfigFile", "/etc/webhook/config/tsiMutateConfig.yaml", "File containing the mutation configuration.")
 	flag.Parse()
 
-	initcontainerConfig, err := loadInitContainerConfig(parameters.initcontainerCfgFile)
+	tsiMutateConfig, err := loadtsiMutateConfig(parameters.tsiMutateConfigFile)
 	if err != nil {
 		glog.Errorf("Failed to load configuration: %v", err)
 	}
-	logJSON("InitContainerConfig(main)", initcontainerConfig)
+	logJSON("tsiMutateConfig(main)", tsiMutateConfig)
 
 	pair, err := tls.LoadX509KeyPair(parameters.certFile, parameters.keyFile)
 	if err != nil {
@@ -49,7 +49,7 @@ func main() {
 	}
 
 	whsvr := &WebhookServer{
-		initcontainerConfig: initcontainerConfig,
+		tsiMutateConfig: tsiMutateConfig,
 		server: &http.Server{
 			Addr:      fmt.Sprintf(":%v", parameters.port),
 			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},

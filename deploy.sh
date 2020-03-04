@@ -32,4 +32,4 @@ cat deployment/configmap.yaml | sed -e "s|\${TI_SA_TOKEN}|${TI_SA_TOKEN}|g" | ku
 kubectl -n trusted-identity apply -f deployment/service.yaml
 kubectl -n trusted-identity apply -f deployment/deployment.yaml
 
-kubectl label namespace trusted-identity ti-injector=enabled --overwrite
+kubectl label namespace trusted-identity tsi-mutate=enabled --overwrite

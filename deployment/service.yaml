@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ti-injector-webhook-svc
+  name: tsi-mutate-webhook-svc
   labels:
-    app: ti-injector
+    app: tsi-mutate
 spec:
   ports:
   - port: 443
     targetPort: 443
   selector:
-    app: ti-injector
+    app: tsi-mutate

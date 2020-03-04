@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ti-injector-webhook-configmap
+  name: tsi-mutate-webhook-configmap
 data:
-  initcontainerconfig.yaml: |
+  tsiMutateConfig.yaml: |
       initContainers:
       - name: gen-vault-cert
         image: trustedseriviceidentity/ti-gen-vault-cert:v1.2

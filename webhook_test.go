@@ -51,15 +51,15 @@ func (ck *cigKubeTest) GetClusterTI(namespace, name string) (ctiv1.ClusterTI, er
 	return ck.ret, nil
 }
 
-// TestLoadInitFile - tests loadInitContainerConfig method from webhook.go. Validates the output
+// TestLoadInitFile - tests loadtsiMutateConfig method from webhook.go. Validates the output
 func TestLoadInitFile(t *testing.T) {
-	icc, err := loadInitContainerConfig("tests/ConfigFile.yaml")
+	icc, err := loadtsiMutateConfig("tests/ConfigFile.yaml")
 	if err != nil {
-		t.Errorf("Error loading InitContainerConfig %v", err)
+		t.Errorf("Error loading tsiMutateConfig %v", err)
 		return
 	}
 
-	err = validateResult(icc, "tests/ExpectInitContainerConfig.json")
+	err = validateResult(icc, "tests/ExpectTsiMutateConfig.json")
 	if err != nil {
 		t.Errorf("Result failed: %v", err)
 		return
@@ -88,16 +88,16 @@ func TestMutateInitialization(t *testing.T) {
 	}
 	clInfo := newCigKubeTest(ret)
 
-	icc, err := loadInitContainerConfig("tests/ConfigFile.yaml")
+	icc, err := loadtsiMutateConfig("tests/ConfigFile.yaml")
 	if err != nil {
-		t.Errorf("Error loading InitContainerConfig %v", err)
+		t.Errorf("Error loading tsiMutateConfig %v", err)
 		return
 	}
 
 	whsvr := &WebhookServer{
-		initcontainerConfig: icc,
-		server:              &http.Server{},
-		clusterInfo:         clInfo,
+		tsiMutateConfig: icc,
+		server:          &http.Server{},
+		clusterInfo:     clInfo,
 	}
 
 	// get test result of running mutateInitialization method:
@@ -151,9 +151,9 @@ func getFakeAdmissionReview() v1beta1.AdmissionReview {
 	return ar
 }
 
-func getInitContainerConfig() InitContainerConfig {
-	s := getContentOfTheFile("tests/FakeInitContainerConfig.json")
-	obj := InitContainerConfig{}
+func getTsiMutateConfig() tsiMutateConfig {
+	s := getContentOfTheFile("tests/FakeTsiMutateConfig.json")
+	obj := tsiMutateConfig{}
 	json.Unmarshal([]byte(s), &obj)
 	return obj
 }

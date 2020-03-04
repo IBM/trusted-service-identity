@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ti-injector-configmap-update
+  name: tsi-mutate-configmap-update
   namespace: {{ .Values.namespace }}
   annotations:
     helm.sh/hook: post-install
@@ -16,7 +16,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: ti-injector-configmap-update
+      name: tsi-mutate-configmap-update
       labels:
         app: {{ template "ti-key-release.name" . }}
         chart: {{ template "ti-key-release.chart" . }}
@@ -27,7 +27,7 @@ spec:
       containers:
         - name: hyperkube
           image: "{{ .Values.hyperkube.repository }}:{{ .Values.hyperkube.tag }}"
-          command: ["sh", "-c", "/tmp/ti-key-release/ti-injector-update.sh"]
+          command: ["sh", "-c", "/tmp/ti-key-release/tsi-mutate-update.sh"]
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: "/tmp/ti-key-release"
@@ -35,7 +35,7 @@ spec:
       volumes:
         - name: tmp-ti-key-release-configmap
           configMap:
-            name: ti-injector-configmap
+            name: tsi-mutate-configmap
             # this makes the files executable
             defaultMode: 0744
       restartPolicy: OnFailure
