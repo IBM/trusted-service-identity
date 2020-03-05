@@ -7,7 +7,7 @@ BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BINARY_NAME=ti-webhook
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.1
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.2
 GOARCH=$(shell go env GOARCH)
 
 .PHONY: all test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
@@ -25,8 +25,7 @@ test-deps: build-deps
 	go get github.com/pierrre/gotestcover
 
 test: test-deps
-	# temp, just to compile code
-	# $(GOPATH)/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES}
+	$(GOPATH)/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES}
 
 build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build -installsuffix cgo -o $(BINARY_NAME) -v

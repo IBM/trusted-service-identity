@@ -2,7 +2,7 @@
     "InitContainers": [
         {
             "name": "gen-vault-cert",
-            "image": "trustedseriviceidentity/ti-gen-vault-cert:v1.1",
+            "image": "trustedseriviceidentity/ti-gen-vault-cert:v1.2",
             "resources": {},
             "volumeMounts": [
                 {
@@ -43,7 +43,7 @@
     "SidecarContainers": [
         {
             "name": "jwt-sidecar",
-            "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.1",
+            "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.2",
             "command": [
                 "/bin/sh",
                 "-c",
@@ -103,13 +103,6 @@
             "name": "pod-metadata",
             "downwardAPI": {
                 "items": [
-                    {
-                        "path": "ti-secret",
-                        "fieldRef": {
-                            "apiVersion": "v1",
-                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-secret-key']"
-                        }
-                    },
                     {
                         "path": "ti-identity",
                         "fieldRef": {
@@ -195,11 +188,10 @@
         }
     ],
     "Annotations": {
-        "admission.trusted.identity/status": "injected",
+        "admission.trusted.identity/status": "mutated",
         "admission.trusted.identity/ti-cluster-name": "EUcluster",
         "admission.trusted.identity/ti-cluster-region": "eu-de",
-        "admission.trusted.identity/ti-images": "trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
-        "admission.trusted.identity/ti-secret-key": "ti-secret-ea723670-1e8e-4b2b-398d-d48d59aa65c5"
+        "admission.trusted.identity/ti-images": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
     }
 
 

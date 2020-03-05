@@ -10,10 +10,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	ctiv1 "github.com/IBM/trusted-service-identity/pkg/apis/cti/v1"
 	"github.com/nsf/jsondiff"
-	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
 	"k8s.io/api/admission/v1beta1"
 )
+
+/*
+	In order to generate a new content of the Fake and Expect files,
+	uncomment out the corresponding `logJSON`statements in webhook.go
+	Then re-run the tests
+*/
 
 var pod corev1.Pod
 var admissionRequest v1beta1.AdmissionRequest
@@ -51,31 +57,32 @@ func (ck *cigKubeTest) GetClusterTI(namespace, name string) (ctiv1.ClusterTI, er
 	return ck.ret, nil
 }
 
-// TestLoadInitFile - tests loadInitContainerConfig method from webhook.go. Validates the output
+// TestLoadInitFile - tests loadtsiMutateConfig method from webhook.go. Validates the output
 func TestLoadInitFile(t *testing.T) {
-	icc, err := loadInitContainerConfig("tests/ConfigFile.yaml")
+	icc, err := loadtsiMutateConfig("tests/ConfigFile.yaml")
 	if err != nil {
-		t.Errorf("Error loading InitContainerConfig %v", err)
+		t.Errorf("Error loading tsiMutateConfig %v", err)
 		return
 	}
 
-	err = validateResult(icc, "tests/ExpectInitContainerConfig.json")
+	err = validateResult(icc, "tests/ExpectTsiMutateConfig.json")
 	if err != nil {
 		t.Errorf("Result failed: %v", err)
 		return
 	}
-	t.Logf("Results match expections")
+	t.Log("Results match expections")
+
 }
 
 // TestPseudoUUID - testing function to generate UUIDs
-func TestPseudoUUID(t *testing.T) {
-	uuid, err := pseudoUUID()
-	if err != nil {
-		t.Errorf("Error obtaining pseudo_uuid %v", err)
-		return
-	}
-	t.Logf("UUID: %v", uuid)
-}
+// func TestPseudoUUID(t *testing.T) {
+// 	uuid, err := pseudoUUID()
+// 	if err != nil {
+// 		t.Errorf("Error obtaining pseudo_uuid %v", err)
+// 		return
+// 	}
+// 	t.Logf("UUID: %v", uuid)
+//}
 
 // TestMutateInitialization - tests the results of calling `mutateInitialization` in webhook
 func TestMutateInitialization(t *testing.T) {
@@ -88,17 +95,16 @@ func TestMutateInitialization(t *testing.T) {
 	}
 	clInfo := newCigKubeTest(ret)
 
-	icc, err := loadInitContainerConfig("tests/ConfigFile.yaml")
+	icc, err := loadtsiMutateConfig("tests/ConfigFile.yaml")
 	if err != nil {
-		t.Errorf("Error loading InitContainerConfig %v", err)
+		t.Errorf("Error loading tsiMutateConfig %v", err)
 		return
 	}
 
 	whsvr := &WebhookServer{
-		initcontainerConfig: icc,
-		server:              &http.Server{},
-		createVaultCert:     true,
-		clusterInfo:         clInfo,
+		tsiMutateConfig: icc,
+		server:          &http.Server{},
+		clusterInfo:     clInfo,
 	}
 
 	// get test result of running mutateInitialization method:
@@ -107,12 +113,6 @@ func TestMutateInitialization(t *testing.T) {
 		t.Errorf("Error executing mutateInitialization %v", err)
 		return
 	}
-
-	// one of the Annotation fields is dynamically set (UUID), so it needs to be
-	// changed to static, for comparison
-	annot := result.Annotations
-	annot["admission.trusted.identity/ti-secret-key"] = "ti-secret-XXX"
-	result.Annotations = annot
 
 	err = validateResult(result, "tests/ExpectMutateInit.json")
 	if err != nil {
@@ -158,12 +158,22 @@ func getFakeAdmissionReview() v1beta1.AdmissionReview {
 	return ar
 }
 
-func getInitContainerConfig() InitContainerConfig {
-	s := getContentOfTheFile("tests/FakeInitContainerConfig.json")
-	obj := InitContainerConfig{}
+func getTsiMutateConfig() tsiMutateConfig {
+	s := getContentOfTheFile("tests/FakeTsiMutateConfig.json")
+	obj := tsiMutateConfig{}
 	json.Unmarshal([]byte(s), &obj)
 	return obj
 }
+
+// func printObject(r interface{}) {
+// 	// marshal the object to []byte for comparison
+// 	result, err := json.Marshal(r)
+// 	if err != nil {
+// 		t.errorF("%v", err)
+// 		//return err
+// 	}
+//
+// }
 
 func validateResult(r interface{}, expectedFile string) error {
 
@@ -188,5 +198,5 @@ func validateResult(r interface{}, expectedFile string) error {
 		fmt.Printf("Results match expections: %v", diff)
 		return nil
 	}
-	return fmt.Errorf("Results do not match expections: %v %v", diff, text)
+	return fmt.Errorf("Results do not match expections. diff: %v text: %v", diff, text)
 }

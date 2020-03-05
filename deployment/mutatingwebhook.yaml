@@ -1,14 +1,14 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: ti-injector-webhook-cfg
+  name: tsi-mutate-webhook-cfg
   labels:
-    app: ti-injector
+    app: tsi-mutate
 webhooks:
-  - name: ti-injector.morven.me
+  - name: tsi-mutate.morven.me
     clientConfig:
       service:
-        name: ti-injector-webhook-svc
+        name: tsi-mutate-webhook-svc
         namespace: trusted-identity
         path: "/mutate"
       caBundle: ${CA_BUNDLE}
@@ -19,4 +19,4 @@ webhooks:
         resources: ["pods"]
     namespaceSelector:
       matchLabels:
-        ti-injector: enabled
+        tsi-mutate: enabled

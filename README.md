@@ -139,7 +139,7 @@ $ ibmcloud ks clusters
 $ # then use the cluster name to get the Ingress info:
 $ ibmcloud ks cluster-get <cluster_name> | grep Ingress
 ```
-Build an ingress file from `ingress-IKS.template.yaml`,
+Build an ingress file from `example/vault-plugin/ingress-IKS.template.yaml`,
 using the `Ingress Subdomain` information obtained above.
 Here is an example using `my-ti-cluster.eu-de.containers.appdomain.cloud`
 
@@ -207,11 +207,13 @@ You can use them directly or use the charts that you built yourself (see instruc
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
-* vault address - the remote address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. Use the env. variable VAULT_ADDR set [above](.README.md#setup-vault)
+* vault address - the remote address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. Use the env. variable VAULT_ADDR set [above](./README.md#setup-vault)
+
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 
 ```console
+export VAULT_ADDR=http://<vault_location>
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=CLUSTER_REGION \
@@ -253,7 +255,7 @@ Sample JWT Claims:
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
-  "images-names": "trustedseriviceidentity/myubuntu:latest@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "images-names": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
   "iss": "wsched@us.ibm.com",
   "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",

@@ -23,10 +23,10 @@ package v1
 import (
 	time "time"
 
-	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
-	versioned "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned"
-	internalinterfaces "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/listers/cti/v1"
+	ctiv1 "github.com/IBM/trusted-service-identity/pkg/apis/cti/v1"
+	versioned "github.com/IBM/trusted-service-identity/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/IBM/trusted-service-identity/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.com/IBM/trusted-service-identity/pkg/client/listers/cti/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

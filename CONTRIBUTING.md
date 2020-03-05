@@ -65,14 +65,12 @@ make docker-push
 Compile and create images for other sub-components
 
 ```console
-make all -C components/gen-vault-cert/
 make all -C components/jss/
 make all -C components/jwt-sidecar/
 make all -C components/node-setup/
-make all -C components/revoker/
 ```
 vTPM is no longer a required component, but if you like to still use it, either version
-vTPM v1 or v2, built them as shown below and then referenced accordingly in the
+vTPM v1 or v2, built them as shown below and then reference them accordingly in the
 helm deployment.
 
 ```console
@@ -85,8 +83,6 @@ Compile and build examples (JWT server and client)
 ```console
 make all -C examples/vault-client/
 make all -C examples/vault-plugin/
-make all -C examples/jwt-client/
-make all -C examples/jwt-server/
 ```
 
 ## TSI Helm Deployment

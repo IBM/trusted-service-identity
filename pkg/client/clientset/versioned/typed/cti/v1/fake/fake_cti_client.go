@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
+	v1 "github.com/IBM/trusted-service-identity/pkg/client/clientset/versioned/typed/cti/v1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

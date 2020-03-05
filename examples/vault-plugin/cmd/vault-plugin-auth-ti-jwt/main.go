@@ -5,9 +5,9 @@ import (
 	"os"
 
 	//"github.ibm.com/dpittner/vault-plugin-auth-ti-jwt"
+	"github.com/IBM/trusted-service-identity/examples/vault-plugin"
 	"github.com/hashicorp/vault/helper/pluginutil"
 	"github.com/hashicorp/vault/logical/plugin"
-	"github.ibm.com/kompass/ti-keyrelease/examples/vault-plugin"
 )
 
 func main() {

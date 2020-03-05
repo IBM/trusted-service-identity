@@ -18,26 +18,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	v1 "k8s.io/kubernetes/pkg/apis/core/v1"
 
-	"crypto/rand"
-
 	"k8s.io/client-go/rest"
 
-	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
-	cctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
+	ctiv1 "github.com/IBM/trusted-service-identity/pkg/apis/cti/v1"
+	cctiv1 "github.com/IBM/trusted-service-identity/pkg/client/clientset/versioned/typed/cti/v1"
 )
-
-func pseudoUUID() (string, error) {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return "", err
-	}
-
-	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-
-	return uuid, nil
-}
 
 var (
 	runtimeScheme = runtime.NewScheme()
@@ -56,17 +41,15 @@ var ignoredNamespaces = []string{
 const (
 	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
 	admissionWebhookAnnotationStatusKey     = "admission.trusted.identity/status"
-	admissionWebhookAnnotationSecretKey     = "admission.trusted.identity/ti-secret-key"
 	admissionWebhookAnnotationImagesKey     = "admission.trusted.identity/ti-images"
 	admissionWebhookAnnotationClusterName   = "admission.trusted.identity/ti-cluster-name"
 	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/ti-cluster-region"
 )
 
 type WebhookServer struct {
-	initcontainerConfig *InitContainerConfig
-	server              *http.Server
-	createVaultCert     bool // true to inject keys on init
-	clusterInfo         ClusterInfoGetter
+	tsiMutateConfig *tsiMutateConfig
+	server          *http.Server
+	clusterInfo     ClusterInfoGetter
 }
 
 type ClusterInfoGetter interface {
@@ -106,7 +89,7 @@ func (ck *cigKube) GetClusterTI(namespace string, policy string) (ctiv1.ClusterT
 	return *cti, err
 }
 
-type InitContainerConfig struct {
+type tsiMutateConfig struct {
 	InitContainers    []corev1.Container   `yaml:"initContainers"`
 	SidecarContainers []corev1.Container   `yaml:"sidecarContainers"`
 	Volumes           []corev1.Volume      `yaml:"volumes"`
@@ -114,8 +97,8 @@ type InitContainerConfig struct {
 	Annotations       map[string]string    `yaml:"annotations"`
 }
 
-func (ic *InitContainerConfig) DeepCopy() *InitContainerConfig {
-	icc := &InitContainerConfig{
+func (ic *tsiMutateConfig) DeepCopy() *tsiMutateConfig {
+	icc := &tsiMutateConfig{
 		InitContainers:    make([]corev1.Container, len(ic.InitContainers)),
 		SidecarContainers: make([]corev1.Container, len(ic.SidecarContainers)),
 		Volumes:           make([]corev1.Volume, len(ic.Volumes)),
@@ -171,14 +154,14 @@ func applyDefaultsWorkaround(containers []corev1.Container, volumes []corev1.Vol
 	})
 }
 
-func loadInitContainerConfig(configFile string) (*InitContainerConfig, error) {
+func loadtsiMutateConfig(configFile string) (*tsiMutateConfig, error) {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return nil, err
 	}
 	glog.Infof("New configuration: sha256sum %x", sha256.Sum256(data))
 
-	var cfg InitContainerConfig
+	var cfg tsiMutateConfig
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
@@ -186,7 +169,8 @@ func loadInitContainerConfig(configFile string) (*InitContainerConfig, error) {
 	if cfg.Annotations == nil {
 		cfg.Annotations = make(map[string]string)
 	}
-
+	// To generate a new `Expect` file for testing, uncomment out below:
+	// logJSON("ExpectTsiMutateConfig.json", cfg)
 	return &cfg, nil
 }
 
@@ -205,22 +189,16 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 		annotations = map[string]string{}
 	}
 
-	status := annotations[admissionWebhookAnnotationStatusKey]
-
-	// determine whether to perform mutation based on annotation for the target resource
+	// mutation is only executed if requested
 	var required bool
-	if strings.ToLower(status) == "injected" {
+	switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
+	default:
 		required = false
-	} else {
-		switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
-		default:
-			required = false
-		case "y", "yes", "true", "on":
-			required = true
-		}
+	case "y", "yes", "true", "on":
+		required = true
 	}
 
-	glog.Infof("Mutation policy for %v/%v: status: %q required:%v", metadata.Namespace, metadata.Name, status, required)
+	glog.Infof("Mutation policy for %v/%v: required:%v", metadata.Namespace, metadata.Name, required)
 	return required
 }
 
@@ -307,20 +285,21 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 }
 
 // If return nil, no changes required
-func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.AdmissionRequest) (*InitContainerConfig, error) {
+func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.AdmissionRequest) (*tsiMutateConfig, error) {
 	namespace := req.Namespace
 	if namespace == metav1.NamespaceNone {
 		namespace = metav1.NamespaceDefault
 	}
-	logJSON("AdmissionRequest", req)
-	logJSON("Pod", &pod)
+	// To generate a content for a new `Fake` file for testing, uncomment out below:
+	// logJSON("FakeAdmissionRequest.json", req)
+	// logJSON("FakePod.json", &pod)
 
-	initcontainerConfigCp := whsvr.initcontainerConfig.DeepCopy()
+	tsiMutateConfigCp := whsvr.tsiMutateConfig.DeepCopy()
 
 	glog.Infof("Applying defaults")
 
 	// Workaround: https://github.com/kubernetes/kubernetes/issues/57982
-	applyDefaultsWorkaround(initcontainerConfigCp.InitContainers, initcontainerConfigCp.Volumes)
+	applyDefaultsWorkaround(tsiMutateConfigCp.InitContainers, tsiMutateConfigCp.Volumes)
 
 	var err error
 
@@ -349,19 +328,11 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		        return nil, err
 		    }
 
-		    for i, c := range initcontainerConfigCp.InitContainers {
+		    for i, c := range tsiMutateConfigCp.InitContainers {
 		        glog.Infof("add vol mounts (initc) : %v", c.VolumeMounts, serviceaccountVolMount)
-		        initcontainerConfigCp.InitContainers[i].VolumeMounts = append(c.VolumeMounts, serviceaccountVolMount)
+		        tsiMutateConfigCp.InitContainers[i].VolumeMounts = append(c.VolumeMounts, serviceaccountVolMount)
 		    }
 	*/
-	// Set volume
-	uuid, err := pseudoUUID()
-	if err != nil {
-		glog.Infof("Err: %v", err)
-		return nil, err
-	}
-
-	secretName := "ti-secret-" + uuid
 
 	cti, err := whsvr.clusterInfo.GetClusterTI(namespace, "cluster-policy")
 	if err != nil {
@@ -372,32 +343,6 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	glog.Infof("Got CTI: %#v", cti)
 	glog.Infof("CTI Cluster Name: %v", cti.Info.ClusterName)
 	glog.Infof("CTI Cluster Region: %v", cti.Info.ClusterRegion)
-	// // Create a secret
-	// glog.Infof("Creating kube client")
-	// client, err := ccorev1.NewForConfig(kubeConf)
-	// if err != nil {
-	// 	glog.Infof("Err: %v", err)
-	// 	return nil, err
-	// }
-
-	// // Create secret if it doesn't exist
-	// glog.Infof("Creating secret")
-	// createSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretName}}
-	// createSecret, err = client.Secrets(namespace).Create(createSecret)
-	// if err != nil {
-	// 	if !errors.IsAlreadyExists(err) {
-	// 		glog.Infof("Err: %v", err)
-	// 		return nil, err
-	// 	}
-	// }
-	//
-	// glog.Infof("pod name : %v", pod.ObjectMeta.Name)
-	// for i, v := range initcontainerConfigCp.Volumes {
-	// 	if v.Name == "ti-vault-secret" {
-	// 		initcontainerConfigCp.Volumes[i].VolumeSource.Secret.SecretName = secretName
-	// 		break
-	// 	}
-	// }
 
 	// Get list of images
 	images := ""
@@ -417,33 +362,48 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		}
 	}
 
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "injected"
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationSecretKey] = secretName
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
-	initcontainerConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion
+	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationStatusKey] = "mutated"
+	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationImagesKey] = images
+	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
+	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion
 
-	return initcontainerConfigCp, nil
-
+	// To generate a content for a new `Expect` file for testing, uncomment out below:
+	// logJSON("ExpectMutateInit.json", tsiMutateConfigCp)
+	return tsiMutateConfigCp, nil
 }
 
 // create mutation patch for resoures
-func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *InitContainerConfig) ([]byte, error) {
+func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, error) {
 	var patch []patchOperation
-	annotations := initcontainerConfig.Annotations
 
-	// additions
-	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
-	if createVaultCert {
-		patch = append(patch, addContainer(pod.Spec.InitContainers, initcontainerConfig.InitContainers, "/spec/initContainers")...)
+	// by default, mutate the pod with the new sidecar and required volumes
+	var mutateAll bool = true
+
+	// check if the pod already mutated, if so, only update the annotations
+	currentAnnotations := pod.ObjectMeta.GetAnnotations()
+	if currentAnnotations != nil {
+		status := currentAnnotations[admissionWebhookAnnotationStatusKey]
+		if strings.ToLower(status) == "mutated" {
+			glog.Infof("Pod already mutated. Update only the annotations")
+			mutateAll = false
+		}
 	}
-	patch = append(patch, addContainer(pod.Spec.Containers, initcontainerConfig.SidecarContainers,
-		"/spec/containers")...)
-	patch = append(patch, addVolume(pod.Spec.Volumes, initcontainerConfig.Volumes, "/spec/volumes")...)
 
-	for i, c := range pod.Spec.Containers {
-		glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
-		patch = append(patch, addVolumeMount(c.VolumeMounts, initcontainerConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
+	// always get updated annotations
+	annotations := tsiMutateConfig.Annotations
+	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)
+	glog.Infof("Annotations are always updated. New values: %#v", annotations)
+
+	// update everything only if not mutated before
+	if mutateAll {
+		patch = append(patch, addContainer(pod.Spec.Containers, tsiMutateConfig.SidecarContainers,
+			"/spec/containers")...)
+		patch = append(patch, addVolume(pod.Spec.Volumes, tsiMutateConfig.Volumes, "/spec/volumes")...)
+
+		for i, c := range pod.Spec.Containers {
+			glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, tsiMutateConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
+			patch = append(patch, addVolumeMount(c.VolumeMounts, tsiMutateConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
+		}
 	}
 
 	return json.Marshal(patch)
@@ -451,7 +411,8 @@ func createPatch(createVaultCert bool, pod *corev1.Pod, initcontainerConfig *Ini
 
 // main mutation process
 func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
-	logJSON("AdmissionReview", ar)
+	// To generate a content for a new `Fake` file for testing, uncomment out below:
+	// logJSON("FakeAdmissionReview.json", ar)
 
 	req := ar.Request
 
@@ -477,9 +438,7 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 	}
 
 	// Mutation Initialization
-	initContainerConfig, err := whsvr.mutateInitialization(pod, req)
-	// Dump the initContainerConfig so it can be used for testing:
-	logJSON("mutatedContainerConfig", initContainerConfig)
+	tsiMutateConfig, err := whsvr.mutateInitialization(pod, req)
 
 	if err != nil {
 		glog.Infof("Err: %v", err)
@@ -489,7 +448,7 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 			},
 		}
 	}
-	if initContainerConfig == nil {
+	if tsiMutateConfig == nil {
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
@@ -497,9 +456,7 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Create TI secret key to populate
 	glog.Infof("Creating patch")
-	createVaultCert := whsvr.createVaultCert
-	glog.Infof("createVaultCert: %v", createVaultCert)
-	patchBytes, err := createPatch(createVaultCert, &pod, initContainerConfig)
+	patchBytes, err := createPatch(&pod, tsiMutateConfig)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{

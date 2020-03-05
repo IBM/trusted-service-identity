@@ -1,5 +1,5 @@
 {
-   "InitContainers": [],
+   "InitContainers": null,
    "SidecarContainers": [
        {
            "name": "jwt-sidecar",
@@ -76,54 +76,46 @@
                    {
                        "path": "tsi-secrets",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.annotations['tsi.secrets']"
                        }
                    },
                    {
                        "path": "ti-identity",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-identity']"
                        }
                    },
                    {
                        "path": "ti-pod-name",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.name"
                        }
                    },
                    {
                        "path": "ti-pod-namespace",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.namespace"
                        }
                    },
                    {
                        "path": "ti-images",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-images']"
                        }
                    },
                    {
                        "path": "ti-cluster-name",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-name']"
                        }
                    },
                    {
                        "path": "ti-cluster-region",
                        "fieldRef": {
-                           "apiVersion": "v1",
                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-region']"
                        }
                    }
-               ],
-               "defaultMode": 420
+               ]
            }
        }
    ],
@@ -134,10 +126,5 @@
            "mountPath": "/tsi-secrets"
        }
    ],
-   "Annotations": {
-       "admission.trusted.identity/status": "mutated",
-       "admission.trusted.identity/ti-cluster-name": "testCluster",
-       "admission.trusted.identity/ti-cluster-region": "testRegion",
-       "admission.trusted.identity/ti-images": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c"
-   }
+   "Annotations": {}
 }

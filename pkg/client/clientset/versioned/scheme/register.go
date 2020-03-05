@@ -19,7 +19,7 @@ limitations under the License.
 package scheme
 
 import (
-	trustedv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
+	trustedv1 "github.com/IBM/trusted-service-identity/pkg/apis/cti/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

@@ -27,4 +27,4 @@ def get():
         return str(out)
     except Exception as e:
         print e.output
-        return ("Error: %s" % e.output), 503
+        return "",503

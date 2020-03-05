@@ -14,7 +14,7 @@ do
     echo "$SECREQFILE does not exist or empty. Nothing to do. Waiting..."
   else
     if [ ! -s "$JWTFILE" ]; then
-      echo "$JWTFILE does not exist yet. Let's wait for it..."
+      echo "$JWTFILE does not exist yet. Let's wait for it. Please make sure the JSS in initalized."
     else
       /usr/local/bin/get-vault-secrets.sh
       RT=$?

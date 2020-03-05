@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	cti "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti"
+	cti "github.com/IBM/trusted-service-identity/pkg/apis/cti"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

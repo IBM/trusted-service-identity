@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ti-injector-configmap
+  name: tsi-mutate-configmap
   namespace: {{ .Values.namespace }}
   labels:
     app: {{ template "ti-key-release.name" . }}
@@ -9,10 +9,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  ti-injector-configmap.yaml: |-
-    {{- include "ti-injector-configmap.yaml.tpl" . | indent 4}}
-  ti-injector-update.sh: |-
-    {{- include "ti-injector-update.sh.tpl" . | indent 4}}
+  tsi-mutate-configmap.yaml: |-
+    {{- include "tsi-mutate-configmap.yaml.tpl" . | indent 4}}
+  tsi-mutate-update.sh: |-
+    {{- include "tsi-mutate-update.sh.tpl" . | indent 4}}
   certmaker.sh: |-
     {{- include "certmaker.sh.tpl" . | indent 4}}
   mutatingwebhook.yaml: |-

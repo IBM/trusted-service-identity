@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of ti-components
-tiVersion: v1.1
+tiVersion: v1.2
 
 # target docker repo
 tiRepo: trustedseriviceidentity
@@ -32,10 +32,6 @@ jssService:
   #   - vtpm-server - vTPM v1
   #   - vtpm2-server - vTPM v2
   type: jss-server
-
-# createVaultCert - if true, unique certs will be created
-# during Init Containers and inserted to Vault
-createVaultCert: false
 
 secrets:
   # how often secrets should be retrieved from Vault

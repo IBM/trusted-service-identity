@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of TSI components
-tsiVersion: v1.1
+tsiVersion: v1.2
 
 # target docker repo
 tsiRepo: trustedseriviceidentity
