@@ -21,7 +21,7 @@ limitations under the License.
 package v1
 
 import (
-	internalinterfaces "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/IBM/trusted-service-identity/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

@@ -25,9 +25,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned"
-	cti "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/cti"
-	internalinterfaces "github.ibm.com/kompass/ti-keyrelease/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/IBM/trusted-service-identity/pkg/client/clientset/versioned"
+	cti "github.com/IBM/trusted-service-identity/pkg/client/informers/externalversions/cti"
+	internalinterfaces "github.com/IBM/trusted-service-identity/pkg/client/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
