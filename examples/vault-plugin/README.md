@@ -15,7 +15,7 @@ for plugin development.
 Demo with Vault Plugin steps. "bootstrapping" label indicates the operations that
 will be done by the initial bootstrapping in CI/CD pipeline.
 * Make sure [TI Prerequisites](../../README.md#prerequisites) are met
-* (bootstrapping) Install [Trusted Service Identity framework](../../REAMDE.md#install-trusted-service-identity-framework)
+* (bootstrapping) Install [Trusted Service Identity framework](../../README.md#install-trusted-service-identity-framework)
 * [Deploy Vault Service](./README.md#deploy-vault-service)
 * (bootstrapping) Configure the Vault Plugin
 * (bootstrapping) Register JWT Signing Service (JSS) with Vault
@@ -352,7 +352,7 @@ If you wish to work on this plugin, you'll first need
 [Go](https://www.golang.org) installed on your machine.
 
 This component is the integral part of the Trusted Service Identity project, so
-please refer to installation instruction in main [README](../../REAMDE.md#prerequisites) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
+please refer to installation instruction in main [README](../../README.md#prerequisites) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
 
 Then you can then download any required build tools by bootstrapping your
 environment:
