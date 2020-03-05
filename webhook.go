@@ -20,8 +20,8 @@ import (
 
 	"k8s.io/client-go/rest"
 
-	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
-	cctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/client/clientset/versioned/typed/cti/v1"
+	ctiv1 "github.com/IBM/trusted-service-identity/pkg/apis/cti/v1"
+	cctiv1 "github.com/IBM/trusted-service-identity/pkg/client/clientset/versioned/typed/cti/v1"
 )
 
 var (
@@ -169,7 +169,8 @@ func loadtsiMutateConfig(configFile string) (*tsiMutateConfig, error) {
 	if cfg.Annotations == nil {
 		cfg.Annotations = make(map[string]string)
 	}
-
+	// To generate a new `Expect` file for testing, uncomment out below:
+	// logJSON("ExpectTsiMutateConfig.json", cfg)
 	return &cfg, nil
 }
 
@@ -289,8 +290,9 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	if namespace == metav1.NamespaceNone {
 		namespace = metav1.NamespaceDefault
 	}
-	logJSON("AdmissionRequest", req)
-	logJSON("Pod", &pod)
+	// To generate a content for a new `Fake` file for testing, uncomment out below:
+	// logJSON("FakeAdmissionRequest.json", req)
+	// logJSON("FakePod.json", &pod)
 
 	tsiMutateConfigCp := whsvr.tsiMutateConfig.DeepCopy()
 
@@ -365,8 +367,9 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationClusterName] = cti.Info.ClusterName
 	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion
 
+	// To generate a content for a new `Expect` file for testing, uncomment out below:
+	// logJSON("ExpectMutateInit.json", tsiMutateConfigCp)
 	return tsiMutateConfigCp, nil
-
 }
 
 // create mutation patch for resoures
@@ -408,7 +411,8 @@ func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, err
 
 // main mutation process
 func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
-	logJSON("AdmissionReview", ar)
+	// To generate a content for a new `Fake` file for testing, uncomment out below:
+	// logJSON("FakeAdmissionReview.json", ar)
 
 	req := ar.Request
 
@@ -435,8 +439,6 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// Mutation Initialization
 	tsiMutateConfig, err := whsvr.mutateInitialization(pod, req)
-	// Dump the tsiMutateConfig so it can be used for testing:
-	logJSON("mutatedContainerConfig", tsiMutateConfig)
 
 	if err != nil {
 		glog.Infof("Err: %v", err)

@@ -10,10 +10,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	ctiv1 "github.com/IBM/trusted-service-identity/pkg/apis/cti/v1"
 	"github.com/nsf/jsondiff"
-	ctiv1 "github.ibm.com/kompass/ti-keyrelease/pkg/apis/cti/v1"
 	"k8s.io/api/admission/v1beta1"
 )
+
+/*
+	In order to generate a new content of the Fake and Expect files,
+	uncomment out the corresponding `logJSON`statements in webhook.go
+	Then re-run the tests
+*/
 
 var pod corev1.Pod
 var admissionRequest v1beta1.AdmissionRequest
@@ -64,7 +70,8 @@ func TestLoadInitFile(t *testing.T) {
 		t.Errorf("Result failed: %v", err)
 		return
 	}
-	t.Logf("Results match expections")
+	t.Log("Results match expections")
+
 }
 
 // TestPseudoUUID - testing function to generate UUIDs
@@ -158,6 +165,16 @@ func getTsiMutateConfig() tsiMutateConfig {
 	return obj
 }
 
+// func printObject(r interface{}) {
+// 	// marshal the object to []byte for comparison
+// 	result, err := json.Marshal(r)
+// 	if err != nil {
+// 		t.errorF("%v", err)
+// 		//return err
+// 	}
+//
+// }
+
 func validateResult(r interface{}, expectedFile string) error {
 
 	// marshal the object to []byte for comparison
@@ -181,5 +198,5 @@ func validateResult(r interface{}, expectedFile string) error {
 		fmt.Printf("Results match expections: %v", diff)
 		return nil
 	}
-	return fmt.Errorf("Results do not match expections: %v %v", diff, text)
+	return fmt.Errorf("Results do not match expections. diff: %v text: %v", diff, text)
 }

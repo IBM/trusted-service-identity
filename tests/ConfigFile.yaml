@@ -2,25 +2,35 @@ sidecarContainers:
 - name: jwt-sidecar
   image: trustedseriviceidentity/ti-jwt-sidecar:v1.2
   imagePullPolicy: Always
+  env:
+  - name: HOST_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+  - name: JWT_TTL_SEC
+    value: 30
+  - name: VAULT_ADDR
+    value: http://ti-test1.eu-de.containers.appdomain.cloud
+  - name: SECRET_REFRESH_SEC
+    value: 45
   volumeMounts:
-    - name: jwt-shared-data
+    - name: tsi-secrets
       mountPath: /usr/share/secrets
-    - name: jwt-secret
-      mountPath: "/secret/jwt"
-      readOnly: true
+    - name: tsi-sockets
+      mountPath: "/host/sockets"
     - name: pod-metadata
       mountPath: /pod-metadata
       readOnly: true
     - name: host-etc
       mountPath: /host/etc
-  command: ["/bin/sh", "-c", "/usr/local/bin/execute-get-key.sh"]
+      readOnly: true
 volumes:
-  - name: jwt-shared-data
+  - name: tsi-secrets
     emptyDir: {}
-  - name: ti-host-volume
+  - name: tsi-sockets
     hostPath:
       # directory location on host
-       path: /ti
+       path: /tsi-secure/sockets
        # directory must exist
        type: Directory
   - name: host-etc
@@ -28,14 +38,12 @@ volumes:
       # directory location on host
        path: /etc
        type: Directory
-  - name: jwt-secret
-    hostPath:
-      # directory location on host
-       path: /ti/secrets/jwt
-       type: Directory
   - name: pod-metadata
     downwardAPI:
       items:
+        - path: "tsi-secrets"
+          fieldRef:
+           fieldPath: metadata.annotations['tsi.secrets']
         - path: "ti-identity"
           fieldRef:
             fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
@@ -54,19 +62,6 @@ volumes:
         - path: "ti-cluster-region"
           fieldRef:
             fieldPath: metadata.annotations['admission.trusted.identity/ti-cluster-region']
-  - name: ti-vault-secret
-    emptyDir: {}
-  - name: ti-keys
-    hostPath:
-      # directory location on host
-       path: /ti/secrets/keys
-       type: Directory
-  - name: ti-skeys
-    secret:
-      secretName: ti-keys-config
-  - name: ti-sa-mount
-    secret:
-      secretName: ti-sa-token-7ptlx
 addVolumeMounts:
   - name: tsi-secrets
     mountPath: /tsi-secrets
