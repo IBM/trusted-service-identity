@@ -352,7 +352,7 @@ If you wish to work on this plugin, you'll first need
 [Go](https://www.golang.org) installed on your machine.
 
 This component is the integral part of the Trusted Service Identity project, so
-please refer to installation instruction in main [README](https://github.com/IBM/trusted-service-identity#build-and-install) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
+please refer to installation instruction in main [README](https://github.com/IBM/trusted-service-identity#prerequisites) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
 
 Then you can then download any required build tools by bootstrapping your
 environment:
