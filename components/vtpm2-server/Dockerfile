@@ -2,11 +2,12 @@ FROM fedora:29
 
 RUN dnf -y install python swtpm procps-ng
 
-RUN dnf -y install git openssl-devel automake autoconf libtool \
+RUN dnf -y install git openssl-devel automake autoconf libtool make file \
     && git clone https://git.code.sf.net/p/ibmtpm20tss/tss ibmtpm20tss-tss \
     && cd ibmtpm20tss-tss \
+    && git checkout tags/v1.3.0 \
     && autoreconf -i \
-    && ./configure --prefix=/usr \
+    && ./configure --prefix=/usr --disable-tpm-1.2 \
     && make -j$(nproc) \
     && make install
 
@@ -22,15 +23,16 @@ RUN cd ibmtpm20tss-tss \
 RUN dnf -y install git openssl-devel automake autoconf libtool help2man file \
     && git clone https://git.kernel.org/pub/scm/linux/kernel/git/jejb/openssl_tpm2_engine.git \
     && cd openssl_tpm2_engine \
+    && git checkout tags/v2.4.0 \
     && bash ./bootstrap.sh \
     && ./configure \
     && make -j$(nproc) \
     && make install
 
 # we absolutely need python2-cryptography otherwise we may pick up the one from pip
-# and this one may cause issues
+# and this one may cause issues; python2-crypography 2.3 works
 RUN dnf -y install python2-cryptography \
-    && pip install jwcrypto
+    && pip install jwcrypto==0.7
 
 COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validate-jwt.py /usr/local/bin/
 
