@@ -20,7 +20,7 @@ HELPMEHELPME
 
 setupVault()
 {
-  vault login "${ROOT_TOKEN}"
+  vault login -no-print "${ROOT_TOKEN}"
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo "ROOT_TOKEN is not correctly set"

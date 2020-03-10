@@ -128,4 +128,4 @@ Your new helm chart, `ti-key-release-2-x.X.x.tgs` already contains `ti-key-relea
 and it is ready deploy.
 To be consistent, move the newly created chart package into `charts` directory.
 
-Once the helm charts are created, you can proceed with [install](./REAMDE.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework
+Once the helm charts are created, you can proceed with [install](./README.md#install-trusted-service-identity-framework) of the Trusted Service Identity framework

@@ -17,8 +17,8 @@ HELPMEHELPME
 loadVault()
 {
   #docker run -d --name=dev-vault -v ${PWD}/local.json:/vault/config/local.json -v ${PWD}/pkg/linux_amd64/${PLUGIN}:/plugins/${PLUGIN} -p 127.0.0.1:8200:8200/tcp vault
-  echo "Root Token: ${ROOT_TOKEN}"
-  vault login ${ROOT_TOKEN}
+  # echo "Root Token: ${ROOT_TOKEN}"
+  vault login -no-print ${ROOT_TOKEN}
 
   export MOUNT_ACCESSOR=$(curl --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET ${VAULT_ADDR}/v1/sys/auth | jq -r '.["trusted-identity/"].accessor')
 

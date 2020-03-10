@@ -11,6 +11,22 @@ tiVersion: v1.2
 # target docker repo
 tiRepo: trustedseriviceidentity
 
+jssService:
+  name: jss-service
+  port: 8012
+  # jssSerivce.type: this is the name of the image used for building JSS server
+  # available options are:
+  #   - jss-server - standard JSS server (deafult)
+  #   - vtpm2-server - vTPM v2
+  type: jss-server
+
+# Not recommended for user to configure this. Hyperkube image to use when executing
+# kubectl commands
+hyperkube:
+  repository: gcr.io/google_containers/hyperkube
+  tag: v1.14.3
+
+
 # Parameters below are passed to ti-key-release-1
 # target namespace for the deployment
 ti-key-release-1:
@@ -30,19 +46,3 @@ ti-key-release-1:
     # expireSec - Time To Live for JWT token (in seconds)
     expireSec: 30
     issuer: wsched@us.ibm.com
-  # jssService - JSS Service is accessable only from within the namespace
-  jssService:
-    name: jss-service
-    port: 8012
-    # jssSerivce.type: this is the name of the image used for building JSS server
-    # available options are:
-    #   - jss-server - standard JSS server (deafult)
-    #   - vtpm-server - vTPM v1
-    #   - vtpm2-server - vTPM v2
-    type: jss-server
-
-# Not recommended for user to configure this. Hyperkube image to use when executing
-# kubectl commands
-hyperkube:
-  repository: gcr.io/google_containers/hyperkube
-  tag: v1.14.3

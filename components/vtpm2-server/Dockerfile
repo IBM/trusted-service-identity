@@ -1,6 +1,6 @@
 FROM fedora:29
 
-RUN dnf -y install python swtpm procps-ng
+RUN dnf -y install python swtpm procps-ng uwsgi uwsgi-plugin-python2
 
 RUN dnf -y install git openssl-devel automake autoconf libtool make file \
     && git clone https://git.code.sf.net/p/ibmtpm20tss/tss ibmtpm20tss-tss \
@@ -50,7 +50,7 @@ RUN jwt=$(gen-jwt.sh \
 # Adding support for flask
 COPY requirements.txt /
 RUN pip install -r requirements.txt
-COPY run-server.sh server.py /usr/local/bin/
+COPY run-jss-server.sh jss-server-priv.py jss-server-pub.py /usr/local/bin/
 
 # Default values for JWT, issuer and token expiration in seconds
 ARG DEFAULT_ISS="wsched@us.ibm.com"

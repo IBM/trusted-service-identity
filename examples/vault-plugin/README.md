@@ -189,12 +189,11 @@ kk get po
 The secrets will be mounted to your pad under `/tsi-secrets` directory, using
 the path requested via pod annotation.
 
-Get the sample keys loaded earlier via 'demo.load-sample-keys.sh'  script and
-requested via pod annotation:
+Validate if the sample secrets loaded earlier to Vault via 'demo.load-sample-keys.sh'  script and
+requested via pod annotation are available on the container:
 
 ```console
-kk get po
-kk exec -it myubuntu-xxxx cat /tsi-secrets/mysecrets/myubuntu-mysecret1/mysecret1
+kk exec -it $(kk get pods | grep myubuntu | awk '{print $1}') cat /tsi-secrets/mysecrets/myubuntu-mysecret1/mysecret1
 ```
 
 To test the sidecar access to Vault:

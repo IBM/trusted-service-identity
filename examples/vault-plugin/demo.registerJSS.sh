@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 ## create help menu:
 helpme()
@@ -35,8 +35,8 @@ register()
     exit 1
   fi
 
-  echo "Root Token: ${ROOT_TOKEN}"
-  vault login ${ROOT_TOKEN}
+  # echo "Root Token: ${ROOT_TOKEN}"
+  vault login -no-print ${ROOT_TOKEN}
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo "ROOT_TOKEN is not correctly set"
