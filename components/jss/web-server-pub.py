@@ -16,9 +16,15 @@ def index():
 def getCSR():
     statedir = os.getenv('STATEDIR') or '/host/tsi-secure'
     csrfile = join(statedir,"server.csr")
-    with open(csrfile) as f:
-        csr = f.read().strip()
-        return str(csr)
+    try:
+        with open(csrfile) as f:
+            csr = f.read().strip()
+            return str(csr)
+    except Exception as e:
+        print (e)
+        #flash(e)
+        return ("Error %s" % e), 500
+
 
 @app.route('/public/postX5c', methods=["POST"])
 def postX5c():
