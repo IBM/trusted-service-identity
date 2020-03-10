@@ -24,6 +24,7 @@ run() {
 run "make all"
 run "make docker-push"
 run "make $ALL -C components/jss/"
+run "make $ALL -C components/vtpm2-server/"
 run "make $ALL -C components/jwt-sidecar/"
 run "make $ALL -C components/node-setup/"
 run "make $ALL -C examples/vault-client/"

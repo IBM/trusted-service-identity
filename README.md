@@ -176,14 +176,21 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/
 At this point, this is an expected result.
 
 ### Setup Cluster Nodes
-In order to install and run Trusted Service Identity, all worker nodes have to be
-setup with a private key, either directly or through vTPM (virtual Trusted Platform Module).
-This operation needs to be executed only once.
+TSI currently supports 2 methods for signing JWT Tokens:
+* using TPM2 - private keys are obtained directly from TPM using TPM wrapper (VTPM2)
+* using custom signing service JSS (JWT Signing Service)
 
-If you are running this for the first time or like to override previous setup
-values, execute the helm command below.
+To use vTPM, deploy TSI Node Setup helm charts with all the functions disabled. The setup containers are needed only to register the nodes with Vault.
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
+```console
+helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=false --set reset.x5c=false
+```
+
+In order to run JSS serer, all worker nodes have to be setup with private keys.  This operation needs to be executed only once.
+If you are running this setup for the first time or like to override previous setup values, execute the helm command below.
+
+
 
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=true
@@ -208,6 +215,9 @@ The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This should correspond to actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
 * vault address - the remote address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. Use the env. variable VAULT_ADDR set [above](./README.md#setup-vault)
+* jss service - TSI currently support 2 mechanism for running the JSS (JWT Signing Service):
+  - jss-server - custom service for signing JWT tokens (default)
+  - vtpm2-server - JWT token signer using a software wrapper for TPM2
 
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
@@ -217,7 +227,8 @@ export VAULT_ADDR=http://<vault_location>
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=CLUSTER_REGION \
---set ti-key-release-1.vaultAddress=$VAULT_ADDR
+--set ti-key-release-1.vaultAddress=$VAULT_ADDR \
+--set jssService.type=jss-server
 ```
 For example:
 ```console
@@ -225,7 +236,8 @@ export VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=ti-fra02 \
 --set ti-key-release-1.cluster.region=eu-de \
---set ti-key-release-1.vaultAddress=$VAULT_ADDR
+--set ti-key-release-1.vaultAddress=$VAULT_ADDR \
+--set jssService.type=jss-server
 ```
 
 Complete list of available setup parameters can be obtained as follow:

@@ -47,14 +47,15 @@ if ! [ -d "${PRIVATEDIR}/sockets" ]; then
 fi
 
 # create a private key
-if ! [ -f "${PRIV_KEY}" ]; then
- openssl genrsa -out "${PRIV_KEY}" 2048
- openssl req -new -sha256 -key "${PRIV_KEY}" -out "${SERV_CSR}" -subj "/CN=jss-jwt-server"
- logme "private key ${PRIV_KEY} and ${SERV_CSR} created"
-else
- logme "private key ${PRIV_KEY} and ${SERV_CSR} already exist. Do nothing"
+if [ "$RESETALL" == "true" ]; then
+  if ! [ -f "${PRIV_KEY}" ]; then
+   openssl genrsa -out "${PRIV_KEY}" 2048
+   openssl req -new -sha256 -key "${PRIV_KEY}" -out "${SERV_CSR}" -subj "/CN=jss-jwt-server"
+   logme "private key ${PRIV_KEY} and ${SERV_CSR} created"
+  else
+   logme "private key ${PRIV_KEY} and ${SERV_CSR} already exist. Do nothing"
+  fi
 fi
-
 # end of the audit log
 logme "end of audit record"
 

@@ -30,7 +30,7 @@ spec:
             hostPort: 5000
           volumeMounts:
           - mountPath: /host/sockets
-            name: tsi-seckets
+            name: tsi-sockets
 {{- end }}
 
 {{- if eq .Values.jssService.type "jss-server" }}
@@ -50,7 +50,7 @@ spec:
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: tsi-secure
-            
+
         - name: {{ .Values.jssService.type }}-priv
           image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-priv:{{ .Values.tiVersion }}
           imagePullPolicy: Always
