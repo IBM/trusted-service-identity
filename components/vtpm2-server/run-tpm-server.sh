@@ -7,4 +7,4 @@ mkdir -p ${STATEDIR}
 source ${DIR}/startup_tpm.sh
 
 cd /usr/local/bin || exit
-./run-server.sh
+./run-jss-server.sh
