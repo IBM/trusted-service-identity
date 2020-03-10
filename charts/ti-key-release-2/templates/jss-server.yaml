@@ -1,25 +1,44 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  namespace: {{ index .Values "ti-key-release-1" "namespace" }}
-  name: jss-server
+  namespace: {{- include "namespace" . | indent 4}}
+  name: {{ .Values.jssService.type }}
 spec:
   selector:
     matchLabels:
-      name: jss-server
+      name: {{ .Values.jssService.type }}
   template:
     metadata:
       labels:
-        name: jss-server
+        name: {{ .Values.jssService.type }}
     spec:
       containers:
-        - name: jss-server-pub
-          #image: {{ .Values.tiRepo }}/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
-          image: {{ .Values.tiRepo }}/jss-server-pub:{{ .Values.tiVersion }}
+
+{{- if eq .Values.jssService.type "vtpm2-server" }}
+        - name: {{ .Values.jssService.type }}
+          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS
-              # this doublequotes actually works :)
+              value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
+            - name: TTL_SEC
+              value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
+          ports:
+          - name: http
+            containerPort: 5000
+            protocol: TCP
+            hostPort: 5000
+          volumeMounts:
+          - mountPath: /host/sockets
+            name: tsi-seckets
+{{- end }}
+
+{{- if eq .Values.jssService.type "jss-server" }}
+        - name: {{ .Values.jssService.type }}-pub
+          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-pub:{{ .Values.tiVersion }}
+          imagePullPolicy: Always
+          env:
+            - name: ISS
               value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
             - name: TTL_SEC
               value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
@@ -31,13 +50,12 @@ spec:
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: tsi-secure
-        - name: jss-server-priv
-          #image: {{ .Values.tiRepo }}/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
-          image: {{ .Values.tiRepo }}/jss-server-priv:{{ .Values.tiVersion }}
+            
+        - name: {{ .Values.jssService.type }}-priv
+          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-priv:{{ .Values.tiVersion }}
           imagePullPolicy: Always
           env:
             - name: ISS
-              # this doublequotes actually works :)
               value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
             - name: TTL_SEC
               value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
@@ -47,16 +65,21 @@ spec:
             readOnly: true
           - mountPath: /host/sockets
             name: tsi-sockets
+{{- end }}
+
       volumes:
-      - name: tsi-secure
-        hostPath:
-          # directory location on host
-           path: /tsi-secure
-           # directory must exist
-           type: Directory
       - name: tsi-sockets
         hostPath:
           # directory location on host
            path: /tsi-secure/sockets
            # directory might be created
            type: DirectoryOrCreate
+
+{{- if eq .Values.jssService.type "jss-server" }}
+      - name: tsi-secure
+        hostPath:
+          # directory location on host
+           path: /tsi-secure
+           # directory must exist
+           type: Directory
+{{- end }}

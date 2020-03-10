@@ -22,17 +22,6 @@ jwt:
   expireSec: 30
   issuer: wsched@us.ibm.com
 
-# jssService - main JSS Service is accessable only from within the namespace
-jssService:
-  name: jss-service
-  port: 8012
-  # jssSerivce.type: this is the name of the image used for building JSS server
-  # available options are:
-  #   - jss-server - standard JSS server (deafult)
-  #   - vtpm-server - vTPM v1
-  #   - vtpm2-server - vTPM v2
-  type: jss-server
-
 secrets:
   # how often secrets should be retrieved from Vault
   refreshSec: 45
