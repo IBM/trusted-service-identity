@@ -51,8 +51,8 @@ loadVault()
   fi
 
   #docker run -d --name=dev-vault -v ${PWD}/local.json:/vault/config/local.json -v ${PWD}/pkg/linux_amd64/${PLUGIN}:/plugins/${PLUGIN} -p 127.0.0.1:8200:8200/tcp vault
-  echo "Root Token: ${ROOT_TOKEN}"
-  vault login ${ROOT_TOKEN}
+  # echo "Root Token: ${ROOT_TOKEN}"
+  vault login -no-print ${ROOT_TOKEN}
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo "ROOT_TOKEN is not correctly set"
