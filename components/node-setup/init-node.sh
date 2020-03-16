@@ -44,6 +44,9 @@ fi
 if ! [ -d "${PRIVATEDIR}/sockets" ]; then
   mkdir -p "${PRIVATEDIR}/sockets"
   logme "directory ${PRIVATEDIR}/sockets created"
+else
+  rm "${PRIVATEDIR}/sockets/app.sock"
+  logme "${PRIVATEDIR}/sockets/app.sock removed"
 fi
 
 # create a private key

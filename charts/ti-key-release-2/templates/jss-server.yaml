@@ -12,12 +12,16 @@ spec:
       labels:
         name: {{ .Values.jssService.type }}
     spec:
+      serviceAccountName: tsi-setup-admin-sa
       containers:
 
 {{- if eq .Values.jssService.type "vtpm2-server" }}
         - name: {{ .Values.jssService.type }}
           image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}:{{ .Values.tiVersion }}
           imagePullPolicy: Always
+          securityContext:
+            # privilaged is needed to create /host/sockets/app.sock
+            privileged: true
           env:
             - name: ISS
               value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"

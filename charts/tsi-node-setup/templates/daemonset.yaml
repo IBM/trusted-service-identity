@@ -14,11 +14,13 @@ spec:
         app: ti-node-setup
         version: v1
     spec:
-      #serviceAccountName: ti-setup-admin-sa
+      serviceAccountName: tsi-setup-admin-sa
       containers:
         - name: ti-node-setup
           image: "{{ .Values.tsiRepo }}/node-setup:{{ .Values.tsiVersion }}"
           imagePullPolicy: Always
+          securityContext:
+            privileged: true
           env:
             - name: RESETALL
               value: "{{ .Values.reset.all }}"

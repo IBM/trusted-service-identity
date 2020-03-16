@@ -9,6 +9,8 @@ data:
       - name: jwt-sidecar
         image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Values.tiVersion }}
         imagePullPolicy: Always
+        securityContext:
+          runAsUser: 0
         env:
         - name: HOST_IP
           valueFrom:
