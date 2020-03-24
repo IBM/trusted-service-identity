@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # this script checks if X5c file exists.
 # if YES, the Private server starts and Public server shuts down
 # if NO, the Public server starts and Private server shuts down
@@ -26,7 +26,9 @@ start_priv_server() {
     cd /usr/local/bin || exit
     uwsgi --http-socket ${SOCKETFILE} --chmod-socket=666 --manage-script-name --mount /=jss-server-priv:app --plugins python &
     echo "wait for the socket file to be created then change its security context..."
-    sleep 15
+    while [ ! -S ${SOCKETFILE} ]; do
+      sleep 5
+    done
     chcon -t container_file_t ${SOCKETFILE}
   fi
 }
