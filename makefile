@@ -7,7 +7,7 @@ BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BINARY_NAME=ti-webhook
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.2
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.3
 GOARCH=$(shell go env GOARCH)
 
 .PHONY: all test-deps build-deps fmt vet lint get-deps test build docker docker-push dep

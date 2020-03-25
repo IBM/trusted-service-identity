@@ -3,7 +3,7 @@
    "SidecarContainers": [
        {
            "name": "jwt-sidecar",
-           "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.2",
+           "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.3",
            "env": [
                {
                    "name": "HOST_IP",
