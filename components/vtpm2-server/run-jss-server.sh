@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 # this script checks if X5c file exists.
 # if YES, the Private server starts and Public server shuts down
 # if NO, the Public server starts and Private server shuts down
 WAIT_SECS=30
 STATEDIR="${STATEDIR:-/tmp}"
 X5CFILE="${STATEDIR}/x5c"
+SOCKETFILE="/host/sockets/app.sock"
 
 cmd_priv_server_on="ps -ef | grep uwsgi | grep -v grep"
 cmd_pub_server_on="ps -ef | grep flask | grep -v grep"
@@ -23,7 +24,12 @@ start_priv_server() {
     echo "socket server already running" > /dev/null # for debugging...
   else
     cd /usr/local/bin || exit
-    uwsgi --http-socket /host/sockets/app.sock --chmod-socket=666 --manage-script-name --mount /=jss-server-priv:app --plugins python &
+    uwsgi --http-socket ${SOCKETFILE} --chmod-socket=666 --manage-script-name --mount /=jss-server-priv:app --plugins python &
+    echo "wait for the socket file to be created then change its security context..."
+    while [ ! -S ${SOCKETFILE} ]; do
+      sleep 5
+    done
+    chcon -t container_file_t ${SOCKETFILE}
   fi
 }
 

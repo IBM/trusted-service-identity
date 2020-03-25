@@ -29,6 +29,8 @@ spec:
           image: "{{ .Values.hyperkube.repository }}:{{ .Values.hyperkube.tag }}"
           command: ["sh", "-c", "/tmp/ti-key-release/tsi-mutate-update.sh"]
           imagePullPolicy: Always
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - mountPath: "/tmp/ti-key-release"
               name: tmp-ti-key-release-configmap

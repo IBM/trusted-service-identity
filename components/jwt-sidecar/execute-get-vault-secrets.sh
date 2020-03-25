@@ -12,16 +12,21 @@ while true
 do
   if [ ! -s "$SECREQFILE" ]; then
     echo "$SECREQFILE does not exist or empty. Nothing to do. Waiting..."
-  else
-    if [ ! -s "$JWTFILE" ]; then
+    while [ ! -s "$SECREQFILE" ]; do
+      sleep 5
+    done
+  fi
+
+  if [ ! -s "$JWTFILE" ]; then
       echo "$JWTFILE does not exist yet. Let's wait for it. Please make sure the JSS in initalized."
-    else
-      /usr/local/bin/get-vault-secrets.sh
-      RT=$?
-      if [ "$RT" == "0" ]; then
-        WAIT_SEC=${SECRET_REFRESH_SEC}
-      fi
-    fi
+      while [ ! -s "$JWTFILE" ]; do
+        sleep 5
+      done
+  fi
+  /usr/local/bin/get-vault-secrets.sh
+  RT=$?
+  if [ "$RT" == "0" ]; then
+    WAIT_SEC=${SECRET_REFRESH_SEC}
   fi
   sleep "${WAIT_SEC}"
 done

@@ -20,6 +20,9 @@ spec:
         - name: tsi-mutate
           image: {{ .Values.tiRepo }}/ti-webhook:{{ .Values.tiVersion }}
           imagePullPolicy: Always
+          # webhook must be running as root to listen to events on port 443
+          securityContext:
+            runAsUser: 0
           args:
             - -tsiMutateConfigFile=/etc/webhook/config/tsiMutateConfig.yaml
             - -tlsCertFile=/etc/webhook/certs/cert.pem
