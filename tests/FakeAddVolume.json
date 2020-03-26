@@ -1,0 +1,77 @@
+[
+  {
+    "name": "tsi-secrets",
+    "emptyDir": {}
+  },
+  {
+    "name": "tsi-sockets",
+    "hostPath": {
+      "path": "/tsi-secure/sockets",
+      "type": "Directory"
+    }
+  },
+  {
+    "name": "host-etc",
+    "hostPath": {
+      "path": "/etc",
+      "type": "Directory"
+    }
+  },
+  {
+    "name": "pod-metadata",
+    "downwardAPI": {
+      "items": [
+        {
+          "path": "tsi-secrets",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.annotations['tsi.secrets']"
+          }
+        },
+        {
+          "path": "ti-identity",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-identity']"
+          }
+        },
+        {
+          "path": "ti-pod-name",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.name"
+          }
+        },
+        {
+          "path": "ti-pod-namespace",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.namespace"
+          }
+        },
+        {
+          "path": "ti-images",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-images']"
+          }
+        },
+        {
+          "path": "ti-cluster-name",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-name']"
+          }
+        },
+        {
+          "path": "ti-cluster-region",
+          "fieldRef": {
+            "apiVersion": "v1",
+            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-region']"
+          }
+        }
+      ],
+      "defaultMode": 420
+    }
+  }
+]

@@ -1,0 +1,8 @@
+[
+  {
+    "name": "default-token-sggvc",
+    "secret": {
+      "secretName": "default-token-sggvc"
+    }
+  }
+]

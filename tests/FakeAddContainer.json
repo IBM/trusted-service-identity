@@ -1,0 +1,53 @@
+[
+  {
+    "name": "jwt-sidecar",
+    "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.3",
+    "env": [
+      {
+        "name": "HOST_IP",
+        "valueFrom": {
+          "fieldRef": {
+            "fieldPath": "status.hostIP"
+          }
+        }
+      },
+      {
+        "name": "JWT_TTL_SEC",
+        "value": "30"
+      },
+      {
+        "name": "VAULT_ADDR",
+        "value": "http://ti-test1.eu-de.containers.appdomain.cloud"
+      },
+      {
+        "name": "SECRET_REFRESH_SEC",
+        "value": "45"
+      }
+    ],
+    "resources": {},
+    "volumeMounts": [
+      {
+        "name": "tsi-secrets",
+        "mountPath": "/usr/share/secrets"
+      },
+      {
+        "name": "tsi-sockets",
+        "mountPath": "/host/sockets"
+      },
+      {
+        "name": "pod-metadata",
+        "readOnly": true,
+        "mountPath": "/pod-metadata"
+      },
+      {
+        "name": "host-etc",
+        "readOnly": true,
+        "mountPath": "/host/etc"
+      }
+    ],
+    "imagePullPolicy": "Always",
+    "securityContext": {
+      "runAsUser": 0
+    }
+  }
+]
