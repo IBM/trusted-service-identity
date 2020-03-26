@@ -5,7 +5,7 @@ metadata:
   labels:
     app: tsi-mutate
 webhooks:
-  - name: tsi-mutate.morven.me
+  - name: tsi-mutate.trusted-service-identity.ibm
     clientConfig:
       service:
         name: tsi-mutate-webhook-svc

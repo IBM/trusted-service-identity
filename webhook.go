@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -174,8 +175,73 @@ func loadtsiMutateConfig(configFile string) (*tsiMutateConfig, error) {
 	return &cfg, nil
 }
 
+// isSafe validates the format of the request to check if the requested
+// operation is permitted. For CREATE operations, it checks if the request
+// contains references to proteced socket and /etc Volumes.
+// And since UPDATE, does not allowed volume modifications, it only makes sure
+// that sidecar image has not been modified
+// it returns TRUE if operation is safe or FALSE with error explanation otherwise
+func isSafe(pod *corev1.Pod, operationType string) (bool, error) {
+
+	// this output can be used for creating tests/FakeIsSafeXXX.json files
+	glog.Infof("isSafe log. Operation %v", operationType)
+	logJSON("FakeIsSafeX.json", pod)
+
+	result := errors.New("")
+	vols := pod.Spec.Volumes
+
+	switch operationType {
+	case "CREATE":
+		for _, v := range vols {
+			// glog.Infof("***** VNAME: %v VHOSTPATH: %v", v.Name, v.HostPath)
+			if v.HostPath != nil && v.HostPath.Path == "/tsi-secure/sockets" {
+				result = errors.New("Using hostPath Volume with '/tsi-secure/sockets' is not allowed")
+				glog.Error(result)
+				return false, result
+			}
+			if v.HostPath != nil && v.HostPath.Path == "/etc" {
+				result = errors.New("Using hostPath Volume with '/etc' is not allowed")
+				glog.Error(result)
+				return false, result
+			}
+		}
+	case "UPDATE":
+		// volumes cannot be added nor modified on the update, but
+		// we need to prevent image change for the sidecar
+		conts := pod.Spec.Containers
+		for _, c := range conts {
+			// glog.Infof("****** CNAME: %v, CIMG: %v, CVOLUMEMOUNTS: %v", c.Name, c.Image, c.VolumeMounts)
+			if c.Name == "jwt-sidecar" {
+				// extract the image name, skip the version label
+				// trustedseriviceidentity/ti-jwt-sidecar:v1.3
+				img := strings.Split(c.Image, ":")
+				if img[0] == "trustedseriviceidentity/ti-jwt-sidecar" {
+					glog.Infof("Sidecar image matches! %v", c.Image)
+				} else {
+					result := fmt.Errorf("Attempt to modify the sidecar image to %v", c.Image)
+					glog.Error(result)
+					return false, result
+				}
+			}
+
+			// cvols := c.VolumeMounts
+			// for _, cv := range cvols {
+			// 	if cv.Name == "tsi-secrets" && cv.MountPath == "/host/secrets" {
+			// 		glog.Error("Violation, container is mounting to protected HostPath")
+			// 	}
+			// }
+		}
+	}
+	return true, result
+}
+
 // Check whether the target resoured need to be mutated
 func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
+
+	// this output can be used for creating tests/FakeMutationRequiredXXX.json files
+	glog.Infof("mutationRequired log. ignoredList %#v", ignoredList)
+	logJSON("FakeMutationRequired.json", metadata)
+
 	// skip special kubernete system namespaces
 	for _, namespace := range ignoredList {
 		if metadata.Namespace == namespace {
@@ -197,12 +263,14 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	case "y", "yes", "true", "on":
 		required = true
 	}
-
-	glog.Infof("Mutation policy for %v/%v: required:%v", metadata.Namespace, metadata.Name, required)
 	return required
 }
 
 func addContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
+	// this output can be used for creating tests/FakeAddContainer.json files
+	logJSON("FakeAddContainerTarget.json", target)
+	logJSON("FakeAddContainer.json", added)
+
 	first := len(target) == 0
 	var value interface{}
 	for _, add := range added {
@@ -220,10 +288,18 @@ func addContainer(target, added []corev1.Container, basePath string) (patch []pa
 			Value: value,
 		})
 	}
+
+	// this output can be used for creating tests/ExpectedAddContainer.json file
+	logJSON("ExpectAddContainer.json", patch)
 	return patch
 }
 
 func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOperation) {
+
+	// this output can be used for creating tests/FakeAddVolume.json files
+	logJSON("FakeAddVolumeTarget.json", target)
+	logJSON("FakeAddVolume.json", added)
+
 	first := len(target) == 0
 	var value interface{}
 	for _, add := range added {
@@ -241,10 +317,16 @@ func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOpe
 			Value: value,
 		})
 	}
+	// this output can be used for creating tests/ExpectedVolumeM.json file
+	logJSON("ExpectAddVolume.json", patch)
 	return patch
 }
 
 func addVolumeMount(target, added []corev1.VolumeMount, basePath string) (patch []patchOperation) {
+	// this output can be used for creating tests/FakeVolumeMount.json files
+	logJSON("FakeAddVolumeMountTarget.json", target)
+	logJSON("FakeAddVolumeMount.json", added)
+
 	first := len(target) == 0
 	var value interface{}
 	for _, add := range added {
@@ -262,10 +344,16 @@ func addVolumeMount(target, added []corev1.VolumeMount, basePath string) (patch 
 			Value: value,
 		})
 	}
+	// this output can be used for creating tests/ExpectedVolumeMount.json file
+	logJSON("ExpectAddVolumeMount.json", patch)
 	return patch
 }
 
 func updateAnnotation(target map[string]string, added map[string]string) (patch []patchOperation) {
+
+	// this output can be used for creating tests/FakeUpdateAnnotation.json files
+	logJSON("FakeUpdateAnnotationTarget.json", target)
+	logJSON("FakeUpdateAnnotation.json", added)
 
 	// cannot add individual path values. Must add the entire Annotation object
 	// so add/replace new values then patch it all at once
@@ -281,6 +369,9 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 		Path:  "/metadata/annotations",
 		Value: target,
 	})
+
+	// this output can be used for creating tests/ExpectedUpdateAnnotation.json files
+	logJSON("ExpectUpdateAnnotation.json", patch)
 	return patch
 }
 
@@ -401,7 +492,6 @@ func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, err
 		patch = append(patch, addVolume(pod.Spec.Volumes, tsiMutateConfig.Volumes, "/spec/volumes")...)
 
 		for i, c := range pod.Spec.Containers {
-			glog.Infof("add vol mounts : %#v", addVolumeMount(c.VolumeMounts, tsiMutateConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i)))
 			patch = append(patch, addVolumeMount(c.VolumeMounts, tsiMutateConfig.AddVolumeMounts, fmt.Sprintf("/spec/containers/%d/volumeMounts", i))...)
 		}
 	}
@@ -429,9 +519,21 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 	glog.Infof("AdmissionReview for Kind=%v, Namespace=%v Name=%v (%v) UID=%v patchOperation=%v UserInfo=%v",
 		req.Kind, req.Namespace, req.Name, pod.Name, req.UID, req.Operation, req.UserInfo)
 
+	safe, err := isSafe(&pod, string(req.Operation))
+	if !safe {
+		glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, req.Namespace)
+		return &v1beta1.AdmissionResponse{
+			Allowed: false,
+			Result: &metav1.Status{
+				Message: err.Error(),
+			},
+		}
+	}
+	glog.Infof("Safe to continue with %v/%#v", pod.GenerateName, req.Namespace)
+
 	// determine whether to perform mutation
 	if !mutationRequired(ignoredNamespaces, &pod.ObjectMeta) {
-		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
+		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.GenerateName, req.Namespace)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
@@ -521,13 +623,13 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := json.Marshal(admissionReview)
 	if err != nil {
-		glog.Errorf("Can't encode response: %v", err)
-		http.Error(w, fmt.Sprintf("could not encode response: %v", err), http.StatusInternalServerError)
+		glog.Errorf("Can't encode the response: %v", err)
+		http.Error(w, fmt.Sprintf("could not encode the response: %v", err), http.StatusInternalServerError)
 	}
-	glog.Infof("Ready to write reponse ...")
+	glog.Infof("Ready to write the reponse ...")
 	if _, err := w.Write(resp); err != nil {
 		glog.Errorf("Can't write response: %v", err)
-		http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("could not write the response: %v", err), http.StatusInternalServerError)
 	}
 }
 
