@@ -30,8 +30,8 @@ data:
           - name: pod-metadata
             mountPath: /pod-metadata
             readOnly: true
-          - name: host-etc
-            mountPath: /host/etc
+          - name: host-machineid
+            mountPath: /host/machineid
             readOnly: true
       volumes:
         - name: tsi-secrets
@@ -42,11 +42,11 @@ data:
              path: /tsi-secure/sockets
              # directory must exist
              type: Directory
-        - name: host-etc
+        - name: host-machineid
           hostPath:
             # directory location on host
-             path: /etc
-             type: Directory
+             path: /etc/machine-id
+             type: File
         - name: pod-metadata
           downwardAPI:
             items:

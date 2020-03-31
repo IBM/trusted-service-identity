@@ -49,7 +49,6 @@ const (
 
 var (
 	ErrHostpathSocket = errors.New("Using hostPath Volume with '/tsi-secure' is not allowed")
-	ErrHostpathEtc    = errors.New("Using hostPath Volume with '/etc' is not allowed")
 	ErrSidecarImg     = errors.New("Attempt to modify the sidecar image")
 )
 
@@ -201,9 +200,6 @@ func isSafe(pod *corev1.Pod, operationType string) error {
 			// glog.Infof("***** VNAME: %v VHOSTPATH: %v", v.Name, v.HostPath)
 			if v.HostPath != nil && strings.Contains(v.HostPath.Path, "/tsi-secure") {
 				return ErrHostpathSocket
-			}
-			if v.HostPath != nil && v.HostPath.Path == "/etc" {
-				return ErrHostpathEtc
 			}
 		}
 	case "UPDATE":
