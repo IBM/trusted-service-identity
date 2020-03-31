@@ -7,12 +7,14 @@ BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BINARY_NAME=ti-webhook
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.2
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.3
 GOARCH=$(shell go env GOARCH)
 
-.PHONY: all test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
+.PHONY: all fast test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
 
 all: dep get-deps fmt test build docker timestamp
+
+fast: test build docker docker-push timestamp
 
 dep:
 	go mod tidy
@@ -46,7 +48,7 @@ build-deps: dep
 	go mod vendor
 
 fmt:
-	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Please run gofmt -l -w $GOFILES on your code.' && exit 1; fi
+	@if [ -n "$$(gofmt -l ${GOFILES})" ]; then echo 'Please run gofmt -l -w ${GOFILES} on your code.' && exit 1; fi
 
 vet:
 	@set -e; for LINE in ${GOPACKAGES}; do go vet $${LINE} ; done

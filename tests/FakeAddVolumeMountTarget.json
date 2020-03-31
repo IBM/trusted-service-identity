@@ -1,0 +1,7 @@
+[
+  {
+    "name": "default-token-sggvc",
+    "readOnly": true,
+    "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+  }
+]

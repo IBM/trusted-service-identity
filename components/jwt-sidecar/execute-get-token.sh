@@ -15,7 +15,7 @@ while true
   echo -n "images=$(cat /pod-metadata/ti-images | sha256sum | awk '{print $1}')&" >> /tmp/claims
   echo -n "cluster-name=$(cat /pod-metadata/ti-cluster-name)&" >> /tmp/claims
   echo -n "cluster-region=$(cat /pod-metadata/ti-cluster-region)&" >> /tmp/claims
-  echo -n "machineid=$(cat /host/etc/machine-id)" >> /tmp/claims
+  echo -n "machineid=$(cat /host/machineid)" >> /tmp/claims
 
   curl --unix-socket ${SOCKETFILE} http://localhost/getJWT?"$(cat /tmp/claims)" > /jwt/token
   # make the wait 5 seconds shorter than JWT TTL

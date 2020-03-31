@@ -1,0 +1,115 @@
+{
+   "kind": "Pod",
+   "apiVersion": "v1",
+   "metadata": {
+       "generateName": "myubuntu-6fb798d94-",
+       "creationTimestamp": null,
+       "labels": {
+           "app": "myubuntu",
+           "pod-template-hash": "6fb798d94"
+       },
+       "annotations": {
+           "admission.trusted.identity/inject": "false",
+           "kubernetes.io/psp": "ibm-privileged-psp",
+           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-all\"\n  tsi.secret/local-name: \"mysecrets/myubuntu-mysecret1\"\n"
+       },
+       "ownerReferences": [
+           {
+               "apiVersion": "apps/v1",
+               "kind": "ReplicaSet",
+               "name": "myubuntu-6fb798d94",
+               "uid": "7efb3182-6f81-11ea-be8b-6a908431fac0",
+               "controller": true,
+               "blockOwnerDeletion": true
+           }
+       ]
+   },
+   "spec": {
+       "volumes": [
+           {
+               "name": "tsi-secrets",
+               "emptyDir": {}
+           },
+           {
+               "name": "tsi-sockets",
+               "hostPath": {
+                   "path": "/tsi-secure/sockets",
+                   "type": "Directory"
+               }
+           },
+           {
+               "name": "host-etc",
+               "hostPath": {
+                   "path": "/etc",
+                   "type": "Directory"
+               }
+           },
+           {
+               "name": "default-token-sggvc",
+               "secret": {
+                   "secretName": "default-token-sggvc"
+               }
+           }
+       ],
+       "containers": [
+           {
+               "name": "myubuntu",
+               "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+               "command": [
+                   "/bin/bash",
+                   "-c",
+                   "--"
+               ],
+               "args": [
+                   "while true; do cat /mydata; sleep 5; done;"
+               ],
+               "resources": {},
+               "volumeMounts": [
+                   {
+                       "name": "host-etc",
+                       "mountPath": "/host/etc"
+                   },
+                   {
+                       "name": "tsi-sockets",
+                       "mountPath": "/host/sockets"
+                   },
+                   {
+                       "name": "tsi-secrets",
+                       "mountPath": "/host/secrets"
+                   },
+                   {
+                       "name": "default-token-sggvc",
+                       "readOnly": true,
+                       "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                   }
+               ],
+               "terminationMessagePath": "/dev/termination-log",
+               "terminationMessagePolicy": "File",
+               "imagePullPolicy": "Always"
+           }
+       ],
+       "restartPolicy": "Always",
+       "terminationGracePeriodSeconds": 30,
+       "dnsPolicy": "ClusterFirst",
+       "serviceAccountName": "default",
+       "serviceAccount": "default",
+       "securityContext": {},
+       "schedulerName": "default-scheduler",
+       "tolerations": [
+           {
+               "key": "node.kubernetes.io/not-ready",
+               "operator": "Exists",
+               "effect": "NoExecute",
+               "tolerationSeconds": 600
+           },
+           {
+               "key": "node.kubernetes.io/unreachable",
+               "operator": "Exists",
+               "effect": "NoExecute",
+               "tolerationSeconds": 600
+           }
+       ],
+       "priority": 0
+   },
+   "status": {}
+}

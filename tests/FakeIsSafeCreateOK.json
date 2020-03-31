@@ -1,0 +1,85 @@
+{
+   "kind": "Pod",
+   "apiVersion": "v1",
+   "metadata": {
+       "generateName": "myubuntu-79bb88676b-",
+       "creationTimestamp": null,
+       "labels": {
+           "app": "myubuntu",
+           "pod-template-hash": "79bb88676b"
+       },
+       "annotations": {
+           "admission.trusted.identity/inject": "true",
+           "kubernetes.io/psp": "ibm-privileged-psp",
+           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-all\"\n  tsi.secret/local-name: \"mysecrets/myubuntu-mysecret1\"\n- tsi.secret/name: \"mysecret2.json\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-r\"\n  tsi.secret/local-name: \"mysecrets/myubuntu-mysecret2\"\n- tsi.secret/name: \"password\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-r\"\n  tsi.secret/local-name: \"mysecrets/myubuntu-passwords\"\n- tsi.secret/name: \"invalid\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-all\"\n  tsi.secret/local-name: \"mysecrets/myubuntu-invalid\"\n- tsi.secret/name: \"non-existing\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/nothing\"\n  tsi.secret/local-name: \"mysecrets/non-existing\"\n"
+       },
+       "ownerReferences": [
+           {
+               "apiVersion": "apps/v1",
+               "kind": "ReplicaSet",
+               "name": "myubuntu-79bb88676b",
+               "uid": "b0272e4e-6f7f-11ea-be8b-6a908431fac0",
+               "controller": true,
+               "blockOwnerDeletion": true
+           }
+       ]
+   },
+   "spec": {
+       "volumes": [
+           {
+               "name": "default-token-sggvc",
+               "secret": {
+                   "secretName": "default-token-sggvc"
+               }
+           }
+       ],
+       "containers": [
+           {
+               "name": "myubuntu",
+               "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+               "command": [
+                   "/bin/bash",
+                   "-c",
+                   "--"
+               ],
+               "args": [
+                   "while true; do cat /mydata; sleep 5; done;"
+               ],
+               "resources": {},
+               "volumeMounts": [
+                   {
+                       "name": "default-token-sggvc",
+                       "readOnly": true,
+                       "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                   }
+               ],
+               "terminationMessagePath": "/dev/termination-log",
+               "terminationMessagePolicy": "File",
+               "imagePullPolicy": "Always"
+           }
+       ],
+       "restartPolicy": "Always",
+       "terminationGracePeriodSeconds": 30,
+       "dnsPolicy": "ClusterFirst",
+       "serviceAccountName": "default",
+       "serviceAccount": "default",
+       "securityContext": {},
+       "schedulerName": "default-scheduler",
+       "tolerations": [
+           {
+               "key": "node.kubernetes.io/not-ready",
+               "operator": "Exists",
+               "effect": "NoExecute",
+               "tolerationSeconds": 600
+           },
+           {
+               "key": "node.kubernetes.io/unreachable",
+               "operator": "Exists",
+               "effect": "NoExecute",
+               "tolerationSeconds": 600
+           }
+       ],
+       "priority": 0
+   },
+   "status": {}
+}
