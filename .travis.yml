@@ -1,8 +1,8 @@
 # .travis.yml
 language: go
 go:
-- "1.12"
-  
+- "1.14"
+
 branches:
   - master
 
@@ -15,7 +15,7 @@ env:
 
 # avoid issues in travis with ssh / https acccess
 before_script:
-  - git config --global url."git@github.ibm.com:".insteadOf "https://github.ibm.com/"
+  - git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 after_success:
 # docker login is required if you want to push docker images.
