@@ -1,2 +1,0 @@
-Flask==1.0.2
-jwcrypto==0.5.0
