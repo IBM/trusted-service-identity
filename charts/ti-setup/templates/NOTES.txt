@@ -1,9 +1,0 @@
-This Helm deployment initializes Trusted Identity environment.
-
-   app: {{ template "ti-key-release.name" . }}
-   chart: {{ template "ti-key-release.chart" . }}
-   release: {{ .Release.Name }}
-   namespace: {{ .Values.namespace }}
-
-After successful execution, this Helm chart must be deleted:
-   helm delete --purge --debug {{ .Release.Name }}
