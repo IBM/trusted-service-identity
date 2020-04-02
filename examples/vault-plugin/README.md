@@ -43,7 +43,7 @@ during the [Setup Cluster](../../README.md#setup-cluster) process earlier:
 $ kk get pods
 
 # select one tsi-node-setup pod and execute:
-$ kk exec -it tsi-setup-tsi-node-setup-xxxx -- sh -c 'curl $HOST_IP:5000/public/getCSR'
+$ kk exec -it $(kk get po | grep tsi-node-setup | awk '{print $1}' |  sed -n 1p ) -- sh -c 'curl $HOST_IP:5000/public/getCSR'
 
 -----BEGIN CERTIFICATE REQUEST-----
 MIICXjCCAUYCAQAwGTEXMBUGA1UEAwwOanNzLWp3dC1zZXJ2ZXIwggEiMA0GCSqG

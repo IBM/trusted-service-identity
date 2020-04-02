@@ -30,11 +30,17 @@ if [[ "$VAULT_ADDR" == "" || "$CLUSTER_NAME" == "" || "$CLUSTER_REGION" == "" ||
   exit 1
 fi
 
+if [[ "$KUBECONFIG" == "" ]] ; then
+  echo "KUBECONFIG, pointing at OpenShift cluster, must be set"
+  exit 1
+fi
+
 if [[ $(eval $oc_test_cmd) ]]; then
   echo "op client setup properly"
 else
   echo "op client must be installed and configured."
-  echo "Get `oc` cli https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/macosx/"
+  echo "(https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)"
+  echo "Get `oc` cli from https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/"
   exit 1
 fi
 
@@ -42,13 +48,15 @@ if [[ $(eval $kubectl_test_cmd) ]]; then
   echo "kubectl client setup properly"
 else
   echo "kubectl client must be installed and configured."
+  echo "(https://kubernetes.io/docs/tasks/tools/install-kubectl/)"
   exit 1
 fi
 
 if [[ $(eval $helm_test_cmd) ]]; then
   echo "helm client setup properly"
 else
-  echo "helm client must be installed and configured."
+  echo "helm client must be installed and configured. "
+  echo "(https://helm.sh/docs/intro/install/)"
   exit 1
 fi
 
@@ -57,9 +65,14 @@ fi
 setupOpenShiftProject() {
 # first cleanup everything:
 cleanup
+echo ""
+echo "To track the status, you can start another console with appropriate KUBECONFIG "
+echo "Then run:"
+echo "    watch -n 5 kubectl -n trusted-identity get all"
 echo "waiting 15s for the cleanup to complete..."
 sleep 15
-read -n 1 -s -r -p 'Press any key to continue'
+
+read -n 1 -s -r -p 'When cleanup completed, press any key to continue'
 
 oc new-project $PROJECTNAME --description="My TSI project on OpenShift" > /dev/null
 oc project $PROJECTNAME
@@ -165,7 +178,47 @@ checkPrereqs
 setupOpenShiftProject
 createSCCs
 executeNodeSetup
+echo ""
+echo "Wait for the setup pods in Running state"
 read -n 1 -s -r -p 'Press any key to continue'
 executeInstall-1
+echo ""
+echo "Wait for all Running or Completed"
 read -n 1 -s -r -p 'Press any key to continue'
 executeInstall-2
+echo ""
+echo "Wait for all Running or Completed"
+echo "*** One time initial bootstrapping setup required ***"
+echo "For complete setup description please visit: "
+echo "  https://github.com/IBM/trusted-service-identity/blob/master/examples/vault-plugin/README.md#register-jwt-signing-service-jss-with-vault"
+echo ""
+echo "This process assumes Vault is already setup at another location as described: "
+echo "  https://github.com/IBM/trusted-service-identity#setup-vault"
+echo ""
+echo "1. change directory to examples/vault-plugin:"
+echo "    cd examples/vault-plugin"
+echo "2. test the connection to Vault:"
+echo "    curl $VAULT_ADDR"
+echo "  expected result: <a href=\"/ui/\">Temporary Redirect</a>"
+echo "3. obtain the ROOT_TOKEN from the cluster with running Vault and export it"
+echo "    export ROOT_TOKEN="
+echo "4. setup shortcut alias:"
+echo "    alias kk=\"kubectl -n trusted-identity\" "
+echo "5. test whether CSRs can be retrieved:"
+echo '    kk exec -it $(kk get po | grep tsi-node-setup | awk '"'{print "'$1}'"' |  sed -n 1p ) -- sh -c 'curl"' $HOST_IP:5000/public/getCSR'"'"
+echo "6. execute cluster registration with Vault: "
+echo "    ./demo.registerJSS.sh"
+echo "7. load sample policies:"
+echo "    ./demo.load-sample-policies.sh"
+echo "8. load sample keys:"
+echo "    ./demo.load-sample-keys.sh $CLUSTER_REGION $CLUSTER_NAME"
+echo "9. the setup containers can be removed now:"
+echo "    kk delete ds tsi-setup-tsi-node-setup "
+echo "    kk delete sa tsi-setup-admin-sa"
+echo "    oc delete scc $SCCHOST"
+echo ""
+echo "Now you can test by running the sample pod:"
+echo "  kk create -f examples/myubuntu.yaml"
+echo "Once running, execute: "
+echo '  kk exec -it $(kk get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecrets/myubuntu-mysecret1/mysecret1"
+echo "********* END ********"
