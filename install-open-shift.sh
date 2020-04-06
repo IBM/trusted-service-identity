@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Required Parameters
-VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
-# VAULT_ADDR=
-CLUSTER_NAME="ti-test1"
-# CLUSTER_NAME=
-CLUSTER_REGION="eu-de"
-# CLUSTER_REGION=
+# VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
+VAULT_ADDR=
+# CLUSTER_NAME="ti-test1"
+CLUSTER_NAME=
+# CLUSTER_REGION="eu-de"
+CLUSTER_REGION=
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
 # JSS_TYPE=
