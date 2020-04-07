@@ -34,9 +34,12 @@ var (
 	defaulter = runtime.ObjectDefaulter(runtimeScheme)
 )
 
+const tsiNamespace = "trusted-identity"
+
 var ignoredNamespaces = []string{
 	metav1.NamespaceSystem,
 	metav1.NamespacePublic,
+	tsiNamespace,
 }
 
 const (
@@ -86,7 +89,7 @@ func NewCigKube() (*cigKube, error) {
 
 func (ck *cigKube) GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error) {
 	// get the client using KubeConfig
-	glog.Infof("Namespace : %v", namespace)
+	glog.Infof("TSI Namespace : %v", namespace)
 	cti, err := ck.cticlient.ClusterTIs(namespace).Get(policy, metav1.GetOptions{})
 	if err != nil {
 		fmt.Printf("Err: %v", err)
@@ -230,10 +233,10 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	glog.Infof("mutationRequired log. ignoredList %#v", ignoredList)
 	// logJSON("FakeMutationRequired.json", metadata)
 
-	// skip special kubernete system namespaces
+	// skip special kubernetes system namespaces, and protect the TSI namespace
 	for _, namespace := range ignoredList {
 		if metadata.Namespace == namespace {
-			glog.Infof("Skip mutation for %v for it' in special namespace:%v", metadata.Name, metadata.Namespace)
+			glog.Infof("Skip mutation for %v in protected namespace: %v", metadata.Name, metadata.Namespace)
 			return false
 		}
 	}
@@ -412,8 +415,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		        tsiMutateConfigCp.InitContainers[i].VolumeMounts = append(c.VolumeMounts, serviceaccountVolMount)
 		    }
 	*/
-
-	cti, err := whsvr.clusterInfo.GetClusterTI(namespace, "cluster-policy")
+	cti, err := whsvr.clusterInfo.GetClusterTI(tsiNamespace, "cluster-policy")
 	if err != nil {
 		fmt.Printf("Err: %v", err)
 		return nil, err
