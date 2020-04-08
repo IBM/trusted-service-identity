@@ -74,6 +74,6 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	glog.Infof("Got OS shutdown signal, shutting down wenhook server gracefully...")
+	glog.Infof("Got OS shutdown signal, shutting down webhook server gracefully...")
 	whsvr.server.Shutdown(context.Background())
 }
