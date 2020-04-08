@@ -34,9 +34,12 @@ var (
 	defaulter = runtime.ObjectDefaulter(runtimeScheme)
 )
 
+// TODO pass the name of the TSI namespace via downwardAPI
 const tsiNamespace = "trusted-identity"
 
-var ignoredNamespaces = []string{
+// protectedNamespaces - list of namespaces that are protected and cannot
+// execute the mutation
+var protectedNamespaces = []string{
 	metav1.NamespaceSystem,
 	metav1.NamespacePublic,
 	tsiNamespace,
@@ -52,7 +55,8 @@ const (
 
 var (
 	ErrHostpathSocket = errors.New("Using hostPath Volume with '/tsi-secure' is not allowed")
-	ErrSidecarImg     = errors.New("Attempt to modify the sidecar image")
+	ErrSidecarImg     = errors.New("Attempting to modify the sidecar image")
+	ErrProtectedNs    = errors.New("Requesting TSI mutation in a protected namespace")
 )
 
 type WebhookServer struct {
@@ -227,17 +231,20 @@ func isSafe(pod *corev1.Pod, operationType string) error {
 }
 
 // Check whether the target resoured need to be mutated
-func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
+func mutationRequired(protectedList []string, metadata *metav1.ObjectMeta, namespace string) (bool, error) {
 
 	// this output can be used for creating tests/FakeMutationRequiredXXX.json files
-	glog.Infof("mutationRequired log. ignoredList %#v", ignoredList)
+	glog.Infof("mutationRequired log. protectedList %#v", protectedList)
 	// logJSON("FakeMutationRequired.json", metadata)
+	glog.Infof("metadata %#v", metadata)
 
+	isProtected := false
 	// skip special kubernetes system namespaces, and protect the TSI namespace
-	for _, namespace := range ignoredList {
-		if metadata.Namespace == namespace {
-			glog.Infof("Skip mutation for %v in protected namespace: %v", metadata.Name, metadata.Namespace)
-			return false
+	for _, protectedNamespace := range protectedList {
+		glog.Infof("metadata.Namespace:%v namespace:%v", protectedNamespace, namespace)
+		if namespace == protectedNamespace {
+			glog.Infof("Pod %v in protected namespace: %v", metadata.Name, namespace)
+			isProtected = true
 		}
 	}
 
@@ -247,14 +254,17 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	}
 
 	// mutation is only executed if requested
-	var required bool
+	// in non-protected namespace
+	glog.Infof("isProtected %v", isProtected)
 	switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
-	default:
-		required = false
 	case "y", "yes", "true", "on":
-		required = true
+		if isProtected {
+			return false, ErrProtectedNs
+		}
+		return true, nil
+	default:
+		return false, nil
 	}
-	return required
 }
 
 func addContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
@@ -526,12 +536,27 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 	glog.Infof("Safe to continue with %v/%#v", pod.GenerateName, req.Namespace)
 
 	// determine whether to perform mutation
-	if !mutationRequired(ignoredNamespaces, &pod.ObjectMeta) {
-		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.GenerateName, req.Namespace)
+	required, err := mutationRequired(protectedNamespaces, &pod.ObjectMeta, req.Namespace)
+	if err != nil {
+		glog.Error(err.Error())
+		glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, req.Namespace)
+		reason := metav1.StatusReason("TSI Mutation Webhook disallowed this pod creation for safety reasons")
+		return &v1beta1.AdmissionResponse{
+			Allowed: false,
+			Result: &metav1.Status{
+				Message: err.Error(),
+				Reason:  reason,
+			},
+		}
+	}
+
+	if !required {
+		glog.Infof("Mutation not requested for %v in %v namespace", pod.GenerateName, req.Namespace)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
+	glog.Infof("Mutation requested for %v in %v namespace", pod.GenerateName, req.Namespace)
 
 	// Mutation Initialization
 	tsiMutateConfig, err := whsvr.mutateInitialization(pod, req)
