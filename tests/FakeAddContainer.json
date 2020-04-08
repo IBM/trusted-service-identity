@@ -1,7 +1,7 @@
 [
   {
     "name": "jwt-sidecar",
-    "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.3",
+    "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.4",
     "env": [
       {
         "name": "HOST_IP",

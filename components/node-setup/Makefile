@@ -4,7 +4,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="node-setup"
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.3
+MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):v1.4
 
 all: docker docker-push timestamp
 

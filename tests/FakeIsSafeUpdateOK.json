@@ -148,7 +148,7 @@
            },
            {
                "name": "jwt-sidecar",
-               "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.3",
+               "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.4",
                "env": [
                    {
                        "name": "HOST_IP",
@@ -267,7 +267,7 @@
                "lastState": {},
                "ready": true,
                "restartCount": 0,
-               "image": "docker.io/trustedseriviceidentity/ti-jwt-sidecar:v1.3",
+               "image": "docker.io/trustedseriviceidentity/ti-jwt-sidecar:v1.4",
                "imageID": "docker.io/trustedseriviceidentity/ti-jwt-sidecar@sha256:2991b88e7e378112c72ddc4f2ac8e98c0b438b4d4b8d8556be2b5904428434db",
                "containerID": "containerd://a73da0404c484e906109732a5f0b4e0f38d2fc41c0d09112b23a56d4fd793e26"
            },
