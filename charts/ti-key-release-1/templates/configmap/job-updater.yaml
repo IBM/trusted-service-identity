@@ -37,7 +37,7 @@ spec:
       volumes:
         - name: tmp-ti-key-release-configmap
           configMap:
-            name: tsi-mutate-configmap
+            name: tsi-mutate-set-configmap
             # this makes the files executable
             defaultMode: 0744
       restartPolicy: OnFailure

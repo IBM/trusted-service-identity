@@ -48,6 +48,11 @@ func main() {
 		glog.Errorf("Failed to create ClusterInfo: %v", err)
 	}
 
+	err = setTsiNamespace("/etc/webhook/tsi-namespace")
+	if err != nil {
+		glog.Errorf("Failed to load the TSI Namespace: %v", err)
+	}
+
 	whsvr := &WebhookServer{
 		tsiMutateConfig: tsiMutateConfig,
 		server: &http.Server{

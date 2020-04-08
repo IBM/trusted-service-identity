@@ -36,6 +36,9 @@ spec:
               readOnly: true
             - name: webhook-config
               mountPath: /etc/webhook/config
+            - name: tsi-namespace
+              mountPath: /etc/webhook
+              readOnly: true
       volumes:
         - name: webhook-certs
           secret:
@@ -43,3 +46,9 @@ spec:
         - name: webhook-config
           configMap:
             name: tsi-mutate-webhook-configmap
+        - name: tsi-namespace
+          downwardAPI:
+            items:
+              - path: "tsi-namespace"
+                fieldRef:
+                  fieldPath: metadata.namespace

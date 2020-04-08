@@ -34,16 +34,9 @@ var (
 	defaulter = runtime.ObjectDefaulter(runtimeScheme)
 )
 
-// TODO pass the name of the TSI namespace via downwardAPI
-const tsiNamespace = "trusted-identity"
-
-// protectedNamespaces - list of namespaces that are protected and cannot
-// execute the mutation
-var protectedNamespaces = []string{
-	metav1.NamespaceSystem,
-	metav1.NamespacePublic,
-	tsiNamespace,
-}
+// list of namespaces that are protected and cannot execute the mutation
+var protectedNamespaces []string
+var tsiNamespace string
 
 const (
 	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
@@ -53,6 +46,7 @@ const (
 	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/ti-cluster-region"
 )
 
+// Webhook errors types used for error matching
 var (
 	ErrHostpathSocket = errors.New("Using hostPath Volume with '/tsi-secure' is not allowed")
 	ErrSidecarImg     = errors.New("Attempting to modify the sidecar image")
@@ -66,7 +60,7 @@ type WebhookServer struct {
 }
 
 type ClusterInfoGetter interface {
-	GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error)
+	GetClusterTI(tsiNamespace string, policy string) (ctiv1.ClusterTI, error)
 }
 
 type cigKube struct {
@@ -91,10 +85,10 @@ func NewCigKube() (*cigKube, error) {
 	return &ci, nil
 }
 
-func (ck *cigKube) GetClusterTI(namespace string, policy string) (ctiv1.ClusterTI, error) {
+func (ck *cigKube) GetClusterTI(tsiNamespace string, policy string) (ctiv1.ClusterTI, error) {
 	// get the client using KubeConfig
-	glog.Infof("TSI Namespace : %v", namespace)
-	cti, err := ck.cticlient.ClusterTIs(namespace).Get(policy, metav1.GetOptions{})
+	glog.Infof("TSI Namespace : %v", tsiNamespace)
+	cti, err := ck.cticlient.ClusterTIs(tsiNamespace).Get(policy, metav1.GetOptions{})
 	if err != nil {
 		fmt.Printf("Err: %v", err)
 		return ctiv1.ClusterTI{}, err
@@ -155,6 +149,20 @@ func init() {
 	// defaulting with webhooks:
 	// https://github.com/kubernetes/kubernetes/issues/57982
 	_ = v1.AddToScheme(runtimeScheme)
+}
+
+func setTsiNamespace(tsiNamespaceFile string) error {
+	tsiNs, err := ioutil.ReadFile(tsiNamespaceFile)
+	if err != nil {
+		return err
+	}
+	tsiNamespace = string(tsiNs)
+	protectedNamespaces = []string{
+		metav1.NamespaceSystem,
+		metav1.NamespacePublic,
+		tsiNamespace,
+	}
+	return nil
 }
 
 // (https://github.com/kubernetes/kubernetes/issues/57982)
@@ -231,19 +239,17 @@ func isSafe(pod *corev1.Pod, operationType string) error {
 }
 
 // Check whether the target resoured need to be mutated
-func mutationRequired(protectedList []string, metadata *metav1.ObjectMeta, namespace string) (bool, error) {
+func mutationRequired(protectedList []string, metadata *metav1.ObjectMeta, podNamespace string) (bool, error) {
 
 	// this output can be used for creating tests/FakeMutationRequiredXXX.json files
 	glog.Infof("mutationRequired log. protectedList %#v", protectedList)
 	// logJSON("FakeMutationRequired.json", metadata)
-	glog.Infof("metadata %#v", metadata)
 
 	isProtected := false
 	// skip special kubernetes system namespaces, and protect the TSI namespace
 	for _, protectedNamespace := range protectedList {
-		glog.Infof("metadata.Namespace:%v namespace:%v", protectedNamespace, namespace)
-		if namespace == protectedNamespace {
-			glog.Infof("Pod %v in protected namespace: %v", metadata.Name, namespace)
+		if podNamespace == protectedNamespace {
+			glog.Infof("Pod %v in protected namespace: %v", metadata.GenerateName, podNamespace)
 			isProtected = true
 		}
 	}
@@ -255,7 +261,6 @@ func mutationRequired(protectedList []string, metadata *metav1.ObjectMeta, names
 
 	// mutation is only executed if requested
 	// in non-protected namespace
-	glog.Infof("isProtected %v", isProtected)
 	switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
 	case "y", "yes", "true", "on":
 		if isProtected {
@@ -378,9 +383,9 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 
 // If return nil, no changes required
 func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.AdmissionRequest) (*tsiMutateConfig, error) {
-	namespace := req.Namespace
-	if namespace == metav1.NamespaceNone {
-		namespace = metav1.NamespaceDefault
+	podNamespace := req.Namespace
+	if podNamespace == metav1.NamespaceNone {
+		podNamespace = metav1.NamespaceDefault
 	}
 	// To generate a content for a new `Fake` file for testing, uncomment out below:
 	// logJSON("FakeAdmissionRequest.json", req)
