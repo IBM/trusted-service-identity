@@ -17,6 +17,7 @@ physical hardware. Secrets are released to the application based on this identit
 ## Table of Contents
 - [Installation](./README.md#installation)
   - [Prerequisites](./README.md#prerequisites)
+  - [Openshift](./README.md#openshift)
   - [Setup Vault](./README.md#setup-vault)
   - [Setup Cluster](./README.md#setup-cluster-nodes)
   - [Install](./README.md#install-trusted-service-identity-framework)
@@ -28,6 +29,7 @@ physical hardware. Secrets are released to the application based on this identit
 - [Maintainers List](./MAINTAINERS.md##maintainers-list)
 
 ## Installation
+
 ### Prerequisites
 #### Clone this project in a local directory, outside your GOPATH
 ```console
@@ -36,7 +38,7 @@ cd trusted-service-identity
 ```
 
 #### Kubernetes cluster
-* Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](www.ibm.com/Kubernetes/Service‎),
+* Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](https://www.ibm.com/cloud/container-service/),
 [IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube) or any other solution that provides Kubernetes cluster.
 * Make sure the Kubernetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
 * Make sure the `KUBECONFIG` is properly set and you can access the cluster. Test the access with
@@ -55,6 +57,9 @@ $ kk get po
 ```
 
 #### Install and initialize Helm environment
+The OpenShift installation, only needs the helm client installed. There is no
+need to run the `helm init` operation.
+
 This project requires Helm v2.10.0 or higher, but not Helm v3 (yet...)
 Install [Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md). On Mac OS X you can use brew to install helm:
 ```bash
@@ -103,6 +108,30 @@ Then recreate a new, empty namespace:
 ./cleanup.sh
 ./init-namespace.sh
 ```
+
+### Openshift
+Installation of Trusted Service Identity on RedHat OpenShift requires several steps
+to overcome the additional security restrictions. To make this process simpler,
+we introduced a script to drive this installation ([install-open-shift.sh](./install-open-shift.sh))
+
+Before we start, several considerations:
+* The script is not using Helm to drive the installation, but instead, using Helm client it extracts  the relevant installation files and customize them as needed.
+* Vault Service cannot be installed in the same OpenShift cluster, so instead we suggest starting the Vault service in another cluster, e.g. [IBM Kubernetes Service](https://www.ibm.com/cloud/container-service/). The Vault installation steps are specified [here](./README.md#setup-vault)
+* Once the Vault Service is operational, the external access point to it is needed to complete the setup
+* The OpenShift installation requires OpenShift client `oc` installed and configured. Please follow the [oc documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html) the `oc` cli can be obtained [here](https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/)
+
+OpenShift Installation:
+* Edit [install-open-shift.sh](./install-open-shift.sh) file by assigning the required parameters:
+  * VAULT_ADDR - external access to your Vault service e.g. VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
+  * CLUSTER_NAME - name of the cluster, e.g. CLUSTER_NAME="my-roks4"
+  * CLUSTER_REGION - label of the datacenter region e.g. CLUSTER_REGION="eu-de"
+  * JSS_TYPE - TSI currently supports 2 JSS services,`vtpm2-server` or `jss-server` e.g. JSS_TYPE=vtpm2-server
+* assuming the KUBECONFIG and `oc` are configured, execute the installation by running the script.
+* To track the status of the installation, you can start another console pointing at the same OpenShift cluster, setup KUBECONFIG, then run:
+  ```
+    watch -n 5 kubectl -n trusted-identity get all
+  ```
+* Follow the installation steps on your screen
 
 ### Setup Vault
 TSI requires Vault to store the secrets. If you have a Vault instance that can be
