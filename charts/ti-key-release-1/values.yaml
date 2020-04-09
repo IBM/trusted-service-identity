@@ -19,12 +19,12 @@ cluster:
 # Section related to JWT token creation
 jwt:
   # expireSec - Time To Live for JWT token (in seconds)
-  expireSec: 30
+  expireSec: 60
   issuer: wsched@us.ibm.com
 
 secrets:
   # how often secrets should be retrieved from Vault
-  refreshSec: 45
+  refreshSec: 600
 
 # specify the address of the Vault service that contains all
 # the TSI secrets to be retrieved by the sidecar

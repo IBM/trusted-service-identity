@@ -36,7 +36,7 @@ ti-key-release-1:
   vaultAddress: http://vault
   secrets:
     # how often secrets should be retrieved from Vault
-    refreshSec: 45
+    refreshSec: 600
   # Cluster Information
   cluster:
     name: cluster-name
@@ -44,5 +44,5 @@ ti-key-release-1:
   # Section related to JWT token creation
   jwt:
     # expireSec - Time To Live for JWT token (in seconds)
-    expireSec: 30
+    expireSec: 60
     issuer: wsched@us.ibm.com
