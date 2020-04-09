@@ -34,12 +34,13 @@ export ROOT_TOKEN=
 export VAULT_ADDR=(vault address in format http://vault.server:8200)
 
 syntax:
-   $0 [region] [cluster] [full image name (optional)]
+   $0 [region] [cluster] [namespace] [full image name (optional)]
 
 where:
-      -region: eu-de, dal01, wdc01, ...
-      -cluster: cluster name
-      -full image name (optional) e.g. trustedseriviceidentity/vault-cli:v0.3
+      [region]: eu-de, dal01, wdc01, ...
+      [cluster]: cluster name
+      [namespace]: namespace of the application container
+      [full image name (optional)]: e.g. trustedseriviceidentity/vault-cli:v0.3
 
 HELPMEHELPME
 }
@@ -78,14 +79,14 @@ loadVault()
 
   # # write some data to be read later on
   # # testing rule `demo` with ti-policy-all
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${VIMGSHA}/mysecret1 all=good
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${VIMGSHA}/mysecret1
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${UIMGSHA}/mysecret1 secret=very5ecret!value
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/trusted-identity/${UIMGSHA}/mysecret1
+  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${VIMGSHA}/mysecret1 all=good
+  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${VIMGSHA}/mysecret1
+  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1 secret=very5ecret!value
+  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1
 
-  # testing rule demo-n with policy ti-policy-n
-  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/mysecret3 policy-n=good
-  vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/trusted-identity/mysecret3
+  # ${NAMESPACE}ing rule demo-n with policy ti-policy-n
+  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3 policy-n=good
+  vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3
 
   # testing rule demo-r with policy ti-demo-r
   vault kv put secret/ti-demo-r/${REGION}/mysecret4 region=good
@@ -103,9 +104,9 @@ loadVault()
       "metadata": {
           "creationTimestamp": "2019-05-02T15:24:32Z",
           "name": "ti-vault",
-          "namespace": "trusted-identity",
+          "namespace": "test",
           "resourceVersion": "1078959",
-          "selfLink": "/api/v1/namespaces/trusted-identity/services/ti-vault",
+          "selfLink": "/api/v1/namespaces/test/services/ti-vault",
           "uid": "627b7e94-6cee-11e9-9e35-fafb83f6879f"
       },
       "spec": {
@@ -140,14 +141,15 @@ EOF
 if [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   echo "ROOT_TOKEN and VAULT_ADDR enviroment variables must be set"
   helpme
-elif [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" || "$2" == "" ]] ; then
+elif [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" || "$3" == "" ]] ; then
     helpme
 else
   REGION=$1
   CLUSTER=$2
+  NAMESPACE=$3
 
-  if  [[ "$3" != "" ]] ; then
-    IMG=$3
+  if  [[ "$4" != "" ]] ; then
+    IMG=$4
   fi
   getSHA
   loadVault
