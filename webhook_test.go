@@ -146,7 +146,8 @@ func TestMutationRequired(t *testing.T) {
 	// testing if pod should be mutated
 	testName := "mutation required"
 	meta := getFakeMetadata("tests/FakeMutationRequired.json")
-	required, err := mutationRequired(ignoredNamespaces, &meta, ns)
+	meta.Namespace = ns
+	required, err := mutationRequired(ignoredNamespaces, &meta)
 	if err != nil {
 		t.Fatalf(ERROR, testName)
 	}
@@ -161,7 +162,8 @@ func TestMutationRequired(t *testing.T) {
 	// testing pod with  "admission.trusted.identity/inject": "false"
 	testName = "mutation not required [1]"
 	meta = getFakeMetadata("tests/FakeMutationNotRequired1.json")
-	required, err = mutationRequired(ignoredNamespaces, &meta, ns)
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
 	if err != nil {
 		t.Fatalf(ERROR, testName)
 	}
@@ -174,7 +176,8 @@ func TestMutationRequired(t *testing.T) {
 	// testing pod with missing  "admission.trusted.identity/inject"
 	testName = "mutation not required [2]"
 	meta = getFakeMetadata("tests/FakeMutationNotRequired2.json")
-	required, err = mutationRequired(ignoredNamespaces, &meta, ns)
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
 	if err != nil {
 		t.Fatalf(ERROR, testName)
 	}
@@ -189,7 +192,8 @@ func TestMutationRequired(t *testing.T) {
 
 	testName = "mutation requested in protected namespace"
 	meta = getFakeMetadata("tests/FakeMutationRequired.json")
-	required, err = mutationRequired(ignoredNamespaces, &meta, ns)
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
 	if err != nil && errors.Is(err, ErrProtectedNs) {
 		t.Logf(SUCCESS, testName)
 	} else {
@@ -204,7 +208,8 @@ func TestMutationRequired(t *testing.T) {
 	// test protected namespace without requested mutation
 	testName = "mutation not requested in protected namespace"
 	meta = getFakeMetadata("tests/FakeMutationNotRequired2.json")
-	required, err = mutationRequired(ignoredNamespaces, &meta, ns)
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
 	if err != nil {
 		t.Fatalf(ERROR, testName)
 	}

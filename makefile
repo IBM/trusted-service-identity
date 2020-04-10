@@ -14,7 +14,7 @@ GOARCH=$(shell go env GOARCH)
 
 all: dep get-deps fmt test build docker timestamp
 
-fast: test build docker docker-push timestamp
+fast: build docker docker-push timestamp
 
 dep:
 	go mod tidy
