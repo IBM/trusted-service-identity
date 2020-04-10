@@ -131,7 +131,7 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
   ROLE=$(echo "$row" | jq -r '."tsi.secret/role"')
   VAULT_PATH=$(echo "$row" | jq -r '."tsi.secret/vault-path"')
-  SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-name"')
+  SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # then run secret retrieval from Vault
   run "$SECNAME" "$ROLE" "$VAULT_PATH" "$SECOUT"

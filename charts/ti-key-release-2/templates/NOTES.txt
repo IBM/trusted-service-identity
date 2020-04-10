@@ -21,3 +21,5 @@ This helm chart installs environment for Trusted Identity
 To execute a test, create a new namespace then deploy the test application:
     kubectl create ns test
     kubectl create -f examples/myubuntu.yaml -n test
+Then check if the secret is available:
+    kubectl -n test exec -it $(k -n test get pods | grep myubuntu | awk '{print $1}' ) cat /tsi-secrets/mysecrets/mysecret4

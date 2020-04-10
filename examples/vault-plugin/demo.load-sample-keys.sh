@@ -85,11 +85,11 @@ loadVault()
   vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1
 
   # ${NAMESPACE}ing rule demo-n with policy ti-policy-n
-  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3 policy-n=good
+  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3 mysecret=my5ecret@1
   vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3
 
   # testing rule demo-r with policy ti-demo-r
-  vault kv put secret/ti-demo-r/${REGION}/mysecret4 region=good
+  vault kv put secret/ti-demo-r/${REGION}/mysecret4 secret=An0ther5ecret!now
   vault kv get secret/ti-demo-r/${REGION}/mysecret4
 
   # pass JSON as a value:
