@@ -18,7 +18,5 @@ webhooks:
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        tsi-mutate: enabled
+        scope: "*"
 {{ end }}

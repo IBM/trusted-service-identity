@@ -20,5 +20,4 @@ This helm chart installs environment for Trusted Identity
 
 To execute a test, create a new namespace then deploy the test application:
     kubectl create ns test
-    kubectl label ns test tsi-mutate=enabled
     kubectl create -f examples/myubuntu.yaml -n test
