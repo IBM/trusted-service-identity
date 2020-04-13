@@ -5,6 +5,7 @@ JWTFILE="/jwt/token"
 # SECREQFILE - Secret Request File from Pod Annotation
 SECREQFILE="/pod-metadata/tsi-secrets"
 LOGINFAIL="Vault Login Failure!"
+TIMEOUT="504 Gateway Time-out"
 
 # validate if VAULT_ADDR env. variable is set
 if [ "$VAULT_ADDR" == "" ]; then
@@ -44,6 +45,10 @@ login()
   # fi
   #
   local RT=$?
+  if [[ "$RESP" == *"$TIMEOUT"* ]]; then
+    echo "$TIMEOUT"
+    return
+  fi
   if [ "$RT" == "0" ]; then
        echo "$RESP"
   else
@@ -75,6 +80,11 @@ run()
     echo "Login to Vault failed!"
     return 1
   fi
+  if [ "$RESP" == "$TIMEOUT" ]; then
+    echo "Vault timeout!"
+    return 1
+  fi
+
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
 
   # Then parse the response to get other attributes associated
