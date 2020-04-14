@@ -35,11 +35,11 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: ti-admin-install-bind
-  namespace: trusted-identity
+  namespace: {{ .Values.namespace }}
 subjects:
 - kind: ServiceAccount
   name: ti-install-sa
-  namespace: trusted-identity
+  namespace: {{ .Values.namespace }}
 roleRef:
   kind: Role
   name: ti-install-admin
@@ -67,7 +67,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: ti-install-sa
-  namespace: trusted-identity
+  namespace: {{ .Values.namespace }}
 roleRef:
   kind: ClusterRole
   name: mutwebhookr-mgr
