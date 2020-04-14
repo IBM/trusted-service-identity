@@ -14,9 +14,11 @@ Syntax: ${0} <token> <vault_addr>
 Where:
   token      - vault root token to setup the plugin (optional, if set as ROOT_TOKEN)
   vault_addr - vault address in format http://vault.server:8200
+  namespace  - if different than trusted-identity (optional)
 
 HELPMEHELPME
 }
+kk="kubectl -n trusted-identity"
 
 setupVault()
 {
@@ -58,7 +60,7 @@ setupVault()
   # if the deployed image has the same binary as the one on your system, use the
   # following method:
   export SHA256
-  SHA256=$(kubectl -n trusted-identity exec $(kubectl -n trusted-identity get po | grep tsi-vault-| awk '{print $1}') /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
+  SHA256=$($kk exec $($kk get po | grep tsi-vault-| awk '{print $1}') /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
   # another way to obtain this SHA, use a local plugin created by the build process
   # assuming it is identical to the one one deployed in Vault container.
   # SHA256=$(shasum -a 256 "${PWD}/pkg/linux_amd64/${PLUGIN}" | cut -d' ' -f1)
@@ -102,6 +104,9 @@ if [ ! "$1" == "" ] ; then
 fi
 if [ ! "$2" == "" ] ; then
   export VAULT_ADDR=$2
+fi
+if [ ! "$3" == "" ] ; then
+  kk="kubectl -n $3"
 fi
 
 # validate the arguments

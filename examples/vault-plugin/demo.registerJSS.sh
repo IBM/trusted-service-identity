@@ -9,6 +9,7 @@ Syntax: ${0} <vault_token> <vault_addr>
 Where:
   token      - vault root token to setup the plugin
   vault_addr - vault address (or ingress) in format http://vault.server:8200
+  namespace  - if different than trusted-identity (optional)
 
 Currently:
    ROOT_TOKEN=${ROOT_TOKEN}
@@ -87,6 +88,9 @@ fi
 if [ ! "$2" == "" ] ; then
   export VAULT_ADDR=$2
 fi
+if [ ! "$3" == "" ] ; then
+  kk="kubectl -n $3"
+fi
 
 # validate the arguments
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
@@ -98,7 +102,7 @@ elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
 else
   # get the list of all 'ti-node-setup' pods for each node instance
   # select only Running instances, to eliminate "Terminating" (helm operations)
-  PODS=$(kubectl -n trusted-identity get pods --selector=app=ti-node-setup --field-selector=status.phase=Running --output=jsonpath={.items..metadata.name})
+  PODS=$($kk get pods --selector=app=ti-node-setup --field-selector=status.phase=Running --output=jsonpath={.items..metadata.name})
   if [ -z "$PODS" ];  then
         echo "ERROR!: There are no running 'ti-node-setup' pods. Cannot register JSS. Run 'helm install charts/tsi-node-setup'"
   else
