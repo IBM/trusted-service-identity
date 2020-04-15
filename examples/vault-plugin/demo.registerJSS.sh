@@ -5,11 +5,11 @@ helpme()
 {
   cat <<HELPMEHELPME
 
-Syntax: ${0} <vault_token> <vault_addr>
+Syntax: ${0} <vault_token> <vault_addr> <TSI_namespace>
 Where:
   token      - vault root token to setup the plugin
   vault_addr - vault address (or ingress) in format http://vault.server:8200
-  namespace  - if different than trusted-identity (optional)
+  TSI_namespace  - if different than trusted-identity (optional)
 
 Currently:
    ROOT_TOKEN=${ROOT_TOKEN}
@@ -17,7 +17,6 @@ Currently:
 
 HELPMEHELPME
 }
-kk="kubectl -n trusted-identity"
 
 # this function registers individual nodes
 register()
@@ -88,6 +87,7 @@ fi
 if [ ! "$2" == "" ] ; then
   export VAULT_ADDR=$2
 fi
+kk="kubectl -n trusted-identity"
 if [ ! "$3" == "" ] ; then
   kk="kubectl -n $3"
 fi
