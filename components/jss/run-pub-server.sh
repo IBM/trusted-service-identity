@@ -1,9 +1,10 @@
 #!/bin/sh
 STATEDIR=${STATEDIR:-/host/tsi-secure}
 
+
 start_server() {
   if ps -ef | grep flask | grep -v grep; then
-    echo "web server already running"
+    echo "web server already running" > /dev/null # for debugging...
   else
     cd /usr/local/bin || exit
     FLASK_APP=/web-server-pub.py python -m flask run --host=0.0.0.0 --port=5000 &
@@ -15,19 +16,19 @@ stop_server() {
     echo "stopping the running web server..."
     kill -9 $(ps -ef |grep flask | grep -v grep | awk '{print $2}')
   else
-    echo "web server not running"
+    echo "web server not running" > /dev/null # for debugging
   fi
 }
 
 while true
  do
-  NOW=$(date +%s)
-  echo $NOW
+  # NOW=$(date +%s)
+  # echo $NOW
   if [ -f /host/tsi-secure/x5c ] ; then
-    echo "x5c file exists"
+    # echo "x5c file exists"
     stop_server
   else
-    echo "x5c file does not exist"
+    # echo "x5c file does not exist"
     start_server
   fi
   sleep 30
