@@ -27,7 +27,8 @@ if [ ! -s "$SECREQFILE" ]; then
 fi
 JSON=$(yq r -j "$SECREQFILE")
 
-
+# the return values from this function are ignored
+# we only use the echoed values
 login()
 {
   local ROLE=$1
@@ -47,13 +48,15 @@ login()
   local RT=$?
   if [[ "$RESP" == *"$TIMEOUT"* ]]; then
     echo "$TIMEOUT"
-    return
+    return 1
   fi
   if [ "$RT" == "0" ]; then
        echo "$RESP"
   else
     echo "$LOGINFAIL"
+    return 1
   fi
+  return 0
 }
 
 ## create help menu:

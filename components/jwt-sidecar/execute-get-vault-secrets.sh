@@ -26,9 +26,9 @@ do
   /usr/local/bin/get-vault-secrets.sh
   RT=$?
   if [ "$RT" == "0" ]; then
-    # introduce the random wait shim from 1 to 30 seconds
-    RAND_SHIM=$((1 + RANDOM % 30))
-    WAIT_SEC=$(($SECRET_REFRESH_SEC + RAND_SHIM))
+    # introduce the random wait value from 1 to 30 seconds
+    RAND_WAIT=$((1 + RANDOM % 30))
+    WAIT_SEC=$((${SECRET_REFRESH_SEC} + RAND_WAIT))
     echo "Waiting $WAIT_SEC seconds ..."
   fi
   sleep "${WAIT_SEC}"
