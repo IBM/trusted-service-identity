@@ -26,11 +26,11 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: ti-admin-bind
-  namespace: trusted-identity
+  namespace: {{ .Values.namespace }}
 subjects:
 - kind: ServiceAccount
   name: ti-sa
-  namespace: trusted-identity
+  namespace: {{ .Values.namespace }}
 roleRef:
   kind: Role
   name: ti-admin

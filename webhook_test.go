@@ -136,11 +136,22 @@ func TestIsSafe(t *testing.T) {
 
 func TestMutationRequired(t *testing.T) {
 
-	// testing if pad that should be mutated
+	// tsiNamespce is protected, mutating containers cannot be created
+	tsiNamespace := "trusted-identity"
+	ignoredNamespaces := []string{"kube-system", "kube-public", tsiNamespace}
+
+	// using non-protected namespace
+	ns := "test"
+
+	// testing if pod should be mutated
 	testName := "mutation required"
 	meta := getFakeMetadata("tests/FakeMutationRequired.json")
-	ignoredNamespaces := []string{"kube-system", "kube-public"}
-	if mutationRequired(ignoredNamespaces, &meta) {
+	meta.Namespace = ns
+	required, err := mutationRequired(ignoredNamespaces, &meta)
+	if err != nil {
+		t.Fatalf(ERROR, testName)
+	}
+	if required {
 		t.Logf(SUCCESS, testName)
 		t.Logf("Testing mutating metadata successful")
 	} else {
@@ -151,8 +162,12 @@ func TestMutationRequired(t *testing.T) {
 	// testing pod with  "admission.trusted.identity/inject": "false"
 	testName = "mutation not required [1]"
 	meta = getFakeMetadata("tests/FakeMutationNotRequired1.json")
-	ignoredNamespaces = []string{"kube-system", "kube-public"}
-	if !mutationRequired(ignoredNamespaces, &meta) {
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
+	if err != nil {
+		t.Fatalf(ERROR, testName)
+	}
+	if !required {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -161,8 +176,44 @@ func TestMutationRequired(t *testing.T) {
 	// testing pod with missing  "admission.trusted.identity/inject"
 	testName = "mutation not required [2]"
 	meta = getFakeMetadata("tests/FakeMutationNotRequired2.json")
-	ignoredNamespaces = []string{"kube-system", "kube-public"}
-	if !mutationRequired(ignoredNamespaces, &meta) {
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
+	if err != nil {
+		t.Fatalf(ERROR, testName)
+	}
+	if !required {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	// test protected namespace with requested mutation
+	ns = tsiNamespace
+
+	testName = "mutation requested in protected namespace"
+	meta = getFakeMetadata("tests/FakeMutationRequired.json")
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
+	if err != nil && errors.Is(err, ErrProtectedNs) {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Fatalf(ERROR, testName)
+	}
+	if !required {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	// test protected namespace without requested mutation
+	testName = "mutation not requested in protected namespace"
+	meta = getFakeMetadata("tests/FakeMutationNotRequired2.json")
+	meta.Namespace = ns
+	required, err = mutationRequired(ignoredNamespaces, &meta)
+	if err != nil {
+		t.Fatalf(ERROR, testName)
+	}
+	if !required {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tsi-mutate-configmap
+  name: tsi-mutate-set-configmap
   namespace: {{ .Values.namespace }}
   labels:
     app: {{ template "ti-key-release.name" . }}

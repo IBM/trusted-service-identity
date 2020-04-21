@@ -18,5 +18,8 @@ This helm chart installs environment for Trusted Identity
     secrets.refreshSec: {{ index .Values "ti-key-release-1" "secrets" "refreshSec" }}
     jssService.type: {{ .Values.jssService.type }}
 
-Execute test:
-  kubectl create -f examples/myubuntu.yaml -n trusted-identity
+To execute a test, create a new namespace then deploy the test application:
+    kubectl create ns test
+    kubectl create -f examples/myubuntu.yaml -n test
+Then check if the secret is available:
+    kubectl -n test exec -it $(k -n test get pods | grep myubuntu | awk '{print $1}' ) cat /tsi-secrets/mysecrets/mysecret4

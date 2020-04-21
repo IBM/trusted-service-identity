@@ -34,18 +34,31 @@ func main() {
 
 	tsiMutateConfig, err := loadtsiMutateConfig(parameters.tsiMutateConfigFile)
 	if err != nil {
-		glog.Errorf("Failed to load configuration: %v", err)
+		glog.Errorf("Failed to load the webhook server configuration: %v", err)
+		glog.Error("Webhook server cannot be started. Terminating.")
+		os.Exit(1)
 	}
 	logJSON("tsiMutateConfig(main)", tsiMutateConfig)
 
 	pair, err := tls.LoadX509KeyPair(parameters.certFile, parameters.keyFile)
 	if err != nil {
 		glog.Errorf("Failed to load key pair: %v", err)
+		glog.Error("Webhook server cannot be started. Terminating.")
+		os.Exit(1)
 	}
 
 	clInfo, err := NewCigKube()
 	if err != nil {
 		glog.Errorf("Failed to create ClusterInfo: %v", err)
+		glog.Error("Webhook server cannot be started. Terminating.")
+		os.Exit(1)
+	}
+
+	err = setTsiNamespace("/etc/webhook/tsi-namespace")
+	if err != nil {
+		glog.Errorf("Failed to load the TSI namespace: %v", err)
+		glog.Error("Webhook server cannot be started. Terminating.")
+		os.Exit(1)
 	}
 
 	whsvr := &WebhookServer{
@@ -74,6 +87,6 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	glog.Infof("Got OS shutdown signal, shutting down wenhook server gracefully...")
+	glog.Infof("Got OS shutdown signal, shutting down webhook server gracefully...")
 	whsvr.server.Shutdown(context.Background())
 }

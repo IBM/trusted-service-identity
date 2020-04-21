@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: myubuntu
-  name: myubuntu
+    app: myubuntu-all
+  name: myubuntu-all
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myubuntu
+      app: myubuntu-all
   template:
     metadata:
       annotations:
@@ -21,29 +21,25 @@ spec:
              - tsi.secret/name: "mysecret2.json"
                tsi.secret/role: "demo-r"
                tsi.secret/vault-path: "secret/ti-demo-r"
-               tsi.secret/local-path: "mysecrets/"
+               tsi.secret/local-path: "mysecrets"
              - tsi.secret/name: "mysecret4"
                tsi.secret/role: "demo-r"
                tsi.secret/vault-path: "secret/ti-demo-r"
                tsi.secret/local-path: "mysecrets"
-             - tsi.secret/name: "password"
+             - tsi.secret/name: "mysecret5"
                tsi.secret/role: "demo-r"
                tsi.secret/vault-path: "secret/ti-demo-r"
                tsi.secret/local-path: "mysecrets"
-             - tsi.secret/name: "invalid"
-               tsi.secret/role: "demo"
-               tsi.secret/vault-path: "secret/ti-demo-all"
-               tsi.secret/local-path: "mysecrets"
-             - tsi.secret/name: "non-existing"
-               tsi.secret/role: "demo"
-               tsi.secret/vault-path: "secret/nothing"
+             - tsi.secret/name: "test.json"
+               tsi.secret/role: "demo-r"
+               tsi.secret/vault-path: "secret/ti-demo-r"
                tsi.secret/local-path: "mysecrets"
       labels:
-        app: myubuntu
-      name: myubuntu
+        app: myubuntu-all
+      name: myubuntu-all
     spec:
       containers:
-        - name: myubuntu
+        - name: myubuntu-all
           image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]

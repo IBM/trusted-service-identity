@@ -10,7 +10,7 @@ webhooks:
     clientConfig:
       service:
         name: tsi-mutate-webhook-svc
-        namespace: trusted-identity
+        namespace: {{ .Values.namespace }}
         path: "/mutate"
       caBundle: ${CA_BUNDLE}
     rules:
@@ -18,7 +18,5 @@ webhooks:
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        tsi-mutate: enabled
+        scope: "*"
 {{ end }}

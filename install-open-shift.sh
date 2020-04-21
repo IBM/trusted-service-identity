@@ -219,9 +219,10 @@ cat << EOF
      kk delete sa tsi-setup-admin-sa
      oc delete scc $SCCHOST
 
-Now you can test by running the sample pod:
-  kk create -f ../myubuntu.yaml
+Now you can test it by creating a new space and running a sample pod:
+    kubectl create ns test
+    kubectl create -f examples/myubuntu.yaml -n test
 Once running, execute:
 EOF
-echo '  kk exec -it $(kk get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecrets/myubuntu-mysecret1/mysecret1"
+echo '  kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecrets/mysecret4"
 echo "********* END ********"

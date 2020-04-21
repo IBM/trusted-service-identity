@@ -17,7 +17,7 @@ spec:
              - tsi.secret/name: "mysecret1"
                tsi.secret/role: "demo"
                tsi.secret/vault-path: "secret/ti-demo-all"
-               tsi.secret/local-name: "mysecrets/myubuntu-mysecret1"
+               tsi.secret/local-path: "mysecrets/myubuntu-mysecret1"
       labels:
         app: myubuntu
       name: myubuntu

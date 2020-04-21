@@ -5,6 +5,7 @@ JWTFILE="/jwt/token"
 # SECREQFILE - Secret Request File from Pod Annotation
 SECREQFILE="/pod-metadata/tsi-secrets"
 LOGINFAIL="Vault Login Failure!"
+TIMEOUT="504 Gateway Time-out"
 
 # validate if VAULT_ADDR env. variable is set
 if [ "$VAULT_ADDR" == "" ]; then
@@ -26,7 +27,8 @@ if [ ! -s "$SECREQFILE" ]; then
 fi
 JSON=$(yq r -j "$SECREQFILE")
 
-
+# the return values from this function are ignored
+# we only use the echoed values
 login()
 {
   local ROLE=$1
@@ -44,11 +46,17 @@ login()
   # fi
   #
   local RT=$?
+  if [[ "$RESP" == *"$TIMEOUT"* ]]; then
+    echo "$TIMEOUT"
+    return 1
+  fi
   if [ "$RT" == "0" ]; then
        echo "$RESP"
   else
     echo "$LOGINFAIL"
+    return 1
   fi
+  return 0
 }
 
 ## create help menu:
@@ -75,6 +83,11 @@ run()
     echo "Login to Vault failed!"
     return 1
   fi
+  if [ "$RESP" == "$TIMEOUT" ]; then
+    echo "Vault timeout!"
+    return 1
+  fi
+
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
 
   # Then parse the response to get other attributes associated
@@ -131,7 +144,7 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
   ROLE=$(echo "$row" | jq -r '."tsi.secret/role"')
   VAULT_PATH=$(echo "$row" | jq -r '."tsi.secret/vault-path"')
-  SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-name"')
+  SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # then run secret retrieval from Vault
   run "$SECNAME" "$ROLE" "$VAULT_PATH" "$SECOUT"
