@@ -24,6 +24,7 @@ physical hardware. Secrets are released to the application based on this identit
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
 - [Usage (demo)](examples/README.md)
+- [Security considerations](./README.md#security-considerations)
 - [Reporting security issues](./README.md#reporting-security-issues)
 - [Contributing (TSI Development)](./CONTRIBUTING.md)
 - [Maintainers List](./MAINTAINERS.md##maintainers-list)
@@ -48,12 +49,14 @@ kubectl get pods --all-namespaces
 ```
 
 #### Setup kubectl alias
-Through out this whole project we will be working with the newly created namespace: `trusted-identity`.
-Let's setup an alias `kk` to make typing faster:
+Through out this whole project we will be working with the newly created TSI namespace.
+By default it is `trusted-identity`, but it can be changed as needed.
+Let's setup an alias `kk` to make typing faster. The value can be anything, but stay
+consistent:
 ```console
 $ alias kk="kubectl -n trusted-identity"
-$ # list all the pods to test it
-$ kk get po
+$ # list all objects to test it
+$ kk get all
 ```
 
 #### Install and initialize Helm environment
@@ -216,7 +219,7 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=false --set reset.x5c=false
 ```
 
-In order to run JSS serer, all worker nodes have to be setup with private keys.  This operation needs to be executed only once.
+In order to run JSS server, all worker nodes have to be setup with private keys.  This operation needs to be executed only once.
 If you are running this setup for the first time or like to override previous setup values, execute the helm command below.
 
 
@@ -310,7 +313,12 @@ Remove all the resources created for Trusted Identity
 ```console
 ./cleanup.sh
 ```
-To start a fresh deployment, make sure to run `./init.sh` again after the cleanup.
+To start a fresh deployment, make sure to run `./init-namespace.sh` again after the cleanup.
+
+## Security Considerations
+To improve security measures, we have decided to move all application containers
+to a different namespace and keep all the TSI framework as _protected namespace_
+that cannot host application and other containers (since version 1.4)
 
 ## Reporting security issues
 

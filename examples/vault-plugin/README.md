@@ -39,10 +39,6 @@ Test the connection to public JSS interface using the node-setup containers depl
 during the [Setup Cluster](../../README.md#setup-cluster) process earlier:
 
 ```console
-# list the running pods
-$ kk get pods
-
-# select one tsi-node-setup pod and execute:
 $ kk exec -it $(kk get po | grep tsi-node-setup | awk '{print $1}' |  sed -n 1p ) -- sh -c 'curl $HOST_IP:5000/public/getCSR'
 
 -----BEGIN CERTIFICATE REQUEST-----
@@ -88,6 +84,11 @@ vault status
 ```sh
 $ ./demo.vault-setup.sh
 ```
+If the TSI namespace is different than `trusted-identity`,
+pass the TSI namespace as follow:
+```sh
+$ ./demo.vault-setup.sh $ROOT_TOKEN $VAULT_ADDR <TSI Namespace>
+```
 If no errors, proceed to the JSS registration
 
 ### Register JWT Signing Service (JSS) with Vault
@@ -100,6 +101,12 @@ $ ./demo.registerJSS.sh
 . . . .
 Upload of x5c successful
 ```
+If the TSI namespace is different than `trusted-identity`,
+pass the TSI namespace as follow:
+```sh
+$ ./demo.registerJSS.sh $ROOT_TOKEN $VAULT_ADDR <TSI Namespace>
+```
+
 This script registers every JSS node with Vault. Make sure the number `Upload of x5c successful`
 corresponds to the number of nodes in the cluster (`kubectl get nodes. Node xxx completed`).
 
@@ -111,6 +118,8 @@ $ # list the running pods
 $ kk get pods
 $ # select one tsi-node-setup pod and execute:
 $ kk exec -it tsi-setup-tsi-node-setup-xxxx -- sh -c 'curl $HOST_IP:5000/public/getCSR'
+$ # or simply use the following script:
+$ kk exec -it $(kk get po | grep tsi-node-setup | awk '{print $1}' |  sed -n 1p ) -- sh -c 'curl $HOST_IP:5000/public/getCSR'
 curl: (7) Failed to connect to 10.X.X.X port 5000: Connection refused
 command terminated with exit code 7
 ```
@@ -144,7 +153,7 @@ Sample Payload:
   "images-names": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
   "iss": "wsched@us.ibm.com",
   "machineid": "fa967df1a948495596ad6ba5f665f340",
-  "namespace": "trusted-identity",
+  "namespace": "test",
   "pod": "vault-cli-84c8d647c-s6cgb",
   "sub": "wsched@us.ibm.com"
 }
@@ -161,29 +170,34 @@ $ ./demo.load-sample-policies.sh
 Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](../myubuntu.yaml) and
 [examples/vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml) (see below) examples.
 
+Since version 1.4, the application must be running in a separate namespace. Use the application namespace to load
+sample keys:
 ```console
 $ demo.load-sample-keys.sh --help
-$ demo.load-sample-keys.sh [region] [cluster]
+$ demo.load-sample-keys.sh [region] [cluster] [app. namespace]
 ```
 
 ### Start sample application
 Now is time to start some sample application. The simplest one is `myubuntu`
-available [here](../myubuntu.yaml#L12). Application will get a TSI sidecar as
-long as it contains the following annotation:
+available [here](../myubuntu.yaml#L12). Application will get a TSI sidecar as long as it contains the following annotation:
 
 ```yaml
 admission.trusted.identity/inject: "true"
 ```
-
 There is also an [example](../myubuntu.yaml#L13-L33) showing how to request secrets for the application.
+
+Staring with TSI version 1.4, all applications must be
+created in a namespace that is not used for TSI components e.g. _test_
 
 Start the application from a new console. It does not require Vault admin (as above).
 Use `KUBECONFIG` as before, to access the cluster:
 
 ```console
+export KUBECONFIG=<your cluster config>
 cd TI-KeyRelease
-kk create -f examples/myubuntu.yaml
-kk get po
+kubectl create namespace test
+kubectl -n test create -f examples/myubuntu.yaml
+kubectl -n test get po
 ```
 
 The secrets will be mounted to your pad under `/tsi-secrets` directory, using
@@ -193,17 +207,17 @@ Validate if the sample secrets loaded earlier to Vault via 'demo.load-sample-key
 requested via pod annotation are available on the container:
 
 ```console
-kk exec -it $(kk get pods | grep myubuntu | awk '{print $1}') cat /tsi-secrets/mysecrets/myubuntu-mysecret1/mysecret1
+kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{print $1}') cat /tsi-secrets/mysecrets/mysecret4
 ```
 
 To test the sidecar access to Vault:
 
 ```console
-kk exec -it myubuntu-xxxx -c jwt-sidecar /test-vault-cli.sh
+kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar /test-vault-cli.sh
 ```
 To see the JWT token:
 ```console
-kk exec -it {myubuntu-pod-id} -c jwt-sidecar cat /jwt/token
+kubectl -n test exec -it {myubuntu-pod-id} -c jwt-sidecar cat /jwt/token
 ```
 
 You can inspect the content of the token by simply pasting its content into
@@ -220,16 +234,16 @@ build the deployment file `vault-cli.yaml`, using the Vault remote address.
 
 Start the vault client, then test the injected secret:
 ```sh
-$ kk create -f ../vault-client/vault-cli.yaml
-$ kk get pods
-$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') cat tsi-secrets/mysecrets/secret-test1/mysecret1
+$ kubectl -n test create -f ../vault-client/vault-cli.yaml
+$ kubectl -n test get pods
+$ kubectl -n test exec -it $(kk get pods | grep vault-cli | awk '{print $1}') cat tsi-secrets/mysecrets/secret-test1/mysecret1
 Defaulting container name to vault-cli.
 {"all":"good"}
 ```
 
 To see the JWT token:
 ```console
-kk exec -it {vault-cli-pod-id} -c jwt-sidecar cat /jwt/token
+kubectl -n test exec -it {vault-cli-pod-id} -c jwt-sidecar cat /jwt/token
 ```
 
 You can inspect the content of the token by simply pasting its content into
@@ -240,7 +254,7 @@ You can inspect the content of the token by simply pasting its content into
 Every sidecar is equipped with a test script `/test-vault-cli.sh` Assuming the keys for this pod were loaded to the Vault using `demo.load-sample-keys.sh` they should be available for testing:
 
 ```console
-$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar /test-vault-cli.sh
+$ kubectl -n test exec -it $(kubectl -n test get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar /test-vault-cli.sh
 
 Testing the default demo role:
 A01 Test successful! RT: 0
@@ -275,7 +289,7 @@ Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environmen
 You can also get inside the `vault-cli` sidecar container and run other tests:
 
 ```console
-$ kk exec -it $(kk get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar bash
+$ kubectl -n test exec -it $(kubectl -n test get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar bash
 ```
 
 To view all the attributes (measurement) associate with this pod, you can execute
@@ -345,7 +359,7 @@ Successfully enabled 'jwt' at 'jwt'!
 
 To see all the supported paths, see the [JWT auth backend docs](https://www.vaultproject.io/docs/auth/jwt.html).
 
-## Developing the TI plugin for Vault
+## Developing the TSI plugin for Vault
 
 If you wish to work on this plugin, you'll first need
 [Go](https://www.golang.org) installed on your machine.
