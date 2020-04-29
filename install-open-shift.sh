@@ -10,6 +10,8 @@ CLUSTER_REGION=
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
 # JSS_TYPE=
+# application namespace: e.g. test
+APP_NS="test"
 
 
 
@@ -213,16 +215,16 @@ cat << EOF
 7. load sample policies:
      ./demo.load-sample-policies.sh
 8. load sample keys:
-     ./demo.load-sample-keys.sh $CLUSTER_REGION $CLUSTER_NAME
+     ./demo.load-sample-keys.sh $CLUSTER_REGION $CLUSTER_NAME $APP_NS
 9. the setup containers can be removed now:
      kk delete ds tsi-setup-tsi-node-setup
      kk delete sa tsi-setup-admin-sa
      oc delete scc $SCCHOST
 
 Now you can test it by creating a new space and running a sample pod:
-    kubectl create ns test
-    kubectl create -f examples/myubuntu.yaml -n test
+    kubectl create ns $APP_NS
+    kubectl create -f examples/myubuntu.yaml -n $APP_NS
 Once running, execute:
 EOF
-echo '  kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecrets/mysecret4"
+echo "  kubectl -n $APP_NS"' exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecrets/mysecret4"
 echo "********* END ********"
