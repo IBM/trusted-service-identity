@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	oidc "github.com/coreos/go-oidc"
@@ -40,13 +41,40 @@ func pathLogin(b *jwtAuthBackend) *framework.Path {
 	}
 }
 
+// getCertChainClaimsMap obtains the TSI claims which are part of the CA
+// chain used to verify a JWT. This implies that the claims from the claim
+// must meet the requirements put forth by the chain of trust.
+func getCertChainClaimsMap(certs []*x509.Certificate) (map[string]string, error) {
+	// It is important to go through every cert and overwrite the map claims
+	// to prevent an attack where an intermediate CA can be used to sign another
+	// set of CAs which do not have these extended names. So each attribute
+	// must be propagated down which can be done by traversing and populating
+	// the map in reverse order.
+	claimsMap := map[string]string{}
+	for _, cert := range certs {
+		for _, v := range cert.URIs {
+			if strings.ToUpper(v.Scheme) == "TSI" {
+				ss := strings.Split(v.Opaque, ":")
+				if len(ss) < 2 {
+					return nil, errors.New("TSI alt name is not in correct format")
+				}
+				k := ss[0]
+				v := strings.Join(ss[1:], ":")
+				claimsMap[k] = v
+			}
+		}
+	}
+
+	return claimsMap, nil
+}
+
 // validateCertChain validates the jwt cert chain and returns the public key
 // that can validate the JWT if verifiable
-func validateCertChain(rootCAPEM []byte, jwtToken *jwt.JSONWebToken) (interface{}, error) {
+func validateCertChain(rootCAPEM []byte, jwtToken *jwt.JSONWebToken) (interface{}, map[string]string, error) {
 	roots := x509.NewCertPool()
 	ok := roots.AppendCertsFromPEM(rootCAPEM)
 	if !ok {
-		return nil, fmt.Errorf("Error appending root cert in x509 CertPool")
+		return nil, nil, fmt.Errorf("Error appending root cert in x509 CertPool")
 	}
 
 	opts := x509.VerifyOptions{
@@ -57,12 +85,17 @@ func validateCertChain(rootCAPEM []byte, jwtToken *jwt.JSONWebToken) (interface{
 	for _, h := range jwtToken.Headers {
 		certs, err := h.Certificates(opts)
 		if err == nil && len(certs) > 0 && len(certs[0]) > 0 {
+			claims, err := getCertChainClaimsMap(certs[0])
+			if err != nil {
+				return nil, nil, err
+			}
+
 			fmt.Printf("Verification Success! %v\n", certs)
-			return certs[0][0].PublicKey, nil
+			return certs[0][0].PublicKey, claims, nil
 		}
 	}
 
-	return nil, fmt.Errorf("Unable to verify cert chain")
+	return nil, nil, fmt.Errorf("Unable to verify cert chain")
 }
 
 func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
@@ -110,12 +143,13 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 
 		claims := jwt.Claims{}
 		var valid bool
+		errMsg := ""
 		for i, key := range config.JWTValidationPubKeys {
 			var validateKey interface{}
 			// If there is a valid x5c chain, do chain validation and use the
 			// provided CA (first cert of chain as the public key) which acts
 			// as the intermediary.
-			validateKey, err := validateCertChain([]byte(key), parsedJWT)
+			validateKey, certClaims, err := validateCertChain([]byte(key), parsedJWT)
 			if err != nil {
 				// If can't validate cert chain, use the rootCA public key
 				fmt.Printf("Couldn't validate cert chain\n")
@@ -123,12 +157,25 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 			}
 
 			if err := parsedJWT.Claims(validateKey, &claims, &allClaims); err == nil {
+				for k, v := range certClaims {
+					if vv, ok := allClaims[k]; ok {
+						if vvString, _ := vv.(string); vvString != v {
+							errMsg = fmt.Sprintf("Trust chain assertion of field %v failed, expected %v, got  %v",
+								k, v, vvString)
+							continue
+						}
+					}
+				}
+
 				valid = true
 				break
 			}
 		}
 		if !valid {
-			return logical.ErrorResponse("no known key successfully validated the token signature"), nil
+			if errMsg != "" {
+				errMsg = "no known key successfully validated the token signature"
+			}
+			return logical.ErrorResponse(errMsg), nil
 		}
 
 		// We require notbefore or expiry; if only one is provided, we allow 5 minutes of leeway.
