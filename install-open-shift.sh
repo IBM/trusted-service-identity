@@ -25,7 +25,8 @@ SCCPOD="genericpod"
 checkPrereqs(){
   oc_test_cmd="oc status"
   kubectl_test_cmd="kubectl version"
-  helm_test_cmd="helm version --client"
+  # today we require helm verion 2:
+  helm_test_cmd="helm version --client| grep 'SemVer:\"v2'"
 
 if [[ "$VAULT_ADDR" == "" || "$CLUSTER_NAME" == "" || "$CLUSTER_REGION" == "" || "$JSS_TYPE" == "" ]] ; then
   echo "One of the required paramters is not set! (VAULT_ADDR, CLUSTER_NAME, CLUSTER_REGION, JSS_TYPE)"
@@ -50,9 +51,9 @@ else
 fi
 
 if [[ $(eval $helm_test_cmd) ]]; then
-  echo "helm client setup properly"
+  echo "helm client v2 installed properly"
 else
-  echo "helm client must be installed and configured. "
+  echo "helm client v2 must be installed and configured. "
   echo "(https://helm.sh/docs/intro/install/)"
   exit 1
 fi
