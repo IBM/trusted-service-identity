@@ -28,6 +28,10 @@ spec:
               value: "{{ .Values.reset.x5c }}"
             - name: PRIVATEDIR
               value: "/host/tsi-secure"
+            - name: CLUSTER_NAME
+              value: "{{ .Values.cluster.name }}"
+            - name: CLUSTER_REGION
+              value: "{{ .Values.cluster.region }}"
               # get the host IP and pass as env. var
             - name: HOST_IP
               valueFrom:

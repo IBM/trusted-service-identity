@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # version of TSI components
-tsiVersion: v1.4
+tsiVersion: v1.5
 
 # target docker repo
 tsiRepo: trustedseriviceidentity
@@ -24,3 +24,8 @@ tsiRepo: trustedseriviceidentity
 reset:
   all: "false"
   x5c: "true"
+
+# Cluster Information
+cluster:
+  name: cluster-name
+  region: dal01
