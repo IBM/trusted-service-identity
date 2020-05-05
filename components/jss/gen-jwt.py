@@ -27,12 +27,49 @@ import time
 import os
 from os.path import join, exists
 
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+
 from jwcrypto import jwt, jwk
 
 # obtaind evn. variables:
 expire = int(os.getenv('TTL_SEC', 30))
 iss = os.getenv('ISS', 'wsched@us.ibm.com')
 statedir = os.getenv('STATEDIR', '/host/tsi-secure')
+
+def format_pem_cert(c):
+    body = ""
+    for i in xrange(0, len(c), 64):
+        body += c[i:i+64] + '\n'
+
+    return "-----BEGIN CERTIFICATE-----\n{}-----END CERTIFICATE-----".format(body)
+
+def get_cert_claims(x5c):
+    certClaims = {}
+    for certData in x5c:
+        cert = x509.load_pem_x509_certificate(format_pem_cert(certData), default_backend())
+        for ex in cert.extensions:
+            for uri in ex.value:
+                f = str(uri.value)
+                if f.startswith("TSI:") or f.startswith("tsi:"):
+                    try:
+                        sps = f[len("TSI:"):].split(":")
+                        certClaims[sps[0]] =  ':'.join(sps[1:])
+                    except:
+                        raise Exception("Invalid TSI URI in x509 alt names")
+        return certClaims
+
+def check_payload (payload, certClaims):
+    for k, v in certClaims.items():
+        if k in payload and payload[k] != v:
+            return None
+        else:
+            payload[k]=v
+
+    return payload
+
+
+
 
 def main(args):
     """Generates a signed JSON Web Token from local private key."""
@@ -78,18 +115,26 @@ def main(args):
 
     # add chain of trust
     x5cfile = join(statedir, "x5c")
+    errMsg = "Error opening/processing x5c file"
     if exists(x5cfile):
         try:
             with open(x5cfile) as x:
                 # serialize the given x5c as json Sring[]
                 x5c = x.read().strip()[1:-1].replace('"', '').split(',')
+                cc = get_cert_claims(x5c)
+                payload = check_payload(payload, cc)
+                if payload is None:
+                    errMsg = "Payload claims do not match chain of trust"
+                    raise Exception(errMsg)
                 token = jwt.JWT(header={"alg": "RS256", "x5c":x5c, "typ": "JWT", "kid": key.key_id},
                     claims=payload)
                 token.make_signed_token(key)
                 return token.serialize()
-        except:
-            print "Error opening/processing x5c file"
-    # using without x5c chain of trust should be disabled
+        except Exception as e:
+            # using without x5c chain of trust should be disabled
+            print e
+            raise e
+
     raise Exception("System not initialized. Missing x5c file. Abort!")
 
 if __name__ == '__main__':
