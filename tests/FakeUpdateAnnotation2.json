@@ -2,5 +2,5 @@
   "admission.trusted.identity/status": "mutated",
   "admission.trusted.identity/ti-cluster-name": "ti-test1",
   "admission.trusted.identity/ti-cluster-region": "eu-de",
-  "admission.trusted.identity/ti-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4,trustedseriviceidentity/ti-jwt-sidecar:v1.4"
+  "admission.trusted.identity/ti-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4,trustedseriviceidentity/ti-jwt-sidecar:v1.5"
 }
