@@ -49,6 +49,8 @@ def get_cert_claims(x5c):
     for certData in x5c:
         cert = x509.load_pem_x509_certificate(format_pem_cert(certData), default_backend())
         for ex in cert.extensions:
+            if type(ex.value) is not x509.extensions.SubjectAlternativeName:
+                continue
             for uri in ex.value:
                 f = str(uri.value)
                 if f.startswith("TSI:") or f.startswith("tsi:"):
