@@ -35,6 +35,9 @@ spec:
           volumeMounts:
           - mountPath: /host/sockets
             name: tsi-sockets
+          - mountPath: /host/tsi-secure
+            name: tsi-secure
+            readOnly: true            
 {{- end }}
 
 {{- if eq .Values.jssService.type "jss-server" }}
@@ -78,12 +81,9 @@ spec:
            path: /tsi-secure/sockets
            # directory might be created
            type: DirectoryOrCreate
-
-{{- if eq .Values.jssService.type "jss-server" }}
       - name: tsi-secure
         hostPath:
           # directory location on host
            path: /tsi-secure
            # directory must exist
            type: Directory
-{{- end }}
