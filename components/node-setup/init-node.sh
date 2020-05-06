@@ -90,7 +90,7 @@ fi
 if [ "$RESETALL" == "true" ]; then
   if ! [ -f "${PRIV_KEY}" ]; then
       openssl genrsa -out "${PRIV_KEY}" 2048
-      openssl req -new -sha256 -key "${PRIV_KEY}" -out "${SERV_CSR}" -subj "/CN=jss-jwt-server" -reqexts v3_req -config <(cat /etc/ssl/openssl.cnf openssl.cnf)
+      openssl req -new -sha256 -key "${PRIV_KEY}" -out "${SERV_CSR}" -subj "/CN=jss-jwt-server" -reqexts v3_req -config <(cat /etc/ssl/openssl.cnf ${SSLCONF})
       logme "private key ${PRIV_KEY} and ${SERV_CSR} created"
       logme "for cluster-name: $CLUSTER_NAME and cluster-region:$CLUSTER_REGION"
    else

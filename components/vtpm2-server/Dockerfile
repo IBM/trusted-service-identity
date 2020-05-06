@@ -36,7 +36,9 @@ RUN dnf -y install python2-cryptography \
 
 COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validate-jwt.py /usr/local/bin/
 
-RUN jwt=$(gen-jwt.sh \
+RUN jwt=$(mkdir -p /host/tsi-secure/ \
+  && touch /host/tsi-secure/openssl.cnf \
+  && gen-jwt.sh \
         --iss example-issuer \
         --aud foo,bar \
         --claims=email:foo@google.com,dead:beef) \
