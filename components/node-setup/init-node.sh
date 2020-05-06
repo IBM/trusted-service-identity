@@ -67,6 +67,11 @@ subjectAltName= @alt_names
 [alt_names]
 URI.1 = TSI:cluster-name:$CLUSTER_NAME
 URI.2 = TSI:cluster-region:$CLUSTER_REGION
+# To assert additional claims about this intermediate CA
+# add new lines in the following format:
+# URI.x = TSI:<claim>
+# where x is a next sequencial number and claim is
+# a `key:value` pair. For example:
 # URI.3 = TSI:datacenter:fra02
 EOF
 
