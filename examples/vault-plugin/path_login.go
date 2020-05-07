@@ -179,7 +179,7 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 			}
 		}
 		if !valid {
-			if errMsg != "" {
+			if errMsg == "" {
 				errMsg = "no known key successfully validated the token signature"
 			}
 			return logical.ErrorResponse(errMsg), nil
