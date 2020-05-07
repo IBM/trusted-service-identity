@@ -3,8 +3,8 @@ package jwtauth
 import (
 	"context"
 	"crypto/x509"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 	"time"
 
@@ -98,6 +98,19 @@ func validateCertChain(rootCAPEM []byte, jwtToken *jwt.JSONWebToken) (interface{
 	return nil, nil, fmt.Errorf("Unable to verify cert chain")
 }
 
+func checkClaims(certClaims map[string]string, payload map[string]interface{}) error {
+	for k, v := range certClaims {
+		if vv, ok := payload[k]; ok {
+			if vvString, _ := vv.(string); vvString != v {
+				return errors.Errorf("Trust chain assertion of field %v failed, expected %v, got  %v",
+					k, v, vvString)
+
+			}
+		}
+	}
+	return nil
+}
+
 func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
 	token := d.Get("jwt").(string)
 	if len(token) == 0 {
@@ -157,16 +170,10 @@ func (b *jwtAuthBackend) pathLogin(ctx context.Context, req *logical.Request, d 
 			}
 
 			if err := parsedJWT.Claims(validateKey, &claims, &allClaims); err == nil {
-				for k, v := range certClaims {
-					if vv, ok := allClaims[k]; ok {
-						if vvString, _ := vv.(string); vvString != v {
-							errMsg = fmt.Sprintf("Trust chain assertion of field %v failed, expected %v, got  %v",
-								k, v, vvString)
-							continue
-						}
-					}
+				if err = checkClaims(certClaims, allClaims); err != nil {
+					errMsg = err.Error()
+					continue
 				}
-
 				valid = true
 				break
 			}

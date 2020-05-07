@@ -784,12 +784,8 @@ func validateTokenX5cChainClaims(rootCA string, token string) error {
 	}
 
 	if err := parsedJWT.Claims(validateKey, &claims, &allClaims); err == nil {
-		for k, v := range certClaims {
-			if vv, ok := allClaims[k]; ok {
-				if vv.(string) != v {
-					return errors.New("Err: Claims don't match cert")
-				}
-			}
+		if err := checkClaims(certClaims, allClaims); err != nil {
+			return errors.New("Err: Claims don't match cert")
 		}
 		return nil
 	} else {
