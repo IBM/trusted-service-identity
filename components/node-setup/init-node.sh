@@ -49,6 +49,20 @@ else
   cat > ${SSLCONF} << EOF
 [req]
 req_extensions = v3_req
+distinguished_name	= req_distinguished_name
+
+[ req_distinguished_name ]
+countryName      = Country Name (2 letter code)
+countryName_min  = 2
+countryName_max  = 2
+stateOrProvinceName = State or Province Name (full name)
+localityName        = Locality Name (eg, city)
+0.organizationName  = Organization Name (eg, company)
+organizationalUnitName = Organizational Unit Name (eg, section)
+commonName       = Common Name (eg, fully qualified host name)
+commonName_max   = 64
+emailAddress     = Email Address
+emailAddress_max = 64
 
 [v3_req]
 subjectAltName= @alt_names

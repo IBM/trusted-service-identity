@@ -37,7 +37,8 @@ setupVault()
   if [ $RT -ne 0 ] ; then
      echo " 'vault secrets enable pki' command failed"
      echo "maybe already set?"
-     exit 1
+     read -n 1 -s -r -p 'Press any key to continue'
+     #exit 1
   fi
   # Increase the TTL by tuning the secrets engine. The default value of 30 days may
   # be too short, so increase it to 1 year:
@@ -58,8 +59,15 @@ setupVault()
   # obtain the SHA256 for the plugin
   # if the deployed image has the same binary as the one on your system, use the
   # following method:
+  VAULTPOD=$($kk get po | grep tsi-vault- | grep Running | awk '{print $1}')
+  if [ "$VAULTPOD" == "" ]; then
+     echo "No running Vault container in this namespace. Perhaps Vault is running in a different location"
+     echo "Please validate by running the following command: "
+     echo "      $kk get po | grep tsi-vault- | grep Running"
+     exit 1
+  fi
   export SHA256
-  SHA256=$($kk exec $($kk get po | grep tsi-vault-| awk '{print $1}') /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
+  SHA256=$($kk exec "$VAULTPOD" /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
   # another way to obtain this SHA, use a local plugin created by the build process
   # assuming it is identical to the one one deployed in Vault container.
   # SHA256=$(shasum -a 256 "${PWD}/pkg/linux_amd64/${PLUGIN}" | cut -d' ' -f1)
