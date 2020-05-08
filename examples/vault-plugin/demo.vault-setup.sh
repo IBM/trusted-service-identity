@@ -31,7 +31,7 @@ setupVault()
   # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
   export VAULT_TOKEN=
 
-  vault status
+  # vault status
   vault secrets enable pki
   RT=$?
   if [ $RT -ne 0 ] ; then
@@ -50,7 +50,7 @@ setupVault()
   export OUT
   OUT=$(vault write pki/root/generate/internal common_name=${COMMON_NAME} \
       ttl=876000h -format=json)
-  echo "$OUT"
+  # echo "$OUT"
 
   # capture the public key as plugin-config.json
   CERT=$(echo "$OUT" | jq -r '.["data"].issuing_ca'| awk '{printf "%s\\n", $0}')
@@ -83,7 +83,9 @@ setupVault()
      echo " 'vault write sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt ...' command failed"
      exit 1
   fi
-  vault read sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt -format=json
+  # useful for debugging:
+  # vault read sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt -format=json
+
   # then enable this plugin
   vault auth enable -path="trusted-identity" -plugin-name="vault-plugin-auth-ti-jwt" plugin
   RT=$?
@@ -93,17 +95,18 @@ setupVault()
   fi
 
   export MOUNT_ACCESSOR
-  MOUNT_ACCESSOR=$(curl --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET "${VAULT_ADDR}/v1/sys/auth" | jq -r '.["trusted-identity/"].accessor')
+  MOUNT_ACCESSOR=$(curl -sS --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET "${VAULT_ADDR}/v1/sys/auth" | jq -r '.["trusted-identity/"].accessor')
 
   # configure plugin using the Issuing CA created internally above
-  curl --header "X-Vault-Token: ${ROOT_TOKEN}"  --request POST --data @${CONFIG} "${VAULT_ADDR}/v1/auth/trusted-identity/config"
+  curl -sS --header "X-Vault-Token: ${ROOT_TOKEN}"  --request POST --data @${CONFIG} "${VAULT_ADDR}/v1/auth/trusted-identity/config"
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo "failed to configure trusted-identity plugin"
      exit 1
   fi
 
-  curl --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET "${VAULT_ADDR}/v1/auth/trusted-identity/config"
+  CONFIG=$(curl -sS --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET "${VAULT_ADDR}/v1/auth/trusted-identity/config" | jq)
+  # echo "*** $CONFIG"
   }
 
 if [ ! "$1" == "" ] ; then

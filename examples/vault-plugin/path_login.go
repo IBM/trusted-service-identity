@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	oidc "github.com/coreos/go-oidc"
 	"github.com/hashicorp/errwrap"
@@ -102,7 +103,7 @@ func checkClaims(certClaims map[string]string, payload map[string]interface{}) e
 	for k, v := range certClaims {
 		if vv, ok := payload[k]; ok {
 			if vvString, _ := vv.(string); vvString != v {
-				return errors.Errorf("Trust chain assertion of field %v failed, expected %v, got  %v",
+				return errors.Errorf("Trust chain assertion of field %v failed, expected %v, got %v",
 					k, v, vvString)
 
 			}
