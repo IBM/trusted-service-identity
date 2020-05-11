@@ -29,6 +29,12 @@ else
 	fi
 fi
 
+TSIOPENSSLCNF="/host/tsi-secure/openssl.cnf"
+if ! [ -f "${TSIOPENSSLCNF}" ]; then
+	echo "Missing ${TSIOPENSSLCNF} file with node identity"
+	exit 1
+fi
+
 TPMKEYFILE="${STATEDIR}/tpm.key"
 if ! [ -f "${TPMKEYFILE}" ]; then
 	# Check whether a key is already there at 'our' index
@@ -49,5 +55,5 @@ if ! [ -f "${TPMKEYFILE}" ]; then
 	echo -n "${TPMKEYURI}" > "${STATEDIR}/tpmkeyurl"
 
 	openssl rsa -inform engine -engine tpm2 -pubout -in "${TPMKEYFILE}" -out "${STATEDIR}/tpmpubkey.pem"
-	openssl req -engine tpm2 -new -key "${TPMKEYFILE}" -keyform engine -subj "/CN=vtpm2-jwt-server" -out "${STATEDIR}/server.csr"
+	openssl req -engine tpm2 -new -key "${TPMKEYFILE}" -keyform engine -subj "/CN=vtpm2-jwt-server" -out "${STATEDIR}/server.csr" -reqexts v3_req -config <(cat ${TSIOPENSSLCNF} )
 fi

@@ -15,7 +15,7 @@ spec:
       containers:
         - name: vtpm2-server-pub
           #image: {{ .Values.tiRepo }}/{{ index .Values "ti-key-release-1" "jssService" "type" }}:{{ .Values.tiVersion }}
-          image: trustedseriviceidentity/vtpm2-server:v1.4
+          image: trustedseriviceidentity/vtpm2-server:v1.5
           imagePullPolicy: Always
           env:
             - name: ISS

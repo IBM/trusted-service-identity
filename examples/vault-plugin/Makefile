@@ -12,7 +12,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 IMG_NAME="ti-vault"
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(IMG_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):v0.3
+MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):v0.4
 
 ARCH=$(shell if test `uname -m` = "x86_64"; then echo amd64 ; else echo `uname -m`; fi;)
 

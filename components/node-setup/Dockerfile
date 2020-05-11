@@ -2,14 +2,10 @@ FROM ubuntu:18.04
 RUN apt update && \
     apt install -y curl jq vim && \
     apt install -y openssl
-#    apt install -y openssl && \
-#    apt install -y python python-pip
 
-
-# we absolutely need python2-cryptography otherwise we may pick up the one from pip
-# and this one may cause issues
-#RUN apt install -y python-cryptography \
-#    && pip install jwcrypto
+RUN cd /usr/local/bin && \
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
+    chmod +x kubectl
 
 COPY init-node.sh /usr/local/bin/
 

@@ -6,7 +6,7 @@
 # cannot use the value from `ti-key-release-1`
 # parsing problem:
 #    `error converting YAML to JSON`
-tiVersion: v1.4
+tiVersion: v1.5
 
 # target docker repo
 tiRepo: trustedseriviceidentity

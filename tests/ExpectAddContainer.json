@@ -4,7 +4,7 @@
     "path": "/spec/containers/-",
     "value": {
       "name": "jwt-sidecar",
-      "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.4",
+      "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.5",
       "env": [
         {
           "name": "HOST_IP",

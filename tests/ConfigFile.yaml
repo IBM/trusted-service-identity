@@ -1,6 +1,6 @@
 sidecarContainers:
 - name: jwt-sidecar
-  image: trustedseriviceidentity/ti-jwt-sidecar:v1.4
+  image: trustedseriviceidentity/ti-jwt-sidecar:v1.5
   imagePullPolicy: Always
   env:
   - name: HOST_IP

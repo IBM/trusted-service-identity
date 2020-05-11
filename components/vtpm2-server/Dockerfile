@@ -5,7 +5,7 @@ RUN dnf -y install python swtpm procps-ng uwsgi uwsgi-plugin-python2
 RUN dnf -y install git openssl-devel automake autoconf libtool make file \
     && git clone https://git.code.sf.net/p/ibmtpm20tss/tss ibmtpm20tss-tss \
     && cd ibmtpm20tss-tss \
-    && git checkout tags/v1.4.0 \
+    && git checkout tags/v1.3.0 \
     && autoreconf -i \
     && ./configure --prefix=/usr --disable-tpm-1.2 \
     && make -j$(nproc) \
@@ -36,7 +36,9 @@ RUN dnf -y install python2-cryptography \
 
 COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validate-jwt.py /usr/local/bin/
 
-RUN jwt=$(gen-jwt.sh \
+RUN jwt=$(mkdir -p /host/tsi-secure/ \
+  && touch /host/tsi-secure/openssl.cnf \
+  && gen-jwt.sh \
         --iss example-issuer \
         --aud foo,bar \
         --claims=email:foo@google.com,dead:beef) \

@@ -35,6 +35,21 @@ register()
     exit 1
   fi
 
+  # extract the X509v3 TSI fields:
+  TSIEXT=$1.csr.tsi
+  openssl req -in "${CSR}" -noout -text |grep "URI:TSI" > $TSIEXT
+  RT=$?
+  if [ $RT -ne 0 ] ; then
+    echo "Missing x509v3 URI:TSI extensions for cluter-name and cluster-region"
+    rm "${TSIEXT}"
+    exit 1
+  fi
+
+  # format:
+  #     URI:TSI:cluster-name:my-cluster-name, URI:TSI:cluster-region:eu-de
+  # remove the "URI:" prefix and leading spaces
+  TSI_URI=$(cat $TSIEXT | sed 's/URI://g' | sed 's/  //g')
+
   # echo "Root Token: ${ROOT_TOKEN}"
   vault login -no-print ${ROOT_TOKEN}
   RT=$?
@@ -48,13 +63,14 @@ register()
 
   X5C="$1.x5c"
   # create an intermedate certificate for 50 years
-  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h -format=json > out
+  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h uri_sans="$TSI_URI" -format=json > out
   CERT=$(cat out | jq -r '.["data"].certificate' | grep -v '\-\-\-')
   CHAIN=$(cat out | jq -r '.["data"].issuing_ca' | grep -v '\-\-\-')
   echo "[\"${CERT}\",\"${CHAIN}\"]" > "$X5C"
 
   # cleanup CSR
   rm "${CSR}"
+  rm "${TSIEXT}"
 
   # cat "$X5C"
   # copy the x5c file to the setup pod:
@@ -79,7 +95,7 @@ register()
   # ["MIIE3jCCA8agAwIBAgICAwEwDQYJKoZIhvcNAQEFBQAwYzELMAkGA1UEBhMCVVM
   #   ...
   #   H0aBsXBTWVU+4=","MIIE+zCC....wCW/POuZ6lcg5Ktz885hZo+L7tdEy8W9ViH0Pd"]
-  }
+}
 
 if [ ! "$1" == "" ] ; then
   export ROOT_TOKEN=$1

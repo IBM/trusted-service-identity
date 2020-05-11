@@ -6,7 +6,7 @@ data:
   tsiMutateConfig.yaml: |
       initContainers:
       - name: gen-vault-cert
-        image: trustedseriviceidentity/ti-gen-vault-cert:v1.4
+        image: trustedseriviceidentity/ti-gen-vault-cert:v1.5
         imagePullSecrets:
         - name: regcred
         imagePullPolicy: Always
