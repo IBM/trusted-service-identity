@@ -54,7 +54,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = setTsiNamespace("/etc/webhook/tsi-namespace")
+	protectedNamespaces, err := getProtectedNamespace("/etc/webhook/tsi-namespace")
 	if err != nil {
 		glog.Errorf("Failed to load the TSI namespace: %v", err)
 		glog.Error("Webhook server cannot be started. Terminating.")
@@ -67,7 +67,8 @@ func main() {
 			Addr:      fmt.Sprintf(":%v", parameters.port),
 			TLSConfig: &tls.Config{Certificates: []tls.Certificate{pair}},
 		},
-		clusterInfo: clInfo,
+		clusterInfo:         clInfo,
+		protectedNamespaces: protectedNamespaces,
 	}
 
 	// define http server and server handler
