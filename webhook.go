@@ -61,11 +61,10 @@ var (
 
 // WebhookServer struct
 type WebhookServer struct {
-	tsiMutateConfig *tsiMutateConfig
-	server          *http.Server
-	clusterInfo     ClusterInfoGetter
-	// list of namespaces that are protected and cannot execute the mutation
-	protectedNamespaces []string
+	tsiMutateConfig     *tsiMutateConfig
+	server              *http.Server
+	clusterInfo         ClusterInfoGetter
+	protectedNamespaces []string // list of namespaces that are protected and cannot execute the mutation
 }
 
 type ClusterInfoGetter interface {
@@ -266,20 +265,73 @@ func isProtectedNamespace(protectedList []string, metadata *metav1.ObjectMeta) b
 	return false
 }
 
-// Check whether the target resource needs to be mutated
-func mutationRequired(metadata *metav1.ObjectMeta) bool {
+// This function validates the entire logic to perform the mutation
+// Steps:
+//   1. If mutation request is done in the protected namespace, return error
+//   2. Evaluate if the pod is safe to continue, return error otherwise
+//   3. Return true if the pod can be mutated, false otherwise
+func mutationRequired(protectedList []string, pod *corev1.Pod, operation string) (bool, error) {
 
+	metadata := pod.ObjectMeta
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
-
+	var isMutate bool
 	switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
 	case "y", "yes", "true", "on":
-		return true
+		isMutate = true
 	default:
-		return false
+		isMutate = false
 	}
+
+	if isProtectedNamespace(protectedList, &metadata) {
+
+		// mutation is not allowed in the protected namespace
+		if isMutate {
+			glog.Errorf("Mutation requested in the protected namespace")
+			return isMutate, ErrProtectedNs
+		}
+
+		//
+		// if mutationRequired(&pod.ObjectMeta) {
+		// 	err := ErrProtectedNs
+		// 	glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, pod.Namespace)
+		// 	reason := metav1.StatusReason(Msg1)
+		// 	return &v1beta1.AdmissionResponse{
+		// 		Allowed: false,
+		// 		Result: &metav1.Status{
+		// 			Message: err.Error(),
+		// 			Reason:  reason,
+		// 		},
+		// 	}
+		// }
+
+		glog.Infof("No mutation requested for %v in %v namespace", pod.GenerateName, pod.Namespace)
+		return false, nil
+		// return &v1beta1.AdmissionResponse{
+		// 	Allowed: true,
+		// }
+	}
+
+	// if the namespace is not protected
+
+	// check if the request is safe
+	err := isSafe(pod, operation)
+	if err != nil {
+		glog.Error(err.Error())
+		return isMutate, err
+	}
+	// glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, pod.Namespace)
+	// reason := metav1.StatusReason(Msg1)
+	// return &v1beta1.AdmissionResponse{
+	// 	Allowed: false,
+	// 	Result: &metav1.Status{
+	// 		Message: err.Error(),
+	// 		Reason:  reason,
+	// 	},
+	// }
+	return isMutate, nil
 }
 
 func addContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
@@ -539,54 +591,27 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 	pod.Namespace = podNamespace
 	pod.ObjectMeta.Namespace = podNamespace
 
-	if isProtectedNamespace(whsvr.protectedNamespaces, &pod.ObjectMeta) {
-
-		// mutation is not allowed in the protected namespace
-		if mutationRequired(&pod.ObjectMeta) {
-			err := ErrProtectedNs
-			glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, pod.Namespace)
-			reason := metav1.StatusReason(Msg1)
-			return &v1beta1.AdmissionResponse{
-				Allowed: false,
-				Result: &metav1.Status{
-					Message: err.Error(),
-					Reason:  reason,
-				},
-			}
+	// log.Infof("Safe to continue with %v/%v", pod.GenerateName, pod.Namespace)
+	isMutate, err := mutationRequired(whsvr.protectedNamespaces, &pod, string(req.Operation))
+	if err != nil {
+		glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, pod.Namespace)
+		reason := metav1.StatusReason(Msg1)
+		return &v1beta1.AdmissionResponse{
+			Allowed: false,
+			Result: &metav1.Status{
+				Message: err.Error(),
+				Reason:  reason,
+			},
 		}
+	}
 
+	if !isMutate {
 		glog.Infof("No mutation requested for %v in %v namespace", pod.GenerateName, pod.Namespace)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
-
-		// if the namespace is not protected
-	} else {
-
-		// check if the request is safe
-		err := isSafe(&pod, string(req.Operation))
-		if err != nil {
-			glog.Error(err.Error())
-			glog.Infof("Not safe to continue with %v for pod: %v/%v. Disallowing", req.Operation, pod.GenerateName, pod.Namespace)
-			reason := metav1.StatusReason(Msg1)
-			return &v1beta1.AdmissionResponse{
-				Allowed: false,
-				Result: &metav1.Status{
-					Message: err.Error(),
-					Reason:  reason,
-				},
-			}
-		}
-
-		glog.Infof("Safe to continue with %v/%v", pod.GenerateName, pod.Namespace)
-
-		if mutationRequired(&pod.ObjectMeta) {
-			glog.Infof("No mutation requested for %v in %v namespace", pod.GenerateName, pod.Namespace)
-			return &v1beta1.AdmissionResponse{
-				Allowed: true,
-			}
-		}
 	}
+
 	glog.Infof("Mutation requested for %v in %v namespace", pod.GenerateName, pod.Namespace)
 
 	// Mutation Initialization

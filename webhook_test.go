@@ -164,37 +164,106 @@ func TestIsProtectedNamespace(t *testing.T) {
 
 func TestMutationRequired(t *testing.T) {
 
-	// using non-protected namespace
-	ns := "test"
+	testNs := "test"
+	tsiNs := "trusted-identity"
+	protectedList := []string{"kube-system", "kube-public", tsiNs}
 
 	// testing if pod should be mutated
-	testName := "mutation required"
-	meta := getFakeMetadata("tests/FakeMutationRequired.json")
-	meta.Namespace = ns
-	required := mutationRequired(&meta)
-	if required {
+	tpod := getFakePod("tests/FakePod.json")
+
+	testName := "mutation required in test namespace"
+	tpod.ObjectMeta.Namespace = testNs
+	required, err := mutationRequired(protectedList, &tpod, "CREATE")
+	if required && err == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
 	}
 
-	// testing pod with  "admission.trusted.identity/inject": "false"
-	testName = "mutation not required [1]"
-	meta = getFakeMetadata("tests/FakeMutationNotRequired1.json")
-	meta.Namespace = ns
-	required = mutationRequired(&meta)
-	if !required {
+	testName = "mutation required in protected namespace"
+	tpod.ObjectMeta.Namespace = tsiNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if required && err != nil && errors.Is(err, ErrProtectedNs) {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
 	}
 
-	// testing pod with missing  "admission.trusted.identity/inject"
-	testName = "mutation not required [2]"
-	meta = getFakeMetadata("tests/FakeMutationNotRequired2.json")
-	meta.Namespace = ns
-	required = mutationRequired(&meta)
-	if !required {
+	tpod = getFakePod("tests/FakePodNM.json")
+	testName = "mutation not required in test namespace"
+	tpod.ObjectMeta.Namespace = testNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if !required && err == nil {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	tpod = getFakePod("tests/FakePodNM.json")
+	testName = "mutation not required in protected namespace"
+	tpod.ObjectMeta.Namespace = tsiNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if !required && err == nil {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "mutation required with Hostpath in test namespace"
+	tpod = getFakePod("tests/FakePodVO.json")
+	tpod.ObjectMeta.Namespace = testNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if required && err != nil && errors.Is(err, ErrHostpathSocket) {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "mutation required with Hostpath in protected namespace"
+	tpod = getFakePod("tests/FakePodVO.json")
+	tpod.ObjectMeta.Namespace = tsiNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if required && err != nil && (errors.Is(err, ErrHostpathSocket) || errors.Is(err, ErrProtectedNs)) {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "mutation not required with Hostpath in test namespace"
+	tpod = getFakePod("tests/FakePodNM-VO.json")
+	tpod.ObjectMeta.Namespace = testNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if !required && err != nil && errors.Is(err, ErrHostpathSocket) {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "mutation not required with Hostpath in protected namespace"
+	tpod = getFakePod("tests/FakePodNM-VO.json")
+	tpod.ObjectMeta.Namespace = tsiNs
+	required, err = mutationRequired(protectedList, &tpod, "CREATE")
+	if !required && err == nil {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "update in test namespace"
+	tpod = getFakePod("tests/FakePodUpdate.json")
+	tpod.ObjectMeta.Namespace = testNs
+	required, err = mutationRequired(protectedList, &tpod, "UPDATE")
+	if required && err == nil {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "update sidecar image in test namespace"
+	tpod = getFakePod("tests/FakePodUpdateErr.json")
+	tpod.ObjectMeta.Namespace = testNs
+	required, err = mutationRequired(protectedList, &tpod, "UPDATE")
+	if required && err != nil && errors.Is(err, ErrSidecarImg) {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -321,7 +390,7 @@ func TestMutate(t *testing.T) {
 	}
 
 	admRsp := whsvr.mutate(&ar)
-	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err3 {
+	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err3 && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -330,7 +399,7 @@ func TestMutate(t *testing.T) {
 	testName = "mutate in test namespace"
 	ar.Request.Namespace = "test"
 	admRsp = whsvr.mutate(&ar)
-	if admRsp.Allowed == true {
+	if admRsp.Allowed == true && admRsp.Patch != nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -339,7 +408,7 @@ func TestMutate(t *testing.T) {
 	testName = "update in test namespace"
 	ar.Request.Operation = "UPDATE"
 	admRsp = whsvr.mutate(&ar)
-	if admRsp.Allowed == true {
+	if admRsp.Allowed == true && admRsp.Patch != nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -349,7 +418,7 @@ func TestMutate(t *testing.T) {
 	ar = getFakeAdmissionReview("tests/FakeAdmissionReviewUpdateErr.json")
 	ar.Request.Operation = "UPDATE"
 	admRsp = whsvr.mutate(&ar)
-	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err2 {
+	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err2 && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -358,7 +427,25 @@ func TestMutate(t *testing.T) {
 	testName = "create pod with hostPath access in test namespace"
 	ar = getFakeAdmissionReview("tests/FakeAdmissionReviewErr.json")
 	admRsp = whsvr.mutate(&ar)
-	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err1 {
+	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err1 && admRsp.Patch == nil {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "no mutation in TSI namespace"
+	ar = getFakeAdmissionReview("tests/FakeAdmissionReviewNM.json")
+	admRsp = whsvr.mutate(&ar)
+	if admRsp.Allowed == true && admRsp.Patch == nil {
+		t.Logf(SUCCESS, testName)
+	} else {
+		t.Errorf(ERROR, testName)
+	}
+
+	testName = "no mutation in test namespace"
+	ar.Request.Namespace = "test"
+	admRsp = whsvr.mutate(&ar)
+	if admRsp.Allowed == true && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -366,16 +453,16 @@ func TestMutate(t *testing.T) {
 
 }
 
-func getContentOfTheFile(file string) string {
-	dat, err := ioutil.ReadFile(file)
+func getContentOfTheFile(filePath string) string {
+	dat, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		panic(err)
 	}
 	return string(dat)
 }
 
-func getFakePod(file string) corev1.Pod {
-	s := getContentOfTheFile(file)
+func getFakePod(filePath string) corev1.Pod {
+	s := getContentOfTheFile(filePath)
 	pod := corev1.Pod{}
 	err := json.Unmarshal([]byte(s), &pod)
 	if err != nil {
@@ -384,8 +471,8 @@ func getFakePod(file string) corev1.Pod {
 	return pod
 }
 
-func getFakeContainers(file string) []corev1.Container {
-	s := getContentOfTheFile(file)
+func getFakeContainers(filePath string) []corev1.Container {
+	s := getContentOfTheFile(filePath)
 	c := []corev1.Container{}
 	err := json.Unmarshal([]byte(s), &c)
 	if err != nil {
@@ -394,8 +481,8 @@ func getFakeContainers(file string) []corev1.Container {
 	return c
 }
 
-func getFakeVolume(file string) []corev1.Volume {
-	s := getContentOfTheFile(file)
+func getFakeVolume(filePath string) []corev1.Volume {
+	s := getContentOfTheFile(filePath)
 	vol := []corev1.Volume{}
 	err := json.Unmarshal([]byte(s), &vol)
 	if err != nil {
@@ -404,8 +491,8 @@ func getFakeVolume(file string) []corev1.Volume {
 	return vol
 }
 
-func getFakeVolumeMount(file string) []corev1.VolumeMount {
-	s := getContentOfTheFile(file)
+func getFakeVolumeMount(filePath string) []corev1.VolumeMount {
+	s := getContentOfTheFile(filePath)
 	vol := []corev1.VolumeMount{}
 	err := json.Unmarshal([]byte(s), &vol)
 	if err != nil {
@@ -414,8 +501,8 @@ func getFakeVolumeMount(file string) []corev1.VolumeMount {
 	return vol
 }
 
-func getFakeMetadata(file string) metav1.ObjectMeta {
-	s := getContentOfTheFile(file)
+func getFakeMetadata(filePath string) metav1.ObjectMeta {
+	s := getContentOfTheFile(filePath)
 	meta := metav1.ObjectMeta{}
 	err := json.Unmarshal([]byte(s), &meta)
 	if err != nil {
@@ -424,8 +511,8 @@ func getFakeMetadata(file string) metav1.ObjectMeta {
 	return meta
 }
 
-func getFakeAnnotation(file string) map[string]string {
-	s := getContentOfTheFile(file)
+func getFakeAnnotation(filePath string) map[string]string {
+	s := getContentOfTheFile(filePath)
 	ann := make(map[string]string)
 	err := json.Unmarshal([]byte(s), &ann)
 	if err != nil {
@@ -451,8 +538,8 @@ func getFakeAdmissionResponse() v1beta1.AdmissionResponse {
 	return ar
 }
 
-func getFakeAdmissionReview(file string) v1beta1.AdmissionReview {
-	s := getContentOfTheFile(file)
+func getFakeAdmissionReview(filePath string) v1beta1.AdmissionReview {
+	s := getContentOfTheFile(filePath)
 	ar := v1beta1.AdmissionReview{}
 	err := json.Unmarshal([]byte(s), &ar)
 	if err != nil {
