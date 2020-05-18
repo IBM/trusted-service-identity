@@ -1,4 +1,4 @@
-TSI_VERSION=$(shell cat ./tsi-version.txt)
+TSI_VERSION=$(shell cat ../../tsi-version.txt)
 GIT_COMMIT_SHA="$(shell git rev-parse --short HEAD 2>/dev/null)"
 GIT_REMOTE_URL="$(shell git config --get remote.origin.url 2>/dev/null)"
 BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
