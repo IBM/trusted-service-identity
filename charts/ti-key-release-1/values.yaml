@@ -5,9 +5,6 @@
 # target namespace for the deployment
 namespace: trusted-identity
 
-# version of ti-components
-tiVersion: v1.5
-
 # target docker repo
 tiRepo: trustedseriviceidentity
 

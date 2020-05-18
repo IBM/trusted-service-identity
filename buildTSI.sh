@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TSI_VERSION=$(cat ./tsi-version.txt )
+
 ALL="$ALL"
 
 if [ "$1" == "fast" ]; then
@@ -29,8 +31,16 @@ run "make $ALL -C components/jwt-sidecar/"
 run "make $ALL -C components/node-setup/"
 run "make $ALL -C examples/vault-client/"
 run "make all -C examples/vault-plugin/"
-run "helm package charts/tsi-node-setup"
-run "helm package charts/ti-key-release-1"
+run "helm package --app-version ${TSI_VERSION} --version ${TSI_VERSION} charts/tsi-node-setup"
+run "helm package --app-version ${TSI_VERSION} --version ${TSI_VERSION} charts/ti-key-release-1"
+
+cat > "./charts/ti-key-release-2/requirements.yaml" << EOF
+dependencies:
+  - name: ti-key-release-1
+    version: ${TSI_VERSION}
+    repository: "file://../ti-key-release-1"
+EOF
+
 run "helm dep update charts/ti-key-release-2"
 run "helm package --dependency-update charts/ti-key-release-2"
 

@@ -7,7 +7,7 @@ data:
   tsiMutateConfig.yaml: |
       sidecarContainers:
       - name: jwt-sidecar
-        image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Values.tiVersion }}
+        image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Chart.AppVersion  }}
         imagePullPolicy: Always
         securityContext:
           runAsUser: 0

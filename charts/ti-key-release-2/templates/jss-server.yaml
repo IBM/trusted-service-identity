@@ -17,7 +17,7 @@ spec:
 
 {{- if eq .Values.jssService.type "vtpm2-server" }}
         - name: {{ .Values.jssService.type }}
-          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}:{{ .Chart.AppVersion  }}
           imagePullPolicy: Always
           securityContext:
             # privilaged is needed to create /host/sockets/app.sock
@@ -42,7 +42,7 @@ spec:
 
 {{- if eq .Values.jssService.type "jss-server" }}
         - name: {{ .Values.jssService.type }}-pub
-          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-pub:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-pub:{{ .Chart.AppVersion  }}
           imagePullPolicy: Always
           env:
             - name: ISS
@@ -59,7 +59,7 @@ spec:
             name: tsi-secure
 
         - name: {{ .Values.jssService.type }}-priv
-          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-priv:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-priv:{{ .Chart.AppVersion  }}
           imagePullPolicy: Always
           env:
             - name: ISS
