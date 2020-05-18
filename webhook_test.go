@@ -390,7 +390,7 @@ func TestMutate(t *testing.T) {
 	}
 
 	admRsp := whsvr.mutate(&ar)
-	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err3 && admRsp.Patch == nil {
+	if admRsp.Allowed == false && string(admRsp.Result.Reason) == MsgNoCreate && string(admRsp.Result.Message) == MsgProtectNs && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -418,7 +418,7 @@ func TestMutate(t *testing.T) {
 	ar = getFakeAdmissionReview("tests/FakeAdmissionReviewUpdateErr.json")
 	ar.Request.Operation = "UPDATE"
 	admRsp = whsvr.mutate(&ar)
-	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err2 && admRsp.Patch == nil {
+	if admRsp.Allowed == false && string(admRsp.Result.Reason) == MsgNoCreate && string(admRsp.Result.Message) == MsgSidecarImg && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
@@ -427,7 +427,7 @@ func TestMutate(t *testing.T) {
 	testName = "create pod with hostPath access in test namespace"
 	ar = getFakeAdmissionReview("tests/FakeAdmissionReviewErr.json")
 	admRsp = whsvr.mutate(&ar)
-	if admRsp.Allowed == false && string(admRsp.Result.Reason) == Msg1 && string(admRsp.Result.Message) == Err1 && admRsp.Patch == nil {
+	if admRsp.Allowed == false && string(admRsp.Result.Reason) == MsgNoCreate && string(admRsp.Result.Message) == MsgHostPath && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
 	} else {
 		t.Errorf(ERROR, testName)
