@@ -23,16 +23,16 @@ run() {
 }
 
 
-run "make all"
-run "make docker-push"
-run "make $ALL -C components/jss/"
-run "make $ALL -C components/vtpm2-server/"
-run "make $ALL -C components/jwt-sidecar/"
-run "make $ALL -C components/node-setup/"
-run "make $ALL -C examples/vault-client/"
-run "make all -C examples/vault-plugin/"
+# run "make all"
+# run "make docker-push"
+# run "make $ALL -C components/jss/"
+# run "make $ALL -C components/vtpm2-server/"
+# run "make $ALL -C components/jwt-sidecar/"
+# run "make $ALL -C components/node-setup/"
+# run "make $ALL -C examples/vault-client/"
+# run "make all -C examples/vault-plugin/"
 
-# Helm chart packaging: 
+# Helm chart packaging:
 run "helm --debug package --app-version ${TSI_VERSION} --version ${TSI_VERSION} charts/tsi-node-setup"
 run "helm --debug package --app-version ${TSI_VERSION} --version ${TSI_VERSION} charts/ti-key-release-1"
 
@@ -45,6 +45,7 @@ description: A Helm chart for deployment of TI-KeyRelease [1/2]
 name: ti-key-release-1
 home: https://github.com/IBM/trusted-service-identity
 version: ${TSI_VERSION}
+appVersion: ${TSI_VERSION}
 maintainers:
   - name: Brandon Lum
     email: Brandon.Lum@ibm.com
@@ -60,6 +61,7 @@ description: A Helm chart for deployment of TI-KeyRelease [2/2]
 name: ti-key-release-2
 home: https://github.com/IBM/trusted-service-identity
 version: ${TSI_VERSION}
+appVersion: ${TSI_VERSION}
 maintainers:
   - name: Brandon Lum
     email: Brandon.Lum@ibm.com
