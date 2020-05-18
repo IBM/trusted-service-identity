@@ -3,6 +3,7 @@ appVersion: "1.0"
 description: A Helm chart for setting up TSI nodes
 name: tsi-node-setup
 home: https://github.com/IBM/trusted-service-identity
+# version: // version is dynamically set by the buildTSI.sh script
 maintainers:
   - name: Brandon Lum
     email: Brandon.Lum@ibm.com
