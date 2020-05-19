@@ -21,3 +21,4 @@ charts/ti-key-release-2/requirements.lock
 
 # remove mac files
 *.DS_Store
+charts/tsi-node-setup-v1.6.0.tgz
