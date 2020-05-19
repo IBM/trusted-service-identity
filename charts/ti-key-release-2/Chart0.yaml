@@ -1,0 +1,11 @@
+apiVersion: v1
+description: A Helm chart for deployment of TI-KeyRelease [2/2]
+name: ti-key-release-2
+home: https://github.com/IBM/trusted-service-identity
+version: v1.6.0
+appVersion: v1.6.0
+maintainers:
+  - name: Brandon Lum
+    email: Brandon.Lum@ibm.com
+  - name: Mariusz Sabath
+    email: sabath@us.ibm.com
