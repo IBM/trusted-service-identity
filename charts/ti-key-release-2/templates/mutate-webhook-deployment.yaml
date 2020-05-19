@@ -18,7 +18,7 @@ spec:
       serviceAccountName: ti-sa
       containers:
         - name: tsi-mutate
-          image: {{ .Values.tiRepo }}/ti-webhook:{{ .Values.tiVersion }}
+          image: {{ .Values.tiRepo }}/ti-webhook:{{ .Chart.AppVersion  }}
           imagePullPolicy: Always
           # webhook must be running as root to listen to events on port 443
           securityContext:

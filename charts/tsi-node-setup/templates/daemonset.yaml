@@ -17,7 +17,7 @@ spec:
       serviceAccountName: tsi-setup-admin-sa
       containers:
         - name: ti-node-setup
-          image: "{{ .Values.tsiRepo }}/node-setup:{{ .Values.tsiVersion }}"
+          image: "{{ .Values.tsiRepo }}/node-setup:{{ .Chart.AppVersion }}"
           imagePullPolicy: Always
           securityContext:
             privileged: true

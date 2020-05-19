@@ -1,0 +1,299 @@
+{
+    "kind": "AdmissionReview",
+    "apiVersion": "admission.k8s.io/v1beta1",
+    "request": {
+        "uid": "98e7aa26-201d-11e9-8d9e-4a1d4b24414a",
+        "kind": {
+            "group": "",
+            "version": "v1",
+            "kind": "Pod"
+        },
+        "resource": {
+            "group": "",
+            "version": "v1",
+            "resource": "pods"
+        },
+        "namespace": "test",
+        "operation": "CREATE",
+        "userInfo": {
+            "username": "system:serviceaccount:kube-system:replicaset-controller",
+            "uid": "0ca3a81d-e8e1-11e8-a185-561f3c8e950e",
+            "groups": [
+                "system:serviceaccounts",
+                "system:serviceaccounts:kube-system",
+                "system:authenticated"
+            ]
+        },
+        "object": {
+          "metadata": {
+              "name": "myubuntu-79bb88676b-qt222",
+              "generateName": "myubuntu-79bb88676b-",
+              "namespace": "trusted-identity",
+              "uid": "b039281d-6f7f-11ea-be8b-6a908431fac0",
+              "resourceVersion": "45012419",
+              "creationTimestamp": "2020-03-26T16:34:39Z",
+              "labels": {
+                  "app": "myubuntu",
+                  "pod-template-hash": "79bb88676b"
+              },
+              "annotations": {
+                  "admission.trusted.identity/inject": "true",
+                  "admission.trusted.identity/status": "mutated",
+                  "admission.trusted.identity/ti-cluster-name": "ti-test1",
+                  "admission.trusted.identity/ti-cluster-region": "eu-de",
+                  "admission.trusted.identity/ti-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4,trustedseriviceidentity/ti-jwt-sidecar:v1.5",
+                  "kubernetes.io/psp": "ibm-privileged-psp",
+                  "tsi.secrets": "- tsi.secret/name: \"mysecretxx1\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-all\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret1\"\n- tsi.secret/name: \"mysecret2.json\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-r\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret2\"\n- tsi.secret/name: \"password\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-r\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-passwords\"\n- tsi.secret/name: \"invalid\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-all\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-invalid\"\n- tsi.secret/name: \"non-existing\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/nothing\"\n  tsi.secret/local-path: \"mysecrets/non-existing\"\n"
+              },
+              "ownerReferences": [
+                  {
+                      "apiVersion": "apps/v1",
+                      "kind": "ReplicaSet",
+                      "name": "myubuntu-79bb88676b",
+                      "uid": "b0272e4e-6f7f-11ea-be8b-6a908431fac0",
+                      "controller": true,
+                      "blockOwnerDeletion": true
+                  }
+              ]
+          },
+          "spec": {
+              "volumes": [
+                  {
+                      "name": "default-token-sggvc",
+                      "secret": {
+                          "secretName": "default-token-sggvc",
+                          "defaultMode": 420
+                      }
+                  },
+                  {
+                      "name": "tsi-secrets",
+                      "emptyDir": {}
+                  },
+                  {
+                      "name": "pod-metadata",
+                      "downwardAPI": {
+                          "items": [
+                              {
+                                  "path": "tsi-secrets",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.annotations['tsi.secrets']"
+                                  }
+                              },
+                              {
+                                  "path": "ti-identity",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.annotations['admission.trusted.identity/ti-identity']"
+                                  }
+                              },
+                              {
+                                  "path": "ti-pod-name",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.name"
+                                  }
+                              },
+                              {
+                                  "path": "ti-pod-namespace",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.namespace"
+                                  }
+                              },
+                              {
+                                  "path": "ti-images",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.annotations['admission.trusted.identity/ti-images']"
+                                  }
+                              },
+                              {
+                                  "path": "ti-cluster-name",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-name']"
+                                  }
+                              },
+                              {
+                                  "path": "ti-cluster-region",
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-region']"
+                                  }
+                              }
+                          ],
+                          "defaultMode": 420
+                      }
+                  }
+              ],
+              "containers": [
+                  {
+                      "name": "myubuntu",
+                      "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+                      "command": [
+                          "/bin/bash",
+                          "-c",
+                          "--"
+                      ],
+                      "args": [
+                          "while true; do cat /mydata; sleep 5; done;"
+                      ],
+                      "resources": {},
+                      "volumeMounts": [
+                          {
+                              "name": "default-token-sggvc",
+                              "readOnly": true,
+                              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                          }
+                      ],
+                      "terminationMessagePath": "/dev/termination-log",
+                      "terminationMessagePolicy": "File",
+                      "imagePullPolicy": "Always"
+                  },
+                  {
+                      "name": "jwt-sidecar",
+                      "image": "ubuntu:latest",
+                      "env": [
+                          {
+                              "name": "HOST_IP",
+                              "valueFrom": {
+                                  "fieldRef": {
+                                      "apiVersion": "v1",
+                                      "fieldPath": "status.hostIP"
+                                  }
+                              }
+                          },
+                          {
+                              "name": "JWT_TTL_SEC",
+                              "value": "30"
+                          },
+                          {
+                              "name": "VAULT_ADDR",
+                              "value": "http://ti-test1.eu-de.containers.appdomain.cloud"
+                          },
+                          {
+                              "name": "SECRET_REFRESH_SEC",
+                              "value": "45"
+                          }
+                      ],
+                      "resources": {},
+                      "volumeMounts": [
+                          {
+                              "name": "tsi-secrets",
+                              "mountPath": "/usr/share/secrets"
+                          },
+                          {
+                              "name": "tsi-sockets",
+                              "mountPath": "/host/sockets"
+                          },
+                          {
+                              "name": "pod-metadata",
+                              "readOnly": true,
+                              "mountPath": "/pod-metadata"
+                          },
+                          {
+                              "name": "host-etc",
+                              "readOnly": true,
+                              "mountPath": "/host/etc"
+                          }
+                      ],
+                      "terminationMessagePath": "/dev/termination-log",
+                      "terminationMessagePolicy": "File",
+                      "imagePullPolicy": "Always",
+                      "securityContext": {
+                          "runAsUser": 0
+                      }
+                  }
+              ],
+              "restartPolicy": "Always",
+              "terminationGracePeriodSeconds": 30,
+              "dnsPolicy": "ClusterFirst",
+              "serviceAccountName": "default",
+              "serviceAccount": "default",
+              "nodeName": "10.135.67.145",
+              "securityContext": {},
+              "schedulerName": "default-scheduler",
+              "tolerations": [
+                  {
+                      "key": "node.kubernetes.io/not-ready",
+                      "operator": "Exists",
+                      "effect": "NoExecute",
+                      "tolerationSeconds": 600
+                  },
+                  {
+                      "key": "node.kubernetes.io/unreachable",
+                      "operator": "Exists",
+                      "effect": "NoExecute",
+                      "tolerationSeconds": 600
+                  }
+              ],
+              "priority": 0
+          },
+          "status": {
+              "phase": "Running",
+              "conditions": [
+                  {
+                      "type": "Initialized",
+                      "status": "True",
+                      "lastProbeTime": null,
+                      "lastTransitionTime": "2020-03-26T16:34:39Z"
+                  },
+                  {
+                      "type": "Ready",
+                      "status": "True",
+                      "lastProbeTime": null,
+                      "lastTransitionTime": "2020-03-26T16:34:43Z"
+                  },
+                  {
+                      "type": "ContainersReady",
+                      "status": "True",
+                      "lastProbeTime": null,
+                      "lastTransitionTime": "2020-03-26T16:34:43Z"
+                  },
+                  {
+                      "type": "PodScheduled",
+                      "status": "True",
+                      "lastProbeTime": null,
+                      "lastTransitionTime": "2020-03-26T16:34:39Z"
+                  }
+              ],
+              "hostIP": "10.135.67.145",
+              "podIP": "172.30.90.91",
+              "startTime": "2020-03-26T16:34:39Z",
+              "containerStatuses": [
+                  {
+                      "name": "jwt-sidecar",
+                      "state": {
+                          "running": {
+                              "startedAt": "2020-03-26T16:34:43Z"
+                          }
+                      },
+                      "lastState": {},
+                      "ready": true,
+                      "restartCount": 0,
+                      "image": "docker.io/trustedseriviceidentity/ti-jwt-sidecar:v1.5",
+                      "imageID": "docker.io/trustedseriviceidentity/ti-jwt-sidecar@sha256:2991b88e7e378112c72ddc4f2ac8e98c0b438b4d4b8d8556be2b5904428434db",
+                      "containerID": "containerd://a73da0404c484e906109732a5f0b4e0f38d2fc41c0d09112b23a56d4fd793e26"
+                  },
+                  {
+                      "name": "myubuntu",
+                      "state": {
+                          "running": {
+                              "startedAt": "2020-03-26T16:34:42Z"
+                          }
+                      },
+                      "lastState": {},
+                      "ready": true,
+                      "restartCount": 0,
+                      "image": "sha256:549b9b86cb8d75a2b668c21c50ee092716d070f129fd1493f95ab7e43767eab8",
+                      "imageID": "docker.io/library/ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+                      "containerID": "containerd://944c5b65590813ad7edfca393bdc49e00abed99bb0a22b2ccbc0e01337bbdec0"
+                  }
+              ],
+              "qosClass": "BestEffort"
+          }
+        },
+        "oldObject": null
+    }
+}

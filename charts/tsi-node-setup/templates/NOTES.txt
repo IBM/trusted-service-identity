@@ -1,6 +1,7 @@
 This Helm chart initializes the TSI nodes.
 
    app: {{ template "tsi-node-setup.name" . }}
+   app.version: {{ .Chart.AppVersion }}
    chart: {{ template "tsi-node-setup.chart" . }}
    release: {{ .Release.Name }}
    namespace: {{ .Values.namespace }}

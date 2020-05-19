@@ -5,9 +5,6 @@
 # target namespace for the deployment
 namespace: trusted-identity
 
-# version of TSI components
-tsiVersion: v1.5
-
 # target docker repo
 tsiRepo: trustedseriviceidentity
 
