@@ -61,10 +61,11 @@ var (
 
 // WebhookServer struct
 type WebhookServer struct {
-	tsiMutateConfig     *tsiMutateConfig
-	server              *http.Server
-	clusterInfo         ClusterInfoGetter
-	protectedNamespaces []string // list of namespaces that are protected and cannot execute the mutation
+	tsiMutateConfig *tsiMutateConfig
+	server          *http.Server
+	clusterInfo     ClusterInfoGetter
+	// protectedNamespaces - list of namespaces that are protected and cannot execute the mutation
+	protectedNamespaces []string
 }
 
 type ClusterInfoGetter interface {
