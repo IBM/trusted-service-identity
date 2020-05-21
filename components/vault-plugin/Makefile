@@ -78,6 +78,15 @@ docker-push:
 timestamp:
 	date
 
-all: bin docker docker-push timestamp
+all: bin fmt test docker timestamp
 
-.PHONY: bin default generate test bootstrap fmt deps docker docker-push timestamp all
+allpush: all docker-push timestamp
+
+fast: bin fmt test
+	docker build --build-arg ARCH=${ARCH} -t $(IMAGE) .
+	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	date
+
+fastpush: fast docker-push timestamp
+
+.PHONY: allpush fast fastpush bin default generate test bootstrap fmt deps docker docker-push timestamp all
