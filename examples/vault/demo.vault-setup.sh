@@ -77,10 +77,10 @@ setupVault()
   fi
 
   # register the trusted-identity plugin
-  vault write sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt sha_256="${SHA256}" command="vault-plugin-auth-ti-jwt"
+  vault write /sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt sha_256="${SHA256}" command="vault-plugin-auth-ti-jwt"
   RT=$?
   if [ $RT -ne 0 ] ; then
-     echo " 'vault write sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt ...' command failed"
+     echo " 'vault write /sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt ...' command failed"
      exit 1
   fi
   # useful for debugging:

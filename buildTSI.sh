@@ -2,10 +2,19 @@
 
 TSI_VERSION=$(cat ./tsi-version.txt )
 
-ALL="$ALL"
+ALL="all"
+PUSH=""
 
 if [ "$1" == "fast" ]; then
    ALL="fast"
+elif [ "$1" == "push" ]; then
+  PUSH="push"
+fi
+
+if [ "$2" == "fast" ]; then
+   ALL="fast"
+elif [ "$2" == "push" ]; then
+  PUSH="push"
 fi
 # if [ "$KUBECONFIG" == "" ]; then
 #   echo "KUBECONFIG must be set!"
@@ -23,14 +32,12 @@ run() {
 }
 
 
-run "make all"
-run "make docker-push"
-run "make $ALL -C components/jss/"
-run "make $ALL -C components/vtpm2-server/"
-run "make $ALL -C components/jwt-sidecar/"
-run "make $ALL -C components/node-setup/"
-run "make $ALL -C examples/vault-client/"
-run "make all -C examples/vault-plugin/"
+run "make $ALL$PUSH"
+run "make $ALL$PUSH -C components/jss/"
+run "make $ALL$PUSH -C components/vtpm2-server/"
+run "make $ALL$PUSH -C components/jwt-sidecar/"
+run "make $ALL$PUSH -C components/node-setup/"
+run "make $ALL$PUSH -C components/vault-plugin/"
 
 # Helm chart packaging:
 run "helm --debug package --app-version ${TSI_VERSION} --version ${TSI_VERSION} charts/tsi-node-setup"
@@ -81,3 +88,7 @@ run "helm --debug dep update charts/ti-key-release-2"
 run "helm --debug package --dependency-update --app-version ${TSI_VERSION} --version ${TSI_VERSION}  charts/ti-key-release-2"
 
 mv *.tgz charts/
+
+# render the Vault deployment from a template
+EXAMPLES_DIR=examples/vault
+sed "s/<%TSI_VERSION%>/$TSI_VERSION/g" ${EXAMPLES_DIR}/vault.tpl > ${EXAMPLES_DIR}/vault.yaml

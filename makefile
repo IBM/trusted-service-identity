@@ -11,11 +11,15 @@ IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):$(TSI_VERSION)
 GOARCH=$(shell go env GOARCH)
 
-.PHONY: all fast test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
+.PHONY: all allpush fast fastpush test-deps build-deps fmt vet lint get-deps test build docker docker-push dep
 
 all: dep get-deps fmt test build docker timestamp
 
-fast: build docker docker-push timestamp
+allpush: all docker-push timestamp
+
+fast: test build docker timestamp
+
+fastpush: fast docker-push timestamp
 
 dep:
 	go mod tidy

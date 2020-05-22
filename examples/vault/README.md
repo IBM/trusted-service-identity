@@ -1,62 +1,34 @@
-# Vault Plugin: JWT Auth Backend for Trusted Service Identity
+# Trusted Service Identity Demo with Vault
+This demo uses the [TSI Vault authentication plugin](/components/vault-plugin/README.md)
 
-This is a standalone backend plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault).
-This plugin allows for JWTs (including OIDC tokens) to authenticate with Vault.
-
-## Quick Links
-    - Vault Website: https://www.vaultproject.io
-    - JWT Auth Docs: https://www.vaultproject.io/docs/auth/jwt.html
-    - Main Project Github: https://www.github.com/hashicorp/vault
-
-This document describes the Trusted Identity demo example and provides guidance
-for plugin development.
+## Trusted Identity Vault Authentication Plugin Development
+[This section](/components/vault-plugin/README.md#plugin-development) describes the plugin development
 
 ## Trusted Identity Demo
 Demo with Vault Plugin steps. "bootstrapping" label indicates the operations that
 will be done by the initial bootstrapping in CI/CD pipeline.
-* Make sure [TI Prerequisites](../../README.md#prerequisites) are met
-* (bootstrapping) Install [Trusted Service Identity framework](../../README.md#install-trusted-service-identity-framework)
-* [Deploy Vault Service](./README.md#deploy-vault-service)
+* Make sure [TI Prerequisites](/README.md#prerequisites) are met
+* (bootstrapping) Install [Trusted Service Identity framework](/README.md#install-trusted-service-identity-framework)
+* [Deploy Vault Service](/README.md#deploy-vault-service)
 * (bootstrapping) Configure the Vault Plugin
 * (bootstrapping) Register JWT Signing Service (JSS) with Vault
 * Define sample policies and roles
 * Deploy Vault Client
 * Execute sample transactions
 
-Setup `kk` [alias](../../README.md#setup-kubectl-alias) to save on typing
-
-## Trusted Identity Vault Authentication Plugin Development
-[This section](./README.md#plugin-development) below describes the plugin development
+Setup `kk` [alias](/README.md#setup-kubectl-alias) to save on typing
 
 ### Deploy Vault Service
 The Vault service can be started anywhere, as long as the Trusted Identity containers
-can access it. Please follow the Vault installation steps from the main [README](../../README.md#setup-vault)
-
-### Test access to public JSS interface
-For every worker node there will be a running `jss-server` and `tsi-node-setup` pod.
-
-Test the connection to public JSS interface using the node-setup containers deployed
-during the [Setup Cluster](../../README.md#setup-cluster) process earlier:
-
-```console
-$ kk exec -it $(kk get po | grep tsi-node-setup | awk '{print $1}' |  sed -n 1p ) -- sh -c 'curl $HOST_IP:5000/public/getCSR'
-
------BEGIN CERTIFICATE REQUEST-----
-MIICXjCCAUYCAQAwGTEXMBUGA1UEAwwOanNzLWp3dC1zZXJ2ZXIwggEiMA0GCSqG
-SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCqeUM+TDlqhyMoRdFJA1OcPcpp4bSEDQ9W
-1pgDBabCyzClJJX8BElsDi1DIf2PIhjazWMQ+rvSEP3eW0o3eLVC+XWIzIEwk/7h
-o.........................................MZsg8vXKAVJdlX7npWW8Gs
-yJEX/CjVKeiUZW2WLcwkFk27uDWSGXXca8Bm1kuuc01O5ENr52DEyBcjqRhMtyGb
-8TYyvgfamDAth1Ph05HElSvg2mI/9Sc+qk5hLwYRC2zp8UMuKVcIlthX6t3v3ZV3
-D8CthBFev8ZBzuqFQiboNG0YgJ5+JxwyVhGFPUse9fYsjQ==
------END CERTIFICATE REQUEST-----
-```
+can access it. Please follow the Vault installation steps from the main [README](/README.md#setup-vault)
 
 ### Configure Vault Plugin
 To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
 installation.
 
 ### Vault Setup (as Vault Admin)
+*This step MUST be done in the cluster where Vault Service is deployed.*
+
 To obtain access to Vault, you have to be a Vault admin.
 Obtain the Vault Root token from the cluster where Vault Plugin is deployed:
 
@@ -69,7 +41,7 @@ Assign the Vault address (using Vault Ingress tested above):
 ```sh
 $ export VAULT_ADDR=http://<vault_address>
 # e.g.
-$ export VAULT_ADDR=http://ti-fra02.eu-de.containers.appdomain.cloud
+$ export VAULT_ADDR=http://tsi-test.eu-de.containers.appdomain.cloud
 ```
 Once you have `ROOT_TOKEN` and `VAULT_ADDR` environment variables defined, test
 the connection
@@ -92,8 +64,41 @@ $ ./demo.vault-setup.sh $ROOT_TOKEN $VAULT_ADDR <TSI Namespace>
 If no errors, proceed to the JSS registration
 
 ### Register JWT Signing Service (JSS) with Vault
-Each cluster with JSS needs to be registered with Vault.
-Env. variables `ROOT_TOKEN` and `VAULT_ADDR` should be already defined.
+*This step MUST be done in the cluster that you want to register with Vault.*
+
+If vault was deployed in a different cluster, obtain the ROOT_TOKEN from Vault
+and VAULT_ADDR (see the Vault Setup steps above):
+
+```console
+export VAULT_ADDR=http://<vault_address>
+export ROOT_TOKEN=<token>
+```
+
+Before registering the JSS service with Vault, please test the access to public JSS
+interface.
+For every worker node there will be a running `jss-server` (or `vtpm2-server`
+when using vTPM2) and `tsi-node-setup` pod.
+
+Test the connection to public JSS interface using the node-setup containers deployed
+during the [Setup Cluster](/README.md#setup-cluster) process earlier:
+
+```console
+$ kk exec -it $(kk get po | grep tsi-node-setup | awk '{print $1}' |  sed -n 1p ) -- sh -c 'curl $HOST_IP:5000/public/getCSR'
+
+-----BEGIN CERTIFICATE REQUEST-----
+MIICXjCCAUYCAQAwGTEXMBUGA1UEAwwOanNzLWp3dC1zZXJ2ZXIwggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCqeUM+TDlqhyMoRdFJA1OcPcpp4bSEDQ9W
+1pgDBabCyzClJJX8BElsDi1DIf2PIhjazWMQ+rvSEP3eW0o3eLVC+XWIzIEwk/7h
+o.........................................MZsg8vXKAVJdlX7npWW8Gs
+yJEX/CjVKeiUZW2WLcwkFk27uDWSGXXca8Bm1kuuc01O5ENr52DEyBcjqRhMtyGb
+8TYyvgfamDAth1Ph05HElSvg2mI/9Sc+qk5hLwYRC2zp8UMuKVcIlthX6t3v3ZV3
+D8CthBFev8ZBzuqFQiboNG0YgJ5+JxwyVhGFPUse9fYsjQ==
+-----END CERTIFICATE REQUEST-----
+```
+
+Each node, member of the cluster, needs to be registered with Vault.
+The env. variables `ROOT_TOKEN` and `VAULT_ADDR` must be defined.
+
 Execute the registration:
 
 ```sh
@@ -167,11 +172,10 @@ $ ./demo.load-sample-policies.sh
 ```
 
 ### Preload sample keys
-Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](../myubuntu.yaml) and
-[examples/vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml) (see below) examples.
+Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](/examples/myubuntu.yaml) (see example below).
 
-Since version 1.4, the application must be running in a separate namespace. Use the application namespace to load
-sample keys:
+Since version 1.4, the application must be running in a separate namespace. Use
+*the application namespace*  to load the sample keys:
 ```console
 $ demo.load-sample-keys.sh --help
 $ demo.load-sample-keys.sh [region] [cluster] [app. namespace]
@@ -179,12 +183,13 @@ $ demo.load-sample-keys.sh [region] [cluster] [app. namespace]
 
 ### Start sample application
 Now is time to start some sample application. The simplest one is `myubuntu`
-available [here](../myubuntu.yaml#L12). Application will get a TSI sidecar as long as it contains the following annotation:
+available [here](/examples/myubuntu.yaml). Application will get a TSI sidecar as long
+as it contains the following annotation:
 
 ```yaml
 admission.trusted.identity/inject: "true"
 ```
-There is also an [example](../myubuntu.yaml#L13-L33) showing how to request secrets for the application.
+There is also an [example](/examples/myubuntu.yaml#L16-L40) showing how to request secrets for the application.
 
 Staring with TSI version 1.4, all applications must be
 created in a namespace that is not used for TSI components e.g. _test_
@@ -200,7 +205,7 @@ kubectl -n test create -f examples/myubuntu.yaml
 kubectl -n test get po
 ```
 
-The secrets will be mounted to your pad under `/tsi-secrets` directory, using
+The secrets will be mounted to your pod under `/tsi-secrets` directory, using
 the path requested via pod annotation.
 
 Validate if the sample secrets loaded earlier to Vault via 'demo.load-sample-keys.sh'  script and
@@ -213,49 +218,9 @@ kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{prin
 To test the sidecar access to Vault:
 
 ```console
-kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar /test-vault-cli.sh
-```
-To see the JWT token:
-```console
-kubectl -n test exec -it {myubuntu-pod-id} -c jwt-sidecar cat /jwt/token
-```
-
-You can inspect the content of the token by simply pasting its content into
-[Debugger](https://jwt.io/) in Encoded window.
-
-
-### Start the Vault client
-Another example uses preloaded Vault client to access an arbitrary Vault service
-using the secrets obtained from TSI Vault and injected to the pod.
-
-Using provided template [../vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml),
-build the deployment file `vault-cli.yaml`, using the Vault remote address.
-
-
-Start the vault client, then test the injected secret:
-```sh
-$ kubectl -n test create -f ../vault-client/vault-cli.yaml
-$ kubectl -n test get pods
-$ kubectl -n test exec -it $(kk get pods | grep vault-cli | awk '{print $1}') cat tsi-secrets/mysecrets/secret-test1/mysecret1
-Defaulting container name to vault-cli.
-{"all":"good"}
-```
-
-To see the JWT token:
-```console
-kubectl -n test exec -it {vault-cli-pod-id} -c jwt-sidecar cat /jwt/token
-```
-
-You can inspect the content of the token by simply pasting its content into
-[Debugger](https://jwt.io/) in Encoded window.
-
-
-### Test the sidecar access to TSI Vault
-Every sidecar is equipped with a test script `/test-vault-cli.sh` Assuming the keys for this pod were loaded to the Vault using `demo.load-sample-keys.sh` they should be available for testing:
-
-```console
-$ kubectl -n test exec -it $(kubectl -n test get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar /test-vault-cli.sh
-
+$ kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar /test-vault-cli.sh
+# or
+$ kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{print $1}') -c jwt-sidecar /test-vault-cli.sh
 Testing the default demo role:
 A01 Test successful! RT: 0
 A02 Test successful! RT: 2
@@ -278,6 +243,7 @@ R01 Test successful! RT: 0
 R02 Test successful! RT: 2
 R03 Test successful! RT: 0
 R04 Test successful! RT: 0
+R05 Test successful! RT: 0
 Testing non-existing role
 E01 Test successful! RT: 0
 Testing access w/o token
@@ -286,10 +252,31 @@ E03 Test successful! RT: 2
 Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values
 ```
 
-You can also get inside the `vault-cli` sidecar container and run other tests:
+To see the JWT token:
+```console
+kubectl -n test exec -it {myubuntu-pod-id} -c jwt-sidecar cat /jwt/token
+```
+
+You can inspect the content of the token by simply pasting its content into
+[Debugger](https://jwt.io/) in Encoded window.
+
+### More testing and exploring
+Get inside the sidecar:
 
 ```console
-$ kubectl -n test exec -it $(kubectl -n test get pods | grep vault-cli | awk '{print $1}') -c jwt-sidecar bash
+$ kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar bash
+```
+
+Get secret from Vault using JWT token:
+
+```console
+curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'demo-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq
+
+export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
+
+export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'demo-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
+
+vault kv get -format=json secret/ti-demo-r/eu-de/mysecret4
 ```
 
 To view all the attributes (measurement) associate with this pod, you can execute
@@ -331,66 +318,5 @@ root@vault-cli-fd855bc5f-2cs4d:/# curl -s --request POST --data '{"jwt": "'"$(ca
 }
 root@vault-cli-fd855bc5f-2cs4d:/#
 ```
-The measurements are grouped under "metadata" section.
-
-## Plugin Development
-### Getting Started
-
-This is a [Vault plugin](https://www.vaultproject.io/docs/internals/plugins.html)
-and is meant to work with Vault. This guide assumes you have already installed Vault
-and have a basic understanding of how Vault works.
-
-Otherwise, first read this guide on how to [get started with Vault](https://www.vaultproject.io/intro/getting-started/install.html).
-
-To learn specifically about how plugins work, see documentation on [Vault plugins](https://www.vaultproject.io/docs/internals/plugins.html).
-
-## Usage
-
-Please see [documentation for the plugin](https://www.vaultproject.io/docs/auth/jwt.html)
-on the Vault website.
-
-This plugin is currently built into Vault and by default is accessed
-at `auth/jwt`. To enable this in a running Vault server:
-
-```sh
-$ vault auth enable jwt
-Successfully enabled 'jwt' at 'jwt'!
-```
-
-To see all the supported paths, see the [JWT auth backend docs](https://www.vaultproject.io/docs/auth/jwt.html).
-
-## Developing the TSI plugin for Vault
-
-If you wish to work on this plugin, you'll first need
-[Go](https://www.golang.org) installed on your machine.
-
-This component is the integral part of the Trusted Service Identity project, so
-please refer to installation instruction in main [README](../../README.md#prerequisites) to clone the repository and setup [GOPATH](https://golang.org/doc/code.html#GOPATH).
-
-Then you can then download any required build tools by bootstrapping your
-environment:
-
-```sh
-$ make bootstrap
-```
-
-Setup dependencies (this builds `vendor` directory)
-
-```sh
-$ dep ensure
-```
-
-To compile a development version of this plugin, run `make` or `make dev`.
-This will put the plugin binary in the `bin` and `$GOPATH/bin` folders. `dev`
-mode will only generate the binary for your platform and is faster:
-
-```sh
-$ make
-$ make dev
-```
-
-Or execute `make all` to compile, build docker image and push to the image repository.
-
-```sh
-$ make all
-```
+The measurements are grouped under "metadata" section. The members of "metadata"
+depend on the `role` value used for login

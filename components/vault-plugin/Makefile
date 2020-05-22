@@ -1,3 +1,4 @@
+TSI_VERSION=$(shell cat ../../tsi-version.txt)
 TOOL?=vault-plugin-auth-ti-jwt
 TEST?=$$(go list ./... | grep -v /vendor/)
 EXTERNAL_TOOLS=\
@@ -12,7 +13,7 @@ BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 IMG_NAME="ti-vault"
 REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(IMG_NAME):$(GIT_COMMIT_SHA)
-MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):v0.4
+MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):$(TSI_VERSION)
 
 ARCH=$(shell if test `uname -m` = "x86_64"; then echo amd64 ; else echo `uname -m`; fi;)
 
@@ -77,6 +78,15 @@ docker-push:
 timestamp:
 	date
 
-all: bin docker docker-push timestamp
+all: bin fmt test docker timestamp
 
-.PHONY: bin default generate test bootstrap fmt deps docker docker-push timestamp all
+allpush: all docker-push timestamp
+
+fast: bin fmt test
+	docker build --build-arg ARCH=${ARCH} -t $(IMAGE) .
+	docker tag $(IMAGE) $(MUTABLE_IMAGE)
+	date
+
+fastpush: fast docker-push timestamp
+
+.PHONY: allpush fast fastpush bin default generate test bootstrap fmt deps docker docker-push timestamp all

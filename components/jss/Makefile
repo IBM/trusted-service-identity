@@ -10,17 +10,17 @@ MUTABLE_IMAGE_PUB := $(REPO)/$(BINARY_NAME_PUB):$(TSI_VERSION)
 IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE_PRIV := $(REPO)/$(BINARY_NAME_PRIV):$(TSI_VERSION)
 
-all: docker docker-push timestamp
+all: docker timestamp
+
+allpush: docker docker-push timestamp
+
+fastpush:  fast docker-push timestamp
 
 fast:
 	docker build -t $(IMAGE_PUB) -f Dockerfile.pub .
 	docker tag $(IMAGE_PUB) $(MUTABLE_IMAGE_PUB)
-	docker push $(IMAGE_PUB)
-	docker push $(MUTABLE_IMAGE_PUB)
 	docker build -t $(IMAGE_PRIV) -f Dockerfile.privsock .
 	docker tag $(IMAGE_PRIV) $(MUTABLE_IMAGE_PRIV)
-	docker push $(IMAGE_PRIV)
-	docker push $(MUTABLE_IMAGE_PRIV)
 	date
 
 docker:
@@ -38,4 +38,4 @@ docker-push:
 timestamp:
 	date
 
-.PHONY: all fast docker docker-push timestamp
+.PHONY: all fast allpush fastpush docker docker-push timestamp

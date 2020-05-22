@@ -7,13 +7,15 @@ REPO ?= trustedseriviceidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):$(TSI_VERSION)
 
-all: docker docker-push timestamp
+all: docker timestamp
+
+allpush: docker docker-push timestamp
+
+fastpush: fast docker-push timestamp
 
 fast:
 	docker build -t $(IMAGE) .
 	docker tag $(IMAGE) $(MUTABLE_IMAGE)
-	docker push $(IMAGE)
-	docker push $(MUTABLE_IMAGE)
 	date
 
 docker:
@@ -27,4 +29,4 @@ docker-push:
 timestamp:
 	date
 
-.PHONY: all fast docker docker-push timestamp
+.PHONY: all allpush fastpush fast docker docker-push timestamp
