@@ -47,11 +47,10 @@ In addition, the traditional binding of certificates to IP addresses via TLS to 
 * **VSI14** - Container memory is visible to the host kernel  
   - **Threat**: Highly privileged cloud provider is able to affect confidentiality and integrity of in-use credentials in orchestration 
 
-Legend
-X - Not available
-✓ - Resolved
-✓- Mitigated
-[x] - Refer to footnote
+Table Legend:
+* X - Not available
+* &#10003; - Resolved/Mitigated
+* [#] - Refer to footnote
 
 | imp \ VSI            | 01        | 02       | 03       | 04       | 05       | 06       | 07       | 08            | 09       | 10       | 11       | 12       | 13       | 14       |
 |----------------------|-----------|----------|----------|----------|----------|----------|----------|---------------|----------|----------|----------|----------|----------|----------|
@@ -60,10 +59,10 @@ X - Not available
 | Vault +TSI +TPM      | &#10003;  | &#10003; | &#10003; | &#10003; | &#10003; | &#10003; | &#10003; | &#10003; [1]  | &#10003; [2]| &#10003; [3]| &#10003; [4] | &#10003; [5] | &#10003; [6]| x        |
 | Vault +TSI +TPM +TEE | &#10003;  | &#10003; | &#10003; | &#10003; | &#10003; | &#10003; | &#10003; | &#10003; [1]  | &#10003; [2]| &#10003; [3]| &#10003; [4]| &#10003; [5]| &#10003; [6]| &#10003; [7]|
 
-TPM - Trusted Platform Module
+- TPM - Trusted Platform Module
+- TEE – Trusted Execution Environment    
 
-TEE – Trusted Execution Environment    
-
+Footnotes:
 * **VSI08**: [1] TSI ensures location trust boundary enforcement through embedding the location properties into the certificate structure
 * **VSI09**: [2] Future work for TSI to do this based on label/context based routing validation of certificate to perform secure delivery of secrets
 * **VSI10**: [3] Is reduced to remove all operator specific interactions. Only limiting to a initial setup with a person of high privilege, i.e. CISO
