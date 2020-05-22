@@ -1,26 +1,26 @@
 # Trusted Service Identity Demo with Vault
-This demo uses the [TSI Vault authentication plugin](../../components/vault-plugin/README.md)
+This demo uses the [TSI Vault authentication plugin](/components/vault-plugin/README.md)
 
 ## Trusted Identity Vault Authentication Plugin Development
-[This section](../../components/vault-plugin/README.md#plugin-development) describes the plugin development
+[This section](/components/vault-plugin/README.md#plugin-development) describes the plugin development
 
 ## Trusted Identity Demo
 Demo with Vault Plugin steps. "bootstrapping" label indicates the operations that
 will be done by the initial bootstrapping in CI/CD pipeline.
-* Make sure [TI Prerequisites](../../README.md#prerequisites) are met
-* (bootstrapping) Install [Trusted Service Identity framework](../../README.md#install-trusted-service-identity-framework)
-* [Deploy Vault Service](./README.md#deploy-vault-service)
+* Make sure [TI Prerequisites](/README.md#prerequisites) are met
+* (bootstrapping) Install [Trusted Service Identity framework](/README.md#install-trusted-service-identity-framework)
+* [Deploy Vault Service](/README.md#deploy-vault-service)
 * (bootstrapping) Configure the Vault Plugin
 * (bootstrapping) Register JWT Signing Service (JSS) with Vault
 * Define sample policies and roles
 * Deploy Vault Client
 * Execute sample transactions
 
-Setup `kk` [alias](../../README.md#setup-kubectl-alias) to save on typing
+Setup `kk` [alias](/README.md#setup-kubectl-alias) to save on typing
 
 ### Deploy Vault Service
 The Vault service can be started anywhere, as long as the Trusted Identity containers
-can access it. Please follow the Vault installation steps from the main [README](../../README.md#setup-vault)
+can access it. Please follow the Vault installation steps from the main [README](/README.md#setup-vault)
 
 ### Configure Vault Plugin
 To configure Vault and install the plugin, your system requires [vault client](https://www.vaultproject.io/docs/install/)
@@ -80,7 +80,7 @@ For every worker node there will be a running `jss-server` (or `vtpm2-server`
 when using vTPM2) and `tsi-node-setup` pod.
 
 Test the connection to public JSS interface using the node-setup containers deployed
-during the [Setup Cluster](../../README.md#setup-cluster) process earlier:
+during the [Setup Cluster](/README.md#setup-cluster) process earlier:
 
 ```console
 $ kk exec -it $(kk get po | grep tsi-node-setup | awk '{print $1}' |  sed -n 1p ) -- sh -c 'curl $HOST_IP:5000/public/getCSR'
@@ -172,8 +172,7 @@ $ ./demo.load-sample-policies.sh
 ```
 
 ### Preload sample keys
-Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](../myubuntu.yaml) and
-[examples/vault-client/vault-cli.template.yaml](../vault-client/vault-cli.template.yaml) (see below) examples.
+Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](/examples/myubuntu.yaml) (see example below).
 
 Since version 1.4, the application must be running in a separate namespace. Use
 *the application namespace*  to load the sample keys:
@@ -184,13 +183,13 @@ $ demo.load-sample-keys.sh [region] [cluster] [app. namespace]
 
 ### Start sample application
 Now is time to start some sample application. The simplest one is `myubuntu`
-available [here](../myubuntu.yaml). Application will get a TSI sidecar as long
+available [here](/examples/myubuntu.yaml). Application will get a TSI sidecar as long
 as it contains the following annotation:
 
 ```yaml
 admission.trusted.identity/inject: "true"
 ```
-There is also an [example](../myubuntu.yaml#L16-L40) showing how to request secrets for the application.
+There is also an [example](/examples/myubuntu.yaml#L16-L40) showing how to request secrets for the application.
 
 Staring with TSI version 1.4, all applications must be
 created in a namespace that is not used for TSI components e.g. _test_
