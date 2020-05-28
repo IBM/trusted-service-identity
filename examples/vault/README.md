@@ -171,6 +171,7 @@ and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
 $ ./demo.load-sample-policies.sh
 ```
 
+## Secrets 
 ### Preload sample keys
 Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](/examples/myubuntu.yaml) (see example below).
 

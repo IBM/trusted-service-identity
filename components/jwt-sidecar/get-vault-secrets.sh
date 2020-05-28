@@ -72,10 +72,87 @@ HELPMEHELPME
 # run secret retrieval and output results to specified location
 run()
 {
+  # SECNAME=${SECNAME}, CONSTRAINS=${CONSTR}, LOCPATH=${LOCPATH}
   local SECNAME=$1
-  local ROLE=$2
-  local VAULT_PATH=$3
-  local SECOUT=$4
+  local CONSTR=$2
+  local LOCPATH=$3
+  # local ROLE=$2
+  # local VAULT_PATH=$3
+  # local SECOUT=$4
+
+
+  # local-path must start with "mysecrets"
+  if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
+    echo "Valid local-path: $LOCPATH"
+  else
+    echo "ERROR: invalid local-path requested: $LOCPATH"
+    return 1
+  fi
+
+  # There are 2 steps to obtain the secret:
+  #   1. Login with Vault Role to obtain a token. Vault responds with claims
+  #      associated with thie Role.
+  #   2. Using claims associated with the Role, build the Vault Path to the
+  #      given secret.
+
+  # convert CONSTRAINS into Vault Roles and Vault Paths:
+  ROLE=
+  VAULT_PATH=
+
+  case $CONSTR in
+    # TODO: this should be more dynamic instead of string comparison.
+    # e.g. parse the values, trim, lowercase and perhaps sort alphabetically ??
+      "region")
+          echo "# using policy $CONSTR"
+          ROLE="demo-r"
+          VAULT_PATH="secret/ti-demo-r"
+          # PL="ti-demo-ri"
+          # REGION=`echo $CLAIMS |jq -r '."region"'`
+          # IMG=`echo $CLAIMS |jq -r '."images"'`
+          # echo "vault kv put secret/ti-demo-r/${REGION}/${SECNAME} ${SECRET_VALUE}"
+          # POLICIES+=('ti-demo-r')
+          ;;
+
+      "region,images")
+          echo "# using policy $CONSTR"
+          ROLE="demo-ri"
+          VAULT_PATH="secret/ti-demo-ri"
+          # PL="ti-demo-r"
+          # REGION=`echo $CLAIMS |jq -r '."region"'`
+          # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
+          # IMG=`echo $CLAIMS |jq -r '."images"'`
+          # echo "vault kv put secret/ti-demo-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+          # POLICIES+=('ti-demo-ri')
+          ;;
+      "region,cluster,namespace")
+              echo "# using policy $CONSTR"
+              ROLE="demo-n"
+              VAULT_PATH="secret/ti-demo-n"
+              # PL="ti-demo-r"
+              # REGION=`echo $CLAIMS |jq -r '."region"'`
+              # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
+              # IMG=`echo $CLAIMS |jq -r '."images"'`
+              # echo "vault kv put secret/ti-demo-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+              # POLICIES+=('ti-demo-ri')
+              ;;
+      "region,cluster-name,namespace,images")
+          echo "# using policy $CONSTR"
+          ROLE="demo"
+          VAULT_PATH="secret/ti-demo-all"
+          # PL="ti-demo-all"
+          # REGION=`echo $CLAIMS |jq -r '."region"'`
+          # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
+          # NS=`echo $CLAIMS |jq -r '."namespace"'`
+          # IMG=`echo $CLAIMS |jq -r '."images"'`
+          # echo "vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+          # POLICIES+=('ti-demo-all')
+          ;;
+      *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
+         return 1
+         ;;
+  esac
+
+
 
   # first login with 'secret.role' and JWT to obtain VAULT_TOKEN
   RESP=$(login "${ROLE}")
@@ -98,16 +175,18 @@ run()
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  echo "Getting $SECNAME from Vault $VAULT_PATH and output to $SECOUT"
+  echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
   if [ "$VAULT_PATH" == "secret/ti-demo-all" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
   elif [ "$VAULT_PATH" == "secret/ti-demo-r" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${SECNAME}"
+  elif [ "$VAULT_PATH" == "secret/ti-demo-ri" ]; then
+    CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${IMGSHA}/${SECNAME}"
   elif [ "$VAULT_PATH" == "secret/ti-demo-n" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
   else
     echo "Unknown Vault path value!"
-    rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+    rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
     return 1
   fi
 
@@ -125,16 +204,16 @@ run()
     RT=$?
     if [ "$RT" == "0" ]; then
       echo "Parsing vault response successful! RESULT: $RESULT"
-      mkdir -p "${SECOUTDIR}/${SECOUT}"
-      echo "$RESULT" > "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+      mkdir -p "${SECOUTDIR}/${LOCPATH}"
+      echo "$RESULT" > "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
     else
       echo "Parsing vault response failed. Result: $JRESULT"
-      rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+      rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
       return 1
     fi
   else
     echo "Vault command failed: RT: $RT, CMD: $CMD, RESULT: $JRESULT"
-    rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+    rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
     return 1
   fi
 } # .. end of run()
@@ -142,14 +221,19 @@ run()
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
   # for each requested secret parse its attributes
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
-  ROLE=$(echo "$row" | jq -r '."tsi.secret/role"')
-  VAULT_PATH=$(echo "$row" | jq -r '."tsi.secret/vault-path"')
-  SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-path"')
+  CONSTR=$(echo "$row" | jq -r '."tsi.secret/constrains"')
+  LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
+
+  # # for each requested secret parse its attributes
+  # SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
+  # ROLE=$(echo "$row" | jq -r '."tsi.secret/role"')
+  # VAULT_PATH=$(echo "$row" | jq -r '."tsi.secret/vault-path"')
+  # SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # then run secret retrieval from Vault
-  run "$SECNAME" "$ROLE" "$VAULT_PATH" "$SECOUT"
+  run "$SECNAME" "$CONSTR" "$LOCPATH"
   RT=$?
   if [ "$RT" != "0" ]; then
-    echo "Error processing secret SECNAME=${SECNAME}, ROLE=${ROLE}, VAULT_PATH=${VAULT_PATH}, SECOUT=${SECOUT}"
+    echo "Error processing secret SECNAME=${SECNAME}, CONSTRAINS=${CONSTR}, LOCPATH=${LOCPATH}"
   fi
 done
