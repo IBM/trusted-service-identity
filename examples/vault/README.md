@@ -151,7 +151,7 @@ Sample Payload:
 ```json
 {
   "cluster-name": "ti_demo",
-  "region": "dal09",
+  "region": "us-south",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",

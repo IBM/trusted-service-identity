@@ -37,7 +37,7 @@ syntax:
    $0 [region] [cluster] [namespace] [full image name (optional)]
 
 where:
-      [region]: eu-de, dal01, wdc01, ...
+      [region]: eu-de, us-south, eu-gb, ...
       [cluster]: cluster name
       [namespace]: namespace of the application container
       [full image name (optional)]: e.g. trustedseriviceidentity/vault-cli:v0.3

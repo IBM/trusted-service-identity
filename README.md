@@ -210,7 +210,7 @@ At this point, this is an expected result.
 ### Setup Cluster Nodes
 The following information is required to deploy TSI node-setup helm chart:
 * cluster name - name of the cluster. This must correspond to the actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+* cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
 TSI currently supports 2 methods for signing JWT Tokens:
 * using TPM2 - private keys are obtained directly from TPM using TPM wrapper (VTPM2)
 * using custom signing service JSS (JWT Signing Service)
@@ -251,7 +251,7 @@ You can use them directly or use the charts that you built yourself (see instruc
 
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This must correspond to the actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, dal09, wdc01)
+* cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, wdc01)
 * vault address - the remote address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. Use the env. variable VAULT_ADDR set [above](./README.md#setup-vault)
 * jss service - TSI currently support 2 mechanism for running the JSS (JWT Signing Service):
   - jss-server - custom service for signing JWT tokens (default)
@@ -301,7 +301,7 @@ Sample JWT Claims:
 ```json
 {
   "cluster-name": "ti_demo",
-  "region": "dal09",
+  "region": "us-south",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",

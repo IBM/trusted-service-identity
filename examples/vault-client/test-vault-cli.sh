@@ -144,8 +144,8 @@ tests()
 
   echo "Testing access w/o token"
   export VAULT_TOKEN=
-  test "vault kv get secret/tsi-rcni/dal01/xxx/xxx/xxx/dummy" 2 E02
-  test "vault kv get secret/tsi-r/dal01/dummy" 2 E03
+  test "vault kv get secret/tsi-rcni/us-south/xxx/xxx/xxx/dummy" 2 E02
+  test "vault kv get secret/tsi-r/us-south/dummy" 2 E03
 
   echo "Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values"
   }

@@ -76,10 +76,6 @@ run()
   local SECNAME=$1
   local CONSTR=$2
   local LOCPATH=$3
-  # local ROLE=$2
-  # local VAULT_PATH=$3
-  # local SECOUT=$4
-
 
   # local-path must start with "mysecrets"
   if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
@@ -106,46 +102,22 @@ run()
           echo "# using policy $CONSTR"
           ROLE="tsi-role-r"
           VAULT_PATH="secret/tsi-r"
-          # PL="tsi-ri"
-          # REGION=`echo $CLAIMS |jq -r '."region"'`
-          # IMG=`echo $CLAIMS |jq -r '."images"'`
-          # echo "vault kv put secret/tsi-r/${REGION}/${SECNAME} ${SECRET_VALUE}"
-          # POLICIES+=('tsi-r')
           ;;
 
       "region,images")
           echo "# using policy $CONSTR"
           ROLE="tsi-role-ri"
           VAULT_PATH="secret/tsi-ri"
-          # PL="tsi-r"
-          # REGION=`echo $CLAIMS |jq -r '."region"'`
-          # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
-          # IMG=`echo $CLAIMS |jq -r '."images"'`
-          # echo "vault kv put secret/tsi-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-          # POLICIES+=('tsi-ri')
           ;;
       "region,cluster,namespace")
               echo "# using policy $CONSTR"
               ROLE="tsi-role-rcn"
               VAULT_PATH="secret/tsi-rcn"
-              # PL="tsi-r"
-              # REGION=`echo $CLAIMS |jq -r '."region"'`
-              # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
-              # IMG=`echo $CLAIMS |jq -r '."images"'`
-              # echo "vault kv put secret/tsi-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-              # POLICIES+=('tsi-ri')
               ;;
       "region,cluster-name,namespace,images")
           echo "# using policy $CONSTR"
           ROLE="tsi-role-rcni"
           VAULT_PATH="secret/tsi-rcni"
-          # PL="tsi-rcni"
-          # REGION=`echo $CLAIMS |jq -r '."region"'`
-          # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
-          # NS=`echo $CLAIMS |jq -r '."namespace"'`
-          # IMG=`echo $CLAIMS |jq -r '."images"'`
-          # echo "vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-          # POLICIES+=('tsi-rcni')
           ;;
       *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
          return 1
@@ -223,12 +195,6 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
   CONSTR=$(echo "$row" | jq -r '."tsi.secret/constrains"')
   LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
-
-  # # for each requested secret parse its attributes
-  # SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
-  # ROLE=$(echo "$row" | jq -r '."tsi.secret/role"')
-  # VAULT_PATH=$(echo "$row" | jq -r '."tsi.secret/vault-path"')
-  # SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # then run secret retrieval from Vault
   run "$SECNAME" "$CONSTR" "$LOCPATH"

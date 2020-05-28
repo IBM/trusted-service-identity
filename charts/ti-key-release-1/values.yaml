@@ -11,7 +11,7 @@ tiRepo: trustedseriviceidentity
 # Cluster Information
 cluster:
   name: cluster-name
-  region: dal01
+  region: us-south
 
 # Section related to JWT token creation
 jwt:

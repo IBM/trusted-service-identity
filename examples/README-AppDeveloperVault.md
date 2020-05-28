@@ -38,7 +38,7 @@ Sample Payload:
 ```json
 {
   "cluster-name": "ti_demo",
-  "region": "dal09",
+  "region": "us-south",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
@@ -81,7 +81,7 @@ This will return the data associated with this application for the specified rol
     ],
     "metadata": {
       "cluster-name": "ti_demo",
-      "region": "dal09",
+      "region": "us-south",
       "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
       "namespace": "trusted-identity",
       "role": "demo"
@@ -114,7 +114,7 @@ script to create sample keys.
 Using claims above as example, define the following variables:
 
 ```console
-export REGION="dal09"
+export REGION="us-south"
 export CLUSTER="ti_demo"
 export IMGSHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc"
 export NAMESPACE="trusted-identity"
@@ -133,7 +133,7 @@ echo $IMGSHA
 ```
 
 As an example, let's create a secret that is only available to the application that
-runs in region labeled as "dal09", cluster named "ti_demo", namespace "trusted-identity"
+runs in region labeled as "us-south", cluster named "ti_demo", namespace "trusted-identity"
 and the image name SHA="f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc".
 We will be using a policy `demo-all` that has the following constraints:
 * region
