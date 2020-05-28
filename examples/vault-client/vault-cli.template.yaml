@@ -13,15 +13,15 @@ spec:
         admission.trusted.identity/inject: "true"
         tsi.secrets: |
              - tsi.secret/name: "mysecret1"
-               tsi.secret/role: "demo"
-               tsi.secret/vault-path: "secret/ti-demo-all"
+               tsi.secret/role: "tsi-role-rcni"
+               tsi.secret/vault-path: "secret/tsi-rcni"
                tsi.secret/local-path: "mysecrets/secret-test1"
              - tsi.secret/name: "invalid"
-               tsi.secret/role: "demo"
-               tsi.secret/vault-path: "secret/ti-demo-all"
+               tsi.secret/role: "tsi-role-rcni"
+               tsi.secret/vault-path: "secret/tsi-rcni"
                tsi.secret/local-path: "mysecrets/secret-invalid"
              - tsi.secret/name: "non-existing"
-               tsi.secret/role: "demo"
+               tsi.secret/role: "tsi-role-rcni"
                tsi.secret/vault-path: "secret/nothing"
                tsi.secret/local-path: "mysecrets/non-existing"
       labels:
@@ -37,4 +37,4 @@ spec:
               # provide the public access to the Vault server with TI plugin
             # value: "http://mycluster.eu-de.containers.appdomain.cloud:80"
             - name: VAULT_ROLE
-              value: "demo"
+              value: "tsi-role-rcni"

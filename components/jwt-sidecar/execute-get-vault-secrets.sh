@@ -3,13 +3,13 @@
 # For debbugging and manually retrieving the vault secrets:
 #  VAULT_ADDR is already defined on the sidecar. You can modify the token and
 # the role
-#   curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'demo-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq
+#   curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'tsi-role-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq
 # using the response above extract the auth.client_token and set as VAULT_TOKEN
 #   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
 # Or, if results are successful, use all-in-one:
-#   export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'demo-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
+#   export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'tsi-role-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
 # now ready to retrieve the secret:
-#   vault kv get -format=json secret/ti-demo-r/eu-de/mysecret4
+#   vault kv get -format=json secret/tsi-r/eu-de/mysecret4
 
 JWTFILE="/jwt/token"
 SECREQFILE="/pod-metadata/tsi-secrets"

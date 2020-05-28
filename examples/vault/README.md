@@ -171,7 +171,7 @@ and the [demo.load-sample-policies.sh](demo.load-sample-policies.sh) script.
 $ ./demo.load-sample-policies.sh
 ```
 
-## Secrets 
+## Secrets
 ### Preload sample keys
 Preload few sample keys that are specifically customized to use with [examples/myubuntu.yaml](/examples/myubuntu.yaml) (see example below).
 
@@ -234,12 +234,12 @@ D02 Test successful! RT: 2
 D03 Test successful! RT: 2
 D04 Test successful! RT: 2
 D05 Test successful! RT: 2
-Testing the 'demo-n' role:
+Testing the 'tsi-role-rcn' role:
 N01 Test successful! RT: 0
 N02 Test successful! RT: 2
 N03 Test successful! RT: 2
 N04 Test successful! RT: 2
-Testing the 'demo-r' role:
+Testing the 'tsi-role-r' role:
 R01 Test successful! RT: 0
 R02 Test successful! RT: 2
 R03 Test successful! RT: 0
@@ -271,13 +271,13 @@ $ kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar bash
 Get secret from Vault using JWT token:
 
 ```console
-curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'demo-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq
+curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'tsi-role-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq
 
 export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
 
-export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'demo-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
+export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'tsi-role-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
 
-vault kv get -format=json secret/ti-demo-r/eu-de/mysecret4
+vault kv get -format=json secret/tsi-r/eu-de/mysecret4
 ```
 
 To view all the attributes (measurement) associate with this pod, you can execute
@@ -298,11 +298,11 @@ root@vault-cli-fd855bc5f-2cs4d:/# curl -s --request POST --data '{"jwt": "'"$(ca
     "accessor": "kvxDUNogiTfBsDNwWz4jGTOF",
     "policies": [
       "default",
-      "ti-policy-all"
+      "tsi-policy-rcni"
     ],
     "token_policies": [
       "default",
-      "ti-policy-all"
+      "tsi-policy-rcni"
     ],
     "metadata": {
       "cluster-name": "EUcluster",

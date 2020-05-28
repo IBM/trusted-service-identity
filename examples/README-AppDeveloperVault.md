@@ -73,11 +73,11 @@ This will return the data associated with this application for the specified rol
     "accessor": "bQTiSsN09HQ0QvFxbZgApqVn",
     "policies": [
       "default",
-      "ti-policy-all"
+      "tsi-policy-rcni"
     ],
     "token_policies": [
       "default",
-      "ti-policy-all"
+      "tsi-policy-rcni"
     ],
     "metadata": {
       "cluster-name": "ti_demo",
@@ -142,22 +142,22 @@ We will be using a policy `demo-all` that has the following constraints:
 * imageSHA
 
 ```console
-vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${IMGSHA}/password value=mysecret
-vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${IMGSHA}/password
+vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${IMGSHA}/password value=mysecret
+vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${IMGSHA}/password
 ```
 
-For policy that uses only one constraint, region (demo-r):
+For policy that uses only one constraint, region (tsi-role-r):
 ```console
-vault kv put secret/ti-demo-r/${REGION}/password value=mysecret2
-vault kv get secret/ti-demo-r/${REGION}/password
+vault kv put secret/tsi-r/${REGION}/password value=mysecret2
+vault kv get secret/tsi-r/${REGION}/password
 ```
 
 And so on.
 
 To pass JSON as a value:
 ```console
-echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/ti-demo-r/${REGION}/password -
-vault kv get secret/ti-demo-r/${REGION}/password
+echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/tsi-r/${REGION}/password -
+vault kv get secret/tsi-r/${REGION}/password
 
 # demonstrate passing a JSON file as value
 cat >./test.json <<EOF
@@ -194,15 +194,15 @@ cat >./test.json <<EOF
 }
 EOF
 
-vault kv put secret/ti-demo-r/${REGION}/test.json @test.json
-vault kv get secret/ti-demo-r/${REGION}/test.json
+vault kv put secret/tsi-r/${REGION}/test.json @test.json
+vault kv get secret/tsi-r/${REGION}/test.json
 }
 ```
 
 
 ## Retrieve keys in the Vault client
 Once the keys are provided you should be able to read them from the Vault client.
-To read `secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${IMGSHA}/password`
+To read `secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${IMGSHA}/password`
 with a role `demo-all`:
 
 ```console
@@ -217,6 +217,6 @@ IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
 NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
 # execute retrieve:
-vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/password
+vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/password
 
 ```

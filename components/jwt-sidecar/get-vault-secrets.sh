@@ -104,48 +104,48 @@ run()
     # e.g. parse the values, trim, lowercase and perhaps sort alphabetically ??
       "region")
           echo "# using policy $CONSTR"
-          ROLE="demo-r"
-          VAULT_PATH="secret/ti-demo-r"
-          # PL="ti-demo-ri"
+          ROLE="tsi-role-r"
+          VAULT_PATH="secret/tsi-r"
+          # PL="tsi-ri"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          # echo "vault kv put secret/ti-demo-r/${REGION}/${SECNAME} ${SECRET_VALUE}"
-          # POLICIES+=('ti-demo-r')
+          # echo "vault kv put secret/tsi-r/${REGION}/${SECNAME} ${SECRET_VALUE}"
+          # POLICIES+=('tsi-r')
           ;;
 
       "region,images")
           echo "# using policy $CONSTR"
-          ROLE="demo-ri"
-          VAULT_PATH="secret/ti-demo-ri"
-          # PL="ti-demo-r"
+          ROLE="tsi-role-ri"
+          VAULT_PATH="secret/tsi-ri"
+          # PL="tsi-r"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          # echo "vault kv put secret/ti-demo-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-          # POLICIES+=('ti-demo-ri')
+          # echo "vault kv put secret/tsi-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+          # POLICIES+=('tsi-ri')
           ;;
       "region,cluster,namespace")
               echo "# using policy $CONSTR"
-              ROLE="demo-n"
-              VAULT_PATH="secret/ti-demo-n"
-              # PL="ti-demo-r"
+              ROLE="tsi-role-rcn"
+              VAULT_PATH="secret/tsi-rcn"
+              # PL="tsi-r"
               # REGION=`echo $CLAIMS |jq -r '."region"'`
               # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
               # IMG=`echo $CLAIMS |jq -r '."images"'`
-              # echo "vault kv put secret/ti-demo-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-              # POLICIES+=('ti-demo-ri')
+              # echo "vault kv put secret/tsi-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+              # POLICIES+=('tsi-ri')
               ;;
       "region,cluster-name,namespace,images")
           echo "# using policy $CONSTR"
-          ROLE="demo"
-          VAULT_PATH="secret/ti-demo-all"
-          # PL="ti-demo-all"
+          ROLE="tsi-role-rcni"
+          VAULT_PATH="secret/tsi-rcni"
+          # PL="tsi-rcni"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # NS=`echo $CLAIMS |jq -r '."namespace"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          # echo "vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-          # POLICIES+=('ti-demo-all')
+          # echo "vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+          # POLICIES+=('tsi-rcni')
           ;;
       *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
          return 1
@@ -176,13 +176,13 @@ run()
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
   echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
-  if [ "$VAULT_PATH" == "secret/ti-demo-all" ]; then
+  if [ "$VAULT_PATH" == "secret/tsi-rcni" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/ti-demo-r" ]; then
+  elif [ "$VAULT_PATH" == "secret/tsi-r" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/ti-demo-ri" ]; then
+  elif [ "$VAULT_PATH" == "secret/tsi-ri" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${IMGSHA}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/ti-demo-n" ]; then
+  elif [ "$VAULT_PATH" == "secret/tsi-rcn" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
   else
     echo "Unknown Vault path value!"
@@ -190,12 +190,12 @@ run()
     return 1
   fi
 
-  #CMD="vault kv get -format=json secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  #vault kv get -format=json secret/ti-demo-all/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy | jq -c '.data.data'
+  #CMD="vault kv get -format=json secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
+  #vault kv get -format=json secret/tsi-rcni/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy | jq -c '.data.data'
 
   # get the result in JSON format, then convert to string
   # Result can be also an error like this:
-  #    No value found at secret/data/ti-demo-all/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
+  #    No value found at secret/data/tsi-rcni/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
   JRESULT=$($CMD)
   local RT=$?
   if [ "$RT" == "0" ]; then

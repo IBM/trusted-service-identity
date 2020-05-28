@@ -23,36 +23,42 @@ loadVault()
   export MOUNT_ACCESSOR=$(curl --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET ${VAULT_ADDR}/v1/sys/auth | jq -r '.["trusted-identity/"].accessor')
 
   # Use policy templates to create policy files.
-  # The example below uses 3 different policies with the following constraints:
-  #  - all - uses region, cluster-name, namespace and images
-  #  - n - uses region, cluster-name, namespace
-  #  - r - uses region
+  # The example below uses 4 different policies with the following constraints:
+  #  - rcni - uses region, cluster-name, namespace and images
+  #  - rcn - uses region, cluster-name, namespace
+  #  - ri - uses region and images
+  #  - r - uses region only
 
   # replace mount accessor in policy
-  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" ti-policy.all.hcl.tpl > ti-policy.all.hcl
-  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" ti-policy.n.hcl.tpl > ti-policy.n.hcl
-  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" ti-policy.r.hcl.tpl > ti-policy.r.hcl
+  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" tsi-policy.rcni.hcl.tpl > tsi-policy.rcni.hcl
+  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" tsi-policy.rcn.hcl.tpl > tsi-policy.rcn.hcl
+  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" tsi-policy.ri.hcl.tpl > tsi-policy.ri.hcl
+  sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" tsi-policy.r.hcl.tpl > tsi-policy.r.hcl
 
   # write policy to grant access to secrets
-  vault policy write ti-policy-all ti-policy.all.hcl
-  vault policy read ti-policy-all
-  vault policy write ti-policy-n ti-policy.n.hcl
-  vault policy read ti-policy-n
-  vault policy write ti-policy-r ti-policy.r.hcl
-  vault policy read ti-policy-r
+  vault policy write tsi-policy-rcni tsi-policy.rcni.hcl
+  vault policy read tsi-policy-rcni
+  vault policy write tsi-policy-rcn tsi-policy.rcn.hcl
+  vault policy read tsi-policy-rcn
+  vault policy write tsi-policy-rcn tsi-policy.ri.hcl
+  vault policy read tsi-policy-ri
+  vault policy write tsi-policy-r tsi-policy.r.hcl
+  vault policy read tsi-policy-r
 
   # create role to associate policy with login
-  # vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" policies=ti-policy
-  # vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region" policies=ti-policy
+  # we choosed to use one role, one policy association
   # *NOTE* the first role MUST include all the metadata that would be used by other roles/policies, not only the first one.
-  vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace,images" policies=ti-policy-all
-  vault read auth/trusted-identity/role/demo
+  vault write auth/trusted-identity/role/tsi-role-rcni bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace,images" policies=tsi-policy-rcni
+  vault read auth/trusted-identity/role/tsi-role-rcni
 
-  vault write auth/trusted-identity/role/demo-n bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace,images" policies=ti-policy-n
-  vault read auth/trusted-identity/role/demo-n
+  vault write auth/trusted-identity/role/tsi-role-rcn bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace" policies=tsi-policy-rcn
+  vault read auth/trusted-identity/role/tsi-role-rcn
 
-  vault write auth/trusted-identity/role/demo-r bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region" policies=ti-policy-r
-  vault read auth/trusted-identity/role/demo-r
+  vault write auth/trusted-identity/role/tsi-role-ri bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,images" policies=tsi-policy-rcn
+  vault read auth/trusted-identity/role/tsi-role-ri
+
+  vault write auth/trusted-identity/role/tsi-role-r bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region" policies=tsi-policy-r
+  vault read auth/trusted-identity/role/tsi-role-r
 }
 
 # validate the arguments

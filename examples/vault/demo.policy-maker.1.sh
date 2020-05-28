@@ -186,11 +186,11 @@ buildSecrets()
   # NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
   #
   # echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
-  # if [ "$VAULT_PATH" == "secret/ti-demo-all" ]; then
+  # if [ "$VAULT_PATH" == "secret/tsi-rcni" ]; then
   #   CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  # elif [ "$VAULT_PATH" == "secret/ti-demo-r" ]; then
+  # elif [ "$VAULT_PATH" == "secret/tsi-r" ]; then
   #   CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${SECNAME}"
-  # elif [ "$VAULT_PATH" == "secret/ti-demo-n" ]; then
+  # elif [ "$VAULT_PATH" == "secret/tsi-rcn" ]; then
   #   CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
   # else
   #   echo "Unknown Vault path value!"
@@ -201,41 +201,41 @@ buildSecrets()
   case $CONSTR in
       "region")
           echo "# using policy $CONSTR"
-          # PL="ti-demo-ri"
+          # PL="tsi-ri"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          echo "vault kv put secret/ti-demo-r/${REGION}/${SECNAME} ${SECRET_VALUE}"
-          POLICIES+=('ti-demo-r')
+          echo "vault kv put secret/tsi-r/${REGION}/${SECNAME} ${SECRET_VALUE}"
+          POLICIES+=('tsi-r')
           ;;
       "region,images")
           echo "# using policy $CONSTR"
-          # PL="ti-demo-r"
+          # PL="tsi-r"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          echo "vault kv put secret/ti-demo-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-          POLICIES+=('ti-demo-ri')
+          echo "vault kv put secret/tsi-ri/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+          POLICIES+=('tsi-ri')
           ;;
       "region,cluster,namespace")
           echo "# using policy $CONSTR"
-          ROLE="demo-n"
-          VAULT_PATH="secret/ti-demo-n"
-          # PL="ti-demo-r"
+          ROLE="tsi-role-rcn"
+          VAULT_PATH="secret/tsi-rcn"
+          # PL="tsi-r"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          echo "vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/${NS}/${SECNAME} ${SECRET_VALUE}"
-          POLICIES+=('ti-demo-n')
+          echo "vault kv put secret/tsi-rcn/${REGION}/${CLUSTER}/${NS}/${SECNAME} ${SECRET_VALUE}"
+          POLICIES+=('tsi-rcn')
           ;;
       "region,cluster-name,namespace,images")
           echo "# using policy $CONSTR"
-          # PL="ti-demo-all"
+          # PL="tsi-rcni"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # NS=`echo $CLAIMS |jq -r '."namespace"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
-          echo "vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
-          POLICIES+=('ti-demo-all')
+          echo "vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
+          POLICIES+=('tsi-rcni')
           ;;
       *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
          ;;

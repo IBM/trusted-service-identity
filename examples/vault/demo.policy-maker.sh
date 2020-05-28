@@ -175,11 +175,11 @@ buildSecrets()
   # NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
   #
   # echo "Getting $SECNAME from Vault $VAULT_PATH and output to $SECOUT"
-  # if [ "$VAULT_PATH" == "secret/ti-demo-all" ]; then
+  # if [ "$VAULT_PATH" == "secret/tsi-rcni" ]; then
   #   CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  # elif [ "$VAULT_PATH" == "secret/ti-demo-r" ]; then
+  # elif [ "$VAULT_PATH" == "secret/tsi-r" ]; then
   #   CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${SECNAME}"
-  # elif [ "$VAULT_PATH" == "secret/ti-demo-n" ]; then
+  # elif [ "$VAULT_PATH" == "secret/tsi-rcn" ]; then
   #   CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
   # else
   #   echo "Unknown Vault path value!"
@@ -188,25 +188,25 @@ buildSecrets()
   # fi
 
   case $VAULT_PATH in
-      "secret/ti-demo-r")
+      "secret/tsi-r")
           echo "# using policy $VAULT_PATH"
-          # PL="ti-demo-ri"
+          # PL="tsi-ri"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
           echo "vault kv put ${VAULT_PATH}/${REGION}/${SECNAME} ${SECRET_VALUE}"
           ;;
 
-      "secret/ti-demo-ri")
+      "secret/tsi-ri")
           echo "# using policy $VAULT_PATH"
-          # PL="ti-demo-r"
+          # PL="tsi-r"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # IMG=`echo $CLAIMS |jq -r '."images"'`
           echo "vault kv put ${VAULT_PATH}/${REGION}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
           ;;
-      "secret/ti-demo-all")
+      "secret/tsi-rcni")
           echo "# using policy $VAULT_PATH"
-          # PL="ti-demo-all"
+          # PL="tsi-rcni"
           # REGION=`echo $CLAIMS |jq -r '."region"'`
           # CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
           # NS=`echo $CLAIMS |jq -r '."namespace"'`

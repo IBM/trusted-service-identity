@@ -83,15 +83,15 @@ tests()
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
 
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/dummy" 0 A01
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy" 2 A02
-  test "vault kv get secret/ti-demo-all/${REGION}/xxxx/${NS}/${IMGSHA}/dummy" 2 A03
-  test "vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 A04
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/xxxx/dummy" 2 A05
+  test "vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/dummy" 0 A01
+  test "vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy" 2 A02
+  test "vault kv get secret/tsi-rcni/${REGION}/xxxx/${NS}/${IMGSHA}/dummy" 2 A03
+  test "vault kv get secret/tsi-rcni/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 A04
+  test "vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/xxxx/dummy" 2 A05
 
 
-  echo "Testing the 'demo' role: "
-  export ROLE="demo"
+  echo "Testing the 'tsi-role-rcni' role: "
+  export ROLE="tsi-role-rcni"
   RESP=$(login ${ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
   REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
@@ -99,15 +99,15 @@ tests()
   IMAGES=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/dummy" 0 D01
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy" 2 D02
-  test "vault kv get secret/ti-demo-all/${REGION}/xxxx/${NS}/${IMGSHA}/dummy" 2 D03
-  test "vault kv get secret/ti-demo-all/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 D04
-  test "vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/xxxx/dummy" 2 D05
+  test "vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/dummy" 0 D01
+  test "vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/xxxx/${IMGSHA}/dummy" 2 D02
+  test "vault kv get secret/tsi-rcni/${REGION}/xxxx/${NS}/${IMGSHA}/dummy" 2 D03
+  test "vault kv get secret/tsi-rcni/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 D04
+  test "vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/xxxx/dummy" 2 D05
 
-  # testing rule demo-n with policy ti-policy-n
-  echo "Testing the 'demo-n' role: "
-  export ROLE="demo-n"
+  # testing role tsi-role-rcn with policy tsi-policy-rcn
+  echo "Testing the 'tsi-role-rcn' role: "
+  export ROLE="tsi-role-rcn"
   RESP=$(login ${ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
   REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
@@ -115,23 +115,23 @@ tests()
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  test "vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/${NS}/dummy" 0 N01
-  test "vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/xxxx/dummy" 2 N02
-  test "vault kv get secret/ti-demo-n/${REGION}/xxxx/${NS}/dummy" 2 N03
-  test "vault kv get secret/ti-demo-n/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 N04
+  test "vault kv get secret/tsi-rcn/${REGION}/${CLUSTER}/${NS}/dummy" 0 N01
+  test "vault kv get secret/tsi-rcn/${REGION}/${CLUSTER}/xxxx/dummy" 2 N02
+  test "vault kv get secret/tsi-rcn/${REGION}/xxxx/${NS}/dummy" 2 N03
+  test "vault kv get secret/tsi-rcn/xxxx/${CLUSTER}/${NS}/${IMGSHA}/dummy" 2 N04
 
-  # testing rule demo-r with policy ti-demo-r
-  echo "Testing the 'demo-r' role: "
-  export ROLE="demo-r"
+  # testing role tsi-role-r with policy tsi-r
+  echo "Testing the 'tsi-role-r' role: "
+  export ROLE="tsi-role-r"
   RESP=$(login ${ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
   REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
 
-  # testing rule demo-r
-  test "vault kv get secret/ti-demo-r/${REGION}/dummy" 0 R01
-  test "vault kv get secret/ti-demo-r/xxxx/dummy" 2 R02
-  test "vault kv get secret/ti-demo-r/${REGION}/password" 0 R03
-  test "vault kv get secret/ti-demo-r/${REGION}/test.json" 0 R04
+  # testing role tsi-role-r
+  test "vault kv get secret/tsi-r/${REGION}/dummy" 0 R01
+  test "vault kv get secret/tsi-r/xxxx/dummy" 2 R02
+  test "vault kv get secret/tsi-r/${REGION}/password" 0 R03
+  test "vault kv get secret/tsi-r/${REGION}/test.json" 0 R04
 
   echo "Testing non-existing role"
   RESP=$(login xxxx_role)
@@ -144,8 +144,8 @@ tests()
 
   echo "Testing access w/o token"
   export VAULT_TOKEN=
-  test "vault kv get secret/ti-demo-all/dal01/xxx/xxx/xxx/dummy" 2 E02
-  test "vault kv get secret/ti-demo-r/dal01/dummy" 2 E03
+  test "vault kv get secret/tsi-rcni/dal01/xxx/xxx/xxx/dummy" 2 E02
+  test "vault kv get secret/tsi-r/dal01/dummy" 2 E03
 
   echo "Make sure to re-run 'setup-vault-cli.sh' as this script overrides the environment values"
   }

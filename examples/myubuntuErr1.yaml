@@ -15,8 +15,8 @@ spec:
         admission.trusted.identity/inject: "false"
         tsi.secrets: |
              - tsi.secret/name: "mysecret1"
-               tsi.secret/role: "demo"
-               tsi.secret/vault-path: "secret/ti-demo-all"
+               tsi.secret/role: "tsi-role-rcni"
+               tsi.secret/vault-path: "secret/tsi-rcni"
                tsi.secret/local-path: "mysecrets/myubuntu-mysecret1"
       labels:
         app: myubuntu

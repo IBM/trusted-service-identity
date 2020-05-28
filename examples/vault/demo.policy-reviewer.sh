@@ -113,13 +113,13 @@ CLAIMS=$(kubectl -n "$NS" exec -it "$POD" -c jwt-sidecar -- sh -c 'cat jwt/token
 case $POLICY in
     "R")
         echo "policy $POLICY"
-        PL="ti-demo-r"
+        PL="tsi-r"
         REGION=`echo $CLAIMS |jq -r '."region"'`
         echo "vault kv put secret/${PL}/${REGION}/${SECRET_NAME} ${SECRET_VALUE}"
         ;;
     "RI")
         echo "policy $POLICY"
-        PL="ti-demo-ri"
+        PL="tsi-ri"
         REGION=`echo $CLAIMS |jq -r '."region"'`
         IMG=`echo $CLAIMS |jq -r '."images"'`
         echo "vault kv put secret/${PL}/${REGION}/${IMG}/${SECRET_NAME} ${SECRET_VALUE}"
@@ -127,7 +127,7 @@ case $POLICY in
 
     "RCI")
         echo "policy $POLICY"
-        PL="ti-demo-r"
+        PL="tsi-r"
         REGION=`echo $CLAIMS |jq -r '."region"'`
         CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
         IMG=`echo $CLAIMS |jq -r '."images"'`
@@ -135,7 +135,7 @@ case $POLICY in
         ;;
     "RCNI")
         echo "policy $POLICY"
-        PL="ti-demo-all"
+        PL="tsi-rcni"
         REGION=`echo $CLAIMS |jq -r '."region"'`
         CLUSTER=`echo $CLAIMS |jq -r '."cluster-name"'`
         NS=`echo $CLAIMS |jq -r '."namespace"'`
