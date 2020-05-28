@@ -15,9 +15,9 @@ For a guidance how to create a custom application that is using Trusted Identity
 Before executing the demo, make sure all the [TI Prerequisites](../README.md#prerequisites)
 are met and the [Trusted Service Identity framework](../README.md#install-trusted-service-identity-framework) is installed
 
-[Vault Plugin Demo](./vault-plugin/README.md) components:
+[Vault Plugin Demo](./vault/README.md) components:
 * bootstrapping the cluster (initialize the Vault and register JSS services)
-* [vault-plugin](./vault-plugin) - authentication plugin extension to Hashicorp Vault
+* [vault](./vault) - authentication plugin extension to Hashicorp Vault
 * [vault-client](./vault-client) - sample client that demonstrates how to retrieve
 secrets from Vault
 

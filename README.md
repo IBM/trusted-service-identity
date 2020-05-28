@@ -143,7 +143,7 @@ Otherwise, follow the simple steps below to create a Vault instance, as a pod an
 service, deployed in `trusted-identity` namespace in your cluster.
 
 ```console
-kk create -f examples/vault-plugin/vault.yaml
+kk create -f examples/vault/vault.yaml
 service/tsi-vault created
 deployment.apps/tsi-vault created
 ```
@@ -171,7 +171,7 @@ $ ibmcloud ks clusters
 $ # then use the cluster name to get the Ingress info:
 $ ibmcloud ks cluster-get <cluster_name> | grep Ingress
 ```
-Build an ingress file from `example/vault-plugin/ingress-IKS.template.yaml`,
+Build an ingress file from `example/vault/ingress-IKS.template.yaml`,
 using the `Ingress Subdomain` information obtained above.
 Here is an example using `my-ti-cluster.eu-de.containers.appdomain.cloud`
 
@@ -288,7 +288,7 @@ helm upgrade -i --values=config.yaml tsi-install charts/ti-key-release-2-X.X.X.t
 ```
 
 ### Boostrapping - CI/CD pipeline
-The bootstrapping process is shown in details under the [Vault demo](examples/vault-plugin/README.md)
+The bootstrapping process is shown in details under the [Vault demo](examples/vault/README.md)
 
 ## Run Demo
 For next steps, review [demo](examples/README.md) examples.

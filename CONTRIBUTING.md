@@ -62,29 +62,6 @@ If you have access to our registry, you can push your image now:
 make docker-push
 ```
 
-Compile and create images for other sub-components
-
-```console
-make all -C components/jss/
-make all -C components/jwt-sidecar/
-make all -C components/node-setup/
-```
-vTPM is no longer a required component, but if you like to still use it, either version
-vTPM v1 or v2, built them as shown below and then reference them accordingly in the
-helm deployment.
-
-```console
-make all -C components/vtpm-server/
-make all -C components/vtpm2-server/
-```
-
-Compile and build examples (JWT server and client)
-
-```console
-make all -C examples/vault-client/
-make all -C examples/vault-plugin/
-```
-
 ## TSI Helm Deployment
 The deployment is done in `trusted-identity` namespace. If you are testing or
 developing the code and execute the deployment several times, it is a good idea
