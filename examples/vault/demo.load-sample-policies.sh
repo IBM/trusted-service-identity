@@ -40,7 +40,7 @@ loadVault()
   vault policy read tsi-policy-rcni
   vault policy write tsi-policy-rcn tsi-policy.rcn.hcl
   vault policy read tsi-policy-rcn
-  vault policy write tsi-policy-rcn tsi-policy.ri.hcl
+  vault policy write tsi-policy-ri tsi-policy.ri.hcl
   vault policy read tsi-policy-ri
   vault policy write tsi-policy-r tsi-policy.r.hcl
   vault policy read tsi-policy-r
