@@ -3,17 +3,17 @@ This document guides through adapting your application to be used with Trusted
 Service Identity with a Vault.
 
 Before starting to integrate your application with TIS, please make sure to run
-the [Demo with Vault Plugin](./vault-plugin/README.md) first.
+the [Demo with Vault Plugin](./vault/README.md) first.
 
 Demo components:
-* [vault-plugin](./vault-plugin) - authentication plugin extension to Hashicorp Vault
+* [vault](./vault) - authentication plugin extension to Hashicorp Vault
 * [vault-client](./vault-client) - sample client that demonstrates how to retrieve
 secrets from Vault
 
 ## Assumptions
 We assume that at this point you have a working K8s cluster with Trusted Service Identity
 environment deployed, including the sample Vault server and client.
-Otherwise, please see [vault-plugin/README.md](./vault-plugin/README.md)
+Otherwise, please see [vault/README.md](./vault/README.md)
 
 There are two roles needed to continue:
 * Vault admin - the person who has privileges to access and change entries in Vault
@@ -95,20 +95,20 @@ This will return the data associated with this application for the specified rol
 ```
 
 ## Create Policies (Vault admin)
-Make sure to become Vault admin (see the [demo](./vault-plugin/README.md))
+Make sure to become Vault admin (see the [demo](./vault/README.md))
 
-There are few sample policies available in `vault-plugin/ti.policy.X.hcl.tpl`.
+There are few sample policies available in `vault/ti.policy.X.hcl.tpl`.
 They have following constraints:
 * all - uses cluster-region, cluster-name, namespace and images
 * n - uses cluster-region, cluster-name and namespace
 * r - uses cluster-region only
 
-If you need to change them, modify templates and re-run  [vault-plugin/demo.load-sample-policies.sh](./vault-plugin/demo.load-sample-policies.sh) script.
+If you need to change them, modify templates and re-run  [vault/demo.load-sample-policies.sh](./vault/demo.load-sample-policies.sh) script.
 
 
 ## Create Secrets
 Using the values obtained from the claims you can build new secrets. See the
-[vault-plugin/demo.load-sample-keys.sh](vault-plugin/demo.load-sample-keys.sh)
+[vault/demo.load-sample-keys.sh](vault/demo.load-sample-keys.sh)
 script to create sample keys.
 
 Using claims above as example, define the following variables:
