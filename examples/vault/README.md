@@ -151,7 +151,7 @@ Sample Payload:
 ```json
 {
   "cluster-name": "ti_demo",
-  "cluster-region": "dal09",
+  "region": "dal09",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
@@ -305,7 +305,7 @@ root@vault-cli-fd855bc5f-2cs4d:/# curl -s --request POST --data '{"jwt": "'"$(ca
     ],
     "metadata": {
       "cluster-name": "EUcluster",
-      "cluster-region": "eu-de",
+      "region": "eu-de",
       "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
       "namespace": "trusted-identity",
       "role": "demo"

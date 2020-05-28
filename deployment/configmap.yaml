@@ -33,9 +33,9 @@ data:
               - path: "ti-pod-namespace"
                 fieldRef:
                   fieldPath: metadata.namespace
-              - path: "ti-images"
+              - path: "tsi-images"
                 fieldRef:
-                  fieldPath: metadata.annotations['admission.trusted.identity/ti-images']
+                  fieldPath: metadata.annotations['admission.trusted.identity/tsi-images']
         - name: ti-keys
           secret:
             secretName: ti-keys-config

@@ -301,7 +301,7 @@ Sample JWT Claims:
 ```json
 {
   "cluster-name": "ti_demo",
-  "cluster-region": "dal09",
+  "region": "dal09",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",

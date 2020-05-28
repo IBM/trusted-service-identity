@@ -39,9 +39,9 @@ var tsiNamespace string
 const (
 	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
 	admissionWebhookAnnotationStatusKey     = "admission.trusted.identity/status"
-	admissionWebhookAnnotationImagesKey     = "admission.trusted.identity/ti-images"
-	admissionWebhookAnnotationClusterName   = "admission.trusted.identity/ti-cluster-name"
-	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/ti-cluster-region"
+	admissionWebhookAnnotationImagesKey     = "admission.trusted.identity/tsi-images"
+	admissionWebhookAnnotationClusterName   = "admission.trusted.identity/tsi-cluster-name"
+	admissionWebhookAnnotationClusterRegion = "admission.trusted.identity/tsi-region"
 )
 
 // Webhook constants used for messaging

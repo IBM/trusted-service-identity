@@ -69,7 +69,7 @@ subjectAltName= @alt_names
 
 [alt_names]
 URI.1 = TSI:cluster-name:$CLUSTER_NAME
-URI.2 = TSI:cluster-region:$CLUSTER_REGION
+URI.2 = TSI:region:$CLUSTER_REGION
 # To assert additional claims about this intermediate CA
 # add new lines in the following format:
 # URI.x = TSI:<claim>
@@ -106,7 +106,7 @@ if [ "$RESETALL" == "true" ]; then
       openssl genrsa -out "${PRIV_KEY}" 2048
       openssl req -new -sha256 -key "${PRIV_KEY}" -out "${SERV_CSR}" -subj "/CN=jss-jwt-server" -reqexts v3_req -config <(cat /etc/ssl/openssl.cnf ${SSLCONF})
       logme "private key ${PRIV_KEY} and ${SERV_CSR} created"
-      logme "for cluster-name: $CLUSTER_NAME and cluster-region:$CLUSTER_REGION"
+      logme "for cluster-name: $CLUSTER_NAME and region:$CLUSTER_REGION"
    else
      logme "private key ${PRIV_KEY} and ${SERV_CSR} already exist. Do nothing"
    fi

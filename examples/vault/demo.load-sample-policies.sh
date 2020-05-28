@@ -24,9 +24,9 @@ loadVault()
 
   # Use policy templates to create policy files.
   # The example below uses 3 different policies with the following constraints:
-  #  - all - uses cluster-region, cluster-name, namespace and images
-  #  - n - uses cluster-region, cluster-name, namespace
-  #  - r - uses cluster-region
+  #  - all - uses region, cluster-name, namespace and images
+  #  - n - uses region, cluster-name, namespace
+  #  - r - uses region
 
   # replace mount accessor in policy
   sed "s/<%MOUNT_ACCESSOR%>/$MOUNT_ACCESSOR/g" ti-policy.all.hcl.tpl > ti-policy.all.hcl
@@ -43,15 +43,15 @@ loadVault()
 
   # create role to associate policy with login
   # vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" policies=ti-policy
-  # vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-region" policies=ti-policy
+  # vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region" policies=ti-policy
   # *NOTE* the first role MUST include all the metadata that would be used by other roles/policies, not only the first one.
-  vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,cluster-region,namespace,images" policies=ti-policy-all
+  vault write auth/trusted-identity/role/demo bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace,images" policies=ti-policy-all
   vault read auth/trusted-identity/role/demo
 
-  vault write auth/trusted-identity/role/demo-n bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,cluster-region,namespace,images" policies=ti-policy-n
+  vault write auth/trusted-identity/role/demo-n bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace,images" policies=ti-policy-n
   vault read auth/trusted-identity/role/demo-n
 
-  vault write auth/trusted-identity/role/demo-r bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-region" policies=ti-policy-r
+  vault write auth/trusted-identity/role/demo-r bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region" policies=ti-policy-r
   vault read auth/trusted-identity/role/demo-r
 }
 

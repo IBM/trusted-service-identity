@@ -20,7 +20,7 @@ chain of trust (x5c) to the header.
 - token expiration is passed as env. var (TTL_SEC)
 
 Example to generate TSI JWT:
-./gen-jwt.py --aud foo,bar --claims "pod:myubuntu-6756d665bc-gc25f|namespace:test|images-names:ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4|images:30beed0665d9cb4df616cca84ef2c06d2323e02869fcca8bbfbf0d8c5a3987cc|cluster-name:my-cluster-name|cluster-region:eu-de|machineid=fbafad4e9df3498f85a555914e241539" private-key.pem
+./gen-jwt.py --aud foo,bar --claims "pod:myubuntu-6756d665bc-gc25f|namespace:test|images-names:ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4|images:30beed0665d9cb4df616cca84ef2c06d2323e02869fcca8bbfbf0d8c5a3987cc|cluster-name:my-cluster-name|region:eu-de|machineid=fbafad4e9df3498f85a555914e241539" private-key.pem
 
 If claims don't match the x5c, you might need to comment out:
 line 130   # payload = check_payload(payload, cc)

@@ -35,7 +35,7 @@ Sample Payload:
 ```json
 {
   "cluster-name": "ti_demo",
-  "cluster-region": "dal09",
+  "region": "dal09",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
@@ -57,7 +57,7 @@ To test the access, simply execute the request to get back the claim values:
 export KEYSTORE_URL=https://198.11.242.156
 root@myubuntu-698b749889-vvgts:/# curl --insecure ${KEYSTORE_URL} --header "Authorization: Bearer $(cat /jwt-tokens/token)"
 
-JWT Claims: {u'cluster-name': u'mycluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'dal13', u'namespace': u'trusted-identity', u'exp': 1550889622, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1550889592, u'pod': u'myubuntu-698b749889-vvgts', u'sub': u'wsched@us.ibm.com'}
+JWT Claims: {u'cluster-name': u'mycluster', u'iss': u'wsched@us.ibm.com', u'region': u'dal13', u'namespace': u'trusted-identity', u'exp': 1550889622, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1550889592, u'pod': u'myubuntu-698b749889-vvgts', u'sub': u'wsched@us.ibm.com'}
 ```
 
 ## Attempt to retrieve a secret from the Key Store using the JWT token
@@ -73,7 +73,7 @@ root@myubuntu-698b749889-vvgts:/# curl --header "Authorization: Bearer $(cat /jw
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <title>404 Not Found</title>
 <h1>Not Found</h1>
-<p>Claims did not match any secret policy: {u'cluster-name': u'mycluster', u'iss': u'wsched@us.ibm.com', u'cluster-region': u'dal13', u'namespace': u'trusted-identity', u'exp': 1550890963, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1550890933, u'pod': u'myubuntu-698b749889-vvgts', u'sub': u'wsched@us.ibm.com'}</p>
+<p>Claims did not match any secret policy: {u'cluster-name': u'mycluster', u'iss': u'wsched@us.ibm.com', u'region': u'dal13', u'namespace': u'trusted-identity', u'exp': 1550890963, u'machineid': u'266c2075dace453da02500b328c9e325', u'images': u'trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c', u'iat': 1550890933, u'pod': u'myubuntu-698b749889-vvgts', u'sub': u'wsched@us.ibm.com'}</p>
 root@myubuntu-698b749889-vvgts:/#
 ```
 
@@ -88,7 +88,7 @@ secrets:
 
 ONLY if the claims are as follow:
 * 'cluster-name'='mycluster'  AND
-* 'cluster-region'='dal13'
+* 'region'='dal13'
 
 NOTE: This is just a demo example. In our PRODUCTION example, access to create
 policy WILL BE PROTECTED by secret SSH keys and/or password.
@@ -99,8 +99,8 @@ So now, let's pretend we are an admin that creates the new policies:
 NAME=MY_CLOUDANT_KEY_NAME
 KEY=MY_CLOUDANT_KEY_VALUE
 # assign to cluster: `mycluster` and region: `dal13`:
-curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-name&secretVal=${NAME}&cluster-name=mycluster&cluster-region=dal13"
-curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-value&secretVal=${KEY}&cluster-name=mycluster&cluster-region=dal13"
+curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-name&secretVal=${NAME}&cluster-name=mycluster&region=dal13"
+curl --insecure "${KEYSTORE_URL}/add?secretKey=cloudant-key-value&secretVal=${KEY}&cluster-name=mycluster&region=dal13"
 ```
 
 ## Run the application

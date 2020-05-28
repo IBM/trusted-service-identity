@@ -77,7 +77,7 @@ tests()
   RESP=$(login ${VAULT_ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
   # doublequotes required when the key name contains '-'
-  REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+  REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
   CLUSTER=$(echo $RESP | jq -r '.auth.metadata."cluster-name"')
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
@@ -94,7 +94,7 @@ tests()
   export ROLE="demo"
   RESP=$(login ${ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
-  REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+  REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
   CLNAME=$(echo $RESP | jq -r '.auth.metadata."cluster-name"')
   IMAGES=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
@@ -110,7 +110,7 @@ tests()
   export ROLE="demo-n"
   RESP=$(login ${ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
-  REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+  REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
   CLUSTER=$(echo $RESP | jq -r '.auth.metadata."cluster-name"')
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
@@ -125,7 +125,7 @@ tests()
   export ROLE="demo-r"
   RESP=$(login ${ROLE})
   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
-  REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+  REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
 
   # testing rule demo-r
   test "vault kv get secret/ti-demo-r/${REGION}/dummy" 0 R01

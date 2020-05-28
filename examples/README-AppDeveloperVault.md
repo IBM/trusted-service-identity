@@ -38,7 +38,7 @@ Sample Payload:
 ```json
 {
   "cluster-name": "ti_demo",
-  "cluster-region": "dal09",
+  "region": "dal09",
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
@@ -81,7 +81,7 @@ This will return the data associated with this application for the specified rol
     ],
     "metadata": {
       "cluster-name": "ti_demo",
-      "cluster-region": "dal09",
+      "region": "dal09",
       "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
       "namespace": "trusted-identity",
       "role": "demo"
@@ -99,9 +99,9 @@ Make sure to become Vault admin (see the [demo](./vault-plugin/README.md))
 
 There are few sample policies available in `vault-plugin/ti.policy.X.hcl.tpl`.
 They have following constraints:
-* all - uses cluster-region, cluster-name, namespace and images
-* n - uses cluster-region, cluster-name and namespace
-* r - uses cluster-region only
+* all - uses region, cluster-name, namespace and images
+* n - uses region, cluster-name and namespace
+* r - uses region only
 
 If you need to change them, modify templates and re-run  [vault-plugin/demo.load-sample-policies.sh](./vault-plugin/demo.load-sample-policies.sh) script.
 
@@ -211,7 +211,7 @@ export RESP=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${R
 export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
 
 # double-quotes required when the key name contains '-'
-REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
 CLUSTER=$(echo $RESP | jq -r '.auth.metadata."cluster-name"')
 IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
 NS=$(echo $RESP | jq -r '.auth.metadata.namespace')

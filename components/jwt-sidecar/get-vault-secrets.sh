@@ -93,7 +93,7 @@ run()
   # Then parse the response to get other attributes associated
   # with this token.
   # Doublequotes required when the key name contains '-'
-  REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+  REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
   CLUSTER=$(echo $RESP | jq -r '.auth.metadata."cluster-name"')
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')

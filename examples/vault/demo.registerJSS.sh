@@ -40,13 +40,13 @@ register()
   openssl req -in "${CSR}" -noout -text |grep "URI:TSI" > $TSIEXT
   RT=$?
   if [ $RT -ne 0 ] ; then
-    echo "Missing x509v3 URI:TSI extensions for cluter-name and cluster-region"
+    echo "Missing x509v3 URI:TSI extensions for cluter-name and region"
     rm "${TSIEXT}"
     exit 1
   fi
 
   # format:
-  #     URI:TSI:cluster-name:my-cluster-name, URI:TSI:cluster-region:eu-de
+  #     URI:TSI:cluster-name:my-cluster-name, URI:TSI:region:eu-de
   # remove the "URI:" prefix and leading spaces
   TSI_URI=$(cat $TSIEXT | sed 's/URI://g' | sed 's/  //g')
 
