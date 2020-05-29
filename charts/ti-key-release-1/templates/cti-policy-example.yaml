@@ -5,4 +5,4 @@ metadata:
   namespace: {{ .Values.namespace }}
 info:
   cluster-name: {{ .Values.cluster.name }}
-  cluster-region: {{ .Values.cluster.region }}
+  region: {{ .Values.cluster.region }}

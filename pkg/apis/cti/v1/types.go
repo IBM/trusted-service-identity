@@ -39,7 +39,7 @@ type ClusterTI struct {
 // ExampleSpec is the spec for an Example resource
 type ClusterTISpec struct {
 	ClusterName   string `json:"cluster-name"`
-	ClusterRegion string `json:"cluster-region"`
+	ClusterRegion string `json:"region"`
 }
 
 // ClusterTIPolicyEntry is a cluster TI policy entry

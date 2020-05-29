@@ -37,7 +37,7 @@ syntax:
    $0 [region] [cluster] [namespace] [full image name (optional)]
 
 where:
-      [region]: eu-de, dal01, wdc01, ...
+      [region]: eu-de, us-south, eu-gb, ...
       [cluster]: cluster name
       [namespace]: namespace of the application container
       [full image name (optional)]: e.g. trustedseriviceidentity/vault-cli:v0.3
@@ -62,41 +62,41 @@ loadVault()
   fi
 
   # write policy to grant access to secrets
-  vault policy read ti-policy-all
+  vault policy read tsi-policy-rcni
   RT=$?
   if [ $RT -ne 0 ] ; then
-     echo "vault ti-policy-all policy does not exist. Did you load the policies?"
+     echo "vault tsi-policy-rcni policy does not exist. Did you load the policies?"
      exit 1
   fi
 
-  vault read auth/trusted-identity/role/demo
+  vault read auth/trusted-identity/role/tsi-role-rcni
   RT=$?
   if [ $RT -ne 0 ] ; then
-     echo "vault auth/trusted-identity/role/demo policy does not exist. Did you load the policies?"
+     echo "vault auth/trusted-identity/role/tsi-role-rcni policy does not exist. Did you load the policies?"
      exit 1
   fi
 
 
   # # write some data to be read later on
-  # # testing rule `demo` with ti-policy-all
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${VIMGSHA}/mysecret1 all=good
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${VIMGSHA}/mysecret1
-  vault kv put secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1 secret=very5ecret!value
-  vault kv get secret/ti-demo-all/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1
+  # # testing role `tsi-role-rcni` with tsi-policy-rcni
+  vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${VIMGSHA}/mysecret1 all=good
+  vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${VIMGSHA}/mysecret1
+  vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1 secret=very5ecret!value
+  vault kv get secret/tsi-rcni/${REGION}/${CLUSTER}/${NAMESPACE}/${UIMGSHA}/mysecret1
 
-  # ${NAMESPACE}ing rule demo-n with policy ti-policy-n
-  vault kv put secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3 mysecret=my5ecret@1
-  vault kv get secret/ti-demo-n/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3
+  # ${NAMESPACE}ing rule tsi-role-rcn with policy tsi-policy-rcn
+  vault kv put secret/tsi-rcn/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3 mysecret=my5ecret@1
+  vault kv get secret/tsi-rcn/${REGION}/${CLUSTER}/${NAMESPACE}/mysecret3
 
-  # testing rule demo-r with policy ti-demo-r
-  vault kv put secret/ti-demo-r/${REGION}/mysecret4 secret=An0ther5ecret!now
-  vault kv get secret/ti-demo-r/${REGION}/mysecret4
+  # testing role tsi-role-r with policy tsi-r
+  vault kv put secret/tsi-r/${REGION}/mysecret4 secret=An0ther5ecret!now
+  vault kv get secret/tsi-r/${REGION}/mysecret4
 
   # pass JSON as a value:
-  echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/ti-demo-r/${REGION}/mysecret5 -
-  vault kv get secret/ti-demo-r/${REGION}/mysecret5
+  echo -n '{"value1":"itsasecret", "value2":"itsabigsecret"}' | vault kv put  secret/tsi-r/${REGION}/mysecret5 -
+  vault kv get secret/tsi-r/${REGION}/mysecret5
 
-  # demonstrate passing a JSON file as value
+  # tsi-role-rcninstrate passing a JSON file as value
   cat >./test.json <<EOF
   {
       "apiVersion": "v1",
@@ -131,10 +131,10 @@ loadVault()
   }
 EOF
 
-  vault kv put secret/ti-demo-r/${REGION}/test.json @test.json
-  vault kv get secret/ti-demo-r/${REGION}/test.json
-  vault kv put secret/ti-demo-r/${REGION}/mysecret2.json @test.json
-  vault kv get secret/ti-demo-r/${REGION}/mysecret2.json
+  vault kv put secret/tsi-r/${REGION}/test.json @test.json
+  vault kv get secret/tsi-r/${REGION}/test.json
+  vault kv put secret/tsi-r/${REGION}/mysecret2.json @test.json
+  vault kv get secret/tsi-r/${REGION}/mysecret2.json
   }
 
 # validate the arguments

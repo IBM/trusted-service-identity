@@ -21,7 +21,7 @@ COPY ./test-vault-cli.sh /test-vault-cli.sh
 
 # Default values for vault client setup
 ARG DEFAULT_VAULT_ADDR="http://vault:8200"
-ARG DEFAULT_VAULT_ROLE="demo"
+ARG DEFAULT_VAULT_ROLE="tsi-role-rcni"
 ENV VAULT_ADDR=${DEFAULT_VAULT_ADDR}
 ENV VAULT_ROLE=${DEFAULT_VAULT_ROLE}
 

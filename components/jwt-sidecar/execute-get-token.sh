@@ -11,10 +11,10 @@ while true
   echo -n '' > /tmp/claims
   echo -n "pod=$(cat /pod-metadata/ti-pod-name)&" >> /tmp/claims
   echo -n "namespace=$(cat /pod-metadata/ti-pod-namespace)&" >> /tmp/claims
-  echo -n "images-names=$(cat /pod-metadata/ti-images)&" >> /tmp/claims
-  echo -n "images=$(cat /pod-metadata/ti-images | sha256sum | awk '{print $1}')&" >> /tmp/claims
-  echo -n "cluster-name=$(cat /pod-metadata/ti-cluster-name)&" >> /tmp/claims
-  echo -n "cluster-region=$(cat /pod-metadata/ti-cluster-region)&" >> /tmp/claims
+  echo -n "images-names=$(cat /pod-metadata/tsi-images)&" >> /tmp/claims
+  echo -n "images=$(cat /pod-metadata/tsi-images | sha256sum | awk '{print $1}')&" >> /tmp/claims
+  echo -n "cluster-name=$(cat /pod-metadata/tsi-cluster-name)&" >> /tmp/claims
+  echo -n "region=$(cat /pod-metadata/tsi-region)&" >> /tmp/claims
   echo -n "machineid=$(cat /host/machineid)" >> /tmp/claims
 
   curl --unix-socket ${SOCKETFILE} http://localhost/getJWT?"$(cat /tmp/claims)" > /jwt/token

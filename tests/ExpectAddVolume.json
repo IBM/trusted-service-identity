@@ -65,24 +65,24 @@
             }
           },
           {
-            "path": "ti-images",
+            "path": "tsi-images",
             "fieldRef": {
               "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/ti-images']"
+              "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-images']"
             }
           },
           {
-            "path": "ti-cluster-name",
+            "path": "tsi-cluster-name",
             "fieldRef": {
               "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-name']"
+              "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-cluster-name']"
             }
           },
           {
-            "path": "ti-cluster-region",
+            "path": "tsi-region",
             "fieldRef": {
               "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/ti-cluster-region']"
+              "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-region']"
             }
           }
         ],

@@ -1,6 +1,6 @@
 #  This policy template controls the path using:
-#  * cluster-region
+#  * region
 
-path "secret/data/ti-demo-r/{{identity.entity.aliases.<%MOUNT_ACCESSOR%>.metadata.cluster-region}}/*" {
+path "secret/data/tsi-r/{{identity.entity.aliases.<%MOUNT_ACCESSOR%>.metadata.region}}/*" {
   capabilities = ["read"]
 }

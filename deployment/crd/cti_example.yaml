@@ -4,7 +4,7 @@ metadata:
   name: cluster-policy
 info:
   cluster-name: mycluster
-  cluster-region: dal
+  region: us-south
 policy:
   - image: "trustedseriviceidentity/"
     identity: id-trustedseriviceidentity

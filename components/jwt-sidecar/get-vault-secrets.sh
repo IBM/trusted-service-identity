@@ -72,10 +72,59 @@ HELPMEHELPME
 # run secret retrieval and output results to specified location
 run()
 {
+  # SECNAME=${SECNAME}, CONSTRAINS=${CONSTR}, LOCPATH=${LOCPATH}
   local SECNAME=$1
-  local ROLE=$2
-  local VAULT_PATH=$3
-  local SECOUT=$4
+  local CONSTR=$2
+  local LOCPATH=$3
+
+  # local-path must start with "mysecrets"
+  if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
+    echo "Valid local-path: $LOCPATH"
+  else
+    echo "ERROR: invalid local-path requested: $LOCPATH"
+    return 1
+  fi
+
+  # There are 2 steps to obtain the secret:
+  #   1. Login with Vault Role to obtain a token. Vault responds with claims
+  #      associated with thie Role.
+  #   2. Using claims associated with the Role, build the Vault Path to the
+  #      given secret.
+
+  # convert CONSTRAINS into Vault Roles and Vault Paths:
+  ROLE=
+  VAULT_PATH=
+
+  case $CONSTR in
+    # TODO: this should be more dynamic instead of string comparison.
+    # e.g. parse the values, trim, lowercase and perhaps sort alphabetically ??
+      "region")
+          echo "# using policy $CONSTR"
+          ROLE="tsi-role-r"
+          VAULT_PATH="secret/tsi-r"
+          ;;
+
+      "region,images")
+          echo "# using policy $CONSTR"
+          ROLE="tsi-role-ri"
+          VAULT_PATH="secret/tsi-ri"
+          ;;
+      "region,cluster,namespace")
+              echo "# using policy $CONSTR"
+              ROLE="tsi-role-rcn"
+              VAULT_PATH="secret/tsi-rcn"
+              ;;
+      "region,cluster-name,namespace,images")
+          echo "# using policy $CONSTR"
+          ROLE="tsi-role-rcni"
+          VAULT_PATH="secret/tsi-rcni"
+          ;;
+      *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
+         return 1
+         ;;
+  esac
+
+
 
   # first login with 'secret.role' and JWT to obtain VAULT_TOKEN
   RESP=$(login "${ROLE}")
@@ -93,30 +142,32 @@ run()
   # Then parse the response to get other attributes associated
   # with this token.
   # Doublequotes required when the key name contains '-'
-  REGION=$(echo $RESP | jq -r '.auth.metadata."cluster-region"')
+  REGION=$(echo $RESP | jq -r '.auth.metadata."region"')
   CLUSTER=$(echo $RESP | jq -r '.auth.metadata."cluster-name"')
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  echo "Getting $SECNAME from Vault $VAULT_PATH and output to $SECOUT"
-  if [ "$VAULT_PATH" == "secret/ti-demo-all" ]; then
+  echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
+  if [ "$VAULT_PATH" == "secret/tsi-rcni" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/ti-demo-r" ]; then
+  elif [ "$VAULT_PATH" == "secret/tsi-r" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/ti-demo-n" ]; then
+  elif [ "$VAULT_PATH" == "secret/tsi-ri" ]; then
+    CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${IMGSHA}/${SECNAME}"
+  elif [ "$VAULT_PATH" == "secret/tsi-rcn" ]; then
     CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
   else
     echo "Unknown Vault path value!"
-    rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+    rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
     return 1
   fi
 
-  #CMD="vault kv get -format=json secret/ti-demo-all/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  #vault kv get -format=json secret/ti-demo-all/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy | jq -c '.data.data'
+  #CMD="vault kv get -format=json secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
+  #vault kv get -format=json secret/tsi-rcni/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy | jq -c '.data.data'
 
   # get the result in JSON format, then convert to string
   # Result can be also an error like this:
-  #    No value found at secret/data/ti-demo-all/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
+  #    No value found at secret/data/tsi-rcni/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
   JRESULT=$($CMD)
   local RT=$?
   if [ "$RT" == "0" ]; then
@@ -125,16 +176,16 @@ run()
     RT=$?
     if [ "$RT" == "0" ]; then
       echo "Parsing vault response successful! RESULT: $RESULT"
-      mkdir -p "${SECOUTDIR}/${SECOUT}"
-      echo "$RESULT" > "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+      mkdir -p "${SECOUTDIR}/${LOCPATH}"
+      echo "$RESULT" > "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
     else
       echo "Parsing vault response failed. Result: $JRESULT"
-      rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+      rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
       return 1
     fi
   else
     echo "Vault command failed: RT: $RT, CMD: $CMD, RESULT: $JRESULT"
-    rm -rf "${SECOUTDIR}/${SECOUT}/${SECNAME}"
+    rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
     return 1
   fi
 } # .. end of run()
@@ -142,14 +193,13 @@ run()
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
   # for each requested secret parse its attributes
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
-  ROLE=$(echo "$row" | jq -r '."tsi.secret/role"')
-  VAULT_PATH=$(echo "$row" | jq -r '."tsi.secret/vault-path"')
-  SECOUT=$(echo "$row" | jq -r '."tsi.secret/local-path"')
+  CONSTR=$(echo "$row" | jq -r '."tsi.secret/constrains"')
+  LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # then run secret retrieval from Vault
-  run "$SECNAME" "$ROLE" "$VAULT_PATH" "$SECOUT"
+  run "$SECNAME" "$CONSTR" "$LOCPATH"
   RT=$?
   if [ "$RT" != "0" ]; then
-    echo "Error processing secret SECNAME=${SECNAME}, ROLE=${ROLE}, VAULT_PATH=${VAULT_PATH}, SECOUT=${SECOUT}"
+    echo "Error processing secret SECNAME=${SECNAME}, CONSTRAINS=${CONSTR}, LOCPATH=${LOCPATH}"
   fi
 done

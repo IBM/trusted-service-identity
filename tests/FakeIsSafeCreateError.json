@@ -11,7 +11,7 @@
        "annotations": {
            "admission.trusted.identity/inject": "false",
            "kubernetes.io/psp": "ibm-privileged-psp",
-           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"demo\"\n  tsi.secret/vault-path: \"secret/ti-demo-all\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret1\"\n"
+           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret1\"\n"
        },
        "ownerReferences": [
            {
