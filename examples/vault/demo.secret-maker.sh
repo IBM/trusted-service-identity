@@ -25,6 +25,15 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" || "$2" == "" ]] ; then
     exit 1
 fi
 
+docker_cmd="docker --version"
+
+if [[ ! $(eval ${docker_cmd}) ]]; then
+  echo "docker installation required to proceed"
+  echo "(https://docs.docker.com/get-docker/)"
+  exit 1
+fi
+
+
 NS="default"
 
 POSITIONAL=()
@@ -54,23 +63,21 @@ case $key in
 esac
 done
 
-SYSINFO="/tmp/sysinfo.$$"
-kubectl get cm -n kube-system cluster-info -o yaml > ${SYSINFO}
-PODINFO="/tmp/podinfo.$$"
-kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
-
-kk="kubectl -n ${TSINS}"
-# get the first `tsi-node-setup` pod in Running state
-SETPOD=$(${kk} get po | grep tsi-node-setup | grep 'Running' | awk '{print $1}' |  sed -n 1p )
-if [[ "$SETPOD" == "" ]]; then
-  echo "Required tsi-node-setup daemonset is not running"
-  echo "For more information, please visit: "
-  echo "  https://github.com/IBM/trusted-service-identity/examples/vault/README.md#secrets"
-  exit 1
+# check if the pod deployment file exists:
+if [ ! -f "$FILE" ]; then
+    echo "File $FILE does not exist"
+    exit 1
 fi
 
-# copy the files into the pod
-${kk} cp ${SYSINFO} ${SETPOD}:/tmp/sysinfo
-${kk} cp ${PODINFO} ${SETPOD}:/tmp/podinfo
-${kk} exec -it $SETPOD -- sh -c '/usr/local/bin/secret-maker.sh /tmp/sysinfo /tmp/podinfo'
-rm ${SYSINFO} ${PODINFO}
+TEMPDIR="/tmp/tsi"
+mkdir -p ${TEMPDIR}
+
+CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
+kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
+PODINFO="${TEMPDIR}/podinfo.$$"
+kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
+
+docker run -v ${CLUSTERINFO}:/tmp/clusterinfo -v ${PODINFO}:/tmp/podinfo \
+docker.io/trustedseriviceidentity/tsi-util:latest /usr/local/bin/secret-maker.sh /tmp/clusterinfo /tmp/podinfo
+
+rm ${CLUSTERINFO} ${PODINFO}

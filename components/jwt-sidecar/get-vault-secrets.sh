@@ -72,7 +72,7 @@ HELPMEHELPME
 # run secret retrieval and output results to specified location
 run()
 {
-  # SECNAME=${SECNAME}, CONSTRAINS=${CONSTR}, LOCPATH=${LOCPATH}
+  # SECNAME=${SECNAME}, CONSTRAINTS=${CONSTR}, LOCPATH=${LOCPATH}
   local SECNAME=$1
   local CONSTR=$2
   local LOCPATH=$3
@@ -91,7 +91,7 @@ run()
   #   2. Using claims associated with the Role, build the Vault Path to the
   #      given secret.
 
-  # convert CONSTRAINS into Vault Roles and Vault Paths:
+  # convert CONSTRAINTS into Vault Roles and Vault Paths:
   ROLE=
   VAULT_PATH=
 
@@ -119,7 +119,7 @@ run()
           ROLE="tsi-role-rcni"
           VAULT_PATH="secret/tsi-rcni"
           ;;
-      *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
+      *) echo "# ERROR: invalid constraints requested: ${CONSTR}"
          return 1
          ;;
   esac
@@ -193,13 +193,13 @@ run()
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
   # for each requested secret parse its attributes
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
-  CONSTR=$(echo "$row" | jq -r '."tsi.secret/constrains"')
+  CONSTR=$(echo "$row" | jq -r '."tsi.secret/constraints"')
   LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # then run secret retrieval from Vault
   run "$SECNAME" "$CONSTR" "$LOCPATH"
   RT=$?
   if [ "$RT" != "0" ]; then
-    echo "Error processing secret SECNAME=${SECNAME}, CONSTRAINS=${CONSTR}, LOCPATH=${LOCPATH}"
+    echo "Error processing secret SECNAME=${SECNAME}, CONSTRAINTS=${CONSTR}, LOCPATH=${LOCPATH}"
   fi
 done

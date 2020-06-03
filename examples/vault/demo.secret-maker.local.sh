@@ -25,7 +25,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" || "$2" == "" ]] ; then
     exit 1
 fi
 
-# check prereqs 
+# check prereqs
 jq_cmd="jq --version"
 yq_cmd="yq --version"
 
@@ -70,9 +70,12 @@ case $key in
 esac
 done
 
-SYSINFO="/tmp/sysinfo.$$"
-kubectl get cm -n kube-system cluster-info -o yaml > ${SYSINFO}
-PODINFO="/tmp/podinfo.$$"
+TEMPDIR="/tmp/tsi"
+mkdir -p ${TEMPDIR}
+
+CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
+kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
+PODINFO="${TEMPDIR}/podinfo.$$"
 kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
-../../components/node-setup/secret-maker.sh ${SYSINFO} ${PODINFO}
-rm ${SYSINFO} ${PODINFO}
+../../components/node-setup/secret-maker.sh ${CLUSTERINFO} ${PODINFO}
+rm ${CLUSTERINFO} ${PODINFO}

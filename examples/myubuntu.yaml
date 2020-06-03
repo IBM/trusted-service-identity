@@ -15,10 +15,10 @@ spec:
         admission.trusted.identity/inject: "true"
         tsi.secrets: |
              - tsi.secret/name: "mysecret1"
-               tsi.secret/constrains: "region,images"
+               tsi.secret/constraints: "region,images"
                tsi.secret/local-path: "mysecrets/"
              - tsi.secret/name: "mysecret2"
-               tsi.secret/constrains: "region"
+               tsi.secret/constraints: "region"
                tsi.secret/local-path: "mysecrets"
       labels:
         app: myubuntu

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+TEMPDIR="/tmp/tsi"
+mkdir -p ${TEMPDIR}
+
 ## create help menu:
 helpme()
 {
@@ -25,7 +28,7 @@ register()
   echo "processing pod $1 for node IP $nodeIP"
 
   # get CSR for each node represented by pod-name
-  CSR=$1.csr
+  CSR="${TEMPDIR}/$1.csr"
   # first obtain CSR from each node
   $kk exec -it $1 -- sh -c 'curl $HOST_IP:5000/public/getCSR' > $CSR
   #cat $CSR
@@ -36,7 +39,7 @@ register()
   fi
 
   # extract the X509v3 TSI fields:
-  TSIEXT=$1.csr.tsi
+  TSIEXT="${TEMPDIR}/$1.csr.tsi"
   openssl req -in "${CSR}" -noout -text |grep "URI:TSI" > $TSIEXT
   RT=$?
   if [ $RT -ne 0 ] ; then
@@ -61,16 +64,19 @@ register()
   # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
   export VAULT_TOKEN=
 
-  X5C="$1.x5c"
+  X5C="${TEMPDIR}/$1.x5c"
+  OUT="${TEMPDIR}/out.$$"
+
   # create an intermedate certificate for 50 years
-  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h uri_sans="$TSI_URI" -format=json > out
-  CERT=$(cat out | jq -r '.["data"].certificate' | grep -v '\-\-\-')
-  CHAIN=$(cat out | jq -r '.["data"].issuing_ca' | grep -v '\-\-\-')
+  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h uri_sans="$TSI_URI" -format=json > ${OUT}
+  CERT=$(cat ${OUT} | jq -r '.["data"].certificate' | grep -v '\-\-\-')
+  CHAIN=$(cat ${OUT} | jq -r '.["data"].issuing_ca' | grep -v '\-\-\-')
   echo "[\"${CERT}\",\"${CHAIN}\"]" > "$X5C"
 
   # cleanup CSR
   rm "${CSR}"
   rm "${TSIEXT}"
+  rm "${OUT}"
 
   # cat "$X5C"
   # copy the x5c file to the setup pod:

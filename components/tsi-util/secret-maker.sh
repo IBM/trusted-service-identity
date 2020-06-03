@@ -56,11 +56,10 @@ helpme()
 This script helps building TSI policies
 
 syntax:
-   $0 [cluster-info.yaml] [pod-info.json]
+   $0 [cluster-info.yaml] [pod-info.yaml]
 where:
-      [cluster-info.yaml] - cluster info
-      [pod-info.json] - pod info
-
+      [cluster-info.yaml] - cluster info, otherwise defaults to '/tmp/clusterinfo'
+      [pod-info.yaml] - pod info, otherwise defaults to '/tmp/podinfo'
 HELPMEHELPME
 }
 
@@ -93,7 +92,7 @@ buildSecrets()
           echo "vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
           POLICIES+=('tsi-rcni')
           ;;
-      *) echo "# ERROR: invalid constrains requested: ${CONSTR}"
+      *) echo "# ERROR: invalid constraints requested: ${CONSTR}"
          ;;
   esac
 }
@@ -101,14 +100,22 @@ buildSecrets()
 #### End of functions
 
 # validate the arguments
-if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" || "$2" == "" ]] ; then
+if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
     helpme
     exit 1
 fi
 
-CLUSTER_YAML="$1"
-POD_JSON="$2"
+if [[ "$1" == "" ]] ; then
+  CLUSTER_YAML="/tmp/clusterinfo"
+else
+  CLUSTER_YAML="$1"
+fi
 
+if [[ "$2" == "" ]] ; then
+  POD_YAML="/tmp/podinfo"
+else
+  POD_YAML="$2"
+fi
 
 ### Get Cluter Information
 
@@ -130,7 +137,7 @@ echo "# Cluster: $CLUSTER DataCenter: $DC Region: $REGION"
 
 # getting the secrets annotations require a bit more work
 TMPTSI="/tmp/tsi.$$"
-cat ${POD_JSON} > ${TMPTSI}.1
+cat ${POD_YAML} > ${TMPTSI}.1
 yq r -j ${TMPTSI}.1 |jq -r '.spec.template.metadata.annotations."tsi.secrets"' > ${TMPTSI}.2
 
 DEPLOY=$(yq r -j ${TMPTSI}.1)
@@ -176,7 +183,7 @@ POLICIES=()
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
   # for each requested secret parse its attributes
   SECNAME=$(echo "$row" | jq -r '."tsi.secret/name"')
-  CONSTR=$(echo "$row" | jq -r '."tsi.secret/constrains"')
+  CONSTR=$(echo "$row" | jq -r '."tsi.secret/constraints"')
   LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
   # local-path must start with "mysecrets"
@@ -186,7 +193,7 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
     buildSecrets "$SECNAME" "$CONSTR"
     RT=$?
     if [ "$RT" != "0" ]; then
-      echo "Error building a secret SECNAME=${SECNAME}, CONSTR=${CONSTR}, LOCPATH=${LOCPATH}"
+      echo "# Error building a secret SECNAME=${SECNAME}, CONSTR=${CONSTR}, LOCPATH=${LOCPATH}"
     fi
 
   else
