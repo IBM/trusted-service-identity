@@ -8,7 +8,6 @@ RUN cd /usr/local/bin && \
     chmod +x kubectl
 
 COPY init-node.sh /usr/local/bin/
-COPY secret-maker.sh /usr/local/bin/
 
 ARG DEFAULT_PRIVATE_DIR="/host/tsi-secure"
 ENV PRIVATEDIR=${DEFAULT_PRIVATE_DIR}
