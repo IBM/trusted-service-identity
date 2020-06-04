@@ -30,8 +30,8 @@ In addition, the traditional binding of certificates to IP addresses via TLS to 
   - **Threat**: Blast radius for Vault authentication is wide. Unnecessary risk  
 * **VSI06** - Vault authorization is not fine-grained, single credential - multiple use / difficult to manage
   - **Threat**: CapitalOne Problem - identity of a single VM has access to several components 
-* **VSI07** - Lack of “break glass” capabilities (to bypass access controls for critical emergencies) and easy compliance policy enforcement (through undertaking parts of secret delivery and management)
-  - **Threat**: Lack of compliance enforcement mechanism (e.g. "break glass") 
+* **VSI07** - Lack of “lockdown” capabilities at the cluster level and easy compliance policy enforcement (through undertaking parts of secret delivery and management)
+  - **Threat**: Lack of compliance enforcement mechanism (e.g. "lockdown") 
 * **VSI08** - Lack of location-based restriction enforcement, preventing the geo-facing. 
   - **Threat**: Malicious user can access data from unauthorized location or spoof the location identity 
 * **VSI09** - Lack of process for secure delivery of secret to correct application
@@ -77,7 +77,7 @@ Vault with TSI as a stand-alone deployment mitigates the following issues:
 - Operator has no access to vault authentication information (VSI04)
 - Vault authentication information is no longer static or long-lived (VSI05)
 - Vault authorization is fine-grained, different credentials for same deployments, easier to manage (VSI06)
-- Provides the `break glass` and easy compliance policy enforcement (VSI07)
+- Provides the `lockdown` capabilities and easy compliance policy enforcement (VSI07)
 - Location based restriction enforcement (VSI08) 
 - Securely delivers secrets to correct application (Future work for TSI to do this based on label/context based routing validation of certificate to perform secure delivery of secrets) (VSI09)
 - Amount of manual human exposure (VSI10): Is reduced to remove all operator specific interactions. Only limiting to a initial setup with a person of high privilege, i.e. CISO
