@@ -19,6 +19,7 @@ RUN wget https://releases.hashicorp.com/vault/1.4.2/vault_1.4.2_linux_amd64.zip 
     rm -f vault_1.4.2_linux_amd64.zip
 
 COPY secret-maker.sh /usr/local/bin/
+COPY getClusterInfo.sh /usr/local/bin/
 COPY load-sample-policies.sh /usr/local/bin/
 COPY vault-tpl/ /vault-tpl
 

@@ -220,7 +220,7 @@ To use vTPM, deploy TSI Node Setup helm charts with all the functions disabled. 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=false \
---set reset.x5c=false --set cluster.name=CLUSTER_NAME --set cluster.region=CLUSTER_REGION
+--set reset.x5c=false --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 In order to run JSS server, all worker nodes have to be setup with private keys.  This operation needs to be executed only once.
@@ -230,13 +230,13 @@ If you are running this setup for the first time or like to override previous se
 
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=true \
---set cluster.name=CLUSTER_NAME --set cluster.region=CLUSTER_REGION
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 To keep the existing private key, but just reset the intermediate CA (`x5c`)
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.x5c=true \
---set cluster.name=CLUSTER_NAME --set cluster.region=CLUSTER_REGION
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 Once the worker nodes are setup, deploy the TSI environment
@@ -263,8 +263,8 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 ```console
 export VAULT_ADDR=http://<vault_location>
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
---set ti-key-release-1.cluster.name=CLUSTER_NAME \
---set ti-key-release-1.cluster.region=CLUSTER_REGION \
+--set ti-key-release-1.cluster.name=$CLUSTER_NAME \
+--set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
 --set jssService.type=jss-server
 ```

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# NS - a TSI namespace (where the tsi-setup daemonset is deployed)
-TSINS="trusted-identity"
-
 ## create help menu:
 helpme()
 {

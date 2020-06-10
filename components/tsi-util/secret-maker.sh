@@ -19,11 +19,14 @@ cat << EOF
 # deployment file
 #
 # Assumptions:
-#  1. File has properly defined annotations including
+#  1. Input file has properly defined annotations including
 #    a. 'tsi.secrets'
 #    b. 'admission.trusted.identity/inject: "true"'
-#  2.
-
+#  2. Script is executed in the environment that has Vault client installed
+#     (https://www.vaultproject.io/downloads)
+#  3. Vault env. variables are set
+#     export ROOT_TOKEN=
+#     export VAULT_ADDR=(vault address in format http://vault.server:8200)
 
 # Define values for the SECRET_VALUE(s)
 # they must be in "key=value" format
@@ -31,12 +34,7 @@ cat << EOF
 # https://github.com/IBM/trusted-service-identity/examples/vault/README.md#secrets
 export SECRET_VALUE="secret=xxx"
 
-# To access vault, obtain the Vault Client from (...)
-#  and define ROOT_TOKEN and VAULT_ADDR env. variables:
-#
-# export ROOT_TOKEN=
-# export VAULT_ADDR=(vault address in format http://vault.server:8200)
-#
+
 EOF
 
 # prevent expression expending by using a single quote:
@@ -92,7 +90,7 @@ buildSecrets()
           echo "vault kv put secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME} ${SECRET_VALUE}"
           POLICIES+=('tsi-rcni')
           ;;
-      *) echo "# ERROR: invalid constraints requested: ${CONSTR}"
+      *) echo "# ERROR: invalid constraints requested: ${CONSTR} for ${SECNAME}"
          ;;
   esac
 }
@@ -131,7 +129,6 @@ DC=$(echo "$CLJS1" | jq -r '.datacenter')
 # CRN format example:
 # crn:v1:bluemix:public:containers-kubernetes:eu-de:586283a9abda5102d46e1b94b923a6c5:5f4306a2738d4cdd89ff067c9481555e
 REGION=$(echo "$CLJS1" | jq -r '."crn"' | cut -d":" -f6)
-echo "# Cluster: $CLUSTER DataCenter: $DC Region: $REGION"
 
 # Get Pod information
 
@@ -173,6 +170,7 @@ else
   echo "# Set 'admission.trusted.identity/inject' annotation to 'true'"
   exit 1
 fi
+echo "# Cluster: $CLUSTER DataCenter: $DC Region: $REGION"
 echo "# NS=$NS, IMG: $IMG, IMGSHA: $IMGSHA"
 
 JSON=$(yq r -j ${TMPTSI}.2)
@@ -191,11 +189,6 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
 
     # build the injection of secret:
     buildSecrets "$SECNAME" "$CONSTR"
-    RT=$?
-    if [ "$RT" != "0" ]; then
-      echo "# Error building a secret SECNAME=${SECNAME}, CONSTR=${CONSTR}, LOCPATH=${LOCPATH}"
-    fi
-
   else
     echo "# ERROR: invalid local-path value: $LOCPATH"
   fi

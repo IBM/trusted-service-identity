@@ -60,13 +60,13 @@ loadVault()
   # create role to associate policy with login
   # we choosed to use one role, one policy association
   # *NOTE* the first role MUST include all the metadata that would be used by other roles/policies, not only the first one.
-  vault write auth/trusted-identity/role/tsi-role-rcni bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace,images" policies=tsi-policy-rcni
+  vault write auth/trusted-identity/role/tsi-role-rcni bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region,cluster-name,namespace,images" policies=tsi-policy-rcni
   vault read auth/trusted-identity/role/tsi-role-rcni
 
-  vault write auth/trusted-identity/role/tsi-role-rcn bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,region,namespace" policies=tsi-policy-rcn
+  vault write auth/trusted-identity/role/tsi-role-rcn bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region,cluster-name,namespace" policies=tsi-policy-rcn
   vault read auth/trusted-identity/role/tsi-role-rcn
 
-  vault write auth/trusted-identity/role/tsi-role-ri bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="cluster-name,images" policies=tsi-policy-rcn
+  vault write auth/trusted-identity/role/tsi-role-ri bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region,images" policies=tsi-policy-ri
   vault read auth/trusted-identity/role/tsi-role-ri
 
   vault write auth/trusted-identity/role/tsi-role-r bound_subject="wsched@us.ibm.com" user_claim="pod" metadata_claims="region" policies=tsi-policy-r
