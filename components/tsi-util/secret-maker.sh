@@ -135,14 +135,41 @@ REGION=$(echo "$CLJS1" | jq -r '."crn"' | cut -d":" -f6)
 # getting the secrets annotations require a bit more work
 TMPTSI="/tmp/tsi.$$"
 cat ${POD_YAML} > ${TMPTSI}.1
-yq r -j ${TMPTSI}.1 |jq -r '.spec.template.metadata.annotations."tsi.secrets"' > ${TMPTSI}.2
+
+# get the kind of the deployment:
+KIND=$(yq r -j ${TMPTSI}.1 |jq -r '.kind')
+
+# get the attribute path based on kind:
+case $KIND in
+    "Deployment")
+        TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
+        TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
+        TSI_IMG='.spec.template.spec.containers[0].image'
+        ;;
+    "DaemonSet")
+        TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
+        TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
+        TSI_IMG='.spec.template.spec.containers[0].image'
+        ;;
+    "Pod")
+        TSI_INJECT='.metadata.annotations."admission.trusted.identity/inject"'
+        TSI_SECRETS='.metadata.annotations."tsi.secrets"'
+        TSI_IMG='.spec.containers[0].image'
+        ;;
+    *) echo "# ERROR: Unsupported kind: ${KIND}"
+       exit 1
+       ;;
+esac
+
+
+yq r -j ${TMPTSI}.1 |jq -r "${TSI_SECRETS}" > ${TMPTSI}.2
 
 DEPLOY=$(yq r -j ${TMPTSI}.1)
 NS=$(echo $DEPLOY | jq -r '.metadata.namespace')
 
 # TODO we need to add support for multiple images in one pod.
 # Sort them alphabetically. Do the same algorithm in TSI
-IMG=$(echo $DEPLOY | jq -r '.spec.template.spec.containers[0].image')
+IMG=$(echo $DEPLOY | jq -r "${TSI_IMG}")
 
 # Get the SHA-256 encoded image name.
 # Encoder depends on the OS:
@@ -161,17 +188,18 @@ fi
 
 # validate if tsiEnabled is provided correctly
 # tsiEnabled - convert to lowercase:
-tsiEnabled=$(echo $DEPLOY | jq -r '.spec.template.metadata.annotations."admission.trusted.identity/inject"' | awk '{print tolower($0)}')
+tsiEnabled=$(echo $DEPLOY | jq -r "${TSI_INJECT}" | awk '{print tolower($0)}')
 if [[ "$tsiEnabled" == "true" || "$tsiEnabled" == "yes"  || "$tsiEnabled" == "on" || "$tsiEnabled" == "y" ]] ; then
   header
+  echo "# Using kind: $KIND"
   echo "# TSI is enabled"
+  echo "# Cluster: $CLUSTER DataCenter: $DC Region: $REGION"
+  echo "# NS: $NS, IMG: $IMG, IMGSHA: $IMGSHA"
 else
   echo "# ERROR: TSI must be enabled to continue! "
   echo "# Set 'admission.trusted.identity/inject' annotation to 'true'"
   exit 1
 fi
-echo "# Cluster: $CLUSTER DataCenter: $DC Region: $REGION"
-echo "# NS=$NS, IMG: $IMG, IMGSHA: $IMGSHA"
 
 JSON=$(yq r -j ${TMPTSI}.2)
 rm ${TMPTSI}.1 ${TMPTSI}.2
@@ -196,5 +224,5 @@ done
 
 # remove duplicated policies:
 sorted_unique_ids=($(echo "${POLICIES[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-echo "# this deployment uses the following policies/paths: "
+echo "# this $KIND uses the following policies/paths: "
 echo "# ${sorted_unique_ids[@]}"

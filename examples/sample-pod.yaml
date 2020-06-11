@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-pod
+  annotations:
+    admission.trusted.identity/inject: "true"
+    tsi.secrets: |
+         - tsi.secret/name: "redissecret1"
+           tsi.secret/constraints: "region,images"
+           tsi.secret/local-path: "mysecrets/"
+         - tsi.secret/name: "redissecret2"
+           tsi.secret/constraints: "region"
+           tsi.secret/local-path: "mysecrets"
+spec:
+  containers:
+  - name: redis-pod
+    image: redis

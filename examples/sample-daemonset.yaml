@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: alpine-daemonset
+spec:
+  selector:
+    matchLabels:
+      name: alpine-daemonset
+  template:
+    metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+        tsi.secrets: |
+             - tsi.secret/name: "alpinesecret1"
+               tsi.secret/constraints: "region,images"
+               tsi.secret/local-path: "mysecrets/"
+             - tsi.secret/name: "alpinesecret2"
+               tsi.secret/constraints: "region"
+               tsi.secret/local-path: "mysecrets"
+      labels:
+        name: alpine-daemonset
+    spec:
+      containers:
+      - image: alpine
+        name: alpine-daemonset
+        command: [ "tail", "-f", "/dev/null" ]
