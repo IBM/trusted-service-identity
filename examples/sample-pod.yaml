@@ -5,10 +5,10 @@ metadata:
   annotations:
     admission.trusted.identity/inject: "true"
     tsi.secrets: |
-         - tsi.secret/name: "redissecret1"
+         - tsi.secret/name: "redis-secret1"
            tsi.secret/constraints: "region,images"
            tsi.secret/local-path: "mysecrets/"
-         - tsi.secret/name: "redissecret2"
+         - tsi.secret/name: "redis-secret2"
            tsi.secret/constraints: "region"
            tsi.secret/local-path: "mysecrets"
 spec:
