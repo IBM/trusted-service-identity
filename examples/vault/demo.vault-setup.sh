@@ -1,4 +1,6 @@
 #!/bin/bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
 ## create help menu:
 helpme()
@@ -47,7 +49,7 @@ setupVault()
      exit 1
   fi
 
-  docker run trustedseriviceidentity/tsi-util:latest vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
+  docker run trustedseriviceidentity/tsi-util:${TSI_VERSION} vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
   }
 
 
