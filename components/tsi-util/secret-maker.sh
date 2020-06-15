@@ -156,7 +156,7 @@ case $KIND in
         TSI_SECRETS='.metadata.annotations."tsi.secrets"'
         TSI_IMG='.spec.containers[0].image'
         ;;
-    *) echo "# ERROR: Unsupported kind: ${KIND}"
+    *) echo "# ERROR: Unsupported kind: ${KIND} in ${CLUSTER_YAML}"
        exit 1
        ;;
 esac

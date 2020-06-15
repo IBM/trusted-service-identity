@@ -77,8 +77,9 @@ loadVault()
 if [[ "$1" != "" && "$2" != "" ]] ; then
   export VAULT_ADDR="$1"
   export ROOT_TOKEN="$2"
-  loadVault
-elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
+fi
+
+if [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   echo "ROOT_TOKEN and VAULT_ADDR must be set"
   helpme
 else

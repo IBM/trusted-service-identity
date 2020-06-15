@@ -1,4 +1,6 @@
 #!/bin/bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
 ## create help menu:
 helpme()
@@ -30,4 +32,4 @@ fi
 echo "sample policies are now preloaded during the vault setup"
 read -n 1 -s -r -p 'Press any key to continue'
 
-docker run trustedseriviceidentity/tsi-util:latest load-sample-policies.sh ${VAULT_ADDR} ${ROOT_TOKEN}
+docker run trustedseriviceidentity/tsi-util:${TSI_VERSION} load-sample-policies.sh ${VAULT_ADDR} ${ROOT_TOKEN}

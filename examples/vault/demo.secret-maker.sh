@@ -1,4 +1,6 @@
 #!/bin/bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
 ## create help menu:
 helpme()
@@ -75,6 +77,6 @@ PODINFO="${TEMPDIR}/podinfo.$$"
 kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
 
 docker run -v ${CLUSTERINFO}:/tmp/clusterinfo -v ${PODINFO}:/tmp/podinfo \
-docker.io/trustedseriviceidentity/tsi-util:latest /usr/local/bin/secret-maker.sh /tmp/clusterinfo /tmp/podinfo
+docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} /usr/local/bin/secret-maker.sh /tmp/clusterinfo /tmp/podinfo
 
 rm ${CLUSTERINFO} ${PODINFO}
