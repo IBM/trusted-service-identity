@@ -42,6 +42,12 @@ To run a full build that compiles the code, builds images and creates helm packa
 ./buildTSI.sh
 ```
 
+If you have credentials to push the image into Docker Hub:
+
+```console
+./buildTSI.sh push
+```
+
 When pushing the images to the registry, the user has to be logged in to Docker Hub with permissions to push images to `hub.docker.com/repository/docker/trustedseriviceidentity`. Make sure you are part of the Organization: [https://hub.docker.com/orgs/trustedseriviceidentity](https://hub.docker.com/orgs/trustedseriviceidentity)
 
 or if you like to build individual components:

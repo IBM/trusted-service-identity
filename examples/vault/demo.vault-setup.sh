@@ -57,7 +57,7 @@ fi
 
 kk="kubectl -n trusted-identity"
 if [ ! "$2" == "" ] ; then
-  kk="kubectl -n $3"
+  kk="kubectl -n $2"
 fi
 
 # validate the arguments

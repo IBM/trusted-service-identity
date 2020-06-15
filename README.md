@@ -211,6 +211,16 @@ At this point, this is an expected result.
 The following information is required to deploy TSI node-setup helm chart:
 * cluster name - name of the cluster. This must correspond to the actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
+When using IKS, these values can be obtain via a script:
+
+```console
+examples/vault/demo.get-cluster-info.sh
+
+export CLUSTER_NAME=ti-test1
+export REGION=eu-de
+```
+Then use the provided output to setup env. variables to be used later.
+
 TSI currently supports 2 methods for signing JWT Tokens:
 * using TPM2 - private keys are obtained directly from TPM using TPM wrapper (VTPM2)
 * using custom signing service JSS (JWT Signing Service)
@@ -225,7 +235,6 @@ helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.al
 
 In order to run JSS server, all worker nodes have to be setup with private keys.  This operation needs to be executed only once.
 If you are running this setup for the first time or like to override previous setup values, execute the helm command below.
-
 
 
 ```console
