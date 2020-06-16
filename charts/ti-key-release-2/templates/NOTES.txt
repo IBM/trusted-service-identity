@@ -10,7 +10,7 @@ This helm chart installs environment for Trusted Identity
   # however, there is a problem with retrieving values that contain "-"
   # see the helm issue: https://github.com/helm/helm/issues/2192
   This chart tiVersion: {{ .Chart.AppVersion }}
-  
+
     vaultAddress: {{ index .Values "ti-key-release-1" "vaultAddress" }}
     cluster.name: {{ index .Values "ti-key-release-1" "cluster" "name" }}
     cluster.region: {{ index .Values "ti-key-release-1" "cluster" "region" }}
@@ -18,8 +18,14 @@ This helm chart installs environment for Trusted Identity
     secrets.refreshSec: {{ index .Values "ti-key-release-1" "secrets" "refreshSec" }}
     jssService.type: {{ .Values.jssService.type }}
 
-To execute a test, create a new namespace then deploy the test application:
+To execute a test, create a new namespace, load the application secrets to vault,
+then deploy the test application:
+
     kubectl create ns test
+    examples/vault/demo.secret-maker.sh -f examples/myubuntu.yaml -n test > myubuntu.secrets.sh
+    # update the myubuntu
+    chmod + myubuntu.secrets.sh
+    ./myubuntu.secrets.sh
     kubectl create -f examples/myubuntu.yaml -n test
 Then check if the secret is available:
     kubectl -n test exec -it $(k -n test get pods | grep myubuntu | awk '{print $1}' ) cat /tsi-secrets/mysecrets/mysecret4

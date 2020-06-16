@@ -9,13 +9,6 @@ RUN cd /usr/local/bin && \
 
 COPY init-node.sh /usr/local/bin/
 
-
-# Default values for JWT, issuer and token expiration in seconds
-#ARG DEFAULT_ISS="wsched@us.ibm.com"
-#ARG DEFAULT_TTL_SEC=30
-#ENV ISS=${DEFAULT_ISS}
-#ENV TTL_SEC=${DEFAULT_TTL_SEC}
-
 ARG DEFAULT_PRIVATE_DIR="/host/tsi-secure"
 ENV PRIVATEDIR=${DEFAULT_PRIVATE_DIR}
 

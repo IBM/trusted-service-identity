@@ -1,18 +1,14 @@
 #!/bin/bash
-
-#ibmcloud plugin install cloud-object-storage
-export PLUGIN="vault-plugin-auth-ti-jwt"
-COMMON_NAME="trusted-identity.ibm.com"
-CONFIG="plugin-config.json"
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
 ## create help menu:
 helpme()
 {
   cat <<HELPMEHELPME
 
-Syntax: ${0} <token> <vault_addr> <TSI_namespace>
+Syntax: ${0} <vault_addr> <TSI_namespace>
 Where:
-  token      - vault root token to setup the plugin (optional, if set as ROOT_TOKEN)
   vault_addr - vault address in format http://vault.server:8200
   TSI_namespace - if different than trusted-identity (optional)
 
@@ -21,44 +17,10 @@ HELPMEHELPME
 
 setupVault()
 {
-  vault login -no-print "${ROOT_TOKEN}"
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo "ROOT_TOKEN is not correctly set"
-     echo "ROOT_TOKEN=${ROOT_TOKEN}"
-     exit 1
-  fi
   # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
   export VAULT_TOKEN=
 
-  # vault status
-  vault secrets enable pki
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo " 'vault secrets enable pki' command failed"
-     echo "maybe already set?"
-     read -n 1 -s -r -p 'Press any key to continue'
-     #exit 1
-  fi
-  # Increase the TTL by tuning the secrets engine. The default value of 30 days may
-  # be too short, so increase it to 1 year:
-  vault secrets tune -max-lease-ttl=8760h pki
-  vault delete pki/root
-
-  # create internal root CA
-  # expire in 100 years
-  export OUT
-  OUT=$(vault write pki/root/generate/internal common_name=${COMMON_NAME} \
-      ttl=876000h -format=json)
-  # echo "$OUT"
-
-  # capture the public key as plugin-config.json
-  CERT=$(echo "$OUT" | jq -r '.["data"].issuing_ca'| awk '{printf "%s\\n", $0}')
-  echo "{ \"jwt_validation_pubkeys\": \"${CERT}\" }" > ${CONFIG}
-
-  # obtain the SHA256 for the plugin
-  # if the deployed image has the same binary as the one on your system, use the
-  # following method:
+  # get the id of the vault container:
   VAULTPOD=$($kk get po | grep tsi-vault- | grep Running | awk '{print $1}')
   if [ "$VAULTPOD" == "" ]; then
      echo "No running Vault container in this namespace. Perhaps Vault is running in a different location"
@@ -66,6 +28,17 @@ setupVault()
      echo "      $kk get po | grep tsi-vault- | grep Running"
      exit 1
   fi
+
+  # get the vault token and validate the connection:
+  ROOT_TOKEN=$($kk logs "$VAULTPOD" | grep "Root Token" | cut -d' ' -f3)
+  vault login -no-print "${ROOT_TOKEN}"
+  RT=$?
+  if [ $RT -ne 0 ] ; then
+     echo "ROOT_TOKEN is not set correctly"
+     echo "ROOT_TOKEN=${ROOT_TOKEN}"
+     exit 1
+  fi
+
   export SHA256
   SHA256=$($kk exec "$VAULTPOD" /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
   # another way to obtain this SHA, use a local plugin created by the build process
@@ -76,59 +49,27 @@ setupVault()
      exit 1
   fi
 
-  # register the trusted-identity plugin
-  vault write /sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt sha_256="${SHA256}" command="vault-plugin-auth-ti-jwt"
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo " 'vault write /sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt ...' command failed"
-     exit 1
-  fi
-  # useful for debugging:
-  # vault read sys/plugins/catalog/auth/vault-plugin-auth-ti-jwt -format=json
-
-  # then enable this plugin
-  vault auth enable -path="trusted-identity" -plugin-name="vault-plugin-auth-ti-jwt" plugin
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo " 'vault auth enable plugin' command failed"
-     exit 1
-  fi
-
-  export MOUNT_ACCESSOR
-  MOUNT_ACCESSOR=$(curl -sS --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET "${VAULT_ADDR}/v1/sys/auth" | jq -r '.["trusted-identity/"].accessor')
-
-  # configure plugin using the Issuing CA created internally above
-  curl -sS --header "X-Vault-Token: ${ROOT_TOKEN}"  --request POST --data @${CONFIG} "${VAULT_ADDR}/v1/auth/trusted-identity/config"
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo "failed to configure trusted-identity plugin"
-     exit 1
-  fi
-
-  CONFIG=$(curl -sS --header "X-Vault-Token: ${ROOT_TOKEN}"  --request GET "${VAULT_ADDR}/v1/auth/trusted-identity/config" | jq)
-  # echo "*** $CONFIG"
+  docker run trustedseriviceidentity/tsi-util:${TSI_VERSION} vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
   }
 
+
 if [ ! "$1" == "" ] ; then
-  export ROOT_TOKEN=$1
+  export VAULT_ADDR=$1
 fi
-if [ ! "$2" == "" ] ; then
-  export VAULT_ADDR=$2
-fi
+
 kk="kubectl -n trusted-identity"
-if [ ! "$3" == "" ] ; then
-  kk="kubectl -n $3"
+if [ ! "$2" == "" ] ; then
+  kk="kubectl -n $2"
 fi
 
 # validate the arguments
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
 #check if token exists:
-elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
-  echo "ROOT_TOKEN or VAULT_ADDR not set"
+elif [[ "$VAULT_ADDR" == "" ]] ; then
+  echo "VAULT_ADDR not set"
   helpme
-# elif [ ! -f "${PWD}/pkg/linux_amd64/${PLUGIN}" ]; then
-#   echo "Plugin directory missing \"${PWD}/pkg/linux_amd64/${PLUGIN}\""
+  exit 1
 else
-  setupVault "$1 $2"
+  setupVault
 fi

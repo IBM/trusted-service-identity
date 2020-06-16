@@ -34,6 +34,7 @@ run() {
 
 run "make $ALL$PUSH"
 run "make $ALL$PUSH -C components/jss/"
+run "make $ALL$PUSH -C components/tsi-util/"
 run "make $ALL$PUSH -C components/vtpm2-server/"
 run "make $ALL$PUSH -C components/jwt-sidecar/"
 run "make $ALL$PUSH -C components/node-setup/"

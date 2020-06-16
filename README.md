@@ -211,6 +211,16 @@ At this point, this is an expected result.
 The following information is required to deploy TSI node-setup helm chart:
 * cluster name - name of the cluster. This must correspond to the actual name of the cluster
 * cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
+When using IKS, these values can be obtain via a script:
+
+```console
+examples/vault/demo.get-cluster-info.sh
+
+export CLUSTER_NAME=ti-test1
+export REGION=eu-de
+```
+Then use the provided output to setup env. variables to be used later.
+
 TSI currently supports 2 methods for signing JWT Tokens:
 * using TPM2 - private keys are obtained directly from TPM using TPM wrapper (VTPM2)
 * using custom signing service JSS (JWT Signing Service)
@@ -220,23 +230,22 @@ To use vTPM, deploy TSI Node Setup helm charts with all the functions disabled. 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=false \
---set reset.x5c=false --set cluster.name=CLUSTER_NAME --set cluster.region=CLUSTER_REGION
+--set reset.x5c=false --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 In order to run JSS server, all worker nodes have to be setup with private keys.  This operation needs to be executed only once.
 If you are running this setup for the first time or like to override previous setup values, execute the helm command below.
 
 
-
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=true \
---set cluster.name=CLUSTER_NAME --set cluster.region=CLUSTER_REGION
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 To keep the existing private key, but just reset the intermediate CA (`x5c`)
 ```console
 helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.x5c=true \
---set cluster.name=CLUSTER_NAME --set cluster.region=CLUSTER_REGION
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 Once the worker nodes are setup, deploy the TSI environment
@@ -263,8 +272,8 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 ```console
 export VAULT_ADDR=http://<vault_location>
 helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
---set ti-key-release-1.cluster.name=CLUSTER_NAME \
---set ti-key-release-1.cluster.region=CLUSTER_REGION \
+--set ti-key-release-1.cluster.name=$CLUSTER_NAME \
+--set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
 --set jssService.type=jss-server
 ```
