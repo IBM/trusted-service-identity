@@ -121,6 +121,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   echo "ROOT_TOKEN or VAULT_ADDR not set"
   helpme
+  exit 1
 else
   # get the list of all 'ti-node-setup' pods for each node instance
   # select only Running instances, to eliminate "Terminating" (helm operations)

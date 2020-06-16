@@ -82,6 +82,7 @@ fi
 if [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   echo "ROOT_TOKEN and VAULT_ADDR must be set"
   helpme
+  exit 1
 else
   loadVault
 fi

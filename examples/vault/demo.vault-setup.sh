@@ -69,6 +69,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 elif [[ "$VAULT_ADDR" == "" ]] ; then
   echo "VAULT_ADDR not set"
   helpme
+  exit 1
 else
   setupVault
 fi
