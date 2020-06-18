@@ -17,7 +17,7 @@ while true
   echo -n "region=$(cat /pod-metadata/tsi-region)&" >> /tmp/claims
   echo -n "machineid=$(cat /host/machineid)" >> /tmp/claims
 
-  curl --unix-socket ${SOCKETFILE} http://localhost/getJWT?"$(cat /tmp/claims)" > /jwt/token
+  curl -s --unix-socket ${SOCKETFILE} http://localhost/getJWT?"$(cat /tmp/claims)" > /jwt/token
   # make the wait 5 seconds shorter than JWT TTL
   sleep "$((${JWT_TTL_SEC}-5))"
 done
