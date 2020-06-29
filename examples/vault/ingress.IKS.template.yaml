@@ -6,6 +6,10 @@ metadata:
 spec:
   rules:
     # provide the actual Ingress for `host` value:
+    # use the following command to get the subdomain:
+    #    ibmcloud ks cluster get --cluster <cluster-name> | grep Ingress
+    # any prefix can be defined as a result (e.g.):
+    #  
 # - host: my-ti-cluster.eu-de.containers.appdomain.cloud
   - host:
     http:
