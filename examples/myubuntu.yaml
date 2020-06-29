@@ -16,10 +16,10 @@ spec:
         tsi.secrets: |
              - tsi.secret/name: "mysecret1"
                tsi.secret/constraints: "region,images"
-               tsi.secret/local-path: "mysecrets/"
+               tsi.secret/local-path: "tsi-secrets/"
              - tsi.secret/name: "mysecret2"
                tsi.secret/constraints: "region"
-               tsi.secret/local-path: "mysecrets"
+               tsi.secret/local-path: "tsi-secrets"
       labels:
         app: myubuntu
       name: myubuntu

@@ -212,8 +212,8 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
   CONSTR=$(echo "$row" | jq -r '."tsi.secret/constraints"')
   LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
-  # local-path must start with "mysecrets"
-  if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
+  # local-path must start with "tsi-secrets"
+  if [[ ${LOCPATH} == "tsi-secrets" ]] || [[ ${LOCPATH} == "/tsi-secrets" ]] || [[ ${LOCPATH} == /tsi-secrets/* ]] || [[ ${LOCPATH} == tsi-secrets/* ]]; then
 
     # build the injection of secret:
     buildSecrets "$SECNAME" "$CONSTR"

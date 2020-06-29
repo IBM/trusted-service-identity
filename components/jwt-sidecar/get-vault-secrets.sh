@@ -85,10 +85,8 @@ run()
   local LOCPATH=$3
   local SECFILE="${SECOUTDIR}/${LOCPATH}/${SECNAME}"
 
-  # local-path must start with "mysecrets"
-  if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
-    echo "Valid local-path: $LOCPATH"
-  else
+  # local-path must start with "tsi-secrets"
+  if [[ ${LOCPATH} != "tsi-secrets" ]] && [[ ${LOCPATH} != "/tsi-secrets" ]] && [[ ${LOCPATH} != /tsi-secrets/* ]] && [[ ${LOCPATH} != tsi-secrets/* ]]; then
     echo "ERROR: invalid local-path requested: $LOCPATH"
     return 1
   fi
@@ -107,23 +105,22 @@ run()
     # TODO: this should be more dynamic instead of string comparison.
     # e.g. parse the values, trim, lowercase and perhaps sort alphabetically ??
       "region")
-          echo "# using policy $CONSTR"
+          # echo "# using policy $CONSTR"
           ROLE="tsi-role-r"
           VAULT_PATH="tsi-r"
           ;;
-
       "region,images")
-          echo "# using policy $CONSTR"
+          # echo "# using policy $CONSTR"
           ROLE="tsi-role-ri"
           VAULT_PATH="tsi-ri"
           ;;
       "region,cluster,namespace")
-              echo "# using policy $CONSTR"
-              ROLE="tsi-role-rcn"
-              VAULT_PATH="tsi-rcn"
-              ;;
+          #echo "# using policy $CONSTR"
+          ROLE="tsi-role-rcn"
+          VAULT_PATH="tsi-rcn"
+          ;;
       "region,cluster-name,namespace,images")
-          echo "# using policy $CONSTR"
+          # echo "# using policy $CONSTR"
           ROLE="tsi-role-rcni"
           VAULT_PATH="tsi-rcni"
           ;;
@@ -131,8 +128,6 @@ run()
          return 1
          ;;
   esac
-
-
 
   # first login with 'secret.role' and JWT to obtain VAULT_TOKEN
   RESP=$(login "${ROLE}")
@@ -156,9 +151,8 @@ run()
   IMGSHA=$(echo $RESP | jq -r '.auth.metadata.images')
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
-  echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
+  #echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
   if [ "$VAULT_PATH" == "tsi-rcni" ]; then
-    # CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
     CMD="${VAULT_ADDR}/v1/secret/data/${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
   elif [ "$VAULT_PATH" == "tsi-r" ]; then
     CMD="${VAULT_ADDR}/v1/secret/data/${VAULT_PATH}/${REGION}/${SECNAME}"
@@ -199,11 +193,10 @@ run()
   fi
 
   if [[ "$SC" == "200" ]]; then
-    echo "Vault command successful! RT: $RT"
+    # echo "Vault command successful! RT: $RT"
     RESULT=$(echo $JRESULT | jq -c '.data.data')
     RT=$?
     if [ "$RT" == "0" ]; then
-      echo "Parsing vault response successful!"
       mkdir -p "${SECOUTDIR}/${LOCPATH}"
       echo "$RESULT" > "${SECFILE}"
     else
@@ -212,10 +205,11 @@ run()
       return 1
     fi
   else
-    echo "Vault command failed: RT: $RT, CMD: $CMD, RESULT: $JRESULT"
+    echo "Vault command failed for SECNAME=${SECNAME}, HTTP status: ${SC}, CMD: $CMD, RESULT: $JRESULT"
     rm -rf "${SECFILE}"
     return 1
   fi
+  echo "Processing secret: ${SECNAME} with constrains: $CONSTR successful"
 } # .. end of run()
 
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
