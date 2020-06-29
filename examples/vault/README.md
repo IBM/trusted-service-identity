@@ -41,7 +41,7 @@ $ export VAULT_ADDR=http://tsi-test.eu-de.containers.appdomain.cloud
 If you have a Vault client installed, you can try to get the admin token directly:
 
 ```sh
-$ export ROOT_TOKEN=$(kk logs $(kk get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3)
+$ export ROOT_TOKEN=$(kk logs $(kk get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3); echo "export ROOT_TOKEN=$ROOT_TOKEN"
 ```
 
 And then test the connection:

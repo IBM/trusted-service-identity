@@ -15,10 +15,10 @@ RUN apt-get install -y software-properties-common && \
 
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
     chmod +x kubectl
-RUN wget https://releases.hashicorp.com/vault/1.0.3/vault_1.0.3_linux_amd64.zip && \
-    unzip vault_1.0.3_linux_amd64.zip && \
+RUN wget https://releases.hashicorp.com/vault/1.4.2/vault_1.4.2_linux_amd64.zip && \
+    unzip vault_1.4.2_linux_amd64.zip && \
     mv vault /usr/local/bin/ && \
-    rm -f vault_1.0.3_linux_amd64.zip
+    rm -f vault_1.4.2_linux_amd64.zip
 
 COPY run-sidecar.sh execute-get-token.sh execute-get-vault-secrets.sh \
     get-vault-secrets.sh /usr/local/bin/

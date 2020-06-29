@@ -34,29 +34,36 @@ login()
   local ROLE=$1
   local TOKEN
   local RESP
+
+  LOGIN_FILE="/tmp/login.$$"
   TOKEN=$(cat $JWTFILE)
-  RESP=$(curl --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login 2> /dev/null)
-  # TODO we need better test if HTTP status code is 200
-  # using `curl --request POST -w "%{http_code}"`
-  # we can get HTTP code in a separate line, but it needs to be parsed, tested and stripped.
-  # if [[ "$RESP" == *200 ]]; then
-  #         echo "$RESP"
-  # else
-  #       echo "$LOGINFAIL"
-  # fi
-  #
+
+  # enforce the timeout to 10 seconds:
+  # For testing timeout:
+  # VAULT_ADDR=http://slowwly.robertomurray.co.uk/delay/15000/url/${VAULT_ADDR}
+  SC=$(curl --max-time 10 -s -w "%{http_code}" -o $LOGIN_FILE --request POST --data '{"jwt": "'"${TOKEN}"'", "role": "'"${ROLE}"'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login 2> /dev/null)
   local RT=$?
-  if [[ "$RESP" == *"$TIMEOUT"* ]]; then
+
+  RESP=$(cat $LOGIN_FILE)
+  rm -f $LOGIN_FILE
+
+  # return value for curl timeout is 28
+
+  if [[ "$RT" == "28" ]]; then
     echo "$TIMEOUT"
     return 1
   fi
-  if [ "$RT" == "0" ]; then
-       echo "$RESP"
+
+  if [[ "$SC" == "200" ]]; then
+    echo "$RESP"
+    return 0
+  elif [[ "$RESP" == *"$TIMEOUT"* ]]; then
+    echo "$TIMEOUT"
+    return 1
   else
     echo "$LOGINFAIL"
     return 1
   fi
-  return 0
 }
 
 ## create help menu:
@@ -76,6 +83,7 @@ run()
   local SECNAME=$1
   local CONSTR=$2
   local LOCPATH=$3
+  local SECFILE="${SECOUTDIR}/${LOCPATH}/${SECNAME}"
 
   # local-path must start with "mysecrets"
   if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
@@ -101,23 +109,23 @@ run()
       "region")
           echo "# using policy $CONSTR"
           ROLE="tsi-role-r"
-          VAULT_PATH="secret/tsi-r"
+          VAULT_PATH="tsi-r"
           ;;
 
       "region,images")
           echo "# using policy $CONSTR"
           ROLE="tsi-role-ri"
-          VAULT_PATH="secret/tsi-ri"
+          VAULT_PATH="tsi-ri"
           ;;
       "region,cluster,namespace")
               echo "# using policy $CONSTR"
               ROLE="tsi-role-rcn"
-              VAULT_PATH="secret/tsi-rcn"
+              VAULT_PATH="tsi-rcn"
               ;;
       "region,cluster-name,namespace,images")
           echo "# using policy $CONSTR"
           ROLE="tsi-role-rcni"
-          VAULT_PATH="secret/tsi-rcni"
+          VAULT_PATH="tsi-rcni"
           ;;
       *) echo "# ERROR: invalid constraints requested: ${CONSTR}"
          return 1
@@ -130,6 +138,7 @@ run()
   RESP=$(login "${ROLE}")
   if [ "$RESP" == "$LOGINFAIL" ]; then
     echo "Login to Vault failed!"
+    rm -rf "${SECFILE}"
     return 1
   fi
   if [ "$RESP" == "$TIMEOUT" ]; then
@@ -148,44 +157,63 @@ run()
   NS=$(echo $RESP | jq -r '.auth.metadata.namespace')
 
   echo "Getting $SECNAME from Vault $VAULT_PATH and output to $LOCPATH"
-  if [ "$VAULT_PATH" == "secret/tsi-rcni" ]; then
-    CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/tsi-r" ]; then
-    CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/tsi-ri" ]; then
-    CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${IMGSHA}/${SECNAME}"
-  elif [ "$VAULT_PATH" == "secret/tsi-rcn" ]; then
-    CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
+  if [ "$VAULT_PATH" == "tsi-rcni" ]; then
+    # CMD="vault kv get -format=json ${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
+    CMD="${VAULT_ADDR}/v1/secret/data/${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
+  elif [ "$VAULT_PATH" == "tsi-r" ]; then
+    CMD="${VAULT_ADDR}/v1/secret/data/${VAULT_PATH}/${REGION}/${SECNAME}"
+  elif [ "$VAULT_PATH" == "tsi-ri" ]; then
+    CMD="${VAULT_ADDR}/v1/secret/data/${VAULT_PATH}/${REGION}/${IMGSHA}/${SECNAME}"
+  elif [ "$VAULT_PATH" == "tsi-rcn" ]; then
+    CMD="${VAULT_ADDR}/v1/secret/data/${VAULT_PATH}/${REGION}/${CLUSTER}/${NS}/${SECNAME}"
   else
     echo "Unknown Vault path value!"
-    rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
+    rm -rf "${SECFILE}"
     return 1
   fi
 
-  #CMD="vault kv get -format=json secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
-  #vault kv get -format=json secret/tsi-rcni/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy | jq -c '.data.data'
+  # CMD="vault kv get -format=json secret/tsi-rcni/${REGION}/${CLUSTER}/${NS}/${IMGSHA}/${SECNAME}"
+  # vault command:
+  #  vault kv get -format=json secret/tsi-rcni/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy
+  # is equivalent of:
+  #  curl -X GET -H "X-Vault-Token: $(vault print token)" ${VAULT_ADDR}/v1/secret/data/tsi-rcni/eu-de/ti-test/trusted-identity/f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc/dummy
 
   # get the result in JSON format, then convert to string
   # Result can be also an error like this:
   #    No value found at secret/data/tsi-rcni/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
-  JRESULT=$($CMD)
+  RESULT_FILE="/tmp/result.$$"
+
+  SC=$(curl --max-time 10 -s -w "%{http_code}" -H "X-Vault-Request: true" -H "X-Vault-Token: ${VAULT_TOKEN}" -o ${RESULT_FILE}  ${CMD})
   local RT=$?
-  if [ "$RT" == "0" ]; then
+  JRESULT=$(cat ${RESULT_FILE})
+  rm -f ${RESULT_FILE}
+
+  if [[ "${RT}" == "28" ]]; then
+    echo "Timeout occured for SECNAME=${SECNAME}"
+    return 1
+  fi
+
+  if [[ "${RT}" != "0" ]]; then
+    echo "Unknow error occured for SECNAME=${SECNAME}, HTTP status: ${SC}, curl return: ${RT}, CMD: ${CMD}, RESULT: ${JRESULT}"
+    return 1
+  fi
+
+  if [[ "$SC" == "200" ]]; then
     echo "Vault command successful! RT: $RT"
     RESULT=$(echo $JRESULT | jq -c '.data.data')
     RT=$?
     if [ "$RT" == "0" ]; then
-      echo "Parsing vault response successful! RESULT: $RESULT"
+      echo "Parsing vault response successful!"
       mkdir -p "${SECOUTDIR}/${LOCPATH}"
-      echo "$RESULT" > "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
+      echo "$RESULT" > "${SECFILE}"
     else
       echo "Parsing vault response failed. Result: $JRESULT"
-      rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
+      rm -rf "${SECFILE}"
       return 1
     fi
   else
     echo "Vault command failed: RT: $RT, CMD: $CMD, RESULT: $JRESULT"
-    rm -rf "${SECOUTDIR}/${LOCPATH}/${SECNAME}"
+    rm -rf "${SECFILE}"
     return 1
   fi
 } # .. end of run()
