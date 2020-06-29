@@ -1,4 +1,4 @@
 dependencies:
   - name: ti-key-release-1
-    version: v1.6.0
+    version: // version is dynamically set by the buildTSI.sh script
     repository: "file://../ti-key-release-1"
