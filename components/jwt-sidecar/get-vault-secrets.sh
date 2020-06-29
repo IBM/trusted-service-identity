@@ -183,14 +183,18 @@ run()
   #    No value found at secret/data/tsi-rcni/eu-de/ti-test1/trusted-identity/a8725beade10de172ec0fdbc683/dummyx
   RESULT_FILE="/tmp/result.$$"
 
-  #JRESULT=$($CMD)
   SC=$(curl --max-time 10 -s -w "%{http_code}" -H "X-Vault-Request: true" -H "X-Vault-Token: ${VAULT_TOKEN}" -o ${RESULT_FILE}  ${CMD})
   local RT=$?
-  JRESULT=$(cat $RESULT_FILE)
-  rm -f $RESULT_FILE
+  JRESULT=$(cat ${RESULT_FILE})
+  rm -f ${RESULT_FILE}
 
-  if [[ "$RT" == "28" ]]; then
+  if [[ "${RT}" == "28" ]]; then
     echo "Timeout occured for SECNAME=${SECNAME}"
+    return 1
+  fi
+
+  if [[ "${RT}" != "0" ]]; then
+    echo "Unknow error occured for SECNAME=${SECNAME}, HTTP status: ${SC}, curl return: ${RT}, CMD: ${CMD}, RESULT: ${JRESULT}"
     return 1
   fi
 
