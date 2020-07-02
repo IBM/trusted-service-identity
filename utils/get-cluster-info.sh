@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 docker_cmd="docker --version"
 if [[ ! $(eval ${docker_cmd}) ]]; then

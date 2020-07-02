@@ -31,5 +31,5 @@ spec:
     spec:
       containers:
         - name: tsi-vault
-          image: trustedseriviceidentity/ti-vault:v1.7.1
+          image: trustedseriviceidentity/ti-vault:v1.7.2
           imagePullPolicy: Always

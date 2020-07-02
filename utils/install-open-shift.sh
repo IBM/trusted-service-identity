@@ -1,12 +1,15 @@
 #!/bin/bash
+# get the SCRIPT and TSI ROOT directories
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+TSI_ROOT="${SCRIPT_PATH}/.."
 
 # Required Parameters
 # VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
 VAULT_ADDR=
 # CLUSTER_NAME="ti-test1"
 CLUSTER_NAME=
-# CLUSTER_REGION="eu-de"
-CLUSTER_REGION=
+# REGION="eu-de"
+REGION=
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
 # JSS_TYPE=
@@ -28,8 +31,8 @@ checkPrereqs(){
   # today we require helm verion 2:
   helm_test_cmd="helm version --client| grep 'SemVer:\"v2'"
 
-if [[ "$VAULT_ADDR" == "" || "$CLUSTER_NAME" == "" || "$CLUSTER_REGION" == "" || "$JSS_TYPE" == "" ]] ; then
-  echo "One of the required paramters is not set! (VAULT_ADDR, CLUSTER_NAME, CLUSTER_REGION, JSS_TYPE)"
+if [[ "$VAULT_ADDR" == "" || "$CLUSTER_NAME" == "" || "$REGION" == "" || "$JSS_TYPE" == "" ]] ; then
+  echo "One of the required paramters is not set! (VAULT_ADDR, CLUSTER_NAME, REGION, JSS_TYPE)"
   exit 1
 fi
 
@@ -139,7 +142,7 @@ oc describe scc $SCCPOD
 executeNodeSetup() {
 # to list the chart values:
 # helm inspect values charts/tsi-node-setup/
-helm template charts/tsi-node-setup/ --name tsi-setup --set reset.all=false \
+helm template ${TSI_ROOT}/charts/tsi-node-setup/ --name tsi-setup --set reset.all=false \
 --set reset.x5c=false > tsi-node-setup.yaml
 oc apply -f tsi-node-setup.yaml
 }
@@ -148,8 +151,8 @@ executeInstall-1() {
 
 # to list the chart values:
 # helm inspect values charts/ti-key-release-1/
-helm template charts/ti-key-release-1/ --name tsi-1 --set vaultAddress=$VAULT_ADDR \
---set cluster.name=$CLUSTER_NAME --set cluster.region=$CLUSTER_REGION > tsi-install-1.yaml
+helm template ${TSI_ROOT}/charts/ti-key-release-1/ --name tsi-1 --set vaultAddress=$VAULT_ADDR \
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION > tsi-install-1.yaml
 oc apply -f tsi-install-1.yaml
 # add the `ti-install-sa` to admin group
 oc policy add-role-to-user cluster-admin system:serviceaccount:trusted-identity:ti-install-sa
@@ -164,10 +167,10 @@ mv charts/ti-key-release-2/requirements.* charts/
 
 # to list the chart values:
 # helm inspect values charts/ti-key-release-2/
-helm template charts/ti-key-release-2/ --name tsi-2 \
+helm template ${TSI_ROOT}/charts/ti-key-release-2/ --name tsi-2 \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
---set ti-key-release-1.cluster.region=$CLUSTER_REGION \
+--set ti-key-release-1.cluster.region=$REGION \
 --set jssService.type=$JSS_TYPE > tsi-install-2.yaml
 
 oc apply -f tsi-install-2.yaml
@@ -216,7 +219,7 @@ cat << EOF
 7. load sample policies:
      ./demo.load-sample-policies.sh
 8. load sample keys:
-     ./demo.load-sample-keys.sh $CLUSTER_REGION $CLUSTER_NAME $APP_NS
+     ./demo.load-sample-keys.sh $REGION $CLUSTER_NAME $APP_NS
 9. the setup containers can be removed now:
      kk delete ds tsi-setup-tsi-node-setup
      kk delete sa tsi-setup-admin-sa
