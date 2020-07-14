@@ -24,7 +24,7 @@ data:
           value: {{ .Values.secrets.refreshSec }}
         volumeMounts:
           - name: tsi-secrets
-            mountPath: /usr/share/secrets
+            mountPath: /usr/share/secrets/tsi-secrets
           - name: tsi-sockets
             mountPath: "/host/sockets"
           - name: pod-metadata

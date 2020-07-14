@@ -7,9 +7,11 @@ if [ ! -f "$DEMOFILE" ]; then
 fi
 source ${DEMOFILE}
 
-doit --ignorerc kubectl -n test delete -f ../myubuntu.yaml
+EXAMPLES="../examples"
+
+doit --ignorerc kubectl -n test delete -f ${EXAMPLES}/myubuntu.yaml
 doit kubectl -n test get po
-doit kubectl -n test create -f ../myubuntu.yaml
+doit kubectl -n test create -f ${EXAMPLES}/myubuntu.yaml
 doit kubectl -n test get po
 doit kubectl -n test get po
 #doit kubectl -n test exec -it $(kubectl -n test get po | grep myubuntu | awk '{print $1}' |  sed -n 1p ) -c myubuntu bash
@@ -18,7 +20,7 @@ doit kubectl -n test get po
 
 
 ttyDoit kubectl -n test exec -it $(kubectl -n test get po | grep myubuntu | grep Running | awk '{print $1}' |  sed -n 1p ) -c myubuntu bash 10<<EOF
-  cat /tsi-secrets/mysecrets/mysecret1
-	watch ls -l /tsi-secrets/mysecrets/
+  cat /tsi-secrets/mysecret1
+	watch ls -l /tsi-secrets/
 	exit
 EOF
