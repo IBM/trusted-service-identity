@@ -5,9 +5,9 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 # Required Parameters
-VAULT_ADDR=
-CLUSTER_NAME=
-REGION=
+#VAULT_ADDR=
+#CLUSTER_NAME=
+#REGION=
 # REGION="eu-de"
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
