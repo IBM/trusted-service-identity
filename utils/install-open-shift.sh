@@ -5,15 +5,16 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 # Required Parameters
-#VAULT_ADDR=
-#CLUSTER_NAME=
-#REGION=
+# CLUSTER_NAME=
 # REGION="eu-de"
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
 # JSS_TYPE=
 # application namespace: e.g. test
 APP_NS="test"
+# default vault namespace, if create requested
+VAULT_NS="tsi-vault"
+
 
 # setup the Cluster Information in IKS
 # CL_INFO=$("$SCRIPT_PATH/get-cluster-info.sh")
@@ -33,8 +34,8 @@ checkPrereqs(){
   # today we require helm verion 2:
   helm_test_cmd="helm version --client| grep 'SemVer:\"v2'"
 
-if [[ "$VAULT_ADDR" == "" || "$CLUSTER_NAME" == "" || "$REGION" == "" || "$JSS_TYPE" == "" ]] ; then
-  echo "One of the required paramters is not set! (VAULT_ADDR, CLUSTER_NAME, REGION, JSS_TYPE)"
+if [[ "$CLUSTER_NAME" == "" || "$REGION" == "" || "$JSS_TYPE" == "" ]] ; then
+  echo "One of the required paramters is not set! (CLUSTER_NAME, REGION, JSS_TYPE)"
   exit 1
 fi
 
@@ -62,6 +63,81 @@ else
   echo "(https://helm.sh/docs/intro/install/)"
   exit 1
 fi
+
+if [[ "$VAULT_ADDR" != "" ]] ; then
+  echo "using the provided Vault at $VAULT_ADDR"
+else
+  echo "VAULT_ADDR is not provided. Would you like to proceed with the default"
+  read -n 1 -r -p "Vault installation? [y/n]" REPLY
+  echo # create a new line
+  if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]] ; then
+    echo "Installing vault in $VAULT_NS namespace"
+    setupVaultNS
+  else
+    echo "Aborting the installation..."
+    exit 1
+  fi
+fi
+}
+
+setupVault() {
+  kubectl create -n $VAULT_NS -f $TSI_ROOT/examples/vault/vault.yaml
+  kubectl -n tsi-vault wait --for=condition=available --timeout=60s deploy/tsi-vault
+
+  oc -n $VAULT_NS expose svc/tsi-vault
+  oc -n $VAULT_NS get route
+  VAULTx=$(oc -n $VAULT_NS get route tsi-vault -o jsonpath='{.spec.host}')
+  if [ "$?" == "0" ]; then
+    VAULT_ADDRx="http://${VAULTx}"
+  else
+    echo "Vault cannot be properly installed"
+    exit 1
+  fi
+  echo "hold on for 10s to let vault intialize..."
+  sleep 10
+  $TSI_ROOT/examples/vault/demo.vault-setup.sh $VAULT_ADDRx $VAULT_NS
+  if [ "$?" != "0" ]; then
+    echo "Vault setup error"
+    exit 1
+  fi
+}
+
+setupVaultNS() {
+  kubectl get ns $VAULT_NS
+  if [ "$?" == "0" ]; then
+
+    kubectl -n $VAULT_NS get po | grep "tsi-vault" | grep "Running"
+    if [ "$?" == "0" ]; then
+
+      echo "Vault instace is already running. "
+      read -n 1 -r -p "Do you want to re-install it? [y/n]" REPLY
+      echo # create a new line
+      if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]] ; then
+        echo "Re-installing vault in $VAULT_NS namespace"
+        kubectl delete ns $VAULT_NS --grace-period=0 --force --wait=true
+        kubectl create ns $VAULT_NS
+        setupVault
+      else
+        echo "Keeping the existing Vault instance"
+      fi
+    else
+      setupVault
+    fi
+
+  else
+    kubectl create ns $VAULT_NS
+    setupVault
+  fi
+
+  VAULTx=$(oc -n $VAULT_NS get route tsi-vault -o jsonpath='{.spec.host}')
+  if [ "$?" == "0" ]; then
+    VAULT_ADDR="http://${VAULTx}"
+    echo "Vault setup completed. $VAULT_ADDR"
+  else
+    echo "Vault cannot be properly installed"
+    exit 1
+  fi
+
 }
 
 setupOpenShiftProject() {
@@ -195,7 +271,7 @@ echo "Wait for the setup pods in Running state"
 read -n 1 -s -r -p 'Press any key to continue'
 executeInstall-1
 echo ""
-echo "Wait for all Running or Completed"
+echo "Wait for all Completed and Running"
 read -n 1 -s -r -p 'Press any key to continue'
 executeInstall-2
 cat << EOF

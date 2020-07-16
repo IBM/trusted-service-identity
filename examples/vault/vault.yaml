@@ -33,3 +33,10 @@ spec:
         - name: tsi-vault
           image: trustedseriviceidentity/ti-vault:v1.7.2
           imagePullPolicy: Always
+          env:
+          - name: SKIP_SETCAP
+            value: "true"
+          - name: SKIP_CHOWN
+            value: "true"
+          - name: HOME
+            value: "/tmp"

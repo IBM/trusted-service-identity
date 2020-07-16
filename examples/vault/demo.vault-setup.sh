@@ -7,10 +7,10 @@ helpme()
 {
   cat <<HELPMEHELPME
 
-Syntax: ${0} <vault_addr> <TSI_namespace>
+Syntax: ${0} <vault_addr> <vault_namespace>
 Where:
   vault_addr - vault address in format http://vault.server:8200
-  TSI_namespace - if different than trusted-identity (optional)
+  vault_namespace - if different than trusted-identity (optional)
 
 HELPMEHELPME
 }
