@@ -39,7 +39,7 @@ data:
         - name: tsi-sockets
           hostPath:
             # directory location on host
-             path: /tsi-secure/sockets
+             path: /var/tsi-secure/sockets
              # directory must exist
              type: Directory
         - name: host-machineid

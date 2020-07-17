@@ -30,7 +30,7 @@
            },
            {
                "hostPath": {
-                   "path": "/tsi-secure/sockets",
+                   "path": "/var/tsi-secure/sockets",
                    "type": "Directory"
                },
                "name": "tsi-sockets"
