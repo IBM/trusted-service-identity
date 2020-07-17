@@ -142,10 +142,11 @@ OpenShift Installation:
 TSI requires Vault to store the secrets. If you have a Vault instance that can be
 used for this TSI installation, make sure you have admin privileges to access it.
 Otherwise, follow the simple steps below to create a Vault instance, as a pod and
-service, deployed in `trusted-identity` namespace in your cluster.
+service, deployed in `tsi-vault` namespace in your cluster.
 
 ```console
-kk create -f examples/vault/vault.yaml
+kubectl create ns tsi-vault
+kubectl -n tsi-vault create -f examples/vault/vault.yaml
 service/tsi-vault created
 deployment.apps/tsi-vault created
 ```
@@ -183,7 +184,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: vault-ingress
-  namespace: trusted-identity
+  namespace: tsi-vault
 spec:
   rules:
     # provide the actual Ingress for `host` value:
@@ -202,6 +203,17 @@ $ kk create -f ingress-IKS.yaml
 ```
 </details>
 
+To access Vault remotely OpenShift (including IKS ROKS)
+<details><summary>Click to view OpenShift steps</summary>
+This assumes the OpenShift command line is already installed. Otherwise see
+the [documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)
+and you can get `oc` cli from [https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/](https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/)"
+```console
+oc -n tsi-vault expose svc/tsi-vault
+VAULT_ADDR="http://$(oc -n tsi-vault get route tsi-vault -o jsonpath='{.spec.host}')"
+```
+
+</details>
 
 Test the remote connection to vault:
 ```console
@@ -209,6 +221,14 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/
 <a href="/ui/">Temporary Redirect</a>.
 ```
 At this point, this is an expected result.
+
+Once the Vault service is running and `VAULT_ADDR` is defined, execute one-time
+Vault setup:
+
+```console
+examples/vault/demo.vault-setup.sh $VAULT_ADDR tsi-test
+
+```
 
 ### Setup Cluster Nodes
 The following information is required to deploy TSI node-setup helm chart:
