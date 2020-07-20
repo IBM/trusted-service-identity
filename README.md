@@ -227,7 +227,6 @@ Vault setup:
 
 ```console
 examples/vault/demo.vault-setup.sh $VAULT_ADDR tsi-test
-
 ```
 
 ### Setup Cluster Nodes

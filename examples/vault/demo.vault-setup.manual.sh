@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 #ibmcloud plugin install cloud-object-storage
