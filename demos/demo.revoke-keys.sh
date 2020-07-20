@@ -12,6 +12,8 @@ EXAMPLES="../examples"
 comment Show the secrets in 'myubuntu.yaml'
 doit "cat ${EXAMPLES}/myubuntu.yaml | grep -B1 -A6 'tsi.secrets:'"
 comment "build the secrets script..."
+doit --noexec "${EXAMPLES}/vault/demo.secret-maker.sh -f ../myubuntu.yaml -n test"
+${EXAMPLES}/vault/demo.secret-maker.sh -f ${EXAMPLES}/myubuntu.yaml -n test
 doit --noexec "${EXAMPLES}/vault/demo.secret-maker.sh -f ../myubuntu.yaml -n test > myubuntu.secrets.sh"
 ${EXAMPLES}/vault/demo.secret-maker.sh -f ${EXAMPLES}/myubuntu.yaml -n test > myubuntu.secrets.sh
 doit --neexec "sed 's/secret=xxx/secret=ThisIs5ecurePa55word/g' myubuntu.secrets.sh > myubuntu.secrets.1.sh"
