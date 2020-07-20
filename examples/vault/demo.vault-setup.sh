@@ -10,7 +10,7 @@ helpme()
 Syntax: ${0} <vault_addr> <vault_namespace>
 Where:
   vault_addr - vault address in format http://vault.server:8200
-  vault_namespace - if different than trusted-identity (optional)
+  vault_namespace - if different than tsi-vault (optional)
 
 HELPMEHELPME
 }
@@ -21,16 +21,16 @@ setupVault()
   export VAULT_TOKEN=
 
   # get the id of the vault container:
-  VAULTPOD=$($kk get po | grep tsi-vault- | grep Running | awk '{print $1}')
+  VAULTPOD=$($kv get po | grep tsi-vault- | grep Running | awk '{print $1}')
   if [ "$VAULTPOD" == "" ]; then
      echo "No running Vault container in this namespace. Perhaps Vault is running in a different location"
      echo "Please validate by running the following command: "
-     echo "      $kk get po | grep tsi-vault- | grep Running"
+     echo "      $kv get po | grep tsi-vault- | grep Running"
      exit 1
   fi
 
   # get the vault token and validate the connection:
-  ROOT_TOKEN=$($kk logs "$VAULTPOD" | grep "Root Token" | cut -d' ' -f3)
+  ROOT_TOKEN=$($kv logs "$VAULTPOD" | grep "Root Token" | cut -d' ' -f3)
   vault login -no-print "${ROOT_TOKEN}"
   RT=$?
   if [ $RT -ne 0 ] ; then
@@ -40,7 +40,7 @@ setupVault()
   fi
 
   export SHA256
-  SHA256=$($kk exec "$VAULTPOD" /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
+  SHA256=$($kv exec "$VAULTPOD" /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
   # another way to obtain this SHA, use a local plugin created by the build process
   # assuming it is identical to the one one deployed in Vault container.
   # SHA256=$(shasum -a 256 "${PWD}/pkg/linux_amd64/${PLUGIN}" | cut -d' ' -f1)
@@ -57,9 +57,9 @@ if [ ! "$1" == "" ] ; then
   export VAULT_ADDR=$1
 fi
 
-kk="kubectl -n trusted-identity"
+kv="kubectl -n tsi-vault"
 if [ ! "$2" == "" ] ; then
-  kk="kubectl -n $2"
+  kv="kubectl -n $2"
 fi
 
 # validate the arguments

@@ -38,10 +38,12 @@ $ export VAULT_ADDR=http://<vault_address>
 $ export VAULT_ADDR=http://tsi-test.eu-de.containers.appdomain.cloud
 ```
 
-If you have a Vault client installed, you can try to get the admin token directly:
+If you have a Vault client installed, you can try to get the admin token directly
+This assumes the Vault is installed in `tsi-vault` namespace. For different namespace,
+modify the command accordingly:
 
 ```sh
-$ export ROOT_TOKEN=$(kk logs $(kk get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3); echo "export ROOT_TOKEN=$ROOT_TOKEN"
+$ export ROOT_TOKEN=$(kubectl -n tsi-vault logs $(kubectl -n tsi-vault get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3); echo "export ROOT_TOKEN=$ROOT_TOKEN"
 ```
 
 And then test the connection:
@@ -50,7 +52,8 @@ And then test the connection:
 vault login $ROOT_TOKEN
 vault status
 ```
-Then run the vault setup:
+Vault is already setup during the installation, but if you need to set it up again
+(using a default `tsi-vault` namespace):
 
 ```sh
 $ ./demo.vault-setup.sh
@@ -62,7 +65,7 @@ Optionally, the vault address can be also passed directly to the script:
 $ ./demo.vault-setup.sh $VAULT_ADDR
 ```
 
-If the TSI namespace is different than `trusted-identity`,
+If the TSI namespace is different than `tsi-vault`,
 pass the TSI namespace as follow:
 ```sh
 $ ./demo.vault-setup.sh $VAULT_ADDR <TSI Namespace>
@@ -187,11 +190,22 @@ annotations:
 Before on-boarding the application, you must populate Vault with secrets, that would be injected to the application. To inject the secrets to Vault, use the script [examples/vault/demo.secret-maker.sh](/examples/vault/demo.secret-maker.sh)
 This script requires a local installation of Docker.
 
-In order to create secrets for an application, pass the application into the script along with the namespace name. For example, to create secrets for [examples/myubuntu.yaml](/examples/myubuntu.yaml) in `test` namespace:
+In order to create secrets for an application, pass the application deployment file
+into the script along with the namespace name.
+For example, to create secrets for [examples/myubuntu.yaml](/examples/myubuntu.yaml) in `test` namespace:
 
 ```console
 cd examples
 vault/demo.secret-maker.sh -f myubuntu.yaml -n test
+```
+If using non-IKS environment, the `REGION` and `CLUSTER-NAME` values must be passed
+to the script:
+
+```console
+export REGION=
+export CLUSTER-NAME=
+cd examples
+vault/demo.secret-maker.sh -f myubuntu.yaml -n test -r $REGION -c $CLUSTER-NAME
 ```
 
 The output is the script that can be used for inserting the secrets into Vault, so re-direct it to the file:

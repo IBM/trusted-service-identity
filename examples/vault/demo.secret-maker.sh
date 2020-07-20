@@ -7,13 +7,17 @@ helpme()
 {
   cat <<HELPMEHELPME
   This script builds a template for injecting secrets to Vault
-  using TSI-node-setup daemonset
+  using TSI-node-setup daemonset. If this script is executed on
+  IKS cluster, the 'region' and 'cluster-name' parameter should be skiped.
+  They are required for other clouds, the parameters must be provided.
 
 syntax:
-   $0 -f [deployment-file-name] -n [namespace]
+   $0 -f [deployment-file-name] -n [namespace] -r [region] -c [cluster-name]
 where:
       [deployment-file-name] - name of the file to inspect
       [namespace] - name of the namespace
+      [region] - cluster region (optional on IKS)
+      [cluster-name] - cluster name (optional on IKS)
 
 HELPMEHELPME
 }
@@ -51,9 +55,15 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    --default)
-    DEFAULT=YES
+    -r|--region)
+    REGION="$2"
     shift # past argument
+    shift # past value
+    ;;
+    -c|--cluster-name)
+    CLUSTER_NAME="$2"
+    shift # past argument
+    shift # past value
     ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
@@ -70,13 +80,21 @@ fi
 
 TEMPDIR="/tmp/tsi"
 mkdir -p ${TEMPDIR}
-
-CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
-kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
 PODINFO="${TEMPDIR}/podinfo.$$"
 kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
 
-docker run -v ${CLUSTERINFO}:/tmp/clusterinfo -v ${PODINFO}:/tmp/podinfo \
-docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} /usr/local/bin/secret-maker.sh /tmp/clusterinfo /tmp/podinfo
+if [[ "$CLUSTER_NAME" == "" || "$REGION" == "" ]] ; then
+  CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
+  echo "# using IKS cluster info"
+  kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
+  docker run -v ${CLUSTERINFO}:/tmp/clusterinfo -v ${PODINFO}:/tmp/podinfo \
+  docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} /usr/local/bin/secret-maker.sh /tmp/podinfo /tmp/clusterinfo
+else
+  docker run -v ${PODINFO}:/tmp/podinfo \
+  docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} \
+  /usr/local/bin/secret-maker.sh /tmp/podinfo ${CLUSTER_NAME} ${REGION}
+fi
+
+
 
 rm ${CLUSTERINFO} ${PODINFO}
