@@ -53,11 +53,16 @@ helpme()
   cat <<HELPMEHELPME
 This script helps building TSI policies
 
-syntax:
-   $0 [cluster-info.yaml] [pod-info.yaml]
+syntax for IKS:
+   $0 [pod-info.yaml] [cluster-info.yaml]
+     or
+   $0 [pod-info.yaml] [cluster-name] [region]
+
 where:
-      [cluster-info.yaml] - cluster info, otherwise defaults to '/tmp/clusterinfo'
       [pod-info.yaml] - pod info, otherwise defaults to '/tmp/podinfo'
+      [cluster-info.yaml] - cluster info, otherwise defaults to '/tmp/clusterinfo' (for IKS only)
+      [cluster-name] - cluster name (non-IKS)
+      [region] - cluster name (non-IKS)
 HELPMEHELPME
 }
 
@@ -104,31 +109,36 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 fi
 
 if [[ "$1" == "" ]] ; then
-  CLUSTER_YAML="/tmp/clusterinfo"
-else
-  CLUSTER_YAML="$1"
-fi
-
-if [[ "$2" == "" ]] ; then
   POD_YAML="/tmp/podinfo"
 else
-  POD_YAML="$2"
+  POD_YAML="$1"
+fi
+
+if [[ "$2" != ""  && "$3" != "" ]] ; then
+  CLUSTER="$2"
+  REGION="$3"
+elif [[ "$2" == "" ]] ; then
+  CLUSTER_YAML="/tmp/clusterinfo"
+else
+  CLUSTER_YAML="$2"
 fi
 
 ### Get Cluter Information
+if [[ "$CLUSTER" == "" || "$REGION" == "" ]] ; then
+  echo  "# Using IKS cluster info"
+  # extract cluster and region info from provided data
+  CLYM1="/tmp/cl1.$$"
+  cat ${CLUSTER_YAML} > ${CLYM1}
+  CLJS1=$(yq r -j ${CLYM1} |jq -r '.data."cluster-config.json"')
+  rm "${CLYM1}"
+  CLUSTER=$(echo "$CLJS1" | jq -r '.name')
+  DC=$(echo "$CLJS1" | jq -r '.datacenter')
 
-# extract cluster and region info from provided data
-CLYM1="/tmp/cl1.$$"
-cat ${CLUSTER_YAML} > ${CLYM1}
-CLJS1=$(yq r -j ${CLYM1} |jq -r '.data."cluster-config.json"')
-rm "${CLYM1}"
-CLUSTER=$(echo "$CLJS1" | jq -r '.name')
-DC=$(echo "$CLJS1" | jq -r '.datacenter')
-
-# Confirmed with Armada team that CRN format should stay consistent for a while
-# CRN format example:
-# crn:v1:bluemix:public:containers-kubernetes:eu-de:586283a9abda5102d46e1b94b923a6c5:5f4306a2738d4cdd89ff067c9481555e
-REGION=$(echo "$CLJS1" | jq -r '."crn"' | cut -d":" -f6)
+  # Confirmed with Armada team that CRN format should stay consistent for a while
+  # CRN format example:
+  # crn:v1:bluemix:public:containers-kubernetes:eu-de:586283a9abda5102d46e1b94b923a6c5:5f4306a2738d4cdd89ff067c9481555e
+  REGION=$(echo "$CLJS1" | jq -r '."crn"' | cut -d":" -f6)
+fi
 
 # Get Pod information
 
@@ -212,8 +222,8 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
   CONSTR=$(echo "$row" | jq -r '."tsi.secret/constraints"')
   LOCPATH=$(echo "$row" | jq -r '."tsi.secret/local-path"')
 
-  # local-path must start with "mysecrets"
-  if [[ ${LOCPATH} == "mysecrets" ]] || [[ ${LOCPATH} == "/mysecrets" ]] || [[ ${LOCPATH} == /mysecrets/* ]] || [[ ${LOCPATH} == mysecrets/* ]]; then
+  # local-path must start with "tsi-secrets"
+  if [[ ${LOCPATH} == "tsi-secrets" ]] || [[ ${LOCPATH} == "/tsi-secrets" ]] || [[ ${LOCPATH} == /tsi-secrets/* ]] || [[ ${LOCPATH} == tsi-secrets/* ]]; then
 
     # build the injection of secret:
     buildSecrets "$SECNAME" "$CONSTR"

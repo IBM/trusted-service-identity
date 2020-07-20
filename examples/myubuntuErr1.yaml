@@ -17,7 +17,7 @@ spec:
              - tsi.secret/name: "mysecret1"
                tsi.secret/role: "tsi-role-rcni"
                tsi.secret/vault-path: "secret/tsi-rcni"
-               tsi.secret/local-path: "mysecrets/myubuntu-mysecret1"
+               tsi.secret/local-path: "tsi-secrets/myubuntu-mysecret1"
       labels:
         app: myubuntu
       name: myubuntu

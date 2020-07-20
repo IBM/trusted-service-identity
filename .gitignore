@@ -22,6 +22,5 @@ charts/ti-key-release-2/charts/*
 
 # remove mac files
 *.DS_Store
-charts/ti-key-release-1-*.tgz
 charts/ti-key-release-1/Chart.yaml
 charts/ti-key-release-2/Chart.yaml

@@ -108,14 +108,14 @@ This would remove all the components and artifacts.
 Then recreate a new, empty namespace:
 
 ```console
-./cleanup.sh
-./init-namespace.sh
+./utils/cleanup.sh
+./utils/init-namespace.sh
 ```
 
 ### Openshift
 Installation of Trusted Service Identity on RedHat OpenShift requires several steps
 to overcome the additional security restrictions. To make this process simpler,
-we introduced a script to drive this installation ([install-open-shift.sh](./install-open-shift.sh))
+we introduced a script to drive this installation ([utils/install-open-shift.sh](./utils/install-open-shift.sh))
 
 Before we start, several considerations:
 * The script is not using Helm to drive the installation, but instead, using Helm client it extracts  the relevant installation files and customize them as needed.
@@ -124,26 +124,29 @@ Before we start, several considerations:
 * The OpenShift installation requires OpenShift client `oc` installed and configured. Please follow the [oc documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html) the `oc` cli can be obtained [here](https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/)
 
 OpenShift Installation:
-* Edit [install-open-shift.sh](./install-open-shift.sh) file by assigning the required parameters:
+* Setup the required parameters, either directly in the script ([utils/install-open-shift.sh](./utils/install-open-shift.sh)) or as env. variables
+* When running on IKS, you can use the script to obtain cluster information: [utils/get-cluster-info.sh](./utils/get-cluster-info.sh)
+* Required parameters:
   * VAULT_ADDR - external access to your Vault service e.g. VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
   * CLUSTER_NAME - name of the cluster, e.g. CLUSTER_NAME="my-roks4"
-  * CLUSTER_REGION - label of the datacenter region e.g. CLUSTER_REGION="eu-de"
+  * REGION - label of the datacenter region e.g. CLUSTER_REGION="eu-de"
   * JSS_TYPE - TSI currently supports 2 JSS services,`vtpm2-server` or `jss-server` e.g. JSS_TYPE=vtpm2-server
 * assuming the KUBECONFIG and `oc` are configured, execute the installation by running the script.
 * To track the status of the installation, you can start another console pointing at the same OpenShift cluster, setup KUBECONFIG, then run:
   ```
     watch -n 5 kubectl -n trusted-identity get all
   ```
-* Follow the installation steps on your screen
+* Follow the installation instructions on your screen
 
 ### Setup Vault
 TSI requires Vault to store the secrets. If you have a Vault instance that can be
 used for this TSI installation, make sure you have admin privileges to access it.
 Otherwise, follow the simple steps below to create a Vault instance, as a pod and
-service, deployed in `trusted-identity` namespace in your cluster.
+service, deployed in `tsi-vault` namespace in your cluster.
 
 ```console
-kk create -f examples/vault/vault.yaml
+kubectl create ns tsi-vault
+kubectl -n tsi-vault create -f examples/vault/vault.yaml
 service/tsi-vault created
 deployment.apps/tsi-vault created
 ```
@@ -169,22 +172,23 @@ Obtain the ingress name using `ibmcloud` cli:
 $ # first obtain the cluster name:
 $ ibmcloud ks clusters
 $ # then use the cluster name to get the Ingress info:
-$ ibmcloud ks cluster-get <cluster_name> | grep Ingress
+$ ibmcloud ks cluster-get --cluster <cluster_name> | grep Ingress
 ```
 Build an ingress file from `example/vault/ingress-IKS.template.yaml`,
-using the `Ingress Subdomain` information obtained above.
-Here is an example using `my-ti-cluster.eu-de.containers.appdomain.cloud`
+using the `Ingress Subdomain` information obtained above. You can use any arbitrary
+prefix in addition to the Ingress value. For example:
+`host: tsi-vault.my-tsi-cluster-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud`
 
 ```yaml
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: vault-ingress
-  namespace: trusted-identity
+  namespace: tsi-vault
 spec:
   rules:
     # provide the actual Ingress for `host` value:
-  - host: my-ti-cluster.eu-de.containers.appdomain.cloud
+  - host: tsi-vault.my-tsi-cluster-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
     http:
       paths:
       - backend:
@@ -199,6 +203,17 @@ $ kk create -f ingress-IKS.yaml
 ```
 </details>
 
+To access Vault remotely OpenShift (including IKS ROKS)
+<details><summary>Click to view OpenShift steps</summary>
+This assumes the OpenShift command line is already installed. Otherwise see
+the [documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)
+and you can get `oc` cli from [https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/](https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/)"
+```console
+oc -n tsi-vault expose svc/tsi-vault
+VAULT_ADDR="http://$(oc -n tsi-vault get route tsi-vault -o jsonpath='{.spec.host}')"
+```
+
+</details>
 
 Test the remote connection to vault:
 ```console
@@ -206,6 +221,13 @@ $ curl  http://<Ingress Subdomain or ICP master IP>/
 <a href="/ui/">Temporary Redirect</a>.
 ```
 At this point, this is an expected result.
+
+Once the Vault service is running and `VAULT_ADDR` is defined, execute one-time
+Vault setup:
+
+```console
+examples/vault/demo.vault-setup.sh $VAULT_ADDR tsi-test
+```
 
 ### Setup Cluster Nodes
 The following information is required to deploy TSI node-setup helm chart:
@@ -260,7 +282,7 @@ You can use them directly or use the charts that you built yourself (see instruc
 
 The following information is required to deploy TSI helm charts:
 * cluster name - name of the cluster. This must correspond to the actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, wdc01)
+* region - label associated with the actual region for the data center (e.g. eu-de, us-south, wdc01)
 * vault address - the remote address of the Vault service that contains the TSI secrets to be retrieved by the sidecar. Use the env. variable VAULT_ADDR set [above](./README.md#setup-vault)
 * jss service - TSI currently support 2 mechanism for running the JSS (JWT Signing Service):
   - jss-server - custom service for signing JWT tokens (default)
@@ -326,9 +348,9 @@ Sample JWT Claims:
 ### Cleanup
 Remove all the resources created for Trusted Identity
 ```console
-./cleanup.sh
+./utils/cleanup.sh
 ```
-To start a fresh deployment, make sure to run `./init-namespace.sh` again after the cleanup.
+To start a fresh deployment, make sure to run `./utils/init-namespace.sh` again after the cleanup.
 
 ## Security Considerations
 To improve security measures, we have decided to move all application containers
