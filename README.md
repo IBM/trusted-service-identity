@@ -212,7 +212,8 @@ and you can get `oc` cli from https://mirror.openshift.com/pub/openshift-v4/clie
 
 ```console
 oc -n tsi-vault expose svc/tsi-vault
-VAULT_ADDR="http://$(oc -n tsi-vault get route tsi-vault -o jsonpath='{.spec.host}')"
+export VAULT_ADDR="http://$(oc -n tsi-vault get route tsi-vault -o jsonpath='{.spec.host}')"
+export ROOT_TOKEN=$(kubectl -n tsi-vault logs $(kubectl -n tsi-vault get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3); echo "export ROOT_TOKEN=$ROOT_TOKEN"
 ```
 
 </details>
