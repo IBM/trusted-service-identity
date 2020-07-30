@@ -50,6 +50,8 @@ setupVault()
   fi
 
   docker run trustedseriviceidentity/tsi-util:${TSI_VERSION} vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
+  # alternatively, using the same cluster:
+  # kubectl run tsi-util --rm --restart=Never -it --image=trustedseriviceidentity/tsi-util:${TSI_VERSION} -- vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
   }
 
 

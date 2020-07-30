@@ -58,7 +58,7 @@
        {
            "name": "tsi-sockets",
            "hostPath": {
-               "path": "/tsi-secure/sockets",
+               "path": "/var/tsi-secure/sockets",
                "type": "Directory"
            }
        },

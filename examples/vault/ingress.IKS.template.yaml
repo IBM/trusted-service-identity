@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: vault-ingress
-  namespace: trusted-identity
+  namespace: tsi-vault
 spec:
   rules:
     # provide the actual Ingress for `host` value:

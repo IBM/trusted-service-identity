@@ -11,10 +11,12 @@ This script builds a template for injecting secrets to Vault
 It requires installation of 'jq', 'yq' and shell script support
 
 syntax:
-   $0 -f [deployment-file-name] -n [namespace]
+   $0 -f [deployment-file-name] -n [namespace] -r [region] -c [cluster-name]
 where:
       [deployment-file-name] - name of the file to inspect
       [namespace] - name of the namespace
+      [region] - cluster region
+      [cluster-name] - cluster name
 
 HELPMEHELPME
 }
@@ -59,9 +61,15 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    --default)
-    DEFAULT=YES
+    -r|--region)
+    REGION="$2"
     shift # past argument
+    shift # past value
+    ;;
+    -c|--cluster-name)
+    CLUSTER_NAME="$2"
+    shift # past argument
+    shift # past value
     ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
@@ -77,5 +85,5 @@ CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
 kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
 PODINFO="${TEMPDIR}/podinfo.$$"
 kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
-../../components/node-setup/secret-maker.sh ${CLUSTERINFO} ${PODINFO}
+components/tsi-util/secret-maker.sh ${PODINFO} ${CLUSTER_NAME} ${REGION}
 rm ${CLUSTERINFO} ${PODINFO}

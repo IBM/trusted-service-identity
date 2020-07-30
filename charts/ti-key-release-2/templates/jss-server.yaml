@@ -37,7 +37,7 @@ spec:
             name: tsi-sockets
           - mountPath: /host/tsi-secure
             name: tsi-secure
-            readOnly: true            
+            readOnly: true
 {{- end }}
 
 {{- if eq .Values.jssService.type "jss-server" }}
@@ -78,12 +78,12 @@ spec:
       - name: tsi-sockets
         hostPath:
           # directory location on host
-           path: /tsi-secure/sockets
+           path: /var/tsi-secure/sockets
            # directory might be created
            type: DirectoryOrCreate
       - name: tsi-secure
         hostPath:
           # directory location on host
-           path: /tsi-secure
+           path: /var/tsi-secure
            # directory must exist
            type: Directory

@@ -119,18 +119,18 @@ we introduced a script to drive this installation ([utils/install-open-shift.sh]
 
 Before we start, several considerations:
 * The script is not using Helm to drive the installation, but instead, using Helm client it extracts  the relevant installation files and customize them as needed.
-* Vault Service cannot be installed in the same OpenShift cluster, so instead we suggest starting the Vault service in another cluster, e.g. [IBM Kubernetes Service](https://www.ibm.com/cloud/container-service/). The Vault installation steps are specified [here](./README.md#setup-vault)
-* Once the Vault Service is operational, the external access point to it is needed to complete the setup
 * The OpenShift installation requires OpenShift client `oc` installed and configured. Please follow the [oc documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html) the `oc` cli can be obtained [here](https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/)
 
 OpenShift Installation:
 * Setup the required parameters, either directly in the script ([utils/install-open-shift.sh](./utils/install-open-shift.sh)) or as env. variables
 * When running on IKS, you can use the script to obtain cluster information: [utils/get-cluster-info.sh](./utils/get-cluster-info.sh)
 * Required parameters:
-  * VAULT_ADDR - external access to your Vault service e.g. VAULT_ADDR=http://ti-test1.eu-de.containers.appdomain.cloud
   * CLUSTER_NAME - name of the cluster, e.g. CLUSTER_NAME="my-roks4"
   * REGION - label of the datacenter region e.g. CLUSTER_REGION="eu-de"
   * JSS_TYPE - TSI currently supports 2 JSS services,`vtpm2-server` or `jss-server` e.g. JSS_TYPE=vtpm2-server
+* Optional parameters:
+  - VAULT_ADDR - external access to your [Vault service](./README.md#setup-vault). If not specified,
+install would create a Vault instance in `tsi-vault` namespace.
 * assuming the KUBECONFIG and `oc` are configured, execute the installation by running the script.
 * To track the status of the installation, you can start another console pointing at the same OpenShift cluster, setup KUBECONFIG, then run:
   ```
@@ -205,12 +205,15 @@ $ kk create -f ingress-IKS.yaml
 
 To access Vault remotely OpenShift (including IKS ROKS)
 <details><summary>Click to view OpenShift steps</summary>
+
 This assumes the OpenShift command line is already installed. Otherwise see
 the [documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)
-and you can get `oc` cli from [https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/](https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/)"
+and you can get `oc` cli from https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/
+
 ```console
 oc -n tsi-vault expose svc/tsi-vault
-VAULT_ADDR="http://$(oc -n tsi-vault get route tsi-vault -o jsonpath='{.spec.host}')"
+export VAULT_ADDR="http://$(oc -n tsi-vault get route tsi-vault -o jsonpath='{.spec.host}')"
+export ROOT_TOKEN=$(kubectl -n tsi-vault logs $(kubectl -n tsi-vault get po | grep tsi-vault-| awk '{print $1}') | grep Root | cut -d' ' -f3); echo "export ROOT_TOKEN=$ROOT_TOKEN"
 ```
 
 </details>

@@ -47,7 +47,7 @@ const (
 // Webhook constants used for messaging
 const (
 	MsgNoCreate   string = "TSI Mutation Webhook disallowed this pod creation for safety reasons"
-	MsgHostPath   string = "Using hostPath Volume with '/tsi-secure' is not allowed"
+	MsgHostPath   string = "Using hostPath Volume with '/var/tsi-secure' is not allowed"
 	MsgSidecarImg string = "Attempting to modify the sidecar image"
 	MsgProtectNs  string = "Requesting TSI mutation in a protected namespace"
 )
@@ -224,7 +224,7 @@ func isSafe(pod *corev1.Pod, operationType string) error {
 	case "CREATE":
 		for _, v := range vols {
 			// glog.Infof("***** VNAME: %v VHOSTPATH: %v", v.Name, v.HostPath)
-			if v.HostPath != nil && strings.Contains(v.HostPath.Path, "/tsi-secure") {
+			if v.HostPath != nil && strings.Contains(v.HostPath.Path, "/var/tsi-secure") {
 				return ErrHostpathSocket
 			}
 		}
