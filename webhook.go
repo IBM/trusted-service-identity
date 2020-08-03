@@ -528,6 +528,8 @@ func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, err
 
 	// update everything only if not mutated before
 	if mutateAll {
+		patch = append(patch, addContainer(pod.Spec.InitContainers, tsiMutateConfig.InitContainers,
+			"/spec/initContainers")...)
 		patch = append(patch, addContainer(pod.Spec.Containers, tsiMutateConfig.SidecarContainers,
 			"/spec/containers")...)
 		patch = append(patch, addVolume(pod.Spec.Volumes, tsiMutateConfig.Volumes, "/spec/volumes")...)

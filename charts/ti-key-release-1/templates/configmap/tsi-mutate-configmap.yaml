@@ -5,9 +5,9 @@ metadata:
   name: tsi-mutate-webhook-configmap
 data:
   tsiMutateConfig.yaml: |
-      sidecarContainers:
-      - name: jwt-sidecar
-        image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Chart.AppVersion  }}
+      initContainers:
+      - name: jwt-init
+        image: {{ .Values.tiRepo }}/tsi-jwt-init:{{ .Chart.AppVersion  }}
         imagePullPolicy: Always
         securityContext:
           runAsUser: 0
@@ -33,6 +33,34 @@ data:
           - name: host-machineid
             mountPath: /host/machineid
             readOnly: true
+      # sidecarContainers:
+      # - name: jwt-sidecar
+      #   image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Chart.AppVersion  }}
+      #   imagePullPolicy: Always
+      #   securityContext:
+      #     runAsUser: 0
+      #   env:
+      #   - name: HOST_IP
+      #     valueFrom:
+      #       fieldRef:
+      #         fieldPath: status.hostIP
+      #   - name: JWT_TTL_SEC
+      #     value: {{ .Values.jwt.expireSec }}
+      #   - name: VAULT_ADDR
+      #     value: {{ .Values.vaultAddress }}
+      #   - name: SECRET_REFRESH_SEC
+      #     value: {{ .Values.secrets.refreshSec }}
+      #   volumeMounts:
+      #     - name: tsi-secrets
+      #       mountPath: /usr/share/secrets/tsi-secrets
+      #     - name: tsi-sockets
+      #       mountPath: "/host/sockets"
+      #     - name: pod-metadata
+      #       mountPath: /pod-metadata
+      #       readOnly: true
+      #     - name: host-machineid
+      #       mountPath: /host/machineid
+      #       readOnly: true
       volumes:
         - name: tsi-secrets
           emptyDir: {}
