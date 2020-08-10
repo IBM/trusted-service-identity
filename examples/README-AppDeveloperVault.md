@@ -28,7 +28,7 @@ cluster owner:
 
 ```
 alias k="kubectl -n trusted-identity"
-k exec -it $(k get po | grep vault-cli | awk '{print $1}') /bin/bash
+k exec -it $(k get po | grep vault-cli | awk '{print $1}') -- /bin/bash
 ```
 By default JWT Tokens are created every 30 seconds and they are available in `/jwt-tokens`
 directory. One can inspect the content of the token by simply pasting it into

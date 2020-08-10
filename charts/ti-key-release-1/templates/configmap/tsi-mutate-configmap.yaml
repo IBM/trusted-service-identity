@@ -7,7 +7,7 @@ data:
   tsiMutateConfig.yaml: |
       initContainers:
       - name: jwt-init
-        image: {{ .Values.tiRepo }}/tsi-jwt-init:{{ .Chart.AppVersion  }}
+        image: {{ .Values.tiRepo }}/ti-jwt-sidecar:{{ .Chart.AppVersion  }}
         imagePullPolicy: Always
         securityContext:
           runAsUser: 0
@@ -16,6 +16,8 @@ data:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
+        - name: IS_SIDECAR
+          value: false
         - name: JWT_TTL_SEC
           value: {{ .Values.jwt.expireSec }}
         - name: VAULT_ADDR
@@ -45,6 +47,8 @@ data:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
+        - name: IS_SIDECAR
+          value: true
         - name: JWT_TTL_SEC
           value: {{ .Values.jwt.expireSec }}
         - name: VAULT_ADDR

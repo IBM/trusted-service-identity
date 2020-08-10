@@ -19,6 +19,10 @@ SECREQFILE="/pod-metadata/tsi-secrets"
 # provided parameter
 WAIT_SEC=10
 
+# when script is running in init initContainer, attempt obtaining secrets only few times
+MAX_EXEC=5
+COUNTER=0
+
 while true
 do
   if [ ! -s "$SECREQFILE" ]; then
@@ -36,11 +40,26 @@ do
   fi
   /usr/local/bin/get-vault-secrets.sh
   RT=$?
-  if [ "$RT" == "0" ]; then
-    # introduce the random wait value from 1 to 30 seconds
-    RAND_WAIT=$((1 + RANDOM % 30))
-    WAIT_SEC=$((${SECRET_REFRESH_SEC} + RAND_WAIT))
-    echo "Waiting $WAIT_SEC seconds ..."
+  # When sript is running as sidecar, run it forever
+  if $IS_SIDECAR; then 
+    if [ "$RT" == "0" ]; then
+      # introduce the random wait value from 1 to 30 seconds
+      RAND_WAIT=$((1 + RANDOM % 30))
+      WAIT_SEC=$((${SECRET_REFRESH_SEC} + RAND_WAIT))
+      echo "Waiting $WAIT_SEC seconds ..."
+    fi
+    sleep "${WAIT_SEC}"
+  else
+    # when it's running as initContainer, exit after successful transaction
+    if [ "$RT" == "0" ]; then
+      echo "Secrets successfully executed!"
+      exit 0
+    fi
+    if [[ "$COUNTER" -gt "$MAX_EXEC" ]]; then
+      echo "$COUNTER unsuccessful attempts to get secret. Exiting..."
+      exit 1
+    fi
+    ((COUNTER++))
+    sleep "${WAIT_SEC}"
   fi
-  sleep "${WAIT_SEC}"
 done
