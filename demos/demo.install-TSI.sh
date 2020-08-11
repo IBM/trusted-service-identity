@@ -81,7 +81,7 @@ doit "helm install ../charts/ti-key-release-2-${TSI_VERSION}.tgz --debug --name 
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
---set ti-key-release-1.runSidecar=false \
+--set ti-key-release-1.runSidecar=true \
 --set jssService.type=jss-server"
 doit "$kk get po"
 

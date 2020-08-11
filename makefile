@@ -32,7 +32,7 @@ test-deps: build-deps
 	go get github.com/pierrre/gotestcover
 
 test: test-deps
-	$(GOPATH)/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES}
+	~/go/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES}
 
 build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build -installsuffix cgo -o $(BINARY_NAME) -v

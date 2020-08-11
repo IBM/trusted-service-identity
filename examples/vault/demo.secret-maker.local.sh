@@ -84,6 +84,6 @@ mkdir -p ${TEMPDIR}
 CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
 kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
 PODINFO="${TEMPDIR}/podinfo.$$"
-kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
+kubectl create -f ${FILE} -n ${NS} --dry-run=client -o yaml > ${PODINFO}
 components/tsi-util/secret-maker.sh ${PODINFO} ${CLUSTER_NAME} ${REGION}
 rm ${CLUSTERINFO} ${PODINFO}

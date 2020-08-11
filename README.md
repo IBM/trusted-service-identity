@@ -20,6 +20,7 @@ physical hardware. Secrets are released to the application based on this identit
   - [Openshift](./README.md#openshift)
   - [Setup Vault](./README.md#setup-vault)
   - [Setup Cluster](./README.md#setup-cluster-nodes)
+  - [Sidecar options](./README.md#sidecar)
   - [Install](./README.md#install-trusted-service-identity-framework)
   - [Test](./README.md#testing-deployment)
   - [Cleanup](./README.md#cleanup)
@@ -131,6 +132,7 @@ OpenShift Installation:
 * Optional parameters:
   - VAULT_ADDR - external access to your [Vault service](./README.md#setup-vault). If not specified,
 install would create a Vault instance in `tsi-vault` namespace.
+ - RUN_SIDECAR - `true/false` see the [Sidecar instructions](./README.md#sidecar)
 * assuming the KUBECONFIG and `oc` are configured, execute the installation by running the script.
 * To track the status of the installation, you can start another console pointing at the same OpenShift cluster, setup KUBECONFIG, then run:
   ```
@@ -275,6 +277,22 @@ helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.x5
 
 Once the worker nodes are setup, deploy the TSI environment
 
+### Sidecar
+TSI sidecar runs along your application container, in the same pod, and it periodically
+(`JWT_TTL_SEC`) creates JWT token that represents measured identity of the container.
+Additionally, it retrieves secrets from Vault (using `SECRET_REFRESH_SEC` frequency) .
+This model increases the security, by periodically validating the secrets that can
+be modified or revoked. Revoked secret are removed from the application.
+Secrets are mounted to the container using the `tsi.secret/local-path` path defined
+in the application annotation during the container init period. Then, by default,
+updated by the sidecar. It is possible to disable the sidecar, by setting:
+`ti-key-release-1.runSidecar=false` in helm deployment chart or `RUN_SIDECAR="false"`
+in [OpenShift install](utils/install-open-shift.sh) script.
+As a result, the secrets would be assigned only once in the pod lifetime and they
+cannot be changed or revoked without restarting the pod.
+Disabling the sidecar supports Kubernetes Jobs, that change the state to Completed
+when the container ends the transaction. Since sidecars are always running indefinitely,
+job would never complete. 
 
 ### Install Trusted Service Identity framework
 Make sure all the [prerequisites](./README.md#prerequisites) are satisfied.

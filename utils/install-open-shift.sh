@@ -12,9 +12,15 @@ JSS_TYPE=vtpm2-server
 # JSS_TYPE=
 # application namespace: e.g. test
 APP_NS="test"
-# default vault namespace, if create requested
+# default vault namespace, if Vault create requested
 VAULT_NS="tsi-vault"
-RUN_SIDECAR="false"
+# run sidecar. When set to true, the sidecar would periodically retrieve secrets
+# from Vault. This supports secret changes or revocation
+# when set to felse, secrets are only retrieved once, during the container init
+# and they cannot be modified anymore.
+# false also support Kubernetes jobs, since the sidecar runs forever and the job
+# would never complete.
+RUN_SIDECAR="true"
 
 
 # setup the Cluster Information in IKS

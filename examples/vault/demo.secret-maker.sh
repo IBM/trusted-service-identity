@@ -81,7 +81,7 @@ fi
 TEMPDIR="/tmp/tsi"
 mkdir -p ${TEMPDIR}
 PODINFO="${TEMPDIR}/podinfo.$$"
-kubectl create -f ${FILE} -n ${NS} --dry-run=true -o yaml > ${PODINFO}
+kubectl create -f ${FILE} -n ${NS} --dry-run=client -o yaml > ${PODINFO}
 
 if [[ "$CLUSTER_NAME" == "" || "$REGION" == "" ]] ; then
   CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
