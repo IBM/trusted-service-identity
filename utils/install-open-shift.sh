@@ -12,8 +12,15 @@ JSS_TYPE=vtpm2-server
 # JSS_TYPE=
 # application namespace: e.g. test
 APP_NS="test"
-# default vault namespace, if create requested
+# default vault namespace, if Vault create requested
 VAULT_NS="tsi-vault"
+# run sidecar. When set to true, the sidecar would periodically retrieve secrets
+# from Vault. This supports secret changes or revocation
+# when set to felse, secrets are only retrieved once, during the container init
+# and they cannot be modified anymore.
+# false also support Kubernetes jobs, since the sidecar runs forever and the job
+# would never complete.
+RUN_SIDECAR="true"
 
 
 # setup the Cluster Information in IKS
@@ -231,7 +238,7 @@ local INSTALL_FILE="tsi-install-1.yaml"
 # to list the chart values:
 # helm inspect values charts/ti-key-release-1/
 helm template ${TSI_ROOT}/charts/ti-key-release-1-${TSI_VERSION}.tgz --name tsi-1 --set vaultAddress=$VAULT_ADDR \
---set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION > ${INSTALL_FILE}
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION --set runSidecar=$RUN_SIDECAR > ${INSTALL_FILE}
 oc apply -f ${INSTALL_FILE}
 # add the `ti-install-sa` to admin group
 oc policy add-role-to-user cluster-admin system:serviceaccount:trusted-identity:ti-install-sa
@@ -254,6 +261,7 @@ helm template ${HELM_REL_2}/ti-key-release-2/ --name tsi-2 \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=$REGION \
+--set ti-key-release-1.runSidecar=$RUN_SIDECAR \
 --set jssService.type=$JSS_TYPE > ${INSTALL_FILE}
 
 oc apply -f ${INSTALL_FILE}

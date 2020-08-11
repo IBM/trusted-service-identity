@@ -8,6 +8,20 @@ if [ ! -f "$DEMOFILE" ]; then
 fi
 source ${DEMOFILE}
 
+realpath_cmd="realpath --version"
+if [[ ! $(eval ${realpath_cmd}) ]]; then
+  echo "realpath installation required to proceed"
+  echo "(on mac: brew install coreutils)"
+  exit 1
+fi
+
+jq_cmd="jq --version"
+if [[ ! $(eval ${jq_cmd}) ]]; then
+  echo "jq installation required to proceed"
+  echo "(https://stedolan.github.io/jq/download/)"
+  exit 1
+fi
+
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 UTILS=$(realpath --relative-to=`pwd` ${SCRIPT_PATH}/../utils)
@@ -67,6 +81,7 @@ doit "helm install ../charts/ti-key-release-2-${TSI_VERSION}.tgz --debug --name 
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
+--set ti-key-release-1.runSidecar=true \
 --set jssService.type=jss-server"
 doit "$kk get po"
 
