@@ -20,7 +20,7 @@ spec:
           image: gcr.io/google_containers/hyperkube:v1.14.3
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "--" ]
-          args: [ "while true; do cat /mydata; sleep 5; done;" ]
+          args: [ "while true; do ls /; sleep 5; done;" ]
           volumeMounts:
           - mountPath: /host/ti
             name: ti-volume

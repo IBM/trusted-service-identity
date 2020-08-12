@@ -227,6 +227,7 @@ executeNodeSetup() {
 local SETUP_FILE="tsi-node-setup.yaml"
 # to list the chart values:
 # helm inspect values charts/tsi-node-setup/
+echo "executing: helm template ${TSI_ROOT}/charts/tsi-node-setup-${TSI_VERSION}.tgz"
 helm template ${TSI_ROOT}/charts/tsi-node-setup-${TSI_VERSION}.tgz --name tsi-setup --set reset.all=true \
 --set reset.x5c=true --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION > ${SETUP_FILE}
 oc apply -f ${SETUP_FILE}
@@ -237,6 +238,7 @@ executeInstall-1() {
 local INSTALL_FILE="tsi-install-1.yaml"
 # to list the chart values:
 # helm inspect values charts/ti-key-release-1/
+echo "executing: helm template ${TSI_ROOT}/charts/ti-key-release-1-${TSI_VERSION}.tgz"
 helm template ${TSI_ROOT}/charts/ti-key-release-1-${TSI_VERSION}.tgz --name tsi-1 --set vaultAddress=$VAULT_ADDR \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION --set runSidecar=$RUN_SIDECAR > ${INSTALL_FILE}
 oc apply -f ${INSTALL_FILE}
