@@ -557,8 +557,12 @@ func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, err
 	// update everything only if not mutated before
 	if mutateAll {
 		// Add initContainer to populate secret before other initContainers so they have access to secrets as well
+		for i, c := range pod.Spec.InitContainers {
+			patch = append(patch, addVolumeMount(c.VolumeMounts, tsiMutateConfig.AddVolumeMounts, fmt.Sprintf("/spec/initContainers/%d/volumeMounts", i))...)
+		}
 		patch = append(patch, prependContainer(pod.Spec.InitContainers, tsiMutateConfig.InitContainers,
 			"/spec/initContainers")...)
+
 		patch = append(patch, addContainer(pod.Spec.Containers, tsiMutateConfig.SidecarContainers,
 			"/spec/containers")...)
 		patch = append(patch, addVolume(pod.Spec.Volumes, tsiMutateConfig.Volumes, "/spec/volumes")...)
