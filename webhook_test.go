@@ -313,6 +313,20 @@ func TestAddContainer(t *testing.T) {
 	t.Logf(SUCCESS, testName)
 }
 
+func TestPrependContainer(t *testing.T) {
+	testName := "prepend container"
+	target := getFakeContainers("tests/FakePrependContainerTarget.json")
+	add := getFakeContainers("tests/FakePrependContainer.json")
+	result := prependContainer(target, add, "/spec/initContainers")
+
+	err := validateResult(result, "tests/ExpectPrependContainer.json")
+	if err != nil {
+		t.Errorf(ERRORWITH, testName, err)
+		return
+	}
+	t.Logf(SUCCESS, testName)
+}
+
 func TestAddVolume(t *testing.T) {
 	testName := "add volume"
 	target := getFakeVolume("tests/FakeAddVolumeTarget.json")

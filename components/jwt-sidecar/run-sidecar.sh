@@ -4,7 +4,7 @@
 /usr/local/bin/execute-get-vault-secrets.sh
 RT=$?
 
-if !$IS_SIDECAR; then
+if ! $IS_SIDECAR; then
   if [ "$RT" == "0" ]; then
     echo "All good!"
     exit 0
