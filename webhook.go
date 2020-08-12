@@ -340,9 +340,9 @@ func addContainer(target, added []corev1.Container, basePath string) (patch []pa
 }
 
 func prependContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
-	// this output can be used for creating tests/FakeAddContainer.json files
-	// logJSON("FakeAddContainerTarget.json", target)
-	// logJSON("FakeAddContainer.json", added)
+	// this output can be used for creating tests/FakePrependContainer.json files
+	logJSON("FakePrependContainerTarget.json", target)
+	logJSON("FakePrependContainer.json", added)
 
 	first := len(target) == 0
 	var value interface{}
@@ -362,8 +362,8 @@ func prependContainer(target, added []corev1.Container, basePath string) (patch 
 		})
 	}
 
-	// this output can be used for creating tests/ExpectedAddContainer.json file
-	// logJSON("ExpectAddContainer.json", patch)
+	// this output can be used for creating tests/ExpectedPrependContainer.json file
+	logJSON("ExpectPrependContainer.json", patch)
 	return patch
 }
 
