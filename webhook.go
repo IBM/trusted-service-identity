@@ -339,6 +339,34 @@ func addContainer(target, added []corev1.Container, basePath string) (patch []pa
 	return patch
 }
 
+func prependContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
+	// this output can be used for creating tests/FakeAddContainer.json files
+	// logJSON("FakeAddContainerTarget.json", target)
+	// logJSON("FakeAddContainer.json", added)
+
+	first := len(target) == 0
+	var value interface{}
+	for _, add := range added {
+		value = add
+		path := basePath
+		if first {
+			first = false
+			value = []corev1.Container{add}
+		} else {
+			path = path + "/0"
+		}
+		patch = append(patch, patchOperation{
+			Op:    "add",
+			Path:  path,
+			Value: value,
+		})
+	}
+
+	// this output can be used for creating tests/ExpectedAddContainer.json file
+	// logJSON("ExpectAddContainer.json", patch)
+	return patch
+}
+
 func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOperation) {
 
 	// this output can be used for creating tests/FakeAddVolume.json files
@@ -528,7 +556,8 @@ func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, err
 
 	// update everything only if not mutated before
 	if mutateAll {
-		patch = append(patch, addContainer(pod.Spec.InitContainers, tsiMutateConfig.InitContainers,
+		// Add initContainer to populate secret before other initContainers so they have access to secrets as well
+		patch = append(patch, prependContainer(pod.Spec.InitContainers, tsiMutateConfig.InitContainers,
 			"/spec/initContainers")...)
 		patch = append(patch, addContainer(pod.Spec.Containers, tsiMutateConfig.SidecarContainers,
 			"/spec/containers")...)
