@@ -20,7 +20,7 @@ VAULT_NS="tsi-vault"
 # and they cannot be modified anymore.
 # false also support Kubernetes jobs, since the sidecar runs forever and the job
 # would never complete.
-RUN_SIDECAR="true"
+RUN_SIDECAR="false"
 
 
 # setup the Cluster Information in IKS
