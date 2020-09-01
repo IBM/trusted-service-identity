@@ -2,6 +2,7 @@
 
 # NS - a TSI namespace (where the tsi-setup daemonset is deployed)
 TSINS="trusted-identity"
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 ## create help menu:
 helpme()
@@ -37,7 +38,8 @@ if [[ ! $(eval ${jq_cmd}) ]]; then
   exit 1
 fi
 
-if [[ ! $(eval ${yq_cmd}) ]]; then
+# bash eval does not return successful value for yq command
+if [[ ! ${yq_cmd} ]]; then
   echo "yq installation required to proceed"
   echo "(https://mikefarah.gitbook.io/yq/)"
   exit 1
@@ -85,5 +87,5 @@ CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
 kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
 PODINFO="${TEMPDIR}/podinfo.$$"
 kubectl create -f ${FILE} -n ${NS} --dry-run=client -o yaml > ${PODINFO}
-components/tsi-util/secret-maker.sh ${PODINFO} ${CLUSTER_NAME} ${REGION}
+${SCRIPT_PATH}/../../components/tsi-util/secret-maker.sh ${PODINFO} ${CLUSTERINFO} ${REGION}
 rm ${CLUSTERINFO} ${PODINFO}

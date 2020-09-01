@@ -154,17 +154,26 @@ case $KIND in
     "Deployment")
         TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.template.spec.containers[0].image'
+        TSI_IMG='.spec.template.spec.containers[].image'
+        TSI_IMGINIT='.spec.template.spec.initContainers[].image'
         ;;
     "DaemonSet")
         TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.template.spec.containers[0].image'
+        TSI_IMG='.spec.template.spec.containers[].image'
+        TSI_IMGINIT='.spec.template.spec.initContainers[].image'
         ;;
     "Pod")
         TSI_INJECT='.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.containers[0].image'
+        TSI_IMG='.spec.containers[].image'
+        TSI_IMGINIT='.spec.initContainers[].image'
+        ;;
+    "Job")
+        TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
+        TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
+        TSI_IMG='.spec.template.spec.containers[].image'
+        TSI_IMGINIT='.spec.template.spec.initContainers[].image'
         ;;
     *) echo "# ERROR: Unsupported kind: ${KIND} in ${CLUSTER_YAML}"
        exit 1
@@ -177,9 +186,22 @@ yq r -j ${TMPTSI}.1 |jq -r "${TSI_SECRETS}" > ${TMPTSI}.2
 DEPLOY=$(yq r -j ${TMPTSI}.1)
 NS=$(echo $DEPLOY | jq -r '.metadata.namespace')
 
-# TODO we need to add support for multiple images in one pod.
-# Sort them alphabetically. Do the same algorithm in TSI
-IMG=$(echo $DEPLOY | jq -r "${TSI_IMG}")
+for row in $(echo ${DEPLOY} | jq -r "${TSI_IMG}"); do
+if [ -z "$IMG" ];then
+   IMG=${row}
+else
+   IMG=${IMG},${row}
+fi
+done
+
+for row in $(echo ${DEPLOY} | jq -r "${TSI_IMGINIT}"); do
+if [ -z "$IMG" ];then
+   IMG=${row}
+else
+   IMG=${IMG},${row}
+fi
+done
+
 
 # Get the SHA-256 encoded image name.
 # Encoder depends on the OS:
