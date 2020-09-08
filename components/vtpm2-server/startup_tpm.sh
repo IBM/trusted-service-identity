@@ -41,10 +41,13 @@ if ! [ -f "${TPMKEYFILE}" ]; then
 	tssreadpublic -ho "${TPM_PERSISTENT_KEY_INDEX}" -opem "${STATEDIR}/tpmpubkey.persist.pem" &>/dev/null
 	if [ $? -ne 0 ]; then
 		# need to create the key first
-		OUTPUT=$(tsscreateprimary -hi o -st -rsa ${VERBOSE+-v} 2>&1) || { echo "${OUTPUT}" ; exit 1 ; }
+		OUTPUT=$(tsscreateprimary -hi o -st -rsa ${TPM_OWNER_PASSWORD:+-pwdp ${TPM_OWNER_PASSWORD}} \
+			${VERBOSE+-v} 2>&1) || { echo "${OUTPUT}" ; exit 1 ; }
 		HANDLE=$(echo "${OUTPUT}" | grep -E "^Handle" | gawk '{print $2}')
 		echo "OUPUT=$OUTPUT" >&2
-		tssevictcontrol -hi o -ho "${HANDLE}" -hp "${TPM_PERSISTENT_KEY_INDEX}" ${VERBOSE+-v} >&2 || exit 1
+		tssevictcontrol -hi o -ho "${HANDLE}" -hp "${TPM_PERSISTENT_KEY_INDEX}" \
+			${TPM_OWNER_PASSWORD:+-pwda ${TPM_OWNER_PASSWORD}} ${VERBOSE+-v} >&2 || exit 1
+
 		tssflushcontext -ha "${HANDLE}" ${VERBOSE+-v} >&2 || exit 1
 		tssreadpublic -ho "${TPM_PERSISTENT_KEY_INDEX}" -opem "${STATEDIR}/tpmpubkey.persist.pem" ${VERBOSE+-v} >&2 || exit 1
 	fi
