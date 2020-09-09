@@ -7,6 +7,10 @@ export TPM_INTERFACE_TYPE=${TPM_INTERFACE_TYPE:-socsim}
 export TPM_COMMAND_PORT=${SWTPM_SERVER_PORT}
 export TPM_DEVICE=${TPM_DEVICE:-/dev/tpm0}
 export TPM_PERSISTENT_KEY_INDEX=${TPM_PERSISTENT_KEY_INDEX:-81230001}
+if [ -n "${TPM_OWNER_PASSWORD}" ]; then
+   TPM_OWNER_PASSWORD=$(echo -en "${TPM_OWNER_PASSWORD}" | sed -n 's/\([0-9a-f]\{2\}\)/\\x\1/pg')
+	 export TPM_OWNER_PASSWORD_FORMAT=hex
+fi
 
 if [ "${TPM_INTERFACE_TYPE}" == "socsim" ]; then
 	swtpm socket \
@@ -41,12 +45,12 @@ if ! [ -f "${TPMKEYFILE}" ]; then
 	tssreadpublic -ho "${TPM_PERSISTENT_KEY_INDEX}" -opem "${STATEDIR}/tpmpubkey.persist.pem" &>/dev/null
 	if [ $? -ne 0 ]; then
 		# need to create the key first
-		OUTPUT=$(tsscreateprimary -hi o -st -rsa ${TPM_OWNER_PASSWORD:+-pwdp "${TPM_OWNER_PASSWORD}"} \
+		OUTPUT=$(tsscreateprimary -hi o -st -rsa ${TPM_OWNER_PASSWORD:+-pwdp "$(echo -en "${TPM_OWNER_PASSWORD}")"}  \
 			${VERBOSE+-v} 2>&1) || { echo "${OUTPUT}" ; exit 1 ; }
 		HANDLE=$(echo "${OUTPUT}" | grep -E "^Handle" | gawk '{print $2}')
 		echo "OUPUT=$OUTPUT" >&2
 		tssevictcontrol -hi o -ho "${HANDLE}" -hp "${TPM_PERSISTENT_KEY_INDEX}" \
-			${TPM_OWNER_PASSWORD:+-pwda "${TPM_OWNER_PASSWORD}"} ${VERBOSE+-v} >&2 || exit 1
+			${TPM_OWNER_PASSWORD:+-pwda "$(echo -en "${TPM_OWNER_PASSWORD}")"} ${VERBOSE+-v} >&2 || exit 1
 
 		tssflushcontext -ha "${HANDLE}" ${VERBOSE+-v} >&2 || exit 1
 		tssreadpublic -ho "${TPM_PERSISTENT_KEY_INDEX}" -opem "${STATEDIR}/tpmpubkey.persist.pem" ${VERBOSE+-v} >&2 || exit 1
