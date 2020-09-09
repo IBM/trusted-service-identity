@@ -102,7 +102,7 @@ doit "cat ${TESTFILE} | grep -B1 -A6 'tsi.secrets:'"
 comment "build the secrets script..."
 doit --noexec "${EXAMPLES}/vault/demo.secret-maker.sh -f ${TESTFILE} -n test > job.secrets.sh"
 ${EXAMPLES}/vault/demo.secret-maker.sh -f ${TESTFILE} -n test > job.secrets.sh
-doit --neexec "sed 's/secret=xxx/secret=Password4JobTest/g' job.secrets.sh > job.secrets.1.sh"
+doit --noexec "sed 's/secret=xxx/secret=Password4JobTest/g' job.secrets.sh > job.secrets.1.sh"
 sed 's/secret=xxx/secret=Password4JobTest/g' job.secrets.sh > job.secrets.1.sh
 
 # load the secrets to Vault
@@ -128,8 +128,8 @@ doit kubectl -n test logs $(kubectl -n test get po | grep myjob | awk '{print $1
 doit kubectl -n test get jobs
 doit kubectl -n test get po
 }
-#
-#cleanup
-#tsi_helm
-#secrets
+
+cleanup
+tsi_helm
+secrets
 job_deploy

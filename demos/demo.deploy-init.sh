@@ -62,7 +62,7 @@ doit "cat ${TESTFILE} | grep -B1 -A6 'tsi.secrets:'"
 comment "build the secrets script..."
 doit --noexec "${EXAMPLES}/vault/demo.secret-maker.sh -f ${TESTFILE} -n test > init.secrets.sh"
 ${EXAMPLES}/vault/demo.secret-maker.sh -f ${TESTFILE} -n test > init.secrets.sh
-doit --neexec "sed 's/secret=xxx/secret=Password4InitTest/g' init.secrets.sh > init.secrets.1.sh"
+doit --noexec "sed 's/secret=xxx/secret=Password4InitTest/g' init.secrets.sh > init.secrets.1.sh"
 sed 's/secret=xxx/secret=Password4InitTest/g' job.secrets.sh > init.secrets.1.sh
 
 # load the secrets to Vault
