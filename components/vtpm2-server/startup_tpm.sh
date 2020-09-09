@@ -25,6 +25,10 @@ if [ "${TPM_INTERFACE_TYPE}" == "socsim" ]; then
 	if [ -n "${VERBOSE}" ]; then
 		echo "Started swtpm and initialized it" >&2
 	fi
+	if [ -n "${TPM_OWNER_PASSWORD}" ]; then
+		# Adjust the owner password
+		tsshierarchychangeauth -hi o -pwdn "$(echo -en "${TPM_OWNER_PASSWORD}")"
+	fi
 else
 	if [ -n "${VERBOSE}" ]; then
 		echo "Using hardware TPM at ${TPM_DEVICE}" >&2
@@ -41,6 +45,7 @@ if ! [ -f "${TSIOPENSSLCNF}" ]; then
 fi
 
 TPMKEYFILE="${STATEDIR}/tpm.key"
+
 if ! [ -f "${TPMKEYFILE}" ]; then
 	# Check whether a key is already there at 'our' index
 	tssreadpublic -ho "${TPM_PERSISTENT_KEY_INDEX}" -opem "${STATEDIR}/tpmpubkey.persist.pem" &>/dev/null
