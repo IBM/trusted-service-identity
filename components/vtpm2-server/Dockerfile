@@ -34,6 +34,9 @@ RUN dnf -y install git openssl-devel automake autoconf libtool help2man file \
 RUN dnf -y install python2-cryptography \
     && pip install jwcrypto==0.7
 
+COPY tpm_proxy.c tpm_proxy.h ./
+RUN gcc tpm_proxy.c -o /usr/local/bin/tpm_proxy
+
 COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validate-jwt.py /usr/local/bin/
 
 RUN jwt=$(mkdir -p /host/tsi-secure/ \
