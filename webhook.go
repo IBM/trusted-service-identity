@@ -506,7 +506,8 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 
 	// Get list of images
 	images := ""
-	for _, cspec := range pod.Spec.InitContainers {
+	// Containers images should go first (since they are alphabetically before initContainers)
+	for _, cspec := range pod.Spec.Containers {
 		if images == "" {
 			images = cspec.Image
 		} else {
@@ -514,7 +515,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 		}
 	}
 
-	for _, cspec := range pod.Spec.Containers {
+	for _, cspec := range pod.Spec.InitContainers {
 		if images == "" {
 			images = cspec.Image
 		} else {

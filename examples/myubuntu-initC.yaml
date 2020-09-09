@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: myubuntu
-  name: myubuntu
+    app: myubuntu-init
+  name: myubuntu-init
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myubuntu
+      app: myubuntu-init
   template:
     metadata:
       annotations:
@@ -21,21 +21,21 @@ spec:
                tsi.secret/constraints: "region"
                tsi.secret/local-path: "tsi-secrets"
       labels:
-        app: myubuntu
-      name: myubuntu
+        app: myubuntu-init
+      name: myubuntu-init
     spec:
       initContainers:
         - name: init-1
-          image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
+          image: ubuntu
           imagePullPolicy: Always
-          command: ['sh', '-c', "echo '**1';hostname; ls /tsi-secrets; cat /tsi-secrets/mysecret2; sleep 2; ls /tsi-secrets"]
+          command: ['sh', '-c', "echo '** init-1';hostname; ls /tsi-secrets; cat /tsi-secrets/mysecret1; sleep 2; ls /tsi-secrets"]
         - name: init-2
-          image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
+          image: ubuntu:18.04
           imagePullPolicy: Always
-          command: ['sh', '-c', "echo '**2';hostname; ls /tsi-secrets; cat /tsi-secrets/mysecret2; sleep 2; ls /tsi-secrets"]
+          command: ['sh', '-c', "echo '** init-2';hostname; ls /tsi-secrets; cat /tsi-secrets/mysecret2; sleep 2; ls /tsi-secrets"]
       containers:
-        - name: myubuntu
+        - name: myubuntu-init
           image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]
-          args: [ "while true; do ls /tsi-secrets; sleep 5; done;" ]
+          args: [ "echo '** in main container';while true; do ls /tsi-secrets; sleep 5; done;" ]
