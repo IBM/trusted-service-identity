@@ -7,9 +7,10 @@ export TPM_INTERFACE_TYPE=${TPM_INTERFACE_TYPE:-socsim}
 export TPM_COMMAND_PORT=${SWTPM_SERVER_PORT}
 export TPM_DEVICE=${TPM_DEVICE:-/dev/tpm0}
 export TPM_PERSISTENT_KEY_INDEX=${TPM_PERSISTENT_KEY_INDEX:-81230001}
-if [ -n "${TPM_OWNER_PASSWORD}" ]; then
+export TPM_OWNER_PASSWORD_FORMAT=${TPM_OWNER_PASSWORD_FORMAT:-hex}
+
+if [ -n "${TPM_OWNER_PASSWORD}" ] && [ "${TPM_OWNER_PASSWORD_FORMAT}" == "hex" ]; then
    TPM_OWNER_PASSWORD=$(echo -en "${TPM_OWNER_PASSWORD}" | sed -n 's/\([0-9a-f]\{2\}\)/\\x\1/pg')
-	 export TPM_OWNER_PASSWORD_FORMAT=hex
 fi
 
 if [ "${TPM_INTERFACE_TYPE}" == "socsim" ]; then
