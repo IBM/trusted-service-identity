@@ -35,15 +35,15 @@ register()
     return 1
   fi
 
+  if [ ! -s "${CSR}" ]; then
+    printf "\nFile ${CSR} does not exist or it is empty\n"
+    exit 1
+  fi
+
   # check for errors
   if [[ $(cat $CSR) == *errors* ]] ; then
     #echo "Invalid CSR from JSS through pod $1. Please make sure tsi-node-setup was correctly executed on node: $nodeIP"
     printf "\nInvalid CSR from JSS for the pod $1. Please make sure tsi-node-setup was correctly executed\n"
-    exit 1
-  fi
-
-  if [ ! -s "${CSR}" ]; then
-    printf "\nFile ${CSR} does not exist or it is empty\n"
     exit 1
   fi
 
