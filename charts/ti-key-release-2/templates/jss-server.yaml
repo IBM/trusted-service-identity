@@ -27,12 +27,32 @@ spec:
               value: "{{ index .Values "ti-key-release-1" "jwt" "issuer" }}"
             - name: TTL_SEC
               value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
+     {{- if .Values.jssService.tpm }}
+        {{- if eq .Values.jssService.tpm.interface_type "dev" }}
+            - name: TPM_INTERFACE_TYPE
+              value: "{{ .Values.jssService.tpm.interface_type }}"
+            - name: TPM_DEVICE
+              value: "{{ .Values.jssService.tpm.device }}"
+        {{- end }}
+        {{- if .Values.jssService.tpm.owner_password }}
+            - name: TPM_OWNER_PASSWORD
+              value: "{{ .Values.jssService.tpm.owner_password }}"
+            - name: TPM_OWNER_PASSWORD_FORMAT
+              value: "{{ .Values.jssService.tpm.owner_password_format }}"
+        {{- end }}
+    {{- end }}
           ports:
           - name: http
             containerPort: 5000
             protocol: TCP
             hostPort: 5000
           volumeMounts:
+    {{- if .Values.jssService.tpm }}
+        {{- if eq .Values.jssService.tpm.interface_type "dev" }}
+          - mountPath: "{{ .Values.jssService.tpm.device }}"
+            name: tpm-device
+        {{- end }}
+    {{- end }}
           - mountPath: /host/sockets
             name: tsi-sockets
           - mountPath: /host/tsi-secure
@@ -87,3 +107,15 @@ spec:
            path: /var/tsi-secure
            # directory must exist
            type: Directory
+{{- if eq .Values.jssService.type "vtpm2-server" }}
+  {{- if .Values.jssService.tpm }}
+    {{- if eq .Values.jssService.tpm.interface_type "dev" }}
+      - name: tpm-device
+        hostPath:
+          # directory location on host
+           path: "{{ .Values.jssService.tpm.device }}"
+           # directory must exist
+           type: Directory
+    {{- end }}
+  {{- end }}
+{{- end }}
