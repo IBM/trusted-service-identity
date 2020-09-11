@@ -28,4 +28,4 @@ then deploy the test application:
     ./myubuntu.secrets.sh
     kubectl create -f examples/myubuntu.yaml -n test
 Then check if the secret is available:
-    kubectl -n test exec -it $(k -n test get pods | grep myubuntu | awk '{print $1}' ) cat /tsi-secrets/mysecrets/mysecret4
+    kubectl -n test exec -it $(k -n test get pods | grep myubuntu | awk '{print $1}' ) -- cat /tsi-secrets/mysecrets/mysecret4

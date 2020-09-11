@@ -327,5 +327,5 @@ Now create the sample pod:
     kubectl create -f examples/myubuntu.yaml -n $APP_NS
 Once running, execute:
 EOF
-echo "  kubectl -n $APP_NS"' exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecret2"
+echo "  kubectl -n $APP_NS"' exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') -- cat /tsi-secrets/mysecret2"
 echo "********* END ********"
