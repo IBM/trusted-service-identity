@@ -1,16 +1,7 @@
 #!/bin/bash
 
-TSI_VERSION=$(cat ./tsi-version.txt )
-
-run() {
-  local CMD=$1
-  $CMD
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo "($CMD) failed!"
-     exit 1
-  fi
-}
+# setup common code:
+source ./buildTSI-setup.sh $1 $2
 
 # Helm chart packaging:
 run "helm --debug package --app-version ${TSI_VERSION} --version ${TSI_VERSION} charts/tsi-node-setup"
