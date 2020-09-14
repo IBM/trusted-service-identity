@@ -12,7 +12,7 @@ helpme()
 
 Syntax: ${0} <vault_token> <vault_addr> <TSI_namespace>
 Where:
-  token      - vault root token to setup the plugin
+  vault_token      - vault root token to setup the plugin
   vault_addr - vault address (or ingress) in format http://vault.server:8200
   TSI_namespace  - if different than trusted-identity (optional)
 

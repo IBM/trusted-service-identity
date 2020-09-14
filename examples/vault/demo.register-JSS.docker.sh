@@ -1,7 +1,7 @@
 #!/bin/bash
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-#TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
-TSI_VERSION="v1.7.7"
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
+TSI_VERSION=${TSI_VERSION:-"v1.7.7"}
 
 TEMPDIR="/tmp/tsi"
 mkdir -p ${TEMPDIR}
@@ -11,6 +11,7 @@ helpme()
 {
   cat <<HELPMEHELPME
 
+Syntax: ${0} <container name>
   Where:
     container name - owner of the scr file
   Required environment variables:

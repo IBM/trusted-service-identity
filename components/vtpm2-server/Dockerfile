@@ -59,7 +59,7 @@ COPY run-jss-server.sh jss-server-priv.py jss-server-pub.py /usr/local/bin/
 
 # Default values for JWT, issuer and token expiration in seconds
 ARG DEFAULT_ISS="wsched@us.ibm.com"
-ARG DEFAULT_TTL_SEC=30
+ARG DEFAULT_TTL_SEC=60
 ENV ISS=${DEFAULT_ISS}
 ENV TTL_SEC=${DEFAULT_TTL_SEC}
 
