@@ -15,7 +15,7 @@ mkdir -p ${TEMPDIR}
 CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
 kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
 
-docker run -v ${CLUSTERINFO}:/tmp/clusterinfo \
+docker run --rm -v ${CLUSTERINFO}:/tmp/clusterinfo \
 docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} /usr/local/bin/getClusterInfo.sh /tmp/clusterinfo
 
 rm ${CLUSTERINFO}

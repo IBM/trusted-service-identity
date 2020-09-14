@@ -48,7 +48,7 @@ register()
   X5C="${TEMPDIR}/$1.x5c"
 
   # process csr, register with vault, obtain x5c:
-  RESP=$(docker run --name=register-jss --rm -v ${TEMPDIR}:/tmp/vault \
+  RESP=$(docker run --rm --name=register-jss --rm -v ${TEMPDIR}:/tmp/vault \
    --env "ROOT_TOKEN=${ROOT_TOKEN}" \
    --env "VAULT_ADDR=${VAULT_ADDR}" \
    trustedseriviceidentity/tsi-util:"${TSI_VERSION}" /usr/local/bin/register-JSS.sh $1)

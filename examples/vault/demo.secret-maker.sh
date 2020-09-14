@@ -87,10 +87,10 @@ if [[ "$CLUSTER_NAME" == "" || "$REGION" == "" ]] ; then
   CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
   echo "# using IKS cluster info"
   kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}
-  docker run -v ${CLUSTERINFO}:/tmp/clusterinfo -v ${PODINFO}:/tmp/podinfo \
+  docker run --rm -v ${CLUSTERINFO}:/tmp/clusterinfo -v ${PODINFO}:/tmp/podinfo \
   docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} /usr/local/bin/secret-maker.sh /tmp/podinfo /tmp/clusterinfo
 else
-  docker run -v ${PODINFO}:/tmp/podinfo \
+  docker run --rm -v ${PODINFO}:/tmp/podinfo \
   docker.io/trustedseriviceidentity/tsi-util:${TSI_VERSION} \
   /usr/local/bin/secret-maker.sh /tmp/podinfo ${CLUSTER_NAME} ${REGION}
 fi
