@@ -40,7 +40,7 @@ setupVault()
   fi
 
   export SHA256
-  SHA256=$($kv exec "$VAULTPOD" /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
+  SHA256=$($kv exec "$VAULTPOD" -- /usr/bin/sha256sum /plugins/vault-plugin-auth-ti-jwt | cut -d' ' -f1)
   # another way to obtain this SHA, use a local plugin created by the build process
   # assuming it is identical to the one one deployed in Vault container.
   # SHA256=$(shasum -a 256 "${PWD}/pkg/linux_amd64/${PLUGIN}" | cut -d' ' -f1)
@@ -49,7 +49,7 @@ setupVault()
      exit 1
   fi
 
-  docker run trustedseriviceidentity/tsi-util:${TSI_VERSION} vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
+  docker run --rm trustedseriviceidentity/tsi-util:${TSI_VERSION} vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
   # alternatively, using the same cluster:
   # kubectl run tsi-util --rm --restart=Never -it --image=trustedseriviceidentity/tsi-util:${TSI_VERSION} -- vault-setup.sh ${SHA256} ${ROOT_TOKEN} ${VAULT_ADDR}
   }

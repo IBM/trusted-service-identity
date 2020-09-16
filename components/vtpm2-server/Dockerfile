@@ -34,6 +34,9 @@ RUN dnf -y install git openssl-devel automake autoconf libtool help2man file \
 RUN dnf -y install python2-cryptography \
     && pip install jwcrypto==0.7
 
+COPY tpm_proxy.c tpm_proxy.h ./
+RUN gcc tpm_proxy.c -o /usr/local/bin/tpm_proxy
+
 COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validate-jwt.py /usr/local/bin/
 
 RUN jwt=$(mkdir -p /host/tsi-secure/ \
@@ -56,7 +59,7 @@ COPY run-jss-server.sh jss-server-priv.py jss-server-pub.py /usr/local/bin/
 
 # Default values for JWT, issuer and token expiration in seconds
 ARG DEFAULT_ISS="wsched@us.ibm.com"
-ARG DEFAULT_TTL_SEC=30
+ARG DEFAULT_TTL_SEC=60
 ENV ISS=${DEFAULT_ISS}
 ENV TTL_SEC=${DEFAULT_TTL_SEC}
 

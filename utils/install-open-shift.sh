@@ -302,7 +302,9 @@ cat << EOF
    expected result: <a href=\"/ui/\">Temporary Redirect</a>
 2. obtain the ROOT_TOKEN from the cluster with a running Vault instance and export it:
    (see https://github.com/IBM/trusted-service-identity/blob/master/examples/vault/README.md#vault-setup-as-vault-admin)
-     export ROOT_TOKEN=
+EOF
+echo '     export ROOT_TOKEN=$(kubectl -n tsi-vault logs $(kubectl -n tsi-vault get po | grep tsi-vault-|'" awk '{" 'print $1}' "') | grep Root | cut -d' ' -f3);" ' echo "export ROOT_TOKEN=$ROOT_TOKEN"'
+cat << EOF
 3. setup shortcut alias:
      alias kk="kubectl -n trusted-identity"
 4. test whether CSRs can be retrieved:
@@ -327,5 +329,5 @@ Now create the sample pod:
     kubectl create -f examples/myubuntu.yaml -n $APP_NS
 Once running, execute:
 EOF
-echo "  kubectl -n $APP_NS"' exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') cat /tsi-secrets/mysecret2"
+echo "  kubectl -n $APP_NS"' exec -it $(kubectl -n test get pods | grep myubuntu | awk '"'{print "'$1}'"') -- cat /tsi-secrets/mysecret2"
 echo "********* END ********"

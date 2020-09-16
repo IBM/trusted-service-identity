@@ -13,6 +13,15 @@ jssService:
   #   - jss-server - standard JSS server (deafult)
   #   - vtpm2-server - vTPM v2
   type: jss-server
+  # type: vtpm2-server
+
+  # Hardware TPM can be specified ONLY when vtpm2-server is provided
+  # tpm:
+    # interface_type: dev
+    # device: /dev/tpmrm0
+    # device: /dev/tpm0
+    # owner_password: abcdefg
+    # owner_password_format: hex
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands

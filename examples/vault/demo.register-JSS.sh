@@ -1,4 +1,6 @@
 #!/bin/bash
+SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
 TEMPDIR="/tmp/tsi"
 mkdir -p ${TEMPDIR}
@@ -10,7 +12,7 @@ helpme()
 
 Syntax: ${0} <vault_token> <vault_addr> <TSI_namespace>
 Where:
-  token      - vault root token to setup the plugin
+  vault_token      - vault root token to setup the plugin
   vault_addr - vault address (or ingress) in format http://vault.server:8200
   TSI_namespace  - if different than trusted-identity (optional)
 
@@ -30,53 +32,36 @@ register()
   # get CSR for each node represented by pod-name
   CSR="${TEMPDIR}/$1.csr"
   # first obtain CSR from each node
-  $kk exec -it $1 -- sh -c 'curl $HOST_IP:5000/public/getCSR' > $CSR
-  #cat $CSR
+  $kk exec -it $1 -- sh -c 'curl --max-time 5 -s $HOST_IP:5000/public/getCSR' > $CSR
+
+  if [ ! -s "${CSR}" ]; then
+    printf "\nFile ${CSR} does not exist or it is empty\n"
+    exit 1
+  fi
+
   # check for errors
   if [[ $(cat $CSR) == *errors* ]] ; then
     echo "Invalid CSR from JSS through pod $1. Please make sure tsi-node-setup was correctly executed on node: $nodeIP"
     exit 1
   fi
 
-  # extract the X509v3 TSI fields:
-  TSIEXT="${TEMPDIR}/$1.csr.tsi"
-  openssl req -in "${CSR}" -noout -text |grep "URI:TSI" > $TSIEXT
+  X5C="${TEMPDIR}/$1.x5c"
+
+  # process csr, register with vault, obtain x5c:
+  RESP=$(docker run --rm --name=register-jss --rm -v ${TEMPDIR}:/tmp/vault \
+   --env "ROOT_TOKEN=${ROOT_TOKEN}" \
+   --env "VAULT_ADDR=${VAULT_ADDR}" \
+   trustedseriviceidentity/tsi-util:"${TSI_VERSION}" /usr/local/bin/register-JSS.sh $1)
   RT=$?
-  if [ $RT -ne 0 ] ; then
-    echo "Missing x509v3 URI:TSI extensions for cluter-name and region"
-    rm "${TSIEXT}"
+
+  if [ "$RT" != "0" ]; then
+    printf "Error occurred while processing X5c\n"
     exit 1
   fi
-
-  # format:
-  #     URI:TSI:cluster-name:my-cluster-name, URI:TSI:region:eu-de
-  # remove the "URI:" prefix and leading spaces
-  TSI_URI=$(cat $TSIEXT | sed 's/URI://g' | sed 's/  //g')
-
-  # echo "Root Token: ${ROOT_TOKEN}"
-  vault login -no-print ${ROOT_TOKEN}
-  RT=$?
-  if [ $RT -ne 0 ] ; then
-     echo "ROOT_TOKEN is not correctly set"
-     echo "ROOT_TOKEN=${ROOT_TOKEN}"
-     exit 1
-  fi
-  # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
-  export VAULT_TOKEN=
-
-  X5C="${TEMPDIR}/$1.x5c"
-  OUT="${TEMPDIR}/out.$$"
-
-  # create an intermedate certificate for 50 years
-  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h uri_sans="$TSI_URI" -format=json > ${OUT}
-  CERT=$(cat ${OUT} | jq -r '.["data"].certificate' | grep -v '\-\-\-')
-  CHAIN=$(cat ${OUT} | jq -r '.["data"].issuing_ca' | grep -v '\-\-\-')
-  echo "[\"${CERT}\",\"${CHAIN}\"]" > "$X5C"
+  printf "${RESP}" > "${X5C}"
 
   # cleanup CSR
   rm "${CSR}"
-  rm "${TSIEXT}"
-  rm "${OUT}"
 
   # cat "$X5C"
   # copy the x5c file to the setup pod:
@@ -89,10 +74,11 @@ register()
 
   # cleanup x5c
   rm "${X5C}"
+
   # echo "on the pod: "
   # $kk exec -it $1 -- sh -c 'cat /tmp/x5c'
   # using the copied x5c post the content to JSS server via setup-pod
-  RESP=$($kk exec -it $1 -- sh -c 'curl -X POST -H "Content-Type: application/json" -d @/tmp/x5c ${HOST_IP}:5000/public/postX5c')
+  RESP=$($kk exec -it $1 -- sh -c 'curl -X POST --max-time 5 -s -H "Content-Type: application/json" -d @/tmp/x5c ${HOST_IP}:5000/public/postX5c')
   #RESP=$(curl -X POST -H "Content-Type: application/json" -d @x5c ${JSS_ADDR}/public/postX5c)
   echo $RESP
   echo "processing $1 for node: $nodeIP completed."

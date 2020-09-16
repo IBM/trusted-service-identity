@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: tsi-vault
-          image: trustedseriviceidentity/ti-vault:v1.7.5
+          image: trustedseriviceidentity/ti-vault:v1.7.7
           imagePullPolicy: Always
           env:
           - name: SKIP_SETCAP

@@ -150,30 +150,31 @@ cat ${POD_YAML} > ${TMPTSI}.1
 KIND=$(yq r -j ${TMPTSI}.1 |jq -r '.kind')
 
 # get the attribute path based on kind:
+# using "?" prevents null errors when objects don't exist e.g. initContainers
 case $KIND in
     "Deployment")
         TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.template.spec.containers[].image'
-        TSI_IMGINIT='.spec.template.spec.initContainers[].image'
+        TSI_IMG='.spec.template.spec.containers[]?.image'
+        TSI_IMGINIT='.spec.template.spec.initContainers[]?.image'
         ;;
     "DaemonSet")
         TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.template.spec.containers[].image'
-        TSI_IMGINIT='.spec.template.spec.initContainers[].image'
+        TSI_IMG='.spec.template.spec.containers[]?.image'
+        TSI_IMGINIT='.spec.template.spec.initContainers[]?.image'
         ;;
     "Pod")
         TSI_INJECT='.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.containers[].image'
-        TSI_IMGINIT='.spec.initContainers[].image'
+        TSI_IMG='.spec.containers[]?.image'
+        TSI_IMGINIT='.spec.initContainers[]?.image'
         ;;
     "Job")
         TSI_INJECT='.spec.template.metadata.annotations."admission.trusted.identity/inject"'
         TSI_SECRETS='.spec.template.metadata.annotations."tsi.secrets"'
-        TSI_IMG='.spec.template.spec.containers[].image'
-        TSI_IMGINIT='.spec.template.spec.initContainers[].image'
+        TSI_IMG='.spec.template.spec.containers[]?.image'
+        TSI_IMGINIT='.spec.template.spec.initContainers[]?.image'
         ;;
     *) echo "# ERROR: Unsupported kind: ${KIND} in ${CLUSTER_YAML}"
        exit 1

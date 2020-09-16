@@ -238,9 +238,9 @@ The secrets will be mounted to the application container under `/tsi-secrets` di
 Validate if the secrets were properly injected:
 
 ```console
-kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{print $1}') ls /tsi-secrets/mysecrets
+kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{print $1}') -- ls /tsi-secrets/mysecrets
 
-kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{print $1}') cat /tsi-secrets/mysecrets/mysecret2
+kubectl -n test exec -it $(kubectl -n test get pods | grep myubuntu | awk '{print $1}') -- cat /tsi-secrets/mysecrets/mysecret2
 ```
 
 ## Claims
@@ -274,7 +274,7 @@ and the output might be:
 Alternatively, the JWT token can be obtained directly from the sidecar:
 
 ```console
-kubectl -n test exec -it myubuntu-7b8969b898-gmzhf -c jwt-sidecar cat /jwt/token
+kubectl -n test exec -it myubuntu-7b8969b898-gmzhf -c jwt-sidecar -- cat /jwt/token
 ```
 and inspected by simply pasting it into [Debugger](https://jwt.io/) in Encoded window.
 
@@ -282,7 +282,7 @@ and inspected by simply pasting it into [Debugger](https://jwt.io/) in Encoded w
 Get inside the sidecar:
 
 ```console
-$ kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar bash
+$ kubectl -n test exec -it myubuntu-xxxx -c jwt-sidecar -- bash
 ```
 
 Get secret from Vault using JWT token:
