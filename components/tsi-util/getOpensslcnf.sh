@@ -65,7 +65,7 @@ fi
 # First check if all the fields are marked as trusted
 OVERALL=$(cat ${SAML_JSON} | jq -r '.trust_information.OVERALL')
 if [ "${OVERALL}" != "true" ]; then
-  echo "ERROR! SAML report OVERALL: ${OVERALL}"
+  echo "ERROR! SAML report OVERALL trust: ${OVERALL}"
   cleanup
   exit 1
 fi
@@ -153,5 +153,7 @@ for k in $(jq -r '. | keys |.[]' <<< $ASSET_TAG); do
    echo "URI.$i = TSI:$k:$val" >> ${SSLCONF};
    ((i=i+1))
 done
+echo "URI.$i = TSI:attestion-trusted:true" >> ${SSLCONF};
+
 cat ${SSLCONF}
 cleanup
