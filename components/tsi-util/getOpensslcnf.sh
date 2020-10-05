@@ -111,11 +111,11 @@ ASSET_TAG=$(cat ${SAML_JSON} | jq -r '.trust_information.flavors_trust."ASSET_TA
 
 # openssl.cnf contains cluster idenity information and must be always created
 # even if private keys are not created (e.g. to be used by VTPM2)
-SSLCONF=${TEMPDIR}/openssl.cnf
+SSLCONF=${TEMPDIR}/tsissl.cnf
 
 cat > ${SSLCONF} << EOF
 # IBM Research - TSI
-# this is an auto-generated openssl.cnf file
+# this is an auto-generated tsissl.cnf file
 # using ASSET TAG
 
 [req]

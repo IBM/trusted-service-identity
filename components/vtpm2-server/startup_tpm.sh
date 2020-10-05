@@ -52,7 +52,7 @@ else
 	fi
 fi
 
-TSIOPENSSLCNF="/host/tsi-secure/openssl.cnf"
+TSIOPENSSLCNF="/tsi-jss/tsissl.cnf"
 if ! [ -f "${TSIOPENSSLCNF}" ]; then
 	echo "Missing ${TSIOPENSSLCNF} file with node identity"
 	exit 1
