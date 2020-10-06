@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 mkdir /jwt
-SOCKETFILE="/host/sockets/app.sock"
+SOCKETFILE="/host/tsi-secure/sockets/app.sock"
 
 while true
  do

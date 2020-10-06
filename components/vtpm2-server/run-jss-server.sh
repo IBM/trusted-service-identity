@@ -5,7 +5,7 @@
 WAIT_SECS=30
 STATEDIR="${STATEDIR:-/tmp}"
 X5CFILE="${STATEDIR}/x5c"
-SOCKETFILE="/host/sockets/app.sock"
+SOCKETFILE="/host/tsi-secure/sockets/app.sock"
 
 cmd_priv_server_on="ps -ef | grep uwsgi | grep -v grep"
 cmd_pub_server_on="ps -ef | grep flask | grep -v grep"

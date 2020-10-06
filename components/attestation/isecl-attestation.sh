@@ -53,7 +53,7 @@ if ! [ -d "${HOSTDIR}/sockets" ]; then
     exit 1
   fi
 else
-  if [ -f ${HOSTDIR}/sockets/app.sock ]; then
+  if [ -f "${HOSTDIR}/sockets/app.sock" ]; then
     RMDIR="rm ${HOSTDIR}/sockets/app.sock"
     if $RMDIR; then
       logme "${HOSTDIR}/sockets/app.sock succefully removed"

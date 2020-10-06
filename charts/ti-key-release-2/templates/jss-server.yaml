@@ -41,7 +41,7 @@ spec:
         volumeMounts:
         - mountPath: /tsi-jss
           name: tsi-jss
-        - mountPath: /host/sockets
+        - mountPath: /host/tsi-secure/sockets
           name: tsi-sockets
   {{- else if eq .Values.jssService.attestation.kind "keylime" }}
   # just a place holder for now
@@ -63,7 +63,7 @@ spec:
         volumeMounts:
         - mountPath: /tsi-jss
           name: tsi-jss
-        - mountPath: /host/sockets
+        - mountPath: /host/tsi-secure/sockets
           name: tsi-sockets
   {{- else }}
     {{- fail "ERROR: Invalid attestation kind" }}
@@ -74,7 +74,7 @@ spec:
           image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}:{{ .Chart.AppVersion  }}
           imagePullPolicy: Always
           securityContext:
-            # privilaged is needed to create /host/sockets/app.sock
+            # privilaged is needed to create /host/tsi-secure/sockets/app.sock
             privileged: true
           env:
             - name: ISS
@@ -107,7 +107,7 @@ spec:
             name: tpm-device
         {{- end }}
     {{- end }}
-          - mountPath: /host/sockets
+          - mountPath: /host/tsi-secure/sockets
             name: tsi-sockets
           - mountPath: /tsi-jss
             name: tsi-jss
@@ -144,7 +144,7 @@ spec:
           - mountPath: /host/tsi-secure
             name: tsi-secure
             readOnly: true
-          - mountPath: /host/sockets
+          - mountPath: /host/tsi-secure/sockets
             name: tsi-sockets
 {{- end }}
 

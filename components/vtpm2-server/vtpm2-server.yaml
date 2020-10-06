@@ -28,7 +28,7 @@ spec:
             protocol: TCP
             hostPort: 5000
           volumeMounts:
-          - mountPath: /host/sockets
+          - mountPath: /host/tsi-secure/sockets
             name: tsi-sockets
       volumes:
       - name: tsi-sockets
