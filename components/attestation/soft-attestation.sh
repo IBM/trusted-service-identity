@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # gather all the environemt variables and global parameters
 # DIR="$(dirname "$0")"
 SHAREDDIR=${SHAREDDIR:-/tsi-jss}
-ATTEST_TYPE="none"
+ATTEST_TYPE="soft"
 HOST_IP=${HOST_IP:-"hostIP-not-provided"}
 SSLCONF=${SSLCONF:-${SHAREDDIR}/tsissl.cnf}
-HOSTDIR=${HOSTDIR:-/host/tsi-secure}
+HOSTDIR=${HOSTDIR:-/host}
 
 # a handy function to format the audit log
 logme() {
@@ -86,7 +86,7 @@ if ! [ -d "${HOSTDIR}/sockets" ]; then
     exit 1
   fi
 else
-  if [ -f ${HOSTDIR}/sockets/app.sock ]; then
+  if [ -f "${HOSTDIR}/sockets/app.sock" ]; then
     RMDIR="rm ${HOSTDIR}/sockets/app.sock"
     if $RMDIR; then
       logme "${HOSTDIR}/sockets/app.sock succefully removed"

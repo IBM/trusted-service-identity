@@ -3,8 +3,8 @@ RUN apt update && \
     apt install -y curl jq vim && \
     apt install -y openssl
 
-# general, no hardware attestation:
-COPY no-attestation.sh /usr/local/bin/
+# general, software attestation:
+COPY soft-attestation.sh /usr/local/bin/
 
 # IsecL attestation:
 COPY isecl-attestation.sh	isecl-get-openssl-cnf.sh /usr/local/bin/
@@ -12,4 +12,4 @@ COPY isecl-attestation.sh	isecl-get-openssl-cnf.sh /usr/local/bin/
 ARG DEFAULT_HOSTDIR="/host/tsi-secure"
 ENV HOSTDIR=${DEFAULT_HOSTDIR}
 
-CMD ["/bin/bash", "-c", "/usr/local/bin/no-attestation.sh"]
+CMD ["/bin/bash", "-c", "/usr/local/bin/soft-attestation.sh"]

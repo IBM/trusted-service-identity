@@ -14,6 +14,20 @@ spec:
         app: ti-node-setup
         version: v1
     spec:
+      containers:
+        - name: ti-node-setup
+          image: "{{ .Values.tsiRepo }}/node-setup:{{ .Chart.AppVersion }}"
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "tail -f /dev/null" ]
+          env:
+          # get the host IP and pass as env. var
+          - name: HOST_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+{{- if .Values.jssService.type }}
+  {{- if eq .Values.jssService.type "jss-server" }}
       serviceAccountName: tsi-setup-admin-sa
       containers:
         - name: ti-node-setup
@@ -32,11 +46,11 @@ spec:
               value: "{{ .Values.cluster.name }}"
             - name: CLUSTER_REGION
               value: "{{ .Values.cluster.region }}"
-              # get the host IP and pass as env. var
-            - name: HOST_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
+            #   # get the host IP and pass as env. var
+            # - name: HOST_IP
+            #   valueFrom:
+            #     fieldRef:
+            #       fieldPath: status.hostIP
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: ti-volume
@@ -62,3 +76,5 @@ spec:
           # directory location on host
            path: /var/log
            type: Directory
+  {{- end }}
+{{- end }}

@@ -10,18 +10,33 @@ jssService:
   port: 8012
   # jssSerivce.type: this is the name of the image used for building JSS server
   # available options are:
-  #   - jss-server - standard JSS server (deafult)
-  #   - vtpm2-server - vTPM v2
-  type: jss-server
-  # type: vtpm2-server
+  #   - jss-server - custom JSS server
+  #   - vtpm2-server - vTPM v2 (deafult)
+  # type: jss-server
+  type: vtpm2-server
 
-  # Hardware TPM can be specified ONLY when vtpm2-server is provided
+  # Hardware TPM can be specified ONLY when vtpm2-server is provided as jss-server type
+  # Use 'owner_password_format: hex' if required password is in HEX format
   # tpm:
     # interface_type: dev
     # device: /dev/tpmrm0
     # device: /dev/tpm0
     # owner_password: abcdefg
     # owner_password_format: hex
+  attestation:
+    kind: soft
+
+  # The configuration below corresponds to the experimental work with Intel
+  # Verfication Server (IsecL)
+  #   kind: isecl
+  #   isecl:
+  #     nodename: worker5.test.ocp.nccoe.lab"
+  #     verificationService:
+  #       tokenService: https://172.16.100.15:8444
+  #       service: https://172.16.100.15:8443
+  #       username: admin
+  #       password: password
+
 
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
