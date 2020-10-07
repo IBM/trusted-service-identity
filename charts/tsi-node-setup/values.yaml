@@ -8,13 +8,6 @@ namespace: trusted-identity
 # target docker repo
 tsiRepo: trustedseriviceidentity
 
-jssService:
-  # jssSerivce.type: jss-server
-  #  If TSI runs custom jss-server, it required additional setup on the hosts
-  #  enable this functionality below.
-  # type: jss-server
-  type:
-
 # reset parameters are used ONLY when the "jssService.type=jss-server" above.
 # reset - indicates whether the setup will remove the existing securtiy
 # components and recreate them, or keep the existing ones as is.
