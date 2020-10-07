@@ -28,7 +28,7 @@ data:
           - name: tsi-secrets
             mountPath: /usr/share/secrets/tsi-secrets
           - name: tsi-sockets
-            mountPath: "/host/tsi-secure/sockets"
+            mountPath: "/host/sockets"
           - name: pod-metadata
             mountPath: /pod-metadata
             readOnly: true
@@ -59,7 +59,7 @@ data:
           - name: tsi-secrets
             mountPath: /usr/share/secrets/tsi-secrets
           - name: tsi-sockets
-            mountPath: "/host/tsi-secure/sockets"
+            mountPath: "/host/sockets"
           - name: pod-metadata
             mountPath: /pod-metadata
             readOnly: true

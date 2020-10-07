@@ -74,7 +74,7 @@ URI.2 = TSI:region:$CLUSTER_REGION
 # add new lines in the following format:
 # URI.x = TSI:<claim>
 # where x is a next sequencial number and claim is
-# a key:value pair. For example:
+# a "key:value" pair. For example:
 # URI.3 = TSI:datacenter:fra02
 EOF
 fi

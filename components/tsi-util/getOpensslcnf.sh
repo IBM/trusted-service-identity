@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# TODO this is just a temporary script to demo TSI with Intel IsecL in NIST
+# For TSI, the functionality has been moved to attestation/isecl-attestation.sh
 TOKEN_SERVICE=${TOKEN_SERVICE:-"https://172.16.100.15:8444"}
 VER_SERVICE=${VER_SERVICE:-"https://172.16.100.15:8443"}
 VER_SERV_USERNAME=${VER_SERV_USERNAME:-"admin"}

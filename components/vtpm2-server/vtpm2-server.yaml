@@ -34,6 +34,6 @@ spec:
       - name: tsi-sockets
         hostPath:
           # directory location on host
-           path: /var/tsi-secure/sockets
+           path: /var/sockets
            # directory might be created
            type: DirectoryOrCreate

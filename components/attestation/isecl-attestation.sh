@@ -6,7 +6,7 @@ SHAREDDIR=${SHAREDDIR:-/tsi-jss}
 ATTEST_TYPE="IsecL"
 HOST_IP=${HOST_IP:-"hostIP-not-provided"}
 SSLCONF=${SSLCONF:-${SHAREDDIR}/tsissl.cnf}
-HOSTDIR=${HOSTDIR:-/host/tsi-secure}
+HOSTDIR=${HOSTDIR:-/host}
 
 # a handy function to format the audit log
 logme() {

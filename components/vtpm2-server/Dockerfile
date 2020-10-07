@@ -1,7 +1,6 @@
 FROM fedora:29
 
 RUN dnf -y install python swtpm procps-ng uwsgi uwsgi-plugin-python2
-RUN dnf -y install jq
 
 RUN dnf -y install git openssl-devel automake autoconf libtool make file \
     && git clone https://git.code.sf.net/p/ibmtpm20tss/tss ibmtpm20tss-tss \
