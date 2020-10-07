@@ -4,7 +4,15 @@ TOKEN_SERVICE=${TOKEN_SERVICE:-"not.set"}
 VER_SERVICE=${VER_SERVICE:-"not.set"}
 VER_SERV_USERNAME=${VER_SERV_USERNAME:-"admin"}
 VER_SERV_PASSWD=${VER_SERV_PASSWD:-"password"}
-NODEHOSTNAME=${NODEHOSTNAME:-"not.set"}
+NODEHOSTNAMEFILE=/host/hostname
+
+if [ -s ${NODEHOSTNAMEFILE} ]; then
+  NODEHOSTNAME=$(cat ${NODEHOSTNAMEFILE})
+else
+  echo "ERROR ${NODEHOSTNAMEFILE} is either missing or empty"
+  exit 1
+fi
+
 
 TEMPDIR="/tmp/tsi.$$"
 

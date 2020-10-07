@@ -1,0 +1,93 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: vtpm2-server
+  namespace: trusted-identity
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: vtpm2-server
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: vtpm2-server
+    spec:
+      containers:
+      - env:
+        - name: ISS
+          value: wsched@us.ibm.com
+        - name: TTL_SEC
+          value: "60"
+        image: trustedseriviceidentity/vtpm2-server:v1.8.0
+        imagePullPolicy: Always
+        name: vtpm2-server
+        ports:
+        - containerPort: 5000
+          hostPort: 5000
+          name: http
+          protocol: TCP
+        resources: {}
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /host/sockets
+          name: tsi-sockets
+        - mountPath: /tsi-jss
+          name: tsi-jss
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - args:
+        - tail -f /dev/null
+        command:
+        - /bin/bash
+        - -c
+        - --
+        env:
+        - name: SHAREDDIR
+          value: /tsi-jss
+        - name: CLUSTER_NAME
+          value: tsi-roks01
+        - name: CLUSTER_REGION
+          value: eu-de
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        image: trustedseriviceidentity/attestation:v1.8.0
+        imagePullPolicy: Always
+        name: init-jss
+        resources: {}
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tsi-jss
+          name: tsi-jss
+        - mountPath: /host/sockets
+          name: tsi-sockets
+        - mountPath: /host/etc
+          name: machine-id
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: tsi-setup-admin-sa
+      serviceAccountName: tsi-setup-admin-sa
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: tsi-jss
+      - hostPath:
+          path: /var/tsi-secure/sockets
+          type: DirectoryOrCreate
+        name: tsi-sockets
+      - hostPath:
+          path: /etc
+          type: Directory
+        name: machine-id

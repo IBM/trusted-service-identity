@@ -43,6 +43,9 @@ spec:
           name: tsi-jss
         - mountPath: /host/sockets
           name: tsi-sockets
+        - mountPath: /host/hostname
+          name: node-hostname
+          readOnly: true
   {{- else if eq .Values.jssService.attestation.kind "keylime" }}
   # just a place holder for now
   {{- else if eq .Values.jssService.attestation.kind "soft" }}
@@ -157,6 +160,11 @@ spec:
            path: /var/tsi-secure/sockets
            # directory might be created
            type: DirectoryOrCreate
+      - name: node-hostname
+        hostPath:
+          # directory location on host
+           path: /etc/hostname
+           type: File
 {{- if eq .Values.jssService.type "vtpm2-server" }}
   {{- if .Values.jssService.tpm }}
     {{- if eq .Values.jssService.tpm.interface_type "dev" }}
