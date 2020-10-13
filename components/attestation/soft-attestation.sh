@@ -75,11 +75,11 @@ EOF
 fi
 
 # VTPM2 server is using host socket to communicate with the TSI sidecar
-# clean this up
+# clean this up here
 if ! [ -d "${HOSTDIR}/sockets" ]; then
-  MKDIR="mkdir -p ${HOSTDIR}/sockets"
+  MKDIR_SOCK="mkdir -p ${HOSTDIR}/sockets"
   # if [ "$?" == "0" ]; then
-  if $MKDIR; then
+  if $MKDIR_SOCK; then
     logme "directory ${HOSTDIR}/sockets succesfully created"
   else
     logme "ERROR: directory ${HOSTDIR}/sockets could not be created"
@@ -87,8 +87,8 @@ if ! [ -d "${HOSTDIR}/sockets" ]; then
   fi
 else
   if [ -f "${HOSTDIR}/sockets/app.sock" ]; then
-    RMDIR="rm ${HOSTDIR}/sockets/app.sock"
-    if $RMDIR; then
+    RMDIR_SOCK="rm ${HOSTDIR}/sockets/app.sock"
+    if $RMDIR_SOCK; then
       logme "${HOSTDIR}/sockets/app.sock succefully removed"
     else
       logme "ERROR: ${HOSTDIR}/sockets/app.sock could not be removed"

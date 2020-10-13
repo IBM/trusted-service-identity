@@ -80,8 +80,7 @@ case $key in
 esac
 done
 
-TEMPDIR="/tmp/tsi"
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d)
 
 CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
 kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}

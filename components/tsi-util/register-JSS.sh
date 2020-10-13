@@ -1,7 +1,6 @@
 #!/bin/bash
 
-TEMPDIR="/tmp/tsi"
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d)
 export CSR_DIR=${CSR_DIR:-/tmp/vault}
 #export CSR=${CSR:-${CSR_DIR}/csr}
 

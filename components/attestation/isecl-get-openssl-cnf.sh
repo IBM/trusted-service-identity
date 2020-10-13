@@ -13,9 +13,6 @@ else
   exit 1
 fi
 
-
-TEMPDIR="/tmp/tsi.$$"
-
 cleanup()
 {
   rm -rf ${TEMPDIR}
@@ -41,7 +38,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   exit 1
 fi
 
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d)
 TOKEN_FILE=${TEMPDIR}/token
 
 # get a token:

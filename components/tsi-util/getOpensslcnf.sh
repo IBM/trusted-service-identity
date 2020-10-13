@@ -8,8 +8,6 @@ VER_SERV_USERNAME=${VER_SERV_USERNAME:-"admin"}
 VER_SERV_PASSWD=${VER_SERV_PASSWD:-"password"}
 NODEHOSTNAME=${NODEHOSTNAME:-"worker5.test.ocp.nccoe.lab"}
 
-TEMPDIR="/tmp/tsi.$$"
-
 cleanup()
 {
   rm -rf ${TEMPDIR}
@@ -35,7 +33,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   exit 1
 fi
 
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d)
 TOKEN_FILE=${TEMPDIR}/token
 
 # get a token:

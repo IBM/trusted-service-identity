@@ -5,12 +5,9 @@ VER_SERV_USERNAME=${VER_SERV_USERNAME:-"admin"}
 VER_SERV_PASSWD=${VER_SERV_PASSWD:-"password"}
 NODEHOSTNAME=${NODEHOSTNAME:-"worker5.test.ocp.nccoe.lab"}
 
-TEMPDIR="/tmp/tsi.$$"
-
 cleanup()
 {
   rm -rf ${TEMPDIR}
-  #echo "Cleanup executed"
 }
 
 ## create help menu:
@@ -40,7 +37,7 @@ else
   CLUSTER_NAME=$2
 fi
 
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d)
 TOKEN_FILE=${TEMPDIR}/token
 
 # get a token:
@@ -48,9 +45,8 @@ SC=$(curl -k --location --max-time 5 -s -w "%{http_code}" -o $TOKEN_FILE --reque
  --header 'Content-Type: application/json' \
  --data-raw '{ "username": "'${VER_SERV_USERNAME}'", "password": "'${VER_SERV_PASSWD}'" }')
 
-if [ "$SC" == "200" ] && [ -s "${TOKEN_FILE}" ]; then
+if [ "$?" == "0" ] && [ "$SC" == "200" ] && [ -s "${TOKEN_FILE}" ]; then
   echo "Auth token received"
-  #echo "TOKEN: $(cat ${TOKEN_FILE})"
 else
   echo "Error obtaining a token from Verfication Service: $SC"
   cleanup
@@ -65,9 +61,8 @@ SC=$(curl -k --location --max-time 5 -s -w "%{http_code}" -o $HOSTS_FILE --reque
 --header 'Accept: application/json' \
 --header "Authorization: Bearer $(cat ${TOKEN_FILE})")
 
-if [ "$SC" == "200" ] && [ -s "${HOSTS_FILE}" ]; then
+if [ "$?" == "0" ] && [ "$SC" == "200" ] && [ -s "${HOSTS_FILE}" ]; then
   echo "Host info for $NODEHOSTNAME received"
-  #echo "Hosts in ${HOSTS_FILE}: $(cat ${HOSTS_FILE})"
 else
   echo "Error obtaining host information for $NODEHOSTNAME from Verfication Service: $SC"
   echo "Host info in ${HOSTS_FILE}: $(cat ${HOSTS_FILE})"
@@ -103,9 +98,8 @@ SC=$(curl -k --location --max-time 5 -s -w "%{http_code}" -o ${HD_TAG_RESP} --re
       }]
     }')
 
-if [ "$SC" == "200" ] && [ -s "${HD_TAG_RESP}" ]; then
+if [ "$?" == "0" ] && [ "$SC" == "200" ] && [ -s "${HD_TAG_RESP}" ]; then
   echo "Tag created for HW: ${HW_UUID} "
-  #echo "Tag response in ${HD_TAG_RESP}: $(cat ${HD_TAG_RESP})"
 else
   echo "Error creating HW tag: $SC"
   echo "Tag response in ${HD_TAG_RESP}: $(cat ${HD_TAG_RESP})"
@@ -131,9 +125,8 @@ SC=$(curl -k --location --max-time 5 -s -w "%{http_code}" -o ${DEPLOY_RESP} --re
 --header "Authorization: Bearer $(cat ${TOKEN_FILE})" \
 --data '{"certificate_id": "'"${CERT_ID}"'"}')
 
-if [ "$SC" == "200" ] && [ -s "${DEPLOY_RESP}" ]; then
+if [ "$?" == "0" ] && [ "$SC" == "200" ] && [ -s "${DEPLOY_RESP}" ]; then
   echo "Tag successfully deployed"
-  # echo "Response in ${DEPLOY_RESP}: $(cat ${DEPLOY_RESP})"
 else
   echo "Error deploying the tag CERT_ID: $SC"
   cho "Response in ${DEPLOY_RESP}: $(cat ${DEPLOY_RESP})"
@@ -149,9 +142,8 @@ SC=$(curl -k --location --max-time 5 -s -w "%{http_code}" -o ${SAML_JSON} --requ
 --header "Authorization: Bearer $(cat ${TOKEN_FILE})" \
 --data '{"host_name": "'"${NODEHOSTNAME}"'"}')
 
-if [ "$SC" == "200" ] && [ -s "${SAML_JSON}" ]; then
+if [ "$?" == "0" ] && [ "$SC" == "200" ] && [ -s "${SAML_JSON}" ]; then
   echo "SAML Report received"
-  #echo "Response in ${SAML_JSON}: $(cat ${SAML_JSON})"
 else
   echo "Error receiving the SAML report: $SC"
   echo "Response in ${SAML_JSON}: $(cat ${SAML_JSON})"

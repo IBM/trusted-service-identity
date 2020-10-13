@@ -7,7 +7,7 @@ RUN apt update && \
 COPY soft-attestation.sh /usr/local/bin/
 
 # IsecL attestation:
-COPY isecl-attestation.sh	isecl-get-openssl-cnf.sh /usr/local/bin/
+COPY isecl-attestation.sh isecl-get-openssl-cnf.sh /usr/local/bin/
 
 ARG DEFAULT_HOSTDIR="/host"
 ENV HOSTDIR=${DEFAULT_HOSTDIR}

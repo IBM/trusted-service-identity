@@ -23,14 +23,17 @@ jssService:
     # device: /dev/tpm0
     # owner_password: abcdefg
     # owner_password_format: hex
+
+  # jssService.attestion section provides configuation for attesting the identity
+  # of the host. The simple attestation is using software (soft), where system is
+  # attested by the trusted bootstrapping process or administrator
   attestation:
     kind: soft
 
   # The configuration below corresponds to the experimental work with Intel
-  # Verfication Server (IsecL)
+  # Verfication Server (IsecL) [https://01.org/intel-secl]
   #   kind: isecl
   #   isecl:
-  #     nodename: worker5.test.ocp.nccoe.lab"
   #     verificationService:
   #       tokenService: https://172.16.100.15:8444
   #       service: https://172.16.100.15:8443

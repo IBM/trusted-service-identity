@@ -78,8 +78,7 @@ if [ ! -f "$FILE" ]; then
     exit 1
 fi
 
-TEMPDIR="/tmp/tsi"
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d)
 PODINFO="${TEMPDIR}/podinfo.$$"
 kubectl create -f ${FILE} -n ${NS} --dry-run=client -o yaml > ${PODINFO}
 
