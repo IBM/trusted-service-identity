@@ -31,7 +31,7 @@ jssService:
     kind: soft
 
   # The configuration below corresponds to the experimental work with Intel
-  # Verfication Server (IsecL) [https://01.org/intel-secl]
+  # Verification Server (IsecL) [https://01.org/intel-secl]
   #   kind: isecl
   #   isecl:
   #     verificationService:
