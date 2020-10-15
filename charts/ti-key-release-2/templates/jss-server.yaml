@@ -41,8 +41,8 @@ spec:
         volumeMounts:
         - mountPath: /tsi-jss
           name: tsi-jss
-        - mountPath: /host/sockets
-          name: tsi-sockets
+        - mountPath: /host
+          name: tsi-secure
         - mountPath: /host/hostname
           name: node-hostname
           readOnly: true
@@ -66,8 +66,8 @@ spec:
         volumeMounts:
         - mountPath: /tsi-jss
           name: tsi-jss
-        - mountPath: /host/sockets
-          name: tsi-sockets
+        - mountPath: /host
+          name: tsi-secure
   {{- else }}
     {{- fail "ERROR: Invalid attestation kind" }}
   {{- end }}
@@ -110,8 +110,8 @@ spec:
             name: tpm-device
         {{- end }}
     {{- end }}
-          - mountPath: /host/sockets
-            name: tsi-sockets
+          - mountPath: /host
+            name: tsi-secure
           - mountPath: /tsi-jss
             name: tsi-jss
             readOnly: true
@@ -148,16 +148,16 @@ spec:
             name: tsi-secure
             readOnly: true
           - mountPath: /host/sockets
-            name: tsi-sockets
+            name: tsi-secure
 {{- end }}
 
       volumes:
       - name: tsi-jss
         emptyDir: {}
-      - name: tsi-sockets
+      - name: tsi-secure
         hostPath:
           # directory location on host
-           path: /var/tsi-secure/sockets
+           path: /var/tsi-secure
            # directory might be created
            type: DirectoryOrCreate
       - name: node-hostname

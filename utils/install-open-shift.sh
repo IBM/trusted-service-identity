@@ -229,6 +229,7 @@ local SETUP_FILE="tsi-node-setup.yaml"
 # helm inspect values charts/tsi-node-setup/
 echo "executing: helm template ${TSI_ROOT}/charts/tsi-node-setup-${TSI_VERSION}.tgz"
 helm template ${TSI_ROOT}/charts/tsi-node-setup-${TSI_VERSION}.tgz --name tsi-setup \
+--set reset.all=false --set reset.x5c=true \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION > ${SETUP_FILE}
 oc apply -f ${SETUP_FILE}
 rm ${SETUP_FILE}

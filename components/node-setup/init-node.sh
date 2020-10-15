@@ -91,15 +91,6 @@ if ! [ -d "${PRIVATEDIR}" ]; then
   logme "directory ${PRIVATEDIR} created"
 fi
 
-if ! [ -d "${PRIVATEDIR}/sockets" ]; then
-  mkdir -p "${PRIVATEDIR}/sockets"
-  logme "directory ${PRIVATEDIR}/sockets created"
-else
-  rm "${PRIVATEDIR}/sockets/app.sock"
-  logme "${PRIVATEDIR}/sockets/app.sock removed"
-fi
-
-
 # create a private key
 if [ "$RESETALL" == "true" ]; then
   if ! [ -f "${PRIV_KEY}" ]; then
