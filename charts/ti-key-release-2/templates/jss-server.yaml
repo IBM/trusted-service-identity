@@ -132,8 +132,11 @@ spec:
             protocol: TCP
             hostPort: 5000
           volumeMounts:
-          - mountPath: /host/tsi-secure
+          - mountPath: /host
             name: tsi-secure
+          - mountPath: /tsi-jss
+            name: tsi-jss
+            readOnly: true
 
         - name: {{ .Values.jssService.type }}-priv
           image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-priv:{{ .Chart.AppVersion  }}
@@ -144,11 +147,11 @@ spec:
             - name: TTL_SEC
               value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
           volumeMounts:
-          - mountPath: /host/tsi-secure
+          - mountPath: /host
             name: tsi-secure
+          - mountPath: /tsi-jss
+            name: tsi-jss
             readOnly: true
-          - mountPath: /host/sockets
-            name: tsi-secure
 {{- end }}
 
       volumes:
