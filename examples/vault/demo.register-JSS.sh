@@ -2,7 +2,7 @@
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
-TEMPDIR=$(mktemp -d)
+TEMPDIR=$(mktemp -d /tmp/tsi.XXX)
 
 ## create help menu:
 helpme()

@@ -9,7 +9,7 @@ if [[ ! $(eval ${docker_cmd}) ]]; then
   exit 1
 fi
 
-TEMPDIR=$(mktemp -d)
+TEMPDIR=$(mktemp -d /tmp/tsi.XXX)
 
 CLUSTERINFO="${TEMPDIR}/clusterinfo.$$"
 kubectl get cm -n kube-system cluster-info -o yaml > ${CLUSTERINFO}

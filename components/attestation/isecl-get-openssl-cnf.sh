@@ -38,7 +38,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   exit 1
 fi
 
-TEMPDIR=$(mktemp -d)
+TEMPDIR=$(mktemp -d /tmp/tsi.XXX)
 TOKEN_FILE=${TEMPDIR}/token
 
 # get a token:
