@@ -132,6 +132,8 @@ spec:
             protocol: TCP
             hostPort: 5000
           volumeMounts:
+          - mountPath: /host/tsi-secure
+            name: tsi-secure
           - mountPath: /host
             name: tsi-secure
           - mountPath: /tsi-jss

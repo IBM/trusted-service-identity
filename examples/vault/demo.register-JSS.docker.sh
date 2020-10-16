@@ -23,6 +23,11 @@ Syntax: ${0} <container name>
 HELPMEHELPME
 }
 
+cleanup()
+{
+  rm -rf ${TEMPDIR}
+}
+
 # this function registers individual nodes
 register()
 {
@@ -32,11 +37,13 @@ register()
   SC=$(curl --max-time 10 -s -w "%{http_code}" -o "${CSR}" localhost:5000/public/getCSR)
   if [ "$SC" != "200" ]; then
     printf "\nError while getting CSR. Make sure the public JSS interface is enabled.\n"
+    cleanup
     return 1
   fi
 
   if [ ! -s "${CSR}" ]; then
     printf "\nFile ${CSR} does not exist or it is empty\n"
+    cleanup
     exit 1
   fi
 
@@ -44,6 +51,7 @@ register()
   if [[ $(cat $CSR) == *errors* ]] ; then
     #echo "Invalid CSR from JSS through pod $1. Please make sure tsi-node-setup was correctly executed on node: $nodeIP"
     printf "\nInvalid CSR from JSS for the pod $1. Please make sure tsi-node-setup was correctly executed\n"
+    cleanup
     exit 1
   fi
 
@@ -57,7 +65,8 @@ register()
   RT=$?
 
   if [ "$RT" != "0" ]; then
-    printf "Error occurred while processing X5c\n"
+    printf "Error occurred registering JSS: ${RESP}\n"
+    cleanup
     exit 1
   fi
   printf "${RESP}" > "${X5C}"
@@ -67,6 +76,7 @@ register()
   cat ${OUT}
   if [ "$SC" != "200" ]; then
     printf "\nHTTP Code=${SC}\n Error registering x5c with JSS server. Make sure the public JSS interface is enabled.\n"
+    cleanup
     return 1
   fi
   printf "\nRegistration of $1 with JSS server completed successfully\n"
@@ -79,6 +89,7 @@ register()
 
 if [ "$1" == "" ] ; then
   helpme
+  cleanup
   exit 1
 fi
 
@@ -89,7 +100,10 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   printf "ROOT_TOKEN or VAULT_ADDR not set"
   helpme
+  cleanup
   exit 1
 else
   register $1
 fi
+
+cleanup
