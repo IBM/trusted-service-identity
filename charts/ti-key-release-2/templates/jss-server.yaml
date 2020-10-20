@@ -151,6 +151,8 @@ spec:
           volumeMounts:
           - mountPath: /host
             name: tsi-secure
+          - mountPath: /host/tsi-secure
+            name: tsi-secure
           - mountPath: /tsi-jss
             name: tsi-jss
             readOnly: true
