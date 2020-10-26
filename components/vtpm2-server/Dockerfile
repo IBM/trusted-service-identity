@@ -39,8 +39,8 @@ RUN gcc tpm_proxy.c -o /usr/local/bin/tpm_proxy
 
 COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validate-jwt.py /usr/local/bin/
 
-RUN jwt=$(mkdir -p /host/tsi-secure/ \
-  && touch /host/tsi-secure/openssl.cnf \
+RUN jwt=$(mkdir -p /tsi-jss/ \
+  && touch /tsi-jss/tsissl.cnf \
   && gen-jwt.sh \
         --iss example-issuer \
         --aud foo,bar \
@@ -55,6 +55,7 @@ RUN jwt=$(mkdir -p /host/tsi-secure/ \
 # Adding support for flask
 COPY requirements.txt /
 RUN pip install -r requirements.txt
+# Copy all the scripts
 COPY run-jss-server.sh jss-server-priv.py jss-server-pub.py /usr/local/bin/
 
 # Default values for JWT, issuer and token expiration in seconds

@@ -13,8 +13,65 @@ spec:
         name: {{ .Values.jssService.type }}
     spec:
       serviceAccountName: tsi-setup-admin-sa
+      initContainers:
+      - name: init-jss
+        image: {{ .Values.tiRepo }}/attestation:{{ .Chart.AppVersion  }}
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+  {{- if eq .Values.jssService.attestation.kind "isecl" }}
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "/usr/local/bin/isecl-attestation.sh" ]
+        env:
+        - name: SHAREDDIR
+          value: "/tsi-jss"
+        - name: TOKEN_SERVICE
+          value: {{ .Values.jssService.attestation.isecl.verificationService.tokenService }}
+        - name: VER_SERVICE
+          value: {{ .Values.jssService.attestation.isecl.verificationService.service }}
+        - name: VER_SERV_USERNAME
+          value: {{ .Values.jssService.attestation.isecl.verificationService.username }}
+        - name: VER_SERV_PASSWD
+          value: {{ .Values.jssService.attestation.isecl.verificationService.password }}
+          # get the host IP and pass as env. var
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        volumeMounts:
+        - mountPath: /tsi-jss
+          name: tsi-jss
+        - mountPath: /host
+          name: tsi-secure
+        - mountPath: /host/hostname
+          name: node-hostname
+          readOnly: true
+  {{- else if eq .Values.jssService.attestation.kind "keylime" }}
+  # just a place holder for now
+  {{- else if eq .Values.jssService.attestation.kind "soft" }}
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "/usr/local/bin/soft-attestation.sh" ]
+        env:
+        - name: SHAREDDIR
+          value: "/tsi-jss"
+        - name: CLUSTER_NAME
+          value: {{ index .Values "ti-key-release-1" "cluster" "name" }}
+        - name: CLUSTER_REGION
+          value: {{ index .Values "ti-key-release-1" "cluster" "region" }}
+          # get the host IP and pass as env. var
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        volumeMounts:
+        - mountPath: /tsi-jss
+          name: tsi-jss
+        - mountPath: /host
+          name: tsi-secure
+  {{- else }}
+    {{- fail "ERROR: Invalid attestation kind" }}
+  {{- end }}
       containers:
-
 {{- if eq .Values.jssService.type "vtpm2-server" }}
         - name: {{ .Values.jssService.type }}
           image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}:{{ .Chart.AppVersion  }}
@@ -53,10 +110,10 @@ spec:
             name: tpm-device
         {{- end }}
     {{- end }}
-          - mountPath: /host/sockets
-            name: tsi-sockets
-          - mountPath: /host/tsi-secure
+          - mountPath: /host
             name: tsi-secure
+          - mountPath: /tsi-jss
+            name: tsi-jss
             readOnly: true
 {{- end }}
 
@@ -77,6 +134,11 @@ spec:
           volumeMounts:
           - mountPath: /host/tsi-secure
             name: tsi-secure
+          - mountPath: /host
+            name: tsi-secure
+          - mountPath: /tsi-jss
+            name: tsi-jss
+            readOnly: true
 
         - name: {{ .Values.jssService.type }}-priv
           image: {{ .Values.tiRepo }}/{{ .Values.jssService.type }}-priv:{{ .Chart.AppVersion  }}
@@ -87,26 +149,29 @@ spec:
             - name: TTL_SEC
               value: "{{ index .Values "ti-key-release-1" "jwt" "expireSec" }}"
           volumeMounts:
+          - mountPath: /host
+            name: tsi-secure
           - mountPath: /host/tsi-secure
             name: tsi-secure
+          - mountPath: /tsi-jss
+            name: tsi-jss
             readOnly: true
-          - mountPath: /host/sockets
-            name: tsi-sockets
 {{- end }}
 
       volumes:
-      - name: tsi-sockets
-        hostPath:
-          # directory location on host
-           path: /var/tsi-secure/sockets
-           # directory might be created
-           type: DirectoryOrCreate
+      - name: tsi-jss
+        emptyDir: {}
       - name: tsi-secure
         hostPath:
           # directory location on host
            path: /var/tsi-secure
-           # directory must exist
-           type: Directory
+           # directory might be created
+           type: DirectoryOrCreate
+      - name: node-hostname
+        hostPath:
+          # directory location on host
+           path: /etc/hostname
+           type: File
 {{- if eq .Values.jssService.type "vtpm2-server" }}
   {{- if .Values.jssService.tpm }}
     {{- if eq .Values.jssService.tpm.interface_type "dev" }}

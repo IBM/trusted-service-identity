@@ -28,12 +28,12 @@ spec:
             protocol: TCP
             hostPort: 5000
           volumeMounts:
-          - mountPath: /host/sockets
+          - mountPath: /host/tsi-secure/sockets
             name: tsi-sockets
       volumes:
       - name: tsi-sockets
         hostPath:
           # directory location on host
-           path: /var/tsi-secure/sockets
+           path: /var/sockets
            # directory might be created
            type: DirectoryOrCreate

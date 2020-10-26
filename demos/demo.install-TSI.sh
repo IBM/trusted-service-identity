@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# For JSS_TYPE: `vtpm2-server` or `jss-server`
+JSS_TYPE=vtpm2-server
+
 # this script requires https://github.com/duglin/tools/tree/master/demoscript
 declare DEMOFILE=~/workspace/tools/demoscript/demoscript
 if [ ! -f "$DEMOFILE" ]; then
@@ -73,8 +76,13 @@ doit --ignorerc "$UTILS/init-namespace.sh"
 }
 
 tsi_helm(){
-doit "helm install ../charts/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup --set reset.all=true \
+if [ "$JSS_TYPE" == "jss-server" ]; then 
+  doit "helm install ../charts/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup --set reset.all=true \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION"
+else
+  doit "helm install ../charts/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup \
+--set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION"
+fi
 doit "$kk get po"
 
 doit "helm install ../charts/ti-key-release-2-${TSI_VERSION}.tgz --debug --name tsi \
@@ -82,7 +90,7 @@ doit "helm install ../charts/ti-key-release-2-${TSI_VERSION}.tgz --debug --name 
 --set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
 --set ti-key-release-1.runSidecar=true \
---set jssService.type=jss-server"
+--set jssService.type=$JSS_TYPE"
 doit "$kk get po"
 
 comment "Register this cluster with Vault"

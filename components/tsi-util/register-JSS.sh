@@ -1,7 +1,6 @@
 #!/bin/bash
 
-TEMPDIR="/tmp/tsi"
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d /tmp/tsi.XXX)
 export CSR_DIR=${CSR_DIR:-/tmp/vault}
 #export CSR=${CSR:-${CSR_DIR}/csr}
 
@@ -26,6 +25,11 @@ Currently:
 HELPMEHELPME
 }
 
+cleanup()
+{
+  rm -rf ${TEMPDIR}
+}
+
 # this function registers individual nodes
 register()
 {
@@ -33,12 +37,14 @@ register()
   if [ ! -s "${CSR}" ]; then
     echo "File ${CSR} do not exist or it is empty"
     helpme
+    cleanup
     exit 1
   fi
 
   # check for errors
   if [[ $(cat ${CSR}) == *errors* ]] ; then
     echo "Invalid CSR from JSS for $1. Please make sure tsi-node-setup was correctly executed"
+    cleanup
     exit 1
   fi
 
@@ -48,7 +54,7 @@ register()
   RT=$?
   if [ $RT -ne 0 ] ; then
     echo "Missing x509v3 URI:TSI extensions for cluter-name and region"
-    rm "${TSIEXT}"
+    cleanup
     exit 1
   fi
 
@@ -63,6 +69,7 @@ register()
   if [ $RT -ne 0 ] ; then
      echo "ROOT_TOKEN is not correctly set"
      echo "ROOT_TOKEN=${ROOT_TOKEN}"
+     cleanup
      exit 1
   fi
   # remove any previously set VAULT_TOKEN, that overrides ROOT_TOKEN in Vault client
@@ -70,9 +77,15 @@ register()
 
   X5C="${TEMPDIR}/$1.x5c"
   OUT="${TEMPDIR}/out.$$"
+  ERR="${TEMPDIR}/err.$$"
 
   # create an intermedate certificate for 50 years
-  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h uri_sans="$TSI_URI" -format=json > ${OUT}
+  vault write pki/root/sign-intermediate csr=@$CSR format=pem_bundle ttl=438000h uri_sans="$TSI_URI" -format=json 1> "${OUT}" 2> "${ERR}"
+  if [ "$?" != "0" ]; then
+    echo "ERROR signing intermediate CA. Was Vault setup successfully executed? $(cat ${ERR})"
+    cleanup
+    exit 1
+  fi
   CERT=$(cat ${OUT} | jq -r '.["data"].certificate' | grep -v '\-\-\-')
   CHAIN=$(cat ${OUT} | jq -r '.["data"].issuing_ca' | grep -v '\-\-\-')
   echo "[\"${CERT}\",\"${CHAIN}\"]" > "$X5C"
@@ -102,12 +115,14 @@ register()
 if [ -z "${VAULT_ADDR}" ]; then
   echo "VAULT_ADDR is not set"
   helpme
+  cleanup
   exit 1
 fi
 
 if [ -z "${ROOT_TOKEN}" ]; then
   echo "ROOT_TOKEN is not set"
   helpme
+  cleanup
   exit 1
 fi
 
@@ -117,3 +132,5 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 else
   register $1
 fi
+
+cleanup

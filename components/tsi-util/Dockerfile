@@ -24,6 +24,7 @@ COPY load-sample-policies.sh /usr/local/bin/
 COPY register-JSS.sh /usr/local/bin/
 COPY vault-tpl/ /vault-tpl
 COPY vault-setup.sh /usr/local/bin/
+COPY setIdentity.sh getOpensslcnf.sh /usr/local/bin/
 
 # run it forever
 CMD ["/bin/bash", "-c", "tail -f /dev/null"]

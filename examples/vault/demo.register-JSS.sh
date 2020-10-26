@@ -2,8 +2,7 @@
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../../tsi-version.txt)
 
-TEMPDIR="/tmp/tsi"
-mkdir -p ${TEMPDIR}
+TEMPDIR=$(mktemp -d /tmp/tsi.XXX)
 
 ## create help menu:
 helpme()
@@ -23,6 +22,11 @@ Currently:
 HELPMEHELPME
 }
 
+cleanup()
+{
+  rm -rf ${TEMPDIR}
+}
+
 # this function registers individual nodes
 register()
 {
@@ -36,26 +40,29 @@ register()
 
   if [ ! -s "${CSR}" ]; then
     printf "\nFile ${CSR} does not exist or it is empty\n"
+    cleanup
     exit 1
   fi
 
   # check for errors
   if [[ $(cat $CSR) == *errors* ]] ; then
     echo "Invalid CSR from JSS through pod $1. Please make sure tsi-node-setup was correctly executed on node: $nodeIP"
+    cleanup
     exit 1
   fi
 
   X5C="${TEMPDIR}/$1.x5c"
 
   # process csr, register with vault, obtain x5c:
-  RESP=$(docker run --rm --name=register-jss --rm -v ${TEMPDIR}:/tmp/vault \
+  RESP=$(docker run --rm --name=register-jss -v ${TEMPDIR}:/tmp/vault \
    --env "ROOT_TOKEN=${ROOT_TOKEN}" \
    --env "VAULT_ADDR=${VAULT_ADDR}" \
    trustedseriviceidentity/tsi-util:"${TSI_VERSION}" /usr/local/bin/register-JSS.sh $1)
   RT=$?
 
   if [ "$RT" != "0" ]; then
-    printf "Error occurred while processing X5c\n"
+    printf "Error occurred registering JSS: ${RESP}\n"
+    cleanup
     exit 1
   fi
   printf "${RESP}" > "${X5C}"
@@ -69,6 +76,7 @@ register()
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo "$X5C file could not be copied to $1:/tmp/x5c"
+     cleanup
      exit 1
   fi
 
@@ -107,6 +115,7 @@ if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
 elif [[ "$ROOT_TOKEN" == "" || "$VAULT_ADDR" == "" ]] ; then
   echo "ROOT_TOKEN or VAULT_ADDR not set"
   helpme
+  cleanup
   exit 1
 else
   # get the list of all 'ti-node-setup' pods for each node instance
@@ -124,3 +133,5 @@ else
         done
   fi
 fi
+
+cleanup

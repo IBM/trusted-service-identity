@@ -74,7 +74,7 @@ URI.2 = TSI:region:$CLUSTER_REGION
 # add new lines in the following format:
 # URI.x = TSI:<claim>
 # where x is a next sequencial number and claim is
-# a `key:value` pair. For example:
+# a "key:value" pair. For example:
 # URI.3 = TSI:datacenter:fra02
 EOF
 fi
@@ -90,15 +90,6 @@ if ! [ -d "${PRIVATEDIR}" ]; then
   mkdir -p "${PRIVATEDIR}"
   logme "directory ${PRIVATEDIR} created"
 fi
-
-if ! [ -d "${PRIVATEDIR}/sockets" ]; then
-  mkdir -p "${PRIVATEDIR}/sockets"
-  logme "directory ${PRIVATEDIR}/sockets created"
-else
-  rm "${PRIVATEDIR}/sockets/app.sock"
-  logme "${PRIVATEDIR}/sockets/app.sock removed"
-fi
-
 
 # create a private key
 if [ "$RESETALL" == "true" ]; then

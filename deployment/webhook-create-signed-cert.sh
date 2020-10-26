@@ -56,7 +56,7 @@ if [ ! -x "$(command -v openssl)" ]; then
 fi
 
 csrName=${service}.${namespace}
-tmpdir=$(mktemp -d)
+tmpdir=$(mktemp -d /tmp/tsi.XXX)
 echo "creating certs in tmpdir ${tmpdir} "
 
 cat <<EOF >> ${tmpdir}/csr.conf

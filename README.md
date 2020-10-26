@@ -7,7 +7,7 @@ for data access by the applications running in the public cloud.
 The project ties Key Management Service technologies with identity via host
 provenance and integrity.
 
-TI limits access to keys (credentials, secrets) for service provider administrators,
+TSI limits access to keys (credentials, secrets) for service provider administrators,
 by creating a key/credential release system based on authorization of container
 workloads. Each application that requires access to key gets a short-term identity
 in form of a JSON Web Token (JWT) as a digital biometric identity that is bound
@@ -17,6 +17,7 @@ physical hardware. Secrets are released to the application based on this identit
 ## Table of Contents
 - [Installation](./README.md#installation)
   - [Prerequisites](./README.md#prerequisites)
+  - [Attestation](./README.md#attestation)
   - [Openshift](./README.md#openshift)
   - [Setup Vault](./README.md#setup-vault)
   - [Setup Cluster](./README.md#setup-cluster-nodes)
@@ -112,6 +113,106 @@ Then recreate a new, empty namespace:
 ./utils/cleanup.sh
 ./utils/init-namespace.sh
 ```
+
+### Attestation
+Attestation is the process of providing a digital signature of a set of measurements
+securely stored in hardware, then having the requestor validate the signature and
+the set of measurements. Attestation requires the roots of trust. The platform has to have a Root of Trust for Measurement (RTM) that is implicitly trusted to provide an accurate measurement and enhanced hardware-based security features provide the RTM.
+
+TSI requires an attestation process to accurately define the identity of the worker
+nodes hosting the application containers. The simplest attestation is via software, `soft` (default) that relies on the trusted bootstrapping process or administrator
+that is performing the TSI installation. The values for CLUSTER_NAME and REGION
+are passed as arguments to the Helm deployment.
+
+Another option is an experimental work with Intel using Intel's Verification Server
+[IsecL](https://01.org/intel-secl). This process requires two independent phases:
+- Asset Registration with Intel Verification Server (executed on every individual worker node by executing [setIdentity.sh](./components/tsi-util/setIdentity.sh) script included in `tsi-util` image: ):
+  1. We need TSI fields that we want to use for creating ASSET_TAG:
+    ```console
+    export CLUSTER_NAME=(cluster name)
+    export REGION=(region name)
+    ```
+  1. We need Intel Attestation Server creds (ISecL authentication service credentials are configured in populate-users.env)
+  ```console
+  export ISECL_USERNAME=
+  export ISECL_PASSWD=
+  ```
+  1. Next are the ISecL endpoints that can be obtained by running `tagent export-config --stdout`:
+  ```console
+  export AUTH_ENDPOINT=(value of aas.api.url)
+  export ISECL_ENDPOINT=(value of mtwilson.api.url)
+  export NODEHOSTNAME=(hostname of the worker node)
+  ```
+  1. Execute the script to register the ASSET_TAG:
+    ```console
+    docker run --rm --name=setIdent \
+    --env NODEHOSTNAME="$NODEHOSTNAME" \
+    --env VER_SERV_USERNAME="$ISECL_USERNAME" \
+    --env VER_SERV_PASSWD="$ISECL_PASSWD" \
+    --env TOKEN_SERVICE="$AUTH_ENDPOINT" \
+    --env VER_SERVICE="$ISECL_ENDPOINT" \
+    trustedseriviceidentity/tsi-util:v1.8.0 /bin/bash -c "/usr/local/bin/setIdentity.sh $REGION $CLUSTER_NAME"
+    ```
+    This script creates an ASSET_TAG Flavor and deploys it to the Verification Server. As a result, the server calculates the hash of the certificate, calls the Intel Trust Agent for the given host to store the tag info in local TPM. As soon as the tag is provisioned, the attestation report will include the newly created tag value for each Security Assertion Markup Language (SAML) report.
+
+    The format of the ASSET_TAG is following:
+    ```json
+    {
+       "hardware_uuid": "${HW_UUID}",
+       "selection_content": [ {
+           "name": "region",
+           "value": "${REGION}"
+          }, {
+           "name": "cluster-name",
+           "value": "${CLUSTER_NAME}"
+        } ]
+    }
+    ```
+
+    The script then obtains the report that includes all the attestation results (OS, Platform, Software trusted) and the ASSET_TAG with extended info for verification.
+
+    Once all the worker nodes are registered with Intel Verification Server, we can start TSI deployment with attestation.
+
+- TSI Attestation.
+
+  1. The experiment with Intel has been done using Red Hat OpenShift, so in order to install TSI with Intel attestation, there are several configuration customization changes required to the [OpenShift script](./utils/install-open-shift.sh)
+  1. Since Intel Attestation Server is using TPM device `/dev/tpm0` we need to switch TSI to use of `/dev/tpmrm0` that requires enablement of the TPM Proxy
+  1. The standard Intel configuration enables TPM owner password for each individual TPM instance, and therefore is usually unique for each host – by default the Trust Agent randomly creates a new TPM ownership secret during installation when it takes ownership. However, for the purpose of the experiment, one can use the TPM_OWNER_SECRET variable in `trustagent.env` when installing the Trust Agent to specify a defined TPM password, instead of the default behavior of creating it randomly on each host. This way one can configure all hosts to use the same known TPM password, and that makes it easier to avoid TPM ownership clears and share the secret with other applications that need to use the TPM at that privilege level.
+    - Get the password value by running the following command on every worker host:
+     ```console
+     tagent export-config --stdout | grep tpm.owner.secret
+     ```
+     The owner password format is HEX
+  1. We also need Intel Attestation Server creds (ISecL authentication service credentials are configured in populate-users.env), same as the Asset Registration above.
+  ```console
+  export ISECL_USERNAME=
+  export ISECL_PASSWD=
+  ```
+  1. Next are the ISecL endpoints that can be obtained by running `tagent export-config --stdout`:
+  ```console
+  export AUTH_ENDPOINT=(value of aas.api.url)
+  export ISECL_ENDPOINT=(value of mtwilson.api.url)
+  ```
+  1.	Values for $CLUSTER_NAME and $REGION must match the values provided during Asset Registration with Intel Verification Server step.
+  1. Code changes in [OpenShift script](./utils/install-open-shift.sh) script in ‘executeInstall-2’ section:
+  ```console
+    helm template ${HELM_REL_2}/ti-key-release-2/ --name tsi-2 \
+    --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
+    --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
+    --set ti-key-release-1.cluster.region=$REGION \
+    --set ti-key-release-1.runSidecar=$RUN_SIDECAR \
+    --set jssService.tpm.interface_type=dev \
+    --set jssService.tpm.device=/dev/tpmrm0 \
+    --set jssService.tpm.owner_password=$TPM_PASSWD \
+    --set jssService.tpm.owner_password_format=hex \
+    --set jssService.attestion.kind=isecl \
+    --set jssService.attestion.isecl.verificationService.tokenService=$AUTH_ENDPOINT \
+    --set jssService.attestion.isecl.verificationService.service=$ISECL_ENDPOINT \
+    --set jssService.attestion.isecl.verificationService.username=$ISECL_USERNAME \
+    --set jssService.attestion.isecl.verificationService.password=$ISECL_PASSWD \
+    --set jssService.type=vtpm2-server > ${INSTALL_FILE}
+    ```
+    As a result of these changes, TSI will be installed in the cluster, using an attestation report from the Intel Attestation Service to provide the identities of the workers and to keep the attestation going. Also, the TSI signing service would be using hardware TPM.
 
 ### Openshift
 Installation of Trusted Service Identity on RedHat OpenShift requires several steps
@@ -292,13 +393,13 @@ As a result, the secrets would be assigned only once in the pod lifetime and the
 cannot be changed or revoked without restarting the pod.
 Disabling the sidecar supports Kubernetes Jobs, that change the state to Completed
 when the container ends the transaction. Since sidecars are always running indefinitely,
-job would never complete. 
+job would never complete.
 
 ### Install Trusted Service Identity framework
 Make sure all the [prerequisites](./README.md#prerequisites) are satisfied.
 
 #### Deploy Helm charts
-TI helm charts are included with this repo under [charts/](./charts/) directory.
+TSI helm charts are included with this repo under [charts/](./charts/) directory.
 You can use them directly or use the charts that you built yourself (see instructions below).
 
 The following information is required to deploy TSI helm charts:
