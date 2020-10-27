@@ -32,7 +32,7 @@ RUN dnf -y install git openssl-devel automake autoconf libtool help2man file \
 # we absolutely need python2-cryptography otherwise we may pick up the one from pip
 # and this one may cause issues; python2-crypography 2.3 works
 RUN dnf -y install python2-cryptography \
-    && pip install jwcrypto==0.7
+    && pip install --user jwcrypto==0.7
 
 COPY tpm_proxy.c tpm_proxy.h ./
 RUN gcc tpm_proxy.c -o /usr/local/bin/tpm_proxy
@@ -42,9 +42,9 @@ COPY gen-jwt.sh EngineJWK.py gen-jwt.py run-tpm-server.sh startup_tpm.sh validat
 RUN jwt=$(mkdir -p /tsi-jss/ \
   && touch /tsi-jss/tsissl.cnf \
   && gen-jwt.sh \
-        --iss example-issuer \
+        --sub subject \
         --aud foo,bar \
-        --claims=email:foo@google.com,dead:beef) \
+        --claims="email:foo@google.com|dead:beef") \
   && echo "$jwt" \
   && bash -c "validate-jwt.py $(cat /tmp/tpmkeyurl) <(echo -n "$jwt") \
               && { echo 'jwt verified successfully'; exit 0; } || exit 1" \
@@ -54,7 +54,7 @@ RUN jwt=$(mkdir -p /tsi-jss/ \
 
 # Adding support for flask
 COPY requirements.txt /
-RUN pip install -r requirements.txt
+RUN pip install --user -r requirements.txt
 # Copy all the scripts
 COPY run-jss-server.sh jss-server-priv.py jss-server-pub.py /usr/local/bin/
 

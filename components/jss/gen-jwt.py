@@ -14,13 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Python script generates a JWT signed witha private key and appends
+"""Python script generates a JWT signed with a private key and appends
 chain of trust (x5c) to the header.
-- issuer(iss) is passed as env. var. (ISS)
-- token expiration is passed as env. var (TTL_SEC)
+
+Env. variables used by this script:
+- ISS - issuer(iss) name
+- TTL_SEC - token expiration, in seconds
+- STATEDIR - directory containing intermediate CA, x5c file
 
 Example to generate TSI JWT:
-./gen-jwt.py --aud foo,bar --claims "pod:myubuntu-6756d665bc-gc25f|namespace:test|images-names:ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4|images:30beed0665d9cb4df616cca84ef2c06d2323e02869fcca8bbfbf0d8c5a3987cc|cluster-name:my-cluster-name|region:eu-de|machineid=fbafad4e9df3498f85a555914e241539" private-key.pem
+./gen-jwt.py --aud foo,bar --sub subject --claims "pod:myubuntu-6756d665bc-gc25f|namespace:test|images-names:ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4|images:30beed0665d9cb4df616cca84ef2c06d2323e02869fcca8bbfbf0d8c5a3987cc|cluster-name:my-cluster-name|region:eu-de|machineid=fbafad4e9df3498f85a555914e241539" /host/tsi-secure/private.key
+
+It is imperative that "cluster-name" and "region" match exactly the values set
+in x5c certificate.
 
 If claims don't match the x5c, you might need to comment out:
 line 130   # payload = check_payload(payload, cc)
@@ -149,12 +155,14 @@ if __name__ == '__main__':
     # positional arguments
     parser.add_argument(
         'key',
-        help='The path to the key pem file. The key can be generated with openssl command: `openssl genrsa -out key.pem 2048`')
+        help='The path to the private key pem file. The key can be generated with openssl command: `openssl genrsa -out key.pem 2048`')
     # optional arguments
     parser.add_argument("-aud", "--aud",
                         help="aud(audience) claim. This is comma-separated-list of audiences")
     parser.add_argument("-sub", "--sub",
                         help="sub(subject) claim. If not provided, it is set to the same as iss claim.")
+    parser.add_argument("-jwks", "--jwks",
+                         help="Path to the output file for JWKS.")
     parser.add_argument("-claims", "--claims",
-                         help="Other claims in format name1:value1|name2:value2 etc. Only string values are supported. Use `|` to seperate each claim")
+                         help="Other claims in format 'name1:value1|name2:value2|images:img1,img2' etc. Only string values are supported. Use `|` to seperate each claim. Use `,` to separate multiple values of a claim e.g. images")
     print main(parser.parse_args())
