@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 /usr/local/bin/execute-get-token.sh &
-/usr/local/bin/execute-get-vault-secrets.sh
+/usr/local/bin/execute-get-vault-secrets.sh &
+usr/local/bin/execute-get-keycloak-identities.sh
+
 RT=$?
 
 if ! $IS_SIDECAR; then

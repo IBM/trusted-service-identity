@@ -27,7 +27,7 @@ spec:
           image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]
-          args: [ "while true; do cat /mydata; sleep 5; done;" ]
+          args: [ "while true; do cat /mydata; sleep 15; done;" ]
           volumeMounts:
           - mountPath: /host/etc
             name: host-etc

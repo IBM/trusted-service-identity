@@ -23,6 +23,9 @@ RUN wget https://releases.hashicorp.com/vault/1.4.2/vault_1.4.2_linux_amd64.zip 
 COPY run-sidecar.sh execute-get-token.sh execute-get-vault-secrets.sh \
     get-vault-secrets.sh /usr/local/bin/
 
+# adding Keycloak identities:
+COPY execute-get-keycloak-identities.sh get-keycloak-identities.sh /usr/local/bin/
+
 COPY test-vault-cli.sh /test-vault-cli.sh
 
 # Default value for NEW_JWT_WAIT_SEC must be a little shorter than TTL_SEC

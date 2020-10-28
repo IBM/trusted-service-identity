@@ -87,6 +87,9 @@ data:
               - path: "tsi-secrets"
                 fieldRef:
                  fieldPath: metadata.annotations['tsi.secrets']
+              - path: "tsi-identities"
+                fieldRef:
+                 fieldPath: metadata.annotations['tsi.identities']
               - path: "ti-identity"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']
