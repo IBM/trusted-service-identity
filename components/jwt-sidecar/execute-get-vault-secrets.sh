@@ -43,7 +43,7 @@ do
           sleep 5
         done
     else
-      # if the script is running in initContainer, there is no need to block 
+      # if the script is running in initContainer, there is no need to block
       # when no secrets are needed
       echo "Nothing to do. Exiting ..."
       exit 0
@@ -53,7 +53,7 @@ do
 
   /usr/local/bin/get-vault-secrets.sh
   RT=$?
-  # When sript is running as sidecar, run it forever
+  # When script is running as sidecar, run it forever
   if $IS_SIDECAR; then
     if [ "$RT" == "0" ]; then
       # introduce the random wait value from 1 to 30 seconds
@@ -61,7 +61,6 @@ do
       WAIT_SEC=$((${SECRET_REFRESH_SEC} + RAND_WAIT))
       echo "Waiting $WAIT_SEC seconds ..."
     fi
-    sleep "${WAIT_SEC}"
   else
     # when it's running as initContainer, exit after successful transaction
     if [ "$RT" == "0" ]; then
@@ -73,6 +72,6 @@ do
       exit 1
     fi
     ((COUNTER++))
-    sleep "${WAIT_SEC}"
   fi
+  sleep "${WAIT_SEC}"
 done

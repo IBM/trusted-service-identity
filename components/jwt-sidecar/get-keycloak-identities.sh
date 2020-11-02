@@ -25,18 +25,23 @@ if [ ! -s "$IDSREQFILE" ]; then
    exit 1
 fi
 JSON=$(yq r -j "$IDSREQFILE")
+if [ "$?" != "0" ]; then
+  echo "Error parsing $IDSREQFILE file. Incorrect format"
+  exit 1
+fi
 
 # the return values from this function are ignored
 # we only use the echoed values
 run()
 {
-  local KEYCLOAK_ADDR=$1
-  local GETTOKEN="${KEYCLOAK_ADDR}/auth/realms/hello-world-authz/protocol/openid-connect/token"
+  # example of the realm token URL:
+  # "${KEYCLOAK_ADDR}/auth/realms/hello-world-authz/protocol/openid-connect/token"
+  local KEYCLOAK_TOKEN_URL=$1
   local JWTFILE="/jwt/token"
   local TOKEN_RESP=$(mktemp /tmp/token-resp.XXX)
 
   SC=$(curl --max-time 10 -s -w "%{http_code}" -o $TOKEN_RESP --location --request POST \
-  ${GETTOKEN} --header ': ' --header 'Content-Type: application/x-www-form-urlencoded' \
+  ${KEYCLOAK_TOKEN_URL} --header ': ' --header 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'client_id=tsi-client' --data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:uma-ticket' \
   --data-urlencode "tsi_token=$(cat $JWTFILE)" --data-urlencode 'audience=tsi-client' 2> /dev/null)
   local RT=$?
@@ -82,7 +87,7 @@ HELPMEHELPME
 
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
 # for each requested identities parse its attributes
- KEYCLOAK_ADDR=$(echo "$row" | jq -r '."tsi.keycloak/server"')
+ KEYCLOAK_ADDR=$(echo "$row" | jq -r '."tsi.keycloak/token-url"')
 
   # then run identity retrieval from Keycloak
   run $KEYCLOAK_ADDR

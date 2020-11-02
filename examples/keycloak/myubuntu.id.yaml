@@ -14,7 +14,8 @@ spec:
       annotations:
         admission.trusted.identity/inject: "true"
         tsi.identities: |
-         - tsi.keycloak/server: "http://tsi-keycloak-v001.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
+        # token-url: complete URL for obtaining a realm token:
+         - tsi.keycloak/token-url: "http://tsi-keycloak-v001.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud/auth/realms/hello-world-authz/protocol/openid-connect/token"
         # tsi.secrets: |
         #      - tsi.secret/name: "mysecret1"
         #        tsi.secret/constraints: "region,images"
