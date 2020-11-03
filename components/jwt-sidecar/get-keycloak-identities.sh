@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 IDSOUTDIR="/usr/share/secrets/tsi-secrets/identities"
 JWTFILE="/jwt/token"
@@ -19,7 +19,7 @@ if [ ! -s "$JWTFILE" ]; then
 fi
 
 # since annotations are provided in YAML format,
-convert YAML to JSON for easier manipulations
+# convert YAML to JSON for easier manipulations
 if [ ! -s "$IDSREQFILE" ]; then
    echo "$IDSREQFILE contains no data. Nothing to do"
    exit 1

@@ -6,8 +6,7 @@
 RT=$?
 if ! $IS_SIDECAR; then
   if [ "$RT" == "0" ]; then
-    echo "All good!"
-    exit 0
+    echo "All good with secrets"
   else
     echo "Unsuccessful Vault retrieve"
     exit 1
@@ -17,8 +16,7 @@ fi
 RT=$?
 if ! $IS_SIDECAR; then
   if [ "$RT" == "0" ]; then
-    echo "All good!"
-    exit 0
+    echo "All good with identities"
   else
     echo "Unsuccessful Keycloak retrieve"
     exit 1
