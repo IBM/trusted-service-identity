@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IDSOUTDIR="/usr/share/secrets/tsi-secrets/identities"
+IDSOUTDIR="/usr/share/secrets"
 JWTFILE="/jwt/token"
 # IDSREQFILE - Identities request file from Pod Annotation
 IDSREQFILE="/pod-metadata/tsi-identities"
@@ -37,8 +37,18 @@ run()
   # example of the realm token URL:
   # "${KEYCLOAK_ADDR}/auth/realms/hello-world-authz/protocol/openid-connect/token"
   local KEYCLOAK_TOKEN_URL=$1
+  local K_LOCAL=$2
+  local LOCPATH=${K_LOCAL:-"tsi-secrets/identities"}
   local JWTFILE="/jwt/token"
   local TOKEN_RESP=$(mktemp /tmp/token-resp.XXX)
+
+  # local-path must start with "tsi-secrets"
+  if [[ ${LOCPATH} != "tsi-secrets" ]] && [[ ${LOCPATH} != "/tsi-secrets" ]] && [[ ${LOCPATH} != /tsi-secrets/* ]] && [[ ${LOCPATH} != tsi-secrets/* ]]; then
+     echo "ERROR: invalid local-path requested: $LOCPATH"
+     echo "Local path must start with /tsi-secrets"
+     return 1
+   fi
+  local IDSOUTDIR=${IDSOUTDIR}/${LOCPATH}/
 
   SC=$(curl --max-time 10 -s -w "%{http_code}" -o $TOKEN_RESP --location --request POST \
   ${KEYCLOAK_TOKEN_URL} --header ': ' --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -68,11 +78,13 @@ run()
   fi
 
   RESP=$(cat $TOKEN_RESP)
-  rm -f $TOKEN_RESP
+  # rm -f $TOKEN_RESP
+  mkdir -p ${IDSOUTDIR}
+  mv $TOKEN_RESP ${IDSOUTDIR}/access_token
   # REF_TOK=$(echo $RESP | jq -r '.refresh_token')
   # ACCESS_TOK=$(echo $RESP | jq -r '.access_token')
   # echo $ACCESS_TOK | cut -d"." -f2 | sed 's/\./\n/g' | base64 --decode | jq
-  echo $RESP | jq -r '.access_token' | cut -d"." -f2 | base64 --decode  | jq  '.'  > $IDSOUTDIR
+  echo $RESP | jq -r '.access_token' | cut -d"." -f2 | base64 --decode  | jq  '.'  > ${IDSOUTDIR}/acces_token.txt
 }
 
 ## create help menu:
@@ -88,11 +100,15 @@ HELPMEHELPME
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
 # for each requested identities parse its attributes
  KEYCLOAK_ADDR=$(echo "$row" | jq -r '."tsi.keycloak/token-url"')
-
+ KEYCLOAK_PATH=$(echo "$row" | jq -r '."tsi.keycloak/local-path"')
+ if [ "$KEYCLOAK_PATH" == "null" ]; then
+	 KEYCLOAK_PATH=""
+ fi
   # then run identity retrieval from Keycloak
-  run $KEYCLOAK_ADDR
+  run $KEYCLOAK_ADDR $KEYCLOAK_PATH
   RT=$?
   if [ "$RT" != "0" ]; then
     echo "Error processing identities KEYCLOAK_ADDR=${KEYCLOAK_ADDR}"
+    exit 1
   fi
 done
