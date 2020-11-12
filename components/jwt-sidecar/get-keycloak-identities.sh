@@ -39,6 +39,7 @@ run()
   local KEYCLOAK_TOKEN_URL=$1
   local K_LOCAL=$2
   local LOCPATH=${K_LOCAL:-"tsi-secrets/identities"}
+  local AUD=$3
   local JWTFILE="/jwt/token"
   local TOKEN_RESP=$(mktemp /tmp/token-resp.XXX)
 
@@ -48,12 +49,12 @@ run()
      echo "Local path must start with /tsi-secrets"
      return 1
    fi
-  local IDSOUTDIR=${IDSOUTDIR}/${LOCPATH}/
+  local IDSOUTDIR=${IDSOUTDIR}/${LOCPATH}
 
   SC=$(curl --max-time 10 -s -w "%{http_code}" -o $TOKEN_RESP --location --request POST \
-  ${KEYCLOAK_TOKEN_URL} --header ': ' --header 'Content-Type: application/x-www-form-urlencoded' \
+  ${KEYCLOAK_TOKEN_URL} --header 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'client_id=tsi-client' --data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:uma-ticket' \
-  --data-urlencode "tsi_token=$(cat $JWTFILE)" --data-urlencode 'audience=tsi-client' 2> /dev/null)
+  --data-urlencode "tsi_token=$(cat $JWTFILE)" --data-urlencode "audience=$AUD" 2> /dev/null)
   local RT=$?
 
   # return value for curl timeout is 28
@@ -80,11 +81,11 @@ run()
   RESP=$(cat $TOKEN_RESP)
   # rm -f $TOKEN_RESP
   mkdir -p ${IDSOUTDIR}
-  mv $TOKEN_RESP ${IDSOUTDIR}/access_token
+  mv $TOKEN_RESP ${IDSOUTDIR}/access_token.$COUNT
   # REF_TOK=$(echo $RESP | jq -r '.refresh_token')
   # ACCESS_TOK=$(echo $RESP | jq -r '.access_token')
   # echo $ACCESS_TOK | cut -d"." -f2 | sed 's/\./\n/g' | base64 --decode | jq
-  echo $RESP | jq -r '.access_token' | cut -d"." -f2 | base64 --decode  | jq  '.'  > ${IDSOUTDIR}/acces_token.txt
+  echo $RESP | jq -r '.access_token' | cut -d"." -f2 | base64 --decode  | jq  '.'  > ${IDSOUTDIR}/acces_token.$COUNT.txt
 }
 
 ## create help menu:
@@ -96,19 +97,35 @@ Syntax: $0
 HELPMEHELPME
 }
 
-
+ERR=0
+COUNT=0
 for row in $(echo "${JSON}" | jq -c '.[]' ); do
 # for each requested identities parse its attributes
  KEYCLOAK_ADDR=$(echo "$row" | jq -r '."tsi.keycloak/token-url"')
  KEYCLOAK_PATH=$(echo "$row" | jq -r '."tsi.keycloak/local-path"')
+ KEYCLOAK_AUDS=$(echo "$row" | jq -r '."tsi.keycloak/audiences"')
  if [ "$KEYCLOAK_PATH" == "null" ]; then
 	 KEYCLOAK_PATH=""
  fi
-  # then run identity retrieval from Keycloak
-  run $KEYCLOAK_ADDR $KEYCLOAK_PATH
-  RT=$?
-  if [ "$RT" != "0" ]; then
-    echo "Error processing identities KEYCLOAK_ADDR=${KEYCLOAK_ADDR}"
-    exit 1
-  fi
+ if [ "$KEYCLOAK_AUDS" == "null" ]; then
+	 KEYCLOAK_AUDS="tsi-client"
+ fi
+
+ # audiences can be separated with comma
+ auds=$(echo $KEYCLOAK_AUDS | tr "," "/n")
+ for aud in $auds; do
+
+    # then run identity retrieval from Keycloak
+    run $KEYCLOAK_ADDR $KEYCLOAK_PATH $aud
+    RT=$?
+    if [ "$RT" != "0" ]; then
+      echo "Error processing identities token-url=${KEYCLOAK_ADDR}, audiance=$aud, local-path=$KEYCLOAK_PATH"
+      ERR=1
+    fi
+    # increase the counter
+    COUNT=$((COUNT+1))
+  done
+  # if [ "$ERR" -ne 0 ]; then
+  #   exit 1
+  # fi
 done
