@@ -42,6 +42,7 @@ run()
   local AUD=$3
   local JWTFILE="/jwt/token"
   local TOKEN_RESP=$(mktemp /tmp/token-resp.XXX)
+  local FILENAME="access_token.$3.$COUNT"
 
   # local-path must start with "tsi-secrets"
   if [[ ${LOCPATH} != "tsi-secrets" ]] && [[ ${LOCPATH} != "/tsi-secrets" ]] && [[ ${LOCPATH} != /tsi-secrets/* ]] && [[ ${LOCPATH} != tsi-secrets/* ]]; then
@@ -81,11 +82,11 @@ run()
   RESP=$(cat $TOKEN_RESP)
   # rm -f $TOKEN_RESP
   mkdir -p ${IDSOUTDIR}
-  mv $TOKEN_RESP ${IDSOUTDIR}/access_token.$COUNT
+  mv $TOKEN_RESP ${IDSOUTDIR}/${FILENAME}
   # REF_TOK=$(echo $RESP | jq -r '.refresh_token')
   # ACCESS_TOK=$(echo $RESP | jq -r '.access_token')
   # echo $ACCESS_TOK | cut -d"." -f2 | sed 's/\./\n/g' | base64 --decode | jq
-  echo $RESP | jq -r '.access_token' | cut -d"." -f2 | base64 --decode  | jq  '.'  > ${IDSOUTDIR}/acces_token.$COUNT.txt
+  echo $RESP | jq -r '.access_token' | cut -d"." -f2 | base64 --decode  | jq  '.'  > ${IDSOUTDIR}/${FILENAME}.txt
 }
 
 ## create help menu:
@@ -112,7 +113,7 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
  fi
 
  # audiences can be separated with comma
- auds=$(echo $KEYCLOAK_AUDS | tr "," "/n")
+ auds=$(echo $KEYCLOAK_AUDS | tr "," "\n")
  for aud in $auds; do
 
     # then run identity retrieval from Keycloak
