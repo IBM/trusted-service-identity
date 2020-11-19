@@ -15,7 +15,8 @@ spec:
         admission.trusted.identity/inject: "true"
         # token-url: complete URL for obtaining a realm token:
         tsi.identities: |
-          - tsi.keycloak/token-url: "http://keycloak.server/auth/realms/tsi-authz/protocol/openid-connect/token"
+          - tsi.keycloak/token-url: "http://keycloak.server/auth/realms/tsi-realm/protocol/openid-connect/token"
+            tsi.keycloak/audiences: "tsi-client"
             tsi.keycloak/local-path: "tsi-secrets/identities"
         # tsi.secrets: |
         #      - tsi.secret/name: "mysecret1"

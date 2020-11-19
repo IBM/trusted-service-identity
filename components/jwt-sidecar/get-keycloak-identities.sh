@@ -121,7 +121,9 @@ for row in $(echo "${JSON}" | jq -c '.[]' ); do
     RT=$?
     if [ "$RT" != "0" ]; then
       echo "Error processing identities token-url=${KEYCLOAK_ADDR}, audiance=$aud, local-path=$KEYCLOAK_PATH"
-      ERR=1
+      # if we want to end the init process in case of the failed attempt,
+      # uncomment all the way to the end
+      #  ERR=1
     fi
     # increase the counter
     COUNT=$((COUNT+1))

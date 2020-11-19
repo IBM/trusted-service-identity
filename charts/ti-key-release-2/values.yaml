@@ -58,6 +58,9 @@ ti-key-release-1:
   secrets:
     # how often secrets should be retrieved from Vault
     refreshSec: 600
+  identities:
+    # how often identities should be retrieved from Keycloak
+    refreshSec: 600
   # Cluster Information
   cluster:
     name: cluster-name

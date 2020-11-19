@@ -259,7 +259,7 @@ For `minikube` obtain the current endpoint as follow
 <details><summary>Click to view minikube steps</summary>
 
 ```console
-minikube service tsi-vault -n trusted-identity --url
+minikube service tsi-vault -n tsi-vault --url
 http://192.168.99.105:30229
 # assign it to VAULT_ADDR env. variable:
 export VAULT_ADDR=http://192.168.99.105:30229
@@ -302,7 +302,7 @@ spec:
 
 create ingress:
 ```console
-$ kk create -f ingress-IKS.yaml
+$ kubectl -n tsi-vault create -f ingress-IKS.yaml
 ```
 </details>
 

@@ -27,6 +27,10 @@ secrets:
 # the TSI secrets to be retrieved by the sidecar
 vaultAddress: http://vault
 
+identities:
+  # how often identities should be retrieved from Keycloak
+  refreshSec: 600
+
 # Not recommended for user to configure this. Hyperkube image to use when executing
 # kubectl commands
 hyperkube:
