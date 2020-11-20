@@ -9,6 +9,7 @@ This demo can be executed alone or in addition to secrets management [demo with 
 - [Keycloak Installation](./README.md#keycloak-installation)
 - [Keycloak Access Policies](./README.md#keycloak-access-policies)
 - [Sample Application](./README.md#sample-application)
+- [Demo Video Recording](https://www.youtube.com/watch?v=2TeExJE4X5o)
 
 ## Prerequisites
 This demo requires complete [TSI installation](/README.md#install-trusted-service-identity-framework), including registration of all the
@@ -268,3 +269,5 @@ root@myubuntuid-7f5897844b-v9whh:/# cat /tsi-secrets/identities/access_token.tsi
   "cluster-name": "minikube"
 }
 ```
+## Demo Video Recording
+This demo recording is [available here](https://www.youtube.com/watch?v=2TeExJE4X5o)
