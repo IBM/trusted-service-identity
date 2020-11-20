@@ -32,7 +32,7 @@ service. This can be installed in the same Kubernetes cluster as
 the demo, or in a remote location, as long as the demo cluster has access to the instance. It is a good practice to keep the Keycloak
 instance in a separate namespace, e.g. `tsi-keycloak`.
 
-First, define the KEYCLOAK_PASSWORD value in [/examples/keycloak/keycloak.yaml](/examples/keycloak/keycloak.yaml)
+First, define the `KEYCLOAK_PASSWORD` value in [/examples/keycloak/keycloak.yaml](/examples/keycloak/keycloak.yaml)
 
 ```console
 kubectl create ns tsi-keycloak
