@@ -27,7 +27,7 @@ helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
 ```
 
 ## Keycloak Installation
-To run Keycloak demo we need a running instance of the Keycloak
+To run the Keycloak demo we need a running instance of the Keycloak
 service. This can be installed in the same Kubernetes cluster as
 the demo, or in remote location, as long as the demo cluster has access to this instance. It is a good practice to keep the Keycloak
 instance in a separate namespace, e.g. `tsi-keycloak`.
