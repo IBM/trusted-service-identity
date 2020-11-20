@@ -269,5 +269,24 @@ root@myubuntuid-7f5897844b-v9whh:/# cat /tsi-secrets/identities/access_token.tsi
   "cluster-name": "minikube"
 }
 ```
+Here is the command to get the access token (from inside of the sidecar):
+```console
+curl --location --request POST 'http://<keycloak-server>/auth/realms/tsi-realm/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:uma-ticket' \
+--data-urlencode 'audience=tsi-client' \
+--data-urlencode 'client_id=tsi-client' \
+--data-urlencode "tsi_token=$(cat /jwt/token)"
+```
+
+The `access_token` part of the response can be inspected in JWT debugger: https://jwt.io/
+
+Here is the command to get the public key, to validate the signature:
+```console
+curl --location --request GET 'http://<keycloak-server>/auth/realms/tsi-realm/protocol/openid-connect/certs' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode --data-urlencode "tsi_token=$(cat /jwt/token)"
+```
+
 ## Demo Video Recording
 This demo recording is [available here](https://www.youtube.com/watch?v=2TeExJE4X5o)
