@@ -259,7 +259,7 @@ For `minikube` obtain the current endpoint as follow
 <details><summary>Click to view minikube steps</summary>
 
 ```console
-minikube service tsi-vault -n trusted-identity --url
+minikube service tsi-vault -n tsi-vault --url
 http://192.168.99.105:30229
 # assign it to VAULT_ADDR env. variable:
 export VAULT_ADDR=http://192.168.99.105:30229
@@ -332,18 +332,17 @@ Once the Vault service is running and `VAULT_ADDR` is defined, execute one-time
 Vault setup:
 
 ```console
-examples/vault/demo.vault-setup.sh $VAULT_ADDR tsi-test
+examples/vault/demo.vault-setup.sh $VAULT_ADDR tsi-vault
 ```
 
 ### Setup Cluster Nodes
 The following information is required to deploy TSI node-setup helm chart:
-* cluster name - name of the cluster. This must correspond to the actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
+* CLUSTER_NAME - name of the cluster. This must correspond to the actual name of the cluster
+* REGION - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
 When using IKS, these values can be obtain via a script:
 
 ```console
-examples/vault/demo.get-cluster-info.sh
-
+. ./utils/get-cluster-info.sh
 export CLUSTER_NAME=ti-test1
 export REGION=eu-de
 ```
@@ -357,7 +356,7 @@ To use vTPM, deploy TSI Node Setup helm charts with all the functions disabled. 
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 ```console
-helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=false \
+helm install charts/tsi-node-setup-vX.X.X.tgz --debug --name tsi-setup --set reset.all=false \
 --set reset.x5c=false --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
@@ -366,13 +365,13 @@ If you are running this setup for the first time or like to override previous se
 
 
 ```console
-helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.all=true \
+helm install charts/tsi-node-setup-vX.X.X.tgz --debug --name tsi-setup --set reset.all=true \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
 To keep the existing private key, but just reset the intermediate CA (`x5c`)
 ```console
-helm install charts/tsi-node-setup-X.X.X --debug --name tsi-setup --set reset.x5c=true \
+helm install charts/tsi-node-setup-vX.X.X.tgz --debug --name tsi-setup --set reset.x5c=true \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION
 ```
 
@@ -415,7 +414,7 @@ Replace X.X.X with a proper version numbers (typically the highest, the most rec
 
 ```console
 export VAULT_ADDR=http://<vault_location>
-helm install charts/ti-key-release-2-X.X.X.tgz --debug --name tsi \
+helm install charts/ti-key-release-2-vX.X.X.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \

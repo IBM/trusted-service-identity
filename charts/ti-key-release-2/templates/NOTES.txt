@@ -18,13 +18,15 @@ This helm chart installs environment for Trusted Identity
     secrets.refreshSec: {{ index .Values "ti-key-release-1" "secrets" "refreshSec" }}
     jssService.type: {{ .Values.jssService.type }}
 
+Before proceeding, please refer to the README.md to perform bootstrapping of TSI.
+
 To execute a test, create a new namespace, load the application secrets to vault,
 then deploy the test application:
 
     kubectl create ns test
     examples/vault/demo.secret-maker.sh -f examples/myubuntu.yaml -n test > myubuntu.secrets.sh
     # update the myubuntu
-    chmod + myubuntu.secrets.sh
+    chmod +x myubuntu.secrets.sh
     ./myubuntu.secrets.sh
     kubectl create -f examples/myubuntu.yaml -n test
 Then check if the secret is available:
