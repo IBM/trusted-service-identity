@@ -337,11 +337,12 @@ examples/vault/demo.vault-setup.sh $VAULT_ADDR tsi-vault
 
 ### Setup Cluster Nodes
 The following information is required to deploy TSI node-setup helm chart:
-* cluster name - name of the cluster. This must correspond to the actual name of the cluster
-* cluster region - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
+* CLUSTER_NAME - name of the cluster. This must correspond to the actual name of the cluster
+* REGION - label associated with the actual region for the data center (e.g. eu-de, us-south, eu-gb)
 When using IKS, these values can be obtain via a script:
 
 ```console
+. ./utils/get-cluster-info.sh
 export CLUSTER_NAME=ti-test1
 export REGION=eu-de
 ```
