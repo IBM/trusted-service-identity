@@ -1,0 +1,43 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: tsi-keycloak
+spec:
+  selector:
+    app: tsi-keycloak
+  ports:
+  - protocol: TCP
+    port: 9090
+    targetPort: 8080
+  type: NodePort
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tsi-keycloak
+  name: tsi-keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tsi-keycloak
+  template:
+    metadata:
+      labels:
+        app: tsi-keycloak
+      name: tsi-keycloak
+    spec:
+      containers:
+        - name: tsi-keycloak
+          image: lumjjb/keycloak-tsi:latest
+          imagePullPolicy: Always
+          args: [ "-b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled" ]
+          env:
+          - name: DB_VENDOR
+            value: "h2"
+          - name: KEYCLOAK_USER
+            value: "admin"
+          - name: KEYCLOAK_PASSWORD
+            value: "**********"

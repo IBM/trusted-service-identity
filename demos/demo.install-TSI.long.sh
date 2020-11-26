@@ -80,7 +80,7 @@ setup() {
     source cluster-info.txt
     rm cluster-info.txt
   else
-    if [ "$REGION" == "" ] || [ "$CLUSTER_NAME" == "" ]; then
+    if [ "$REGION" == "" || "$CLUSTER_NAME" == "" ]; then
       comment "Error: REGION and CLUSTER_NAME must be set"
       helpme
       exit 1
@@ -130,8 +130,8 @@ doit vault login $ROOT_TOKEN
 doit sh myubuntu.secrets.1.sh
 doit vault kv list secret/tsi-ri/eu-de/30beed0665d9cb4df616cca84ef2c06d2323e02869fcca8bbfbf0d8c5a3987cc
 doit vault kv get -format=json secret/tsi-ri/eu-de/30beed0665d9cb4df616cca84ef2c06d2323e02869fcca8bbfbf0d8c5a3987cc/mysecret1
-#doit vault kv list secret/tsi-r/eu-de/
-#doit vault kv get -format=json secret/tsi-r/eu-de/mysecret2
+doit vault kv list secret/tsi-r/eu-de/
+doit vault kv get -format=json secret/tsi-r/eu-de/mysecret2
 }
 
 
@@ -150,6 +150,11 @@ ttyDoit kubectl -n test exec -it $(kubectl -n test get po | grep myubuntu | grep
   exit
 EOF
 
+sleep 10
+comment "Let's delete one secret"
+doit vault kv delete secret/tsi-r/eu-de/mysecret2
+doit vault kv get -format=json secret/tsi-r/eu-de/mysecret2
+doit kubectl -n test logs -f $(kubectl -n test get po | grep myubuntu | grep Running | awk '{print $1}') -c jwt-sidecar
 }
 
 setup "$1"

@@ -24,6 +24,8 @@ data:
           value: {{ .Values.vaultAddress }}
         - name: SECRET_REFRESH_SEC
           value: {{ .Values.secrets.refreshSec }}
+        - name: IDENTITY_REFRESH_SEC
+          value: {{ .Values.identities.refreshSec }}
         volumeMounts:
           - name: tsi-secrets
             mountPath: /usr/share/secrets/tsi-secrets
@@ -55,6 +57,8 @@ data:
           value: {{ .Values.vaultAddress }}
         - name: SECRET_REFRESH_SEC
           value: {{ .Values.secrets.refreshSec }}
+        - name: IDENTITY_REFRESH_SEC
+          value: {{ .Values.secrets.refreshIdent }}
         volumeMounts:
           - name: tsi-secrets
             mountPath: /usr/share/secrets/tsi-secrets
@@ -87,6 +91,9 @@ data:
               - path: "tsi-secrets"
                 fieldRef:
                  fieldPath: metadata.annotations['tsi.secrets']
+              - path: "tsi-identities"
+                fieldRef:
+                 fieldPath: metadata.annotations['tsi.identities']
               - path: "ti-identity"
                 fieldRef:
                   fieldPath: metadata.annotations['admission.trusted.identity/ti-identity']

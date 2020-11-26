@@ -23,6 +23,9 @@ RUN wget https://releases.hashicorp.com/vault/1.4.2/vault_1.4.2_linux_amd64.zip 
 COPY run-sidecar.sh execute-get-token.sh execute-get-vault-secrets.sh \
     get-vault-secrets.sh /usr/local/bin/
 
+# adding Keycloak identities:
+COPY execute-get-keycloak-identities.sh get-keycloak-identities.sh /usr/local/bin/
+
 COPY test-vault-cli.sh /test-vault-cli.sh
 
 # Default value for NEW_JWT_WAIT_SEC must be a little shorter than TTL_SEC
@@ -31,9 +34,11 @@ ENV JWT_TTL_SEC=${DEFAULT_JWT_TTL_SEC}
 # Default values for vault client setup
 ARG DEFAULT_VAULT_ADDR="http://vault:8200"
 ARG DEFAULT_SECRET_REFRESH_SEC=600
+ARG DEFAULT_IDENTITY_REFRESH_SEC=600
 ARG DEFAULT_IS_SIDECAR=true
 ENV VAULT_ADDR=${DEFAULT_VAULT_ADDR}
 ENV SECRET_REFRESH_SEC=${DEFAULT_SECRET_REFRESH_SEC}
+ENV IDENTITY_REFRESH_SEC=${DEFAULT_IDENTITY_REFRESH_SEC}
 ENV IS_SIDECAR=${DEFAULT_IS_SIDECAR}
 
 CMD ["/bin/bash", "-c", "/usr/local/bin/run-sidecar.sh"]

@@ -302,7 +302,7 @@ spec:
 
 create ingress:
 ```console
-$ kk create -f ingress-IKS.yaml
+$ kubectl -n tsi-vault create -f ingress-IKS.yaml
 ```
 </details>
 

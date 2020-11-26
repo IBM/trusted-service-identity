@@ -29,4 +29,4 @@ spec:
           image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]
-          args: [ "while true; do ls /tsi-secrets; sleep 5; done;" ]
+          args: [ "while true; do ls /tsi-secrets; sleep 15; done;" ]

@@ -1,18 +1,7 @@
 #!/bin/bash
 
-# For debbugging and manually retrieving the vault secrets:
-#  VAULT_ADDR is already defined on the sidecar. You can modify the token and
-# the role
-#   curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'tsi-role-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq
-# using the response above extract the auth.client_token and set as VAULT_TOKEN
-#   export VAULT_TOKEN=$(echo $RESP | jq -r '.auth.client_token')
-# Or, if results are successful, use all-in-one:
-#   export VAULT_TOKEN=$(curl --request POST --data '{"jwt": "'"$(cat /jwt/token)"'", "role": "'tsi-role-r'"}' "${VAULT_ADDR}"/v1/auth/trusted-identity/login | jq -r '.auth.client_token')
-# now ready to retrieve the secret:
-#   vault kv get -format=json secret/tsi-r/eu-de/mysecret4
-
 JWTFILE="/jwt/token"
-SECREQFILE="/pod-metadata/tsi-secrets"
+IDSREQFILE="/pod-metadata/tsi-identities"
 
 # set the initial wait to 10 seconds
 # once the vault secret is retrieved successfully, switch to
@@ -33,13 +22,13 @@ do
       done
   fi
 
-  # get the secret definitions
-  if [ ! -s "$SECREQFILE" ]; then
-    echo "$SECREQFILE does not exist or empty."
+  # get the identity definitions
+  if [ ! -s "$IDSREQFILE" ]; then
+    echo "$IDSREQFILE does not exist or empty."
 
     if $IS_SIDECAR; then
         echo "Nothing to do. Waiting..."
-        while [ ! -s "$SECREQFILE" ]; do
+        while [ ! -s "$IDSREQFILE" ]; do
           sleep 5
         done
     else
@@ -51,24 +40,24 @@ do
 
   fi
 
-  /usr/local/bin/get-vault-secrets.sh
+  /usr/local/bin/get-keycloak-identities.sh
   RT=$?
   # When script is running as sidecar, run it forever
   if $IS_SIDECAR; then
     if [ "$RT" == "0" ]; then
       # introduce the random wait value from 1 to 30 seconds
       RAND_WAIT=$((1 + RANDOM % 30))
-      WAIT_SEC=$((${SECRET_REFRESH_SEC} + RAND_WAIT))
+      WAIT_SEC=$((${IDENTITY_REFRESH_SEC} + RAND_WAIT))
       echo "Waiting $WAIT_SEC seconds ..."
     fi
   else
     # when it's running as initContainer, exit after successful transaction
     if [ "$RT" == "0" ]; then
-      echo "Secrets successfully executed!"
+      echo "Keycloak identities successfully executed!"
       exit 0
     fi
     if [[ "$COUNTER" -gt "$MAX_EXEC" ]]; then
-      echo "$COUNTER unsuccessful attempts to get secret. Exiting..."
+      echo "$COUNTER unsuccessful attempts to get Keycloak identities. Exiting..."
       exit 1
     fi
     ((COUNTER++))
