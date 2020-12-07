@@ -1,9 +1,8 @@
 {
-   "InitContainers": null,
-   "SidecarContainers": [
+   "InitContainers": [
        {
-           "name": "jwt-sidecar",
-           "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.5",
+           "name": "jwt-init",
+           "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
            "env": [
                {
                    "name": "HOST_IP",
@@ -14,23 +13,31 @@
                    }
                },
                {
+                   "name": "IS_SIDECAR",
+                   "value": "false"
+               },
+               {
                    "name": "JWT_TTL_SEC",
-                   "value": "30"
+                   "value": "60"
                },
                {
                    "name": "VAULT_ADDR",
-                   "value": "http://ti-test1.eu-de.containers.appdomain.cloud"
+                   "value": "http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
                },
                {
                    "name": "SECRET_REFRESH_SEC",
-                   "value": "45"
+                   "value": "600"
+               },
+               {
+                   "name": "IDENTITY_REFRESH_SEC",
+                   "value": "600"
                }
            ],
            "resources": {},
            "volumeMounts": [
                {
                    "name": "tsi-secrets",
-                   "mountPath": "/usr/share/secrets"
+                   "mountPath": "/usr/share/secrets/tsi-secrets"
                },
                {
                    "name": "tsi-sockets",
@@ -42,12 +49,75 @@
                    "mountPath": "/pod-metadata"
                },
                {
-                   "name": "host-etc",
+                   "name": "host-machineid",
                    "readOnly": true,
-                   "mountPath": "/host/etc"
+                   "mountPath": "/host/machineid"
                }
            ],
-           "imagePullPolicy": "Always"
+           "imagePullPolicy": "Always",
+           "securityContext": {
+               "runAsUser": 0
+           }
+       }
+   ],
+   "SidecarContainers": [
+       {
+           "name": "jwt-sidecar",
+           "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
+           "env": [
+               {
+                   "name": "HOST_IP",
+                   "valueFrom": {
+                       "fieldRef": {
+                           "fieldPath": "status.hostIP"
+                       }
+                   }
+               },
+               {
+                   "name": "IS_SIDECAR",
+                   "value": "true"
+               },
+               {
+                   "name": "JWT_TTL_SEC",
+                   "value": "60"
+               },
+               {
+                   "name": "VAULT_ADDR",
+                   "value": "http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
+               },
+               {
+                   "name": "SECRET_REFRESH_SEC",
+                   "value": "600"
+               },
+               {
+                   "name": "IDENTITY_REFRESH_SEC"
+               }
+           ],
+           "resources": {},
+           "volumeMounts": [
+               {
+                   "name": "tsi-secrets",
+                   "mountPath": "/usr/share/secrets/tsi-secrets"
+               },
+               {
+                   "name": "tsi-sockets",
+                   "mountPath": "/host/sockets"
+               },
+               {
+                   "name": "pod-metadata",
+                   "readOnly": true,
+                   "mountPath": "/pod-metadata"
+               },
+               {
+                   "name": "host-machineid",
+                   "readOnly": true,
+                   "mountPath": "/host/machineid"
+               }
+           ],
+           "imagePullPolicy": "Always",
+           "securityContext": {
+               "runAsUser": 0
+           }
        }
    ],
    "Volumes": [
@@ -63,10 +133,10 @@
            }
        },
        {
-           "name": "host-etc",
+           "name": "host-machineid",
            "hostPath": {
-               "path": "/etc",
-               "type": "Directory"
+               "path": "/etc/machine-id",
+               "type": "File"
            }
        },
        {
@@ -77,6 +147,12 @@
                        "path": "tsi-secrets",
                        "fieldRef": {
                            "fieldPath": "metadata.annotations['tsi.secrets']"
+                       }
+                   },
+                   {
+                       "path": "tsi-identities",
+                       "fieldRef": {
+                           "fieldPath": "metadata.annotations['tsi.identities']"
                        }
                    },
                    {

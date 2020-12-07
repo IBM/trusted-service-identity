@@ -2,23 +2,23 @@
    "kind": "Pod",
    "apiVersion": "v1",
    "metadata": {
-       "generateName": "myubuntu-79bb88676b-",
+       "generateName": "myubuntu-6d5c486b66-",
+       "namespace": "test",
        "creationTimestamp": null,
        "labels": {
            "app": "myubuntu",
-           "pod-template-hash": "79bb88676b"
+           "pod-template-hash": "6d5c486b66"
        },
        "annotations": {
            "admission.trusted.identity/inject": "true",
-           "kubernetes.io/psp": "ibm-privileged-psp",
-           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret1\"\n- tsi.secret/name: \"mysecret2.json\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-r\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret2\"\n- tsi.secret/name: \"password\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-r\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-passwords\"\n- tsi.secret/name: \"invalid\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-invalid\"\n- tsi.secret/name: \"non-existing\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/nothing\"\n  tsi.secret/local-path: \"mysecrets/non-existing\"\n"
+           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
        },
        "ownerReferences": [
            {
                "apiVersion": "apps/v1",
                "kind": "ReplicaSet",
-               "name": "myubuntu-79bb88676b",
-               "uid": "b0272e4e-6f7f-11ea-be8b-6a908431fac0",
+               "name": "myubuntu-6d5c486b66",
+               "uid": "28d87f3f-8dac-4f02-a506-4a274210f7c2",
                "controller": true,
                "blockOwnerDeletion": true
            }
@@ -27,9 +27,9 @@
    "spec": {
        "volumes": [
            {
-               "name": "default-token-sggvc",
+               "name": "default-token-ncgzw",
                "secret": {
-                   "secretName": "default-token-sggvc"
+                   "secretName": "default-token-ncgzw"
                }
            }
        ],
@@ -43,12 +43,12 @@
                    "--"
                ],
                "args": [
-                   "while true; do cat /mydata; sleep 5; done;"
+                   "while true; do ls /tsi-secrets; sleep 15; done;"
                ],
                "resources": {},
                "volumeMounts": [
                    {
-                       "name": "default-token-sggvc",
+                       "name": "default-token-ncgzw",
                        "readOnly": true,
                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                    }
@@ -70,13 +70,13 @@
                "key": "node.kubernetes.io/not-ready",
                "operator": "Exists",
                "effect": "NoExecute",
-               "tolerationSeconds": 600
+               "tolerationSeconds": 300
            },
            {
                "key": "node.kubernetes.io/unreachable",
                "operator": "Exists",
                "effect": "NoExecute",
-               "tolerationSeconds": 600
+               "tolerationSeconds": 300
            }
        ],
        "priority": 0

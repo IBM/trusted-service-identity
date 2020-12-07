@@ -127,7 +127,6 @@ func TestIsSafe(t *testing.T) {
 	} else {
 		t.Fatalf(ERROR, testName)
 	}
-
 }
 
 func TestIsProtectedNamespace(t *testing.T) {
@@ -297,6 +296,7 @@ func TestUpdateAnnotation(t *testing.T) {
 		return
 	}
 	t.Logf(SUCCESS, testName)
+
 }
 
 func TestAddContainer(t *testing.T) {
@@ -386,7 +386,7 @@ func TestMutate(t *testing.T) {
 		return
 	}
 
-	err = validateResult(result, "tests/ExpectMutateInit.json")
+	err = validateResult(result, "tests/ExpectMutateInit2.json")
 	if err != nil {
 		t.Errorf(ERRORWITH, testName, err)
 		return
@@ -403,6 +403,7 @@ func TestMutate(t *testing.T) {
 		t.Errorf(ERRORWITH, testName, err)
 	}
 
+	ar.Request.Namespace = "trusted-identity"
 	admRsp := whsvr.mutate(&ar)
 	if admRsp.Allowed == false && string(admRsp.Result.Reason) == MsgNoCreate && string(admRsp.Result.Message) == MsgProtectNs && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)

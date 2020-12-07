@@ -1,21 +1,24 @@
 {
+   "kind": "Pod",
+   "apiVersion": "v1",
    "metadata": {
-       "generateName": "myubuntu-698b749889-",
+       "generateName": "myubuntu-6d5c486b66-",
+       "namespace": "test",
        "creationTimestamp": null,
        "labels": {
            "app": "myubuntu",
-           "pod-template-hash": "2546305445"
+           "pod-template-hash": "6d5c486b66"
        },
        "annotations": {
            "admission.trusted.identity/inject": "true",
-           "kubernetes.io/psp": "ibm-privileged-psp"
+           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
        },
        "ownerReferences": [
            {
-               "apiVersion": "extensions/v1beta1",
+               "apiVersion": "apps/v1",
                "kind": "ReplicaSet",
-               "name": "myubuntu-698b749889",
-               "uid": "98e29722-201d-11e9-8d9e-4a1d4b24414a",
+               "name": "myubuntu-6d5c486b66",
+               "uid": "6125da71-2a07-4df8-ad3f-305c295d2c20",
                "controller": true,
                "blockOwnerDeletion": true
            }
@@ -24,28 +27,28 @@
    "spec": {
        "volumes": [
            {
-               "name": "default-token-wp8ht",
+               "name": "default-token-ncgzw",
                "secret": {
-                   "secretName": "default-token-wp8ht"
+                   "secretName": "default-token-ncgzw"
                }
            }
        ],
        "containers": [
            {
                "name": "myubuntu",
-               "image": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+               "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
                "command": [
                    "/bin/bash",
                    "-c",
                    "--"
                ],
                "args": [
-                   "while true; do cat /jwt-tokens/token; sleep 5; done;"
+                   "while true; do ls /tsi-secrets; sleep 15; done;"
                ],
                "resources": {},
                "volumeMounts": [
                    {
-                       "name": "default-token-wp8ht",
+                       "name": "default-token-ncgzw",
                        "readOnly": true,
                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                    }
@@ -75,7 +78,8 @@
                "effect": "NoExecute",
                "tolerationSeconds": 300
            }
-       ]
+       ],
+       "priority": 0
    },
    "status": {}
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -35,6 +37,8 @@ var (
 )
 
 var tsiNamespace string
+var debug bool = true
+var write bool = true
 
 const (
 	admissionWebhookAnnotationInjectKey     = "admission.trusted.identity/inject"
@@ -202,7 +206,7 @@ func loadtsiMutateConfig(configFile string) (*tsiMutateConfig, error) {
 		cfg.Annotations = make(map[string]string)
 	}
 	// To generate a new `Expect` file for testing, uncomment out below:
-	// logJSON("ExpectTsiMutateConfig.json", cfg)
+	logJSON("ExpectTsiMutateConfig.json", cfg)
 	return &cfg, nil
 }
 
@@ -216,7 +220,7 @@ func isSafe(pod *corev1.Pod, operationType string) error {
 
 	// this output can be used for creating tests/FakeIsSafeXXX.json files
 	glog.Infof("isSafe log. Operation %v", operationType)
-	// logJSON("FakeIsSafeX.json", pod)
+	logJSON("FakeIsSafeX.json", pod)
 
 	vols := pod.Spec.Volumes
 
@@ -254,7 +258,7 @@ func isProtectedNamespace(protectedList []string, metadata *metav1.ObjectMeta) b
 
 	glog.Infof("isProtectedNamespace - protectedList: %v", protectedList)
 	// this output can be used for creating tests/FakeMutationRequiredXXX.json files
-	// logJSON("FakeMutationRequired.json", metadata)
+	logJSON("FakeMutationRequired.json", metadata)
 
 	// check if the special kubernetes system namespaces and protected TSI namespace used
 	for _, protectedNamespace := range protectedList {
@@ -313,8 +317,8 @@ func mutationRequired(protectedList []string, pod *corev1.Pod, operation string)
 
 func addContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
 	// this output can be used for creating tests/FakeAddContainer.json files
-	// logJSON("FakeAddContainerTarget.json", target)
-	// logJSON("FakeAddContainer.json", added)
+	logJSON("FakeAddContainerTarget.json", target)
+	logJSON("FakeAddContainer.json", added)
 
 	first := len(target) == 0
 	var value interface{}
@@ -335,14 +339,14 @@ func addContainer(target, added []corev1.Container, basePath string) (patch []pa
 	}
 
 	// this output can be used for creating tests/ExpectedAddContainer.json file
-	// logJSON("ExpectAddContainer.json", patch)
+	logJSON("ExpectAddContainer.json", patch)
 	return patch
 }
 
 func prependContainer(target, added []corev1.Container, basePath string) (patch []patchOperation) {
 	// this output can be used for creating tests/FakePrependContainer.json files
-	// logJSON("FakePrependContainerTarget.json", target)
-	// logJSON("FakePrependContainer.json", added)
+	logJSON("FakePrependContainerTarget.json", target)
+	logJSON("FakePrependContainer.json", added)
 
 	first := len(target) == 0
 	var value interface{}
@@ -363,15 +367,15 @@ func prependContainer(target, added []corev1.Container, basePath string) (patch 
 	}
 
 	// this output can be used for creating tests/ExpectedPrependContainer.json file
-	// logJSON("ExpectPrependContainer.json", patch)
+	logJSON("ExpectPrependContainer.json", patch)
 	return patch
 }
 
 func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOperation) {
 
 	// this output can be used for creating tests/FakeAddVolume.json files
-	// logJSON("FakeAddVolumeTarget.json", target)
-	// logJSON("FakeAddVolume.json", added)
+	logJSON("FakeAddVolumeTarget.json", target)
+	logJSON("FakeAddVolume.json", added)
 
 	first := len(target) == 0
 	var value interface{}
@@ -391,14 +395,14 @@ func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOpe
 		})
 	}
 	// this output can be used for creating tests/ExpectedVolumeM.json file
-	// logJSON("ExpectAddVolume.json", patch)
+	logJSON("ExpectAddVolume.json", patch)
 	return patch
 }
 
 func addVolumeMount(target, added []corev1.VolumeMount, basePath string) (patch []patchOperation) {
 	// this output can be used for creating tests/FakeVolumeMount.json files
-	// logJSON("FakeAddVolumeMountTarget.json", target)
-	// logJSON("FakeAddVolumeMount.json", added)
+	logJSON("FakeAddVolumeMountTarget.json", target)
+	logJSON("FakeAddVolumeMount.json", added)
 
 	first := len(target) == 0
 	var value interface{}
@@ -418,15 +422,15 @@ func addVolumeMount(target, added []corev1.VolumeMount, basePath string) (patch 
 		})
 	}
 	// this output can be used for creating tests/ExpectedVolumeMount.json file
-	// logJSON("ExpectAddVolumeMount.json", patch)
+	logJSON("ExpectAddVolumeMount.json", patch)
 	return patch
 }
 
 func updateAnnotation(target map[string]string, added map[string]string) (patch []patchOperation) {
 
 	// this output can be used for creating tests/FakeUpdateAnnotation.json files
-	// logJSON("FakeUpdateAnnotationTarget.json", target)
-	// logJSON("FakeUpdateAnnotation.json", added)
+	logJSON("FakeUpdateAnnotationTarget.json", target)
+	logJSON("FakeUpdateAnnotation.json", added)
 
 	// cannot add individual path values. Must add the entire Annotation object
 	// so add/replace new values then patch it all at once
@@ -444,7 +448,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 	})
 
 	// this output can be used for creating tests/ExpectedUpdateAnnotation.json files
-	// logJSON("ExpectedUpdateAnnotation.json", patch)
+	logJSON("ExpectUpdateAnnotation.json", patch)
 	return patch
 }
 
@@ -452,8 +456,8 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.AdmissionRequest) (*tsiMutateConfig, error) {
 
 	// To generate a content for a new `Fake` file for testing, uncomment out below:
-	// logJSON("FakeAdmissionRequest.json", req)
-	// logJSON("FakePod.json", &pod)
+	logJSON("FakeAdmissionRequest.json", req)
+	logJSON("FakePod.json", &pod)
 
 	tsiMutateConfigCp := whsvr.tsiMutateConfig.DeepCopy()
 
@@ -529,7 +533,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 	tsiMutateConfigCp.Annotations[admissionWebhookAnnotationClusterRegion] = cti.Info.ClusterRegion
 
 	// To generate a content for a new `Expect` file for testing, uncomment out below:
-	// logJSON("ExpectMutateInit.json", tsiMutateConfigCp)
+	logJSON("ExpectMutateInit.json", tsiMutateConfigCp)
 	return tsiMutateConfigCp, nil
 }
 
@@ -579,7 +583,7 @@ func createPatch(pod *corev1.Pod, tsiMutateConfig *tsiMutateConfig) ([]byte, err
 // main mutation process
 func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 	// To generate a content for a new `Fake` file for testing, uncomment out below:
-	// logJSON("FakeAdmissionReview.json", ar)
+	logJSON("FakeAdmissionReview.json", ar)
 
 	req := ar.Request
 
@@ -723,9 +727,23 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 
 // Log the JSON format of the object
 func logJSON(msg string, v interface{}) {
-	s := getJSON(v)
-	glog.Infof("JSON for %v:\n %v", msg, s)
+	if debug {
+		s := getJSON(v)
+		glog.Infof("JSON for %v:\n %v", msg, s)
 
+		if write {
+			f, err := os.Create(filepath.Join(os.TempDir(), msg))
+			if err != nil {
+				panic(err)
+			}
+			_, err = f.WriteString(s)
+			if err != nil {
+				panic(err)
+			}
+			glog.Infof("*** wrote to %s", f.Name())
+			defer f.Close()
+		}
+	}
 }
 
 func getJSON(v interface{}) string {

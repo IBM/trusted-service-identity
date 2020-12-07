@@ -2,23 +2,23 @@
    "kind": "Pod",
    "apiVersion": "v1",
    "metadata": {
-       "generateName": "myubuntu-6fb798d94-",
+       "generateName": "myubuntu-b65995996-",
+       "namespace": "test",
        "creationTimestamp": null,
        "labels": {
            "app": "myubuntu",
-           "pod-template-hash": "6fb798d94"
+           "pod-template-hash": "b65995996"
        },
        "annotations": {
            "admission.trusted.identity/inject": "false",
-           "kubernetes.io/psp": "ibm-privileged-psp",
-           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret1\"\n"
+           "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"tsi-secrets/myubuntu-mysecret1\"\n"
        },
        "ownerReferences": [
            {
                "apiVersion": "apps/v1",
                "kind": "ReplicaSet",
-               "name": "myubuntu-6fb798d94",
-               "uid": "7efb3182-6f81-11ea-be8b-6a908431fac0",
+               "name": "myubuntu-b65995996",
+               "uid": "20a9b4f9-a26a-4b04-8829-3b7a33cfd20e",
                "controller": true,
                "blockOwnerDeletion": true
            }
@@ -45,9 +45,9 @@
                }
            },
            {
-               "name": "default-token-sggvc",
+               "name": "default-token-ncgzw",
                "secret": {
-                   "secretName": "default-token-sggvc"
+                   "secretName": "default-token-ncgzw"
                }
            }
        ],
@@ -61,7 +61,7 @@
                    "--"
                ],
                "args": [
-                   "while true; do cat /mydata; sleep 5; done;"
+                   "while true; do cat /mydata; sleep 15; done;"
                ],
                "resources": {},
                "volumeMounts": [
@@ -78,7 +78,7 @@
                        "mountPath": "/host/secrets"
                    },
                    {
-                       "name": "default-token-sggvc",
+                       "name": "default-token-ncgzw",
                        "readOnly": true,
                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                    }
@@ -100,13 +100,13 @@
                "key": "node.kubernetes.io/not-ready",
                "operator": "Exists",
                "effect": "NoExecute",
-               "tolerationSeconds": 600
+               "tolerationSeconds": 300
            },
            {
                "key": "node.kubernetes.io/unreachable",
                "operator": "Exists",
                "effect": "NoExecute",
-               "tolerationSeconds": 600
+               "tolerationSeconds": 300
            }
        ],
        "priority": 0

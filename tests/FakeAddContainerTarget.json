@@ -1,25 +1,25 @@
 [
-  {
-    "name": "myubuntu",
-    "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
-    "command": [
-      "/bin/bash",
-      "-c",
-      "--"
-    ],
-    "args": [
-      "while true; do cat /mydata; sleep 5; done;"
-    ],
-    "resources": {},
-    "volumeMounts": [
-      {
-        "name": "default-token-sggvc",
-        "readOnly": true,
-        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
-      }
-    ],
-    "terminationMessagePath": "/dev/termination-log",
-    "terminationMessagePolicy": "File",
-    "imagePullPolicy": "Always"
-  }
+    {
+        "name": "myubuntu",
+        "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+        "command": [
+            "/bin/bash",
+            "-c",
+            "--"
+        ],
+        "args": [
+            "while true; do ls /tsi-secrets; sleep 15; done;"
+        ],
+        "resources": {},
+        "volumeMounts": [
+            {
+                "name": "default-token-ncgzw",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+            }
+        ],
+        "terminationMessagePath": "/dev/termination-log",
+        "terminationMessagePolicy": "File",
+        "imagePullPolicy": "Always"
+    }
 ]

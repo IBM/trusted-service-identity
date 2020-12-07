@@ -1,7 +1,7 @@
 [
-  {
-    "name": "default-token-sggvc",
-    "readOnly": true,
-    "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
-  }
+   {
+       "name": "default-token-ncgzw",
+       "readOnly": true,
+       "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+   }
 ]
