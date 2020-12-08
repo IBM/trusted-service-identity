@@ -22,13 +22,13 @@ import (
 	Then re-run the tests
 */
 
-var pod corev1.Pod
+//var pod corev1.Pod
 var admissionRequest v1beta1.AdmissionRequest
 
 const (
 	SUCCESS   = "Testing %s successful"
-	ERROR     = "Testing %s failed"
-	ERRORWITH = "Testing %s failed with %s"
+	ERROR     = "ERROR: Testing %s failed"
+	ERRORWITH = "ERROR: Testing %s failed with %s"
 )
 
 func init() {
@@ -42,7 +42,7 @@ func init() {
 	// fmt.Println("Argument '-logLevel' is ", logLevel)
 
 	// load K8s objects and unmarshal them to test the API format
-	pod = getFakePod("tests/FakePod.json")
+	//pod = getFakePod("tests/FakePod.json")
 	admissionRequest = getFakeAdmissionRequest()
 }
 
@@ -127,6 +127,7 @@ func TestIsSafe(t *testing.T) {
 	} else {
 		t.Fatalf(ERROR, testName)
 	}
+
 }
 
 func TestIsProtectedNamespace(t *testing.T) {
@@ -379,8 +380,9 @@ func TestMutate(t *testing.T) {
 		protectedNamespaces: protectedList,
 	}
 
+	fpod := getFakePod("tests/FakePod.json")
 	// get test result of running mutateInitialization method:
-	result, err := whsvr.mutateInitialization(pod, &admissionRequest)
+	result, err := whsvr.mutateInitialization(fpod, &admissionRequest)
 	if err != nil {
 		t.Errorf(ERRORWITH, testName, err)
 		return

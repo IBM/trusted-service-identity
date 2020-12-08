@@ -289,6 +289,7 @@ func mutationRequired(protectedList []string, pod *corev1.Pod, operation string)
 	default:
 		isMutate = false
 	}
+	logJSON("FakePod.json", &pod)
 
 	if isProtectedNamespace(protectedList, &metadata) {
 
@@ -457,7 +458,7 @@ func (whsvr *WebhookServer) mutateInitialization(pod corev1.Pod, req *v1beta1.Ad
 
 	// To generate a content for a new `Fake` file for testing, uncomment out below:
 	logJSON("FakeAdmissionRequest.json", req)
-	logJSON("FakePod.json", &pod)
+	//logJSON("FakePod.json", &pod)
 
 	tsiMutateConfigCp := whsvr.tsiMutateConfig.DeepCopy()
 
