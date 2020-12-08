@@ -287,7 +287,7 @@ func TestUpdateAnnotation(t *testing.T) {
 
 	// test 2, UPDATE to force incorrect annotations
 	testName = "update error annotations"
-	target = getFakeAnnotation("tests/FakeUpdateAnnotationError.json")
+	target = getFakeAnnotation("tests/FakeUpdateAnnotationTargetErr.json")
 	added = getFakeAnnotation("tests/FakeUpdateAnnotation2.json")
 	result = updateAnnotation(target, added)
 

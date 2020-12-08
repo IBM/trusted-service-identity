@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 TESTS="../tests"
 SLEEP=10
@@ -65,9 +65,17 @@ $pod_cmd get po $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -ojson 
 sed 's/mysecret1/mysecret1xxx/g' ${TESTS}/FakeIsSafeUpdateOK.json > ${TESTS}/FakePodUpdate.json
 sed 's/trustedseriviceidentity/badplace/g' ${TESTS}/FakePodUpdate.json > ${TESTS}/FakePodUpdateErr.json
 
-
 $pod_cmd patch pod $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -p '{"spec":{"containers":[{"name":"jwt-sidecar","image":"ubuntu"}]}}'
 $webhoook_cmd cat /tmp/FakeAdmissionReview.json > ${TESTS}/FakeAdmissionReviewUpdateErr.json
+
+# '{"metadata":{"annotations"}:{"admission.trusted.identity/tsi-cluster-name": "minikubexxx"}}'
+
+# patch the container by changing the protected annotations:
+$pod_cmd patch po $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -p '{"metadata":{"annotations":{"admission.trusted.identity/tsi-cluster-name": "minikubexxx"}}}'
+$webhoook_cmd cat /tmp/FakeUpdateAnnotationTarget.json > ${TESTS}/FakeUpdateAnnotationTargetErr.json
+$webhoook_cmd cat /tmp/FakeUpdateAnnotation.json > ${TESTS}/FakeUpdateAnnotation2.json
+$webhoook_cmd cat /tmp/ExpectUpdateAnnotation.json > ${TESTS}/ExpectUpdateAnnotation2.json
+
 
 # FakeIsSafeCreateError.json:
 # delete myubuntu.yaml
