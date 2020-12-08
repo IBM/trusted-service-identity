@@ -37,7 +37,8 @@ var (
 )
 
 var tsiNamespace string
-var debug bool = true
+
+// when DEBUG=true, the local write to the file is enabled
 var write bool = true
 
 const (
@@ -728,7 +729,8 @@ func (whsvr *WebhookServer) serve(w http.ResponseWriter, r *http.Request) {
 
 // Log the JSON format of the object
 func logJSON(msg string, v interface{}) {
-	if debug {
+
+	if os.Getenv("DEBUG") == "true" {
 		s := getJSON(v)
 		glog.Infof("JSON for %v:\n %v", msg, s)
 
@@ -741,7 +743,7 @@ func logJSON(msg string, v interface{}) {
 			if err != nil {
 				panic(err)
 			}
-			glog.Infof("*** wrote to %s", f.Name())
+			glog.Infof("Logged successfully to %s", f.Name())
 			defer f.Close()
 		}
 	}
