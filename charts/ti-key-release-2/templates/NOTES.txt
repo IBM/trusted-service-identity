@@ -17,6 +17,7 @@ This helm chart installs environment for Trusted Identity
     jwt.expireSec: {{ index .Values "ti-key-release-1" "jwt" "expireSec" }}
     secrets.refreshSec: {{ index .Values "ti-key-release-1" "secrets" "refreshSec" }}
     jssService.type: {{ .Values.jssService.type }}
+    debug: {{ .Values.debug }}
 
 Before proceeding, please refer to the README.md to perform bootstrapping of TSI.
 
