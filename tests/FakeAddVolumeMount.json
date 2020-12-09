@@ -1,7 +1,7 @@
 [
-   {
-       "name": "tsi-secrets",
-       "readOnly": true,
-       "mountPath": "/tsi-secrets"
-   }
+    {
+        "name": "tsi-secrets",
+        "readOnly": true,
+        "mountPath": "/tsi-secrets"
+    }
 ]

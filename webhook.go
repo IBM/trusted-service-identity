@@ -739,12 +739,13 @@ func logJSON(msg string, v interface{}) {
 			if err != nil {
 				panic(err)
 			}
+			defer f.Close()
+
 			_, err = f.WriteString(s)
 			if err != nil {
 				panic(err)
 			}
 			glog.Infof("Logged successfully to %s", f.Name())
-			defer f.Close()
 		}
 	}
 }

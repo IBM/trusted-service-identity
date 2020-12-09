@@ -6,11 +6,11 @@
             "admission.trusted.identity/inject": "true",
             "admission.trusted.identity/status": "mutated",
             "admission.trusted.identity/tsi-cluster-name": "minikube",
-            "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4,badplace/ti-jwt-sidecar:v1.8.3,badplace/ti-jwt-sidecar:v1.8.3",
+            "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
             "admission.trusted.identity/tsi-region": "eu-de",
-            "tsi.secrets": "- tsi.secret/name: \"mysecret1xxx\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
+            "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
         },
-        "creationTimestamp": "2020-12-02T20:52:12Z",
+        "creationTimestamp": "2020-12-09T15:57:57Z",
         "generateName": "myubuntu-6d5c486b66-",
         "labels": {
             "app": "myubuntu",
@@ -24,7 +24,8 @@
                     "f:metadata": {
                         "f:annotations": {
                             ".": {},
-                            "f:admission.trusted.identity/inject": {}
+                            "f:admission.trusted.identity/inject": {},
+                            "f:tsi.secrets": {}
                         },
                         "f:generateName": {},
                         "f:labels": {
@@ -34,7 +35,7 @@
                         },
                         "f:ownerReferences": {
                             ".": {},
-                            "k:{\"uid\":\"6125da71-2a07-4df8-ad3f-305c295d2c20\"}": {
+                            "k:{\"uid\":\"67635c98-ddee-49eb-a3c1-12a0c7bb15f0\"}": {
                                 ".": {},
                                 "f:apiVersion": {},
                                 "f:blockOwnerDeletion": {},
@@ -69,7 +70,7 @@
                 },
                 "manager": "kube-controller-manager",
                 "operation": "Update",
-                "time": "2020-12-02T20:52:12Z"
+                "time": "2020-12-09T15:57:57Z"
             },
             {
                 "apiVersion": "v1",
@@ -81,6 +82,8 @@
                                 ".": {},
                                 "f:lastProbeTime": {},
                                 "f:lastTransitionTime": {},
+                                "f:message": {},
+                                "f:reason": {},
                                 "f:status": {},
                                 "f:type": {}
                             },
@@ -88,6 +91,8 @@
                                 ".": {},
                                 "f:lastProbeTime": {},
                                 "f:lastTransitionTime": {},
+                                "f:message": {},
+                                "f:reason": {},
                                 "f:status": {},
                                 "f:type": {}
                             },
@@ -95,6 +100,8 @@
                                 ".": {},
                                 "f:lastProbeTime": {},
                                 "f:lastTransitionTime": {},
+                                "f:message": {},
+                                "f:reason": {},
                                 "f:status": {},
                                 "f:type": {}
                             }
@@ -102,11 +109,10 @@
                         "f:containerStatuses": {},
                         "f:hostIP": {},
                         "f:initContainerStatuses": {},
-                        "f:phase": {},
                         "f:podIP": {},
                         "f:podIPs": {
                             ".": {},
-                            "k:{\"ip\":\"172.18.0.4\"}": {
+                            "k:{\"ip\":\"172.18.0.5\"}": {
                                 ".": {},
                                 "f:ip": {}
                             }
@@ -116,24 +122,10 @@
                 },
                 "manager": "kubelet",
                 "operation": "Update",
-                "time": "2020-12-02T20:52:44Z"
-            },
-            {
-                "apiVersion": "v1",
-                "fieldsType": "FieldsV1",
-                "fieldsV1": {
-                    "f:metadata": {
-                        "f:annotations": {
-                            "f:tsi.secrets": {}
-                        }
-                    }
-                },
-                "manager": "kubectl-edit",
-                "operation": "Update",
-                "time": "2020-12-02T20:55:46Z"
+                "time": "2020-12-09T15:58:00Z"
             }
         ],
-        "name": "myubuntu-6d5c486b66-94czv",
+        "name": "myubuntu-6d5c486b66-dkdl5",
         "namespace": "test",
         "ownerReferences": [
             {
@@ -142,12 +134,12 @@
                 "controller": true,
                 "kind": "ReplicaSet",
                 "name": "myubuntu-6d5c486b66",
-                "uid": "6125da71-2a07-4df8-ad3f-305c295d2c20"
+                "uid": "67635c98-ddee-49eb-a3c1-12a0c7bb15f0"
             }
         ],
-        "resourceVersion": "448615",
-        "selfLink": "/api/v1/namespaces/test/pods/myubuntu-6d5c486b66-94czv",
-        "uid": "d3eb08a1-a23e-495a-9b09-2fe6081c4f52"
+        "resourceVersion": "512738",
+        "selfLink": "/api/v1/namespaces/test/pods/myubuntu-6d5c486b66-dkdl5",
+        "uid": "011ff3cf-e7a4-422f-811e-f12ca3c42498"
     },
     "spec": {
         "containers": [
@@ -210,7 +202,7 @@
                         "name": "IDENTITY_REFRESH_SEC"
                     }
                 ],
-                "image": "badplace/ti-jwt-sidecar:v1.8.3",
+                "image": "ubuntu:v1.8.3",
                 "imagePullPolicy": "Always",
                 "name": "jwt-sidecar",
                 "resources": {},
@@ -281,7 +273,7 @@
                         "value": "600"
                     }
                 ],
-                "image": "badplace/ti-jwt-sidecar:v1.8.3",
+                "image": "ubuntu:v1.8.3",
                 "imagePullPolicy": "Always",
                 "name": "jwt-init",
                 "resources": {},
@@ -435,57 +427,61 @@
         "conditions": [
             {
                 "lastProbeTime": null,
-                "lastTransitionTime": "2020-12-02T20:52:40Z",
-                "status": "True",
+                "lastTransitionTime": "2020-12-09T15:57:57Z",
+                "message": "containers with incomplete status: [jwt-init]",
+                "reason": "ContainersNotInitialized",
+                "status": "False",
                 "type": "Initialized"
             },
             {
                 "lastProbeTime": null,
-                "lastTransitionTime": "2020-12-02T20:52:44Z",
-                "status": "True",
+                "lastTransitionTime": "2020-12-09T15:57:57Z",
+                "message": "containers with unready status: [myubuntu jwt-sidecar]",
+                "reason": "ContainersNotReady",
+                "status": "False",
                 "type": "Ready"
             },
             {
                 "lastProbeTime": null,
-                "lastTransitionTime": "2020-12-02T20:52:44Z",
-                "status": "True",
+                "lastTransitionTime": "2020-12-09T15:57:57Z",
+                "message": "containers with unready status: [myubuntu jwt-sidecar]",
+                "reason": "ContainersNotReady",
+                "status": "False",
                 "type": "ContainersReady"
             },
             {
                 "lastProbeTime": null,
-                "lastTransitionTime": "2020-12-02T20:52:12Z",
+                "lastTransitionTime": "2020-12-09T15:57:57Z",
                 "status": "True",
                 "type": "PodScheduled"
             }
         ],
         "containerStatuses": [
             {
-                "containerID": "docker://b2e4b2ccd187c1bbe4c637ab72d241aec20e6b2f97b8f934543aeda454f7942b",
-                "image": "badplace/ti-jwt-sidecar:v1.8.3",
-                "imageID": "docker-pullable://badplace/ti-jwt-sidecar@sha256:c99941a4171d2dd08e6487aa92b23b3ddf3b695543ba78988a1e26a0679f1b3a",
+                "image": "ubuntu:v1.8.3",
+                "imageID": "",
                 "lastState": {},
                 "name": "jwt-sidecar",
-                "ready": true,
+                "ready": false,
                 "restartCount": 0,
-                "started": true,
+                "started": false,
                 "state": {
-                    "running": {
-                        "startedAt": "2020-12-02T20:52:44Z"
+                    "waiting": {
+                        "reason": "PodInitializing"
                     }
                 }
             },
             {
-                "containerID": "docker://b19c2d264862d6645d70b9e6eaea7f36e9adf28ed77c2b151551803afe1776b7",
                 "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
-                "imageID": "docker-pullable://ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+                "imageID": "",
                 "lastState": {},
                 "name": "myubuntu",
-                "ready": true,
+                "ready": false,
                 "restartCount": 0,
-                "started": true,
+                "started": false,
                 "state": {
-                    "running": {
-                        "startedAt": "2020-12-02T20:52:42Z"
+                    "waiting": {
+                        "reason": "PodInitializing"
                     }
                 }
             }
@@ -493,32 +489,28 @@
         "hostIP": "172.17.0.2",
         "initContainerStatuses": [
             {
-                "containerID": "docker://071bd0e29db8740569464a3b113e2a95810679214b8b02b923ee1cfc1328116b",
-                "image": "badplace/ti-jwt-sidecar:v1.8.3",
-                "imageID": "docker-pullable://badplace/ti-jwt-sidecar@sha256:c99941a4171d2dd08e6487aa92b23b3ddf3b695543ba78988a1e26a0679f1b3a",
+                "containerID": "docker://d60512fdecf894c328ab1b04a8138274b1623b94560a51a0cd71e4a5f5bbefc6",
+                "image": "ubuntu:v1.8.3",
+                "imageID": "docker-pullable://ubuntu@sha256:c99941a4171d2dd08e6487aa92b23b3ddf3b695543ba78988a1e26a0679f1b3a",
                 "lastState": {},
                 "name": "jwt-init",
-                "ready": true,
+                "ready": false,
                 "restartCount": 0,
                 "state": {
-                    "terminated": {
-                        "containerID": "docker://071bd0e29db8740569464a3b113e2a95810679214b8b02b923ee1cfc1328116b",
-                        "exitCode": 0,
-                        "finishedAt": "2020-12-02T20:52:40Z",
-                        "reason": "Completed",
-                        "startedAt": "2020-12-02T20:52:15Z"
+                    "running": {
+                        "startedAt": "2020-12-09T15:58:00Z"
                     }
                 }
             }
         ],
-        "phase": "Running",
-        "podIP": "172.18.0.4",
+        "phase": "Pending",
+        "podIP": "172.18.0.5",
         "podIPs": [
             {
-                "ip": "172.18.0.4"
+                "ip": "172.18.0.5"
             }
         ],
         "qosClass": "BestEffort",
-        "startTime": "2020-12-02T20:52:12Z"
+        "startTime": "2020-12-09T15:57:57Z"
     }
 }

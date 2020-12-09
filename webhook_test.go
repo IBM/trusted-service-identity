@@ -548,12 +548,15 @@ func getFakeAdmissionRequest() v1beta1.AdmissionRequest {
 	return ar
 }
 
+/*
+// Not used
 func getFakeAdmissionResponse() v1beta1.AdmissionResponse {
 	s := getContentOfTheFile("tests/FakeAdmissionResponse.json")
 	ar := v1beta1.AdmissionResponse{}
 	json.Unmarshal([]byte(s), &ar)
 	return ar
 }
+*/
 
 func getFakeAdmissionReview(filePath string) v1beta1.AdmissionReview {
 	s := getContentOfTheFile(filePath)
@@ -565,6 +568,8 @@ func getFakeAdmissionReview(filePath string) v1beta1.AdmissionReview {
 	return ar
 }
 
+/*
+// Not used
 func getTsiMutateConfig() tsiMutateConfig {
 	s := getContentOfTheFile("tests/FakeTsiMutateConfig.json")
 	obj := tsiMutateConfig{}
@@ -573,7 +578,7 @@ func getTsiMutateConfig() tsiMutateConfig {
 		panic(err)
 	}
 	return obj
-}
+}*/
 
 // func printObject(r interface{}) {
 // 	// marshal the object to []byte for comparison

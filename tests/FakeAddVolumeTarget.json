@@ -1,8 +1,8 @@
 [
-   {
-       "name": "default-token-ncgzw",
-       "secret": {
-           "secretName": "default-token-ncgzw"
-       }
-   }
+    {
+        "name": "default-token-ncgzw",
+        "secret": {
+            "secretName": "default-token-ncgzw"
+        }
+    }
 ]

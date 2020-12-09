@@ -1,23 +1,23 @@
 {
-   "generateName": "myubuntu-6d5c486b66-",
-   "namespace": "test",
-   "creationTimestamp": null,
-   "labels": {
-       "app": "myubuntu",
-       "pod-template-hash": "6d5c486b66"
-   },
-   "annotations": {
-       "admission.trusted.identity/inject": "true",
-       "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
-   },
-   "ownerReferences": [
-       {
-           "apiVersion": "apps/v1",
-           "kind": "ReplicaSet",
-           "name": "myubuntu-6d5c486b66",
-           "uid": "6125da71-2a07-4df8-ad3f-305c295d2c20",
-           "controller": true,
-           "blockOwnerDeletion": true
-       }
-   ]
+    "generateName": "myubuntu-6d5c486b66-",
+    "namespace": "test",
+    "creationTimestamp": null,
+    "labels": {
+        "app": "myubuntu",
+        "pod-template-hash": "6d5c486b66"
+    },
+    "annotations": {
+        "admission.trusted.identity/inject": "true",
+        "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
+    },
+    "ownerReferences": [
+        {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "myubuntu-6d5c486b66",
+            "uid": "67635c98-ddee-49eb-a3c1-12a0c7bb15f0",
+            "controller": true,
+            "blockOwnerDeletion": true
+        }
+    ]
 }
