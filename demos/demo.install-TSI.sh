@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# To generate test files, execute a deployment with DEBUG=true enabled
+DEBUG=false
+
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
 
@@ -99,12 +102,16 @@ else
 fi
 doit "$kk get po"
 
+SETDEBUG=""
+if [ $DEBUG = true ]; then
+ SETDEBUG=" --set debug=true"
+fi
 doit "helm install ../charts/ti-key-release-2-${TSI_VERSION}.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \
 --set ti-key-release-1.runSidecar=true \
---set jssService.type=$JSS_TYPE"
+--set jssService.type=$JSS_TYPE $SETDEBUG"
 doit "$kk get po"
 
 comment "Register this cluster with Vault"
