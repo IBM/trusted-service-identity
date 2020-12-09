@@ -1,8 +1,8 @@
 [
-  {
-    "name": "default-token-sggvc",
-    "secret": {
-      "secretName": "default-token-sggvc"
+    {
+        "name": "default-token-ncgzw",
+        "secret": {
+            "secretName": "default-token-ncgzw"
+        }
     }
-  }
 ]

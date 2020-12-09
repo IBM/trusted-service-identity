@@ -1,93 +1,100 @@
 [
-  {
-    "op": "add",
-    "path": "/spec/volumes/-",
-    "value": {
-      "name": "tsi-secrets",
-      "emptyDir": {}
+    {
+        "op": "add",
+        "path": "/spec/volumes/-",
+        "value": {
+            "name": "tsi-secrets",
+            "emptyDir": {}
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/volumes/-",
+        "value": {
+            "name": "tsi-sockets",
+            "hostPath": {
+                "path": "/var/tsi-secure/sockets",
+                "type": "Directory"
+            }
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/volumes/-",
+        "value": {
+            "name": "host-machineid",
+            "hostPath": {
+                "path": "/etc/machine-id",
+                "type": "File"
+            }
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/volumes/-",
+        "value": {
+            "name": "pod-metadata",
+            "downwardAPI": {
+                "items": [
+                    {
+                        "path": "tsi-secrets",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['tsi.secrets']"
+                        }
+                    },
+                    {
+                        "path": "tsi-identities",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['tsi.identities']"
+                        }
+                    },
+                    {
+                        "path": "ti-identity",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/ti-identity']"
+                        }
+                    },
+                    {
+                        "path": "ti-pod-name",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.name"
+                        }
+                    },
+                    {
+                        "path": "ti-pod-namespace",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.namespace"
+                        }
+                    },
+                    {
+                        "path": "tsi-images",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-images']"
+                        }
+                    },
+                    {
+                        "path": "tsi-cluster-name",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-cluster-name']"
+                        }
+                    },
+                    {
+                        "path": "tsi-region",
+                        "fieldRef": {
+                            "apiVersion": "v1",
+                            "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-region']"
+                        }
+                    }
+                ],
+                "defaultMode": 420
+            }
+        }
     }
-  },
-  {
-    "op": "add",
-    "path": "/spec/volumes/-",
-    "value": {
-      "name": "tsi-sockets",
-      "hostPath": {
-        "path": "/var/tsi-secure/sockets",
-        "type": "Directory"
-      }
-    }
-  },
-  {
-    "op": "add",
-    "path": "/spec/volumes/-",
-    "value": {
-      "name": "host-etc",
-      "hostPath": {
-        "path": "/etc",
-        "type": "Directory"
-      }
-    }
-  },
-  {
-    "op": "add",
-    "path": "/spec/volumes/-",
-    "value": {
-      "name": "pod-metadata",
-      "downwardAPI": {
-        "items": [
-          {
-            "path": "tsi-secrets",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['tsi.secrets']"
-            }
-          },
-          {
-            "path": "ti-identity",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/ti-identity']"
-            }
-          },
-          {
-            "path": "ti-pod-name",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.name"
-            }
-          },
-          {
-            "path": "ti-pod-namespace",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.namespace"
-            }
-          },
-          {
-            "path": "tsi-images",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-images']"
-            }
-          },
-          {
-            "path": "tsi-cluster-name",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-cluster-name']"
-            }
-          },
-          {
-            "path": "tsi-region",
-            "fieldRef": {
-              "apiVersion": "v1",
-              "fieldPath": "metadata.annotations['admission.trusted.identity/tsi-region']"
-            }
-          }
-        ],
-        "defaultMode": 420
-      }
-    }
-  }
 ]

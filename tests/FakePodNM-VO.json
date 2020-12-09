@@ -1,87 +1,115 @@
 {
-   "metadata": {
-       "generateName": "myubuntu-698b749889-",
-       "creationTimestamp": null,
-       "labels": {
-           "app": "myubuntu",
-           "pod-template-hash": "2546305445"
-       },
-       "annotations": {
-           "kubernetes.io/psp": "ibm-privileged-psp"
-       },
-       "ownerReferences": [
-           {
-               "apiVersion": "extensions/v1beta1",
-               "kind": "ReplicaSet",
-               "name": "myubuntu-698b749889",
-               "uid": "98e29722-201d-11e9-8d9e-4a1d4b24414a",
-               "controller": true,
-               "blockOwnerDeletion": true
-           }
-       ]
-   },
-   "spec": {
-       "volumes": [
-           {
-               "name": "default-token-wp8ht",
-               "secret": {
-                   "secretName": "default-token-wp8ht"
-               }
-           },
-           {
-               "hostPath": {
-                   "path": "/var/tsi-secure/sockets",
-                   "type": "Directory"
-               },
-               "name": "tsi-sockets"
-           }
-       ],
-       "containers": [
-           {
-               "name": "myubuntu",
-               "image": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
-               "command": [
-                   "/bin/bash",
-                   "-c",
-                   "--"
-               ],
-               "args": [
-                   "while true; do cat /jwt-tokens/token; sleep 5; done;"
-               ],
-               "resources": {},
-               "volumeMounts": [
-                   {
-                       "name": "default-token-wp8ht",
-                       "readOnly": true,
-                       "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
-                   }
-               ],
-               "terminationMessagePath": "/dev/termination-log",
-               "terminationMessagePolicy": "File",
-               "imagePullPolicy": "Always"
-           }
-       ],
-       "restartPolicy": "Always",
-       "terminationGracePeriodSeconds": 30,
-       "dnsPolicy": "ClusterFirst",
-       "serviceAccountName": "default",
-       "serviceAccount": "default",
-       "securityContext": {},
-       "schedulerName": "default-scheduler",
-       "tolerations": [
-           {
-               "key": "node.kubernetes.io/not-ready",
-               "operator": "Exists",
-               "effect": "NoExecute",
-               "tolerationSeconds": 300
-           },
-           {
-               "key": "node.kubernetes.io/unreachable",
-               "operator": "Exists",
-               "effect": "NoExecute",
-               "tolerationSeconds": 300
-           }
-       ]
-   },
-   "status": {}
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+        "generateName": "myubuntu-694676d-",
+        "namespace": "test",
+        "creationTimestamp": null,
+        "labels": {
+            "app": "myubuntu",
+            "pod-template-hash": "694676d"
+        },
+        "annotations": {
+            "admission.trusted.identity/inject": "false",
+            "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
+        },
+        "ownerReferences": [
+            {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "myubuntu-694676d",
+                "uid": "9e594c74-e4db-435b-bee3-c66fcbcbbbd7",
+                "controller": true,
+                "blockOwnerDeletion": true
+            }
+        ]
+    },
+    "spec": {
+        "volumes": [
+            {
+                "name": "tsi-secrets",
+                "emptyDir": {}
+            },
+            {
+                "name": "tsi-sockets",
+                "hostPath": {
+                    "path": "/var/tsi-secure/sockets",
+                    "type": "Directory"
+                }
+            },
+            {
+                "name": "host-etc",
+                "hostPath": {
+                    "path": "/etc",
+                    "type": "Directory"
+                }
+            },
+            {
+                "name": "default-token-ncgzw",
+                "secret": {
+                    "secretName": "default-token-ncgzw"
+                }
+            }
+        ],
+        "containers": [
+            {
+                "name": "myubuntu",
+                "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+                "command": [
+                    "/bin/bash",
+                    "-c",
+                    "--"
+                ],
+                "args": [
+                    "while true; do ls /tsi-secrets; sleep 15; done;"
+                ],
+                "resources": {},
+                "volumeMounts": [
+                    {
+                        "name": "host-etc",
+                        "mountPath": "/host/etc"
+                    },
+                    {
+                        "name": "tsi-sockets",
+                        "mountPath": "/host/sockets"
+                    },
+                    {
+                        "name": "tsi-secrets",
+                        "mountPath": "/host/secrets"
+                    },
+                    {
+                        "name": "default-token-ncgzw",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                    }
+                ],
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "imagePullPolicy": "Always"
+            }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+            {
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "effect": "NoExecute",
+                "tolerationSeconds": 300
+            },
+            {
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "effect": "NoExecute",
+                "tolerationSeconds": 300
+            }
+        ],
+        "priority": 0
+    },
+    "status": {}
 }

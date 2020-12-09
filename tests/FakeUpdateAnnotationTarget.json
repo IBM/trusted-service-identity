@@ -1,5 +1,4 @@
 {
-  "admission.trusted.identity/inject": "true",
-  "kubernetes.io/psp": "ibm-privileged-psp",
-  "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret1\"\n- tsi.secret/name: \"mysecret2.json\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-r\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-mysecret2\"\n- tsi.secret/name: \"password\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-r\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-passwords\"\n- tsi.secret/name: \"invalid\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/tsi-rcni\"\n  tsi.secret/local-path: \"mysecrets/myubuntu-invalid\"\n- tsi.secret/name: \"non-existing\"\n  tsi.secret/role: \"tsi-role-rcni\"\n  tsi.secret/vault-path: \"secret/nothing\"\n  tsi.secret/local-path: \"mysecrets/non-existing\"\n"
+    "admission.trusted.identity/inject": "true",
+    "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
 }

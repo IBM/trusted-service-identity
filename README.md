@@ -408,7 +408,7 @@ The following information is required to deploy TSI helm charts:
 * jss service - TSI currently support 2 mechanism for running the JSS (JWT Signing Service):
   - jss-server - custom service for signing JWT tokens (default)
   - vtpm2-server - JWT token signer using a software wrapper for TPM2
-
+* debug - if set to true, allows creating test files (see [here](./CONTRIBUTING.md#testing-tsi))
 
 Replace X.X.X with a proper version numbers (typically the highest, the most recent).
 

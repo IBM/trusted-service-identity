@@ -22,13 +22,13 @@ import (
 	Then re-run the tests
 */
 
-var pod corev1.Pod
+//var pod corev1.Pod
 var admissionRequest v1beta1.AdmissionRequest
 
 const (
 	SUCCESS   = "Testing %s successful"
-	ERROR     = "Testing %s failed"
-	ERRORWITH = "Testing %s failed with %s"
+	ERROR     = "ERROR: Testing %s failed"
+	ERRORWITH = "ERROR: Testing %s failed with %s"
 )
 
 func init() {
@@ -42,7 +42,7 @@ func init() {
 	// fmt.Println("Argument '-logLevel' is ", logLevel)
 
 	// load K8s objects and unmarshal them to test the API format
-	pod = getFakePod("tests/FakePod.json")
+	//pod = getFakePod("tests/FakePod.json")
 	admissionRequest = getFakeAdmissionRequest()
 }
 
@@ -287,7 +287,7 @@ func TestUpdateAnnotation(t *testing.T) {
 
 	// test 2, UPDATE to force incorrect annotations
 	testName = "update error annotations"
-	target = getFakeAnnotation("tests/FakeUpdateAnnotationError.json")
+	target = getFakeAnnotation("tests/FakeUpdateAnnotationTargetErr.json")
 	added = getFakeAnnotation("tests/FakeUpdateAnnotation2.json")
 	result = updateAnnotation(target, added)
 
@@ -297,6 +297,7 @@ func TestUpdateAnnotation(t *testing.T) {
 		return
 	}
 	t.Logf(SUCCESS, testName)
+
 }
 
 func TestAddContainer(t *testing.T) {
@@ -379,14 +380,15 @@ func TestMutate(t *testing.T) {
 		protectedNamespaces: protectedList,
 	}
 
+	fpod := getFakePod("tests/FakePod.json")
 	// get test result of running mutateInitialization method:
-	result, err := whsvr.mutateInitialization(pod, &admissionRequest)
+	result, err := whsvr.mutateInitialization(fpod, &admissionRequest)
 	if err != nil {
 		t.Errorf(ERRORWITH, testName, err)
 		return
 	}
 
-	err = validateResult(result, "tests/ExpectMutateInit.json")
+	err = validateResult(result, "tests/ExpectMutateInit2.json")
 	if err != nil {
 		t.Errorf(ERRORWITH, testName, err)
 		return
@@ -403,6 +405,7 @@ func TestMutate(t *testing.T) {
 		t.Errorf(ERRORWITH, testName, err)
 	}
 
+	ar.Request.Namespace = "trusted-identity"
 	admRsp := whsvr.mutate(&ar)
 	if admRsp.Allowed == false && string(admRsp.Result.Reason) == MsgNoCreate && string(admRsp.Result.Message) == MsgProtectNs && admRsp.Patch == nil {
 		t.Logf(SUCCESS, testName)
@@ -545,12 +548,15 @@ func getFakeAdmissionRequest() v1beta1.AdmissionRequest {
 	return ar
 }
 
+/*
+// Not used
 func getFakeAdmissionResponse() v1beta1.AdmissionResponse {
 	s := getContentOfTheFile("tests/FakeAdmissionResponse.json")
 	ar := v1beta1.AdmissionResponse{}
 	json.Unmarshal([]byte(s), &ar)
 	return ar
 }
+*/
 
 func getFakeAdmissionReview(filePath string) v1beta1.AdmissionReview {
 	s := getContentOfTheFile(filePath)
@@ -562,6 +568,8 @@ func getFakeAdmissionReview(filePath string) v1beta1.AdmissionReview {
 	return ar
 }
 
+/*
+// Not used
 func getTsiMutateConfig() tsiMutateConfig {
 	s := getContentOfTheFile("tests/FakeTsiMutateConfig.json")
 	obj := tsiMutateConfig{}
@@ -570,7 +578,7 @@ func getTsiMutateConfig() tsiMutateConfig {
 		panic(err)
 	}
 	return obj
-}
+}*/
 
 // func printObject(r interface{}) {
 // 	// marshal the object to []byte for comparison

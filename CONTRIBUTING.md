@@ -9,7 +9,7 @@ are satisfied.
 *  Make sure you have an IBM Cloud (formerly Bluemix) account and you have the [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-ibmcloud-cli) installed
 
 
-## Build and Install
+## Build, Test and Install
 [Install](https://github.com/golang/dep#installation) and execute `dep` to manage GoLang dependencies for this project.
 
 To compile and build the image, get and test the dependencies:
@@ -48,6 +48,16 @@ If you have credentials to push the image into Docker Hub:
 ./buildTSI.sh push
 ```
 
+Use `fast` if you already built it and want to just recompile minor changes
+```console
+./buildTSI.sh fast push
+```
+
+To build all the helm charts only:
+```console
+./buildTSI-helm.sh
+```
+
 When pushing the images to the registry, the user has to be logged in to Docker Hub with permissions to push images to `hub.docker.com/repository/docker/trustedseriviceidentity`. Make sure you are part of the Organization: [https://hub.docker.com/orgs/trustedseriviceidentity](https://hub.docker.com/orgs/trustedseriviceidentity)
 
 or if you like to build individual components:
@@ -66,6 +76,21 @@ If you have access to our registry, you can push your image now:
 
 ```console
 make docker-push
+```
+
+## Testing TSI
+In order to generate the test files, TSI **must** be running in `DEBUG` mode.
+To enable `DEBUG` mode, pass the " --set debug=true" parameter during the helm
+deployment as described [here](./README.md#deploy-helm-charts)
+
+```console
+helm install charts/ti-key-release-2-vX.X.X.tgz --debug --name tsi --set debug=true ...
+```
+
+Then setup KUBECONFIG and run a script to recreate test files:
+
+```console
+utils/renderTestFiles.sh
 ```
 
 ## TSI Helm Deployment

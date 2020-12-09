@@ -2,21 +2,30 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: myubuntu-err1
-  name: myubuntu-err1
+    app: myubuntu
+  name: myubuntu
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myubuntu-err1
+      app: myubuntu
   template:
     metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+        tsi.secrets: |
+             - tsi.secret/name: "mysecret1"
+               tsi.secret/constraints: "region,images"
+               tsi.secret/local-path: "tsi-secrets/"
+             - tsi.secret/name: "mysecret2"
+               tsi.secret/constraints: "region"
+               tsi.secret/local-path: "tsi-secrets"
       labels:
-        app: myubuntu-err1
-      name: myubuntu-err1
+        app: myubuntu
+      name: myubuntu
     spec:
       containers:
-        - name: myubuntu-err1
+        - name: myubuntu
           image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
           imagePullPolicy: Always
           command: [ "/bin/bash", "-c", "--" ]

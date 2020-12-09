@@ -70,3 +70,6 @@ ti-key-release-1:
     # expireSec - Time To Live for JWT token (in seconds)
     expireSec: 60
     issuer: wsched@us.ibm.com
+
+# debug, used for generating test files
+debug: false

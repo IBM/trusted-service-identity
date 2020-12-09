@@ -1,106 +1,167 @@
 {
-   "uid": "98e7aa26-201d-11e9-8d9e-4a1d4b24414a",
-   "kind": {
-       "group": "",
-       "version": "v1",
-       "kind": "Pod"
-   },
-   "resource": {
-       "group": "",
-       "version": "v1",
-       "resource": "pods"
-   },
-   "namespace": "trusted-identity",
-   "operation": "CREATE",
-   "userInfo": {
-       "username": "system:serviceaccount:kube-system:replicaset-controller",
-       "uid": "0ca3a81d-e8e1-11e8-a185-561f3c8e950e",
-       "groups": [
-           "system:serviceaccounts",
-           "system:serviceaccounts:kube-system",
-           "system:authenticated"
-       ]
-   },
-   "object": {
-       "metadata": {
-           "generateName": "myubuntu-698b749889-",
-           "creationTimestamp": null,
-           "labels": {
-               "app": "myubuntu",
-               "pod-template-hash": "2546305445"
-           },
-           "annotations": {
-               "admission.trusted.identity/inject": "true",
-               "kubernetes.io/psp": "ibm-privileged-psp"
-           },
-           "ownerReferences": [
-               {
-                   "apiVersion": "extensions/v1beta1",
-                   "kind": "ReplicaSet",
-                   "name": "myubuntu-698b749889",
-                   "uid": "98e29722-201d-11e9-8d9e-4a1d4b24414a",
-                   "controller": true,
-                   "blockOwnerDeletion": true
-               }
-           ]
-       },
-       "spec": {
-           "volumes": [
-               {
-                   "name": "default-token-wp8ht",
-                   "secret": {
-                       "secretName": "default-token-wp8ht"
-                   }
-               }
-           ],
-           "containers": [
-               {
-                   "name": "myubuntu",
-                   "image": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
-                   "command": [
-                       "/bin/bash",
-                       "-c",
-                       "--"
-                   ],
-                   "args": [
-                       "while true; do cat /jwt-tokens/token; sleep 5; done;"
-                   ],
-                   "resources": {},
-                   "volumeMounts": [
-                       {
-                           "name": "default-token-wp8ht",
-                           "readOnly": true,
-                           "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
-                       }
-                   ],
-                   "terminationMessagePath": "/dev/termination-log",
-                   "terminationMessagePolicy": "File",
-                   "imagePullPolicy": "Always"
-               }
-           ],
-           "restartPolicy": "Always",
-           "terminationGracePeriodSeconds": 30,
-           "dnsPolicy": "ClusterFirst",
-           "serviceAccountName": "default",
-           "serviceAccount": "default",
-           "securityContext": {},
-           "schedulerName": "default-scheduler",
-           "tolerations": [
-               {
-                   "key": "node.kubernetes.io/not-ready",
-                   "operator": "Exists",
-                   "effect": "NoExecute",
-                   "tolerationSeconds": 300
-               },
-               {
-                   "key": "node.kubernetes.io/unreachable",
-                   "operator": "Exists",
-                   "effect": "NoExecute",
-                   "tolerationSeconds": 300
-               }
-           ]
-       },
-       "status": {}
-   },
-   "oldObject": null
+    "uid": "ce84f498-67bc-4895-a184-1f926bd68faa",
+    "kind": {
+        "group": "",
+        "version": "v1",
+        "kind": "Pod"
+    },
+    "resource": {
+        "group": "",
+        "version": "v1",
+        "resource": "pods"
+    },
+    "namespace": "test",
+    "operation": "CREATE",
+    "userInfo": {
+        "username": "system:serviceaccount:kube-system:replicaset-controller",
+        "uid": "8280ec5e-e324-4251-8bf1-77c847a39952",
+        "groups": [
+            "system:serviceaccounts",
+            "system:serviceaccounts:kube-system",
+            "system:authenticated"
+        ]
+    },
+    "object": {
+        "kind": "Pod",
+        "apiVersion": "v1",
+        "metadata": {
+            "generateName": "myubuntu-6d5c486b66-",
+            "creationTimestamp": null,
+            "labels": {
+                "app": "myubuntu",
+                "pod-template-hash": "6d5c486b66"
+            },
+            "annotations": {
+                "admission.trusted.identity/inject": "true",
+                "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
+            },
+            "ownerReferences": [
+                {
+                    "apiVersion": "apps/v1",
+                    "kind": "ReplicaSet",
+                    "name": "myubuntu-6d5c486b66",
+                    "uid": "67635c98-ddee-49eb-a3c1-12a0c7bb15f0",
+                    "controller": true,
+                    "blockOwnerDeletion": true
+                }
+            ],
+            "managedFields": [
+                {
+                    "manager": "kube-controller-manager",
+                    "operation": "Update",
+                    "apiVersion": "v1",
+                    "time": "2020-12-09T15:57:57Z",
+                    "fieldsType": "FieldsV1",
+                    "fieldsV1": {
+                        "f:metadata": {
+                            "f:annotations": {
+                                ".": {},
+                                "f:admission.trusted.identity/inject": {},
+                                "f:tsi.secrets": {}
+                            },
+                            "f:generateName": {},
+                            "f:labels": {
+                                ".": {},
+                                "f:app": {},
+                                "f:pod-template-hash": {}
+                            },
+                            "f:ownerReferences": {
+                                ".": {},
+                                "k:{\"uid\":\"67635c98-ddee-49eb-a3c1-12a0c7bb15f0\"}": {
+                                    ".": {},
+                                    "f:apiVersion": {},
+                                    "f:blockOwnerDeletion": {},
+                                    "f:controller": {},
+                                    "f:kind": {},
+                                    "f:name": {},
+                                    "f:uid": {}
+                                }
+                            }
+                        },
+                        "f:spec": {
+                            "f:containers": {
+                                "k:{\"name\":\"myubuntu\"}": {
+                                    ".": {},
+                                    "f:args": {},
+                                    "f:command": {},
+                                    "f:image": {},
+                                    "f:imagePullPolicy": {},
+                                    "f:name": {},
+                                    "f:resources": {},
+                                    "f:terminationMessagePath": {},
+                                    "f:terminationMessagePolicy": {}
+                                }
+                            },
+                            "f:dnsPolicy": {},
+                            "f:enableServiceLinks": {},
+                            "f:restartPolicy": {},
+                            "f:schedulerName": {},
+                            "f:securityContext": {},
+                            "f:terminationGracePeriodSeconds": {}
+                        }
+                    }
+                }
+            ]
+        },
+        "spec": {
+            "volumes": [
+                {
+                    "name": "default-token-ncgzw",
+                    "secret": {
+                        "secretName": "default-token-ncgzw"
+                    }
+                }
+            ],
+            "containers": [
+                {
+                    "name": "myubuntu",
+                    "image": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
+                    "command": [
+                        "/bin/bash",
+                        "-c",
+                        "--"
+                    ],
+                    "args": [
+                        "while true; do ls /tsi-secrets; sleep 15; done;"
+                    ],
+                    "resources": {},
+                    "volumeMounts": [
+                        {
+                            "name": "default-token-ncgzw",
+                            "readOnly": true,
+                            "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                        }
+                    ],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "Always"
+                }
+            ],
+            "restartPolicy": "Always",
+            "terminationGracePeriodSeconds": 30,
+            "dnsPolicy": "ClusterFirst",
+            "serviceAccountName": "default",
+            "serviceAccount": "default",
+            "securityContext": {},
+            "schedulerName": "default-scheduler",
+            "tolerations": [
+                {
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                },
+                {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                }
+            ],
+            "priority": 0,
+            "enableServiceLinks": true
+        },
+        "status": {}
+    },
+    "oldObject": null
 }

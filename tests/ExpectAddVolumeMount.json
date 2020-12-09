@@ -1,11 +1,11 @@
 [
-  {
-    "op": "add",
-    "path": "/spec/containers/0/volumeMounts/-",
-    "value": {
-      "name": "tsi-secrets",
-      "readOnly": true,
-      "mountPath": "/tsi-secrets"
+    {
+        "op": "add",
+        "path": "/spec/containers/0/volumeMounts/-",
+        "value": {
+            "name": "tsi-secrets",
+            "readOnly": true,
+            "mountPath": "/tsi-secrets"
+        }
     }
-  }
 ]

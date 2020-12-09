@@ -8,7 +8,7 @@
             "admission.trusted.identity/tsi-cluster-name": "minikube",
             "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
             "admission.trusted.identity/tsi-region": "eu-de",
-            "tsi.secrets": "- tsi.secret/name: \"mysecret1xxx\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
+            "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
         },
         "creationTimestamp": "2020-12-09T15:57:57Z",
         "generateName": "myubuntu-6d5c486b66-",
