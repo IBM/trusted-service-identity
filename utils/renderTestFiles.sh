@@ -50,7 +50,7 @@ $webhoook_cmd cat /tmp/FakeAddVolumeMount.json > ${TESTS}/FakeAddVolumeMount.jso
 $webhoook_cmd cat /tmp/ExpectAddVolumeMount.json > ${TESTS}/ExpectAddVolumeMount.json
 $webhoook_cmd cat /tmp/FakeAdmissionRequest.json > ${TESTS}/FakeAdmissionRequest.json
 
-sed 's/inject": "true"/inject": "false"/g' ../tests/FakePod.json > ../tests/FakePodNM.json
+sed 's/inject": "true"/inject": "false"/g' ${TESTS}/FakePod.json > ${TESTS}/FakePodNM.json
 
 $pod_cmd get po $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -ojson > ${TESTS}/FakeIsSafeUpdate.json
 sed 's/mysecret1/mysecret1xxx/g' ${TESTS}/FakeIsSafeUpdate.json > ${TESTS}/FakeIsSafeUpdateOK.json
