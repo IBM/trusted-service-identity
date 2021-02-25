@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-tokens
+  namespace: spire
+data:
+  10.135.67.175: |
+   eb5105f7-bede-4505-af90-0d38c2f4ae72
+  10.135.67.180: |
+   d904894c-62c4-48b1-8413-7d0c5a30f49c
