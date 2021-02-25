@@ -4,7 +4,7 @@
         "path": "/spec/initContainers/0",
         "value": {
             "name": "jwt-init",
-            "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
+            "image": "tsidentity/ti-jwt-sidecar:v1.8.3",
             "env": [
                 {
                     "name": "HOST_IP",

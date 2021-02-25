@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # target docker repo
-tiRepo: trustedseriviceidentity
+tiRepo: tsidentity
 
 # Cluster Information
 cluster:

@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: vault-cli
-          image: trustedseriviceidentity/vault-cli:v0.3
+          image: tsidentity/vault-cli:v0.3
           imagePullPolicy: Always
           env:
             - name: VAULT_ADDR

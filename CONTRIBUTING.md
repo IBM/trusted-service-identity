@@ -58,7 +58,7 @@ To build all the helm charts only:
 ./buildTSI-helm.sh
 ```
 
-When pushing the images to the registry, the user has to be logged in to Docker Hub with permissions to push images to `hub.docker.com/repository/docker/trustedseriviceidentity`. Make sure you are part of the Organization: [https://hub.docker.com/orgs/trustedseriviceidentity](https://hub.docker.com/orgs/trustedseriviceidentity)
+When pushing the images to the registry, the user has to be logged in to Docker Hub with permissions to push images to `hub.docker.com/repository/docker/tsidentity`. Make sure you are part of the Organization: [https://hub.docker.com/orgs/tsidentity](https://hub.docker.com/orgs/tsidentity)
 
 or if you like to build individual components:
 

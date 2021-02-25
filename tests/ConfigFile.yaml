@@ -1,6 +1,6 @@
 initContainers:
 - name: jwt-init
-  image: trustedseriviceidentity/ti-jwt-sidecar:v1.8.3
+  image: tsidentity/ti-jwt-sidecar:v1.8.3
   imagePullPolicy: Always
   securityContext:
     runAsUser: 0
@@ -32,7 +32,7 @@ initContainers:
       readOnly: true
 sidecarContainers:
 - name: jwt-sidecar
-  image: trustedseriviceidentity/ti-jwt-sidecar:v1.8.3
+  image: tsidentity/ti-jwt-sidecar:v1.8.3
   imagePullPolicy: Always
   securityContext:
     runAsUser: 0

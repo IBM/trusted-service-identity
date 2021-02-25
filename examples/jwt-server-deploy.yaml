@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: jwt-key-service
-        image: trustedseriviceidentity/ti-jwt-key-server:v0.2
+        image: tsidentity/ti-jwt-key-server:v0.2
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

@@ -17,7 +17,7 @@ spec:
       serviceAccountName: ti-sa
       containers:
         - name: tsi-mutate
-          image: trustedseriviceidentity/ti-webhook:v1.5
+          image: tsidentity/ti-webhook:v1.5
           imagePullPolicy: Always
           args:
             - -tsiMutateConfigFile=/etc/webhook/config/tsiMutateConfig.yaml

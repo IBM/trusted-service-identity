@@ -6,7 +6,7 @@ info:
   cluster-name: mycluster
   region: us-south
 policy:
-  - image: "trustedseriviceidentity/"
-    identity: id-trustedseriviceidentity
+  - image: "tsidentity/"
+    identity: id-tsidentity
   - image: "ibmcom/"
     identity: id-ibm
