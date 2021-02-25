@@ -4,6 +4,11 @@ SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
+# use this instead of press the key:
+#helm uninstall spire
+#while (kubectl get namespaces -o NAME | grep spire); do echo "Waiting for helm uninstall to complete"; sleep 1; done
+#helm install spire spire-chart
+
 # Required Parameters
 # CLUSTER_NAME=
 # REGION="eu-de"
