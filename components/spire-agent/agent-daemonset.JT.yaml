@@ -28,7 +28,7 @@ spec:
           args: ["-t", "30", "spire-server:8081"]
       containers:
         - name: spire-agent
-          image: trustedseriviceidentity/spire-agent:v1.9.0
+          image: tsidentity/spire-agent:v1.9.0
           imagePullPolicy: Always
           securityContext:
             # privilaged is needed to create socket and bundle files
