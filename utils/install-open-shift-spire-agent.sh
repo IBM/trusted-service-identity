@@ -5,7 +5,7 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 CLUSTERNAME="${1:-tsi-roks02}"
-PROJECT="${2:spire-server}"
+PROJECT="${2:-spire-server}"
 SPIRESERVER="spire-server"
 SPIREGROUP="spiregroup"
 
@@ -13,7 +13,7 @@ SPIREGROUP="spiregroup"
 helpme()
 {
   cat <<HELPMEHELPME
-Install SPIRE server for TSI
+Install SPIRE agent and workload registrar for TSI
 
 Syntax: ${0} <CLUSTER_NAME> <PROJECT_NAME>
 
@@ -126,9 +126,9 @@ echo "https://$SPIRESERV"
 }
 
 installSpireAgent(){
-PROJECT="spire-agent"
-oc new-project $PROJECT --description="My TSI Spire AGENT project on OpenShift" > /dev/null
-oc project $PROJECT
+#PROJECT="spire-agent"
+#oc new-project $PROJECT --description="My TSI Spire AGENT project on OpenShift" > /dev/null
+#oc project $PROJECT
 
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
@@ -159,7 +159,7 @@ groups:
 EOF
 oc describe scc $SPIREAGSCC
 
-oc adm policy add-scc-to-user spire-agent system:serviceaccount:spire:spire-agent
+oc adm policy add-scc-to-user spire-agent system:serviceaccount:$PROJECT:$SPIREAGSA
 
 # this works:
 oc adm policy add-scc-to-user privileged -z spire-agent
@@ -227,4 +227,4 @@ cleanup() {
 }
 
 checkPrereqs
-installSpireServer
+installSpireAgent

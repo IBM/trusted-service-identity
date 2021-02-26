@@ -1,0 +1,23 @@
+---
+# Default values for spire.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+registry: docker.io
+org: networkservicemesh
+tag: master
+pullPolicy: IfNotPresent
+
+# workaround since Azure doesn't support by default 10250 security port for kubelet
+azure: false
+namespace: spire-server
+selfSignedCA: true
+
+# SPIRE specific values
+# clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
+clustername: spire-example
+# trustdomain is arbitrary but needs to match between spire-config and k8s-workload-registrar config
+trustdomain: test.com
+
+spireAddress: spire-server-spire-server.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+spirePort: 443 
