@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: myingress
+spec:
+  tls:
+  - hosts:
+    - spire-server-spire-server.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+    secretName: tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000
+  rules:
+  - host: spire-server-spire-server.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: spire-server
+          servicePort: 8081
