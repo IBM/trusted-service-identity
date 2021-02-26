@@ -5,7 +5,7 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 CLUSTERNAME="${1:-tsi-roks02}"
-PROJECT="${2:spire-server}"
+PROJECT="${2:-spire-server}"
 SPIRESERVER="spire-server"
 SPIREGROUP="spiregroup"
 
@@ -197,7 +197,7 @@ else
 fi
 
 # This install requires helm verion 3:
-helm_test_cmd="helm version --client| grep 'Version:\"v3'"
+helm_test_cmd="helm version --client | grep 'Version:\"v3'"
 if [[ $(eval $helm_test_cmd) ]]; then
   echo "helm client v3 installed properly"
 else
