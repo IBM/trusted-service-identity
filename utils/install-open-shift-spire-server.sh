@@ -85,13 +85,14 @@ groups:
 EOF
 oc describe scc $SPIRESCC
 
-helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME spire-server charts/spire-server --debug
+helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME spire-server charts/spire-server # --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
+# Ingress route for spire-server
 oc -n $PROJECT create route passthrough --service spire-server
 oc -n $PROJECT get route
-INGRESS=$(oc -n $PROJECT get route $SPIRESERVER -o jsonpath='{.spec.host}{"\n"}')
+INGRESS=$(oc -n $PROJECT get route spire-server -o jsonpath='{.spec.host}{"\n"}')
 echo $INGRESS
 
 # alternatively:
@@ -128,10 +129,24 @@ spec:
           servicePort: 8081
 EOF
 
+# create route for Tornjak TLS:
+oc -n $PROJECT create route passthrough tornjak-tls --service tornjak-tls
+# create route for Tornjak mTLS:
+oc -n $PROJECT create route passthrough tornjak-mtls --service tornjak-mtls
+# create route for Tornjak HTTP:
+# oc create route passthrough tornjak-http --service tornjak-http
+oc -n $PROJECT expose svc/tornjak-http
+
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
-echo "https://$SPIRESERV"
-echo
+#echo "https://$SPIRESERV"
 echo "spireServer: $SPIRESERV"
+
+TORNJAKHTTP=$(oc get route tornjak-http --output json |  jq -r '.spec.host')
+echo "Tornjak (http): http://$TORNJAKHTTP"
+TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
+echo "Tornjak (TLS): https://$TORNJAKTLS"
+TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
+echo "Tornjak (mTLS): https://$TORNJAKMTLS"
 }
 
 checkPrereqs(){
