@@ -4,10 +4,14 @@ SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
-CLUSTERNAME="${1:-tsi-roks02}"
-PROJECT="${2:-spire-server}"
-SPIRESERVER="spire-server"
+# SPIRE Server info:
+SPIRESERVERPROJECT="spire-server"
+SPIRESERVER=$1
+# SPIRE Agent info:
+PROJECT="${2:-spire-agent}"
 SPIREGROUP="spiregroup"
+SPIREAGSA="spire-agent"
+SPIREAGSCC="spire-agent"
 
 ## create help menu:
 helpme()
@@ -15,11 +19,11 @@ helpme()
   cat <<HELPMEHELPME
 Install SPIRE agent and workload registrar for TSI
 
-Syntax: ${0} <CLUSTER_NAME> <PROJECT_NAME>
+Syntax: ${0} <SPIRE_SERVER> <PROJECT_NAME>
 
 Where:
-  CLUSTER_NAME - name of the OpenShift cluster
-  PROJECT_NAME - OpenShift project (namespace), default: spire-server [optional]
+  SPIRE_SERVER - SPIRE server end-point (mandatory)
+  PROJECT_NAME - OpenShift project (namespace) to install the Agent, default: spire-agent [optional]
 HELPMEHELPME
 }
 
@@ -27,115 +31,40 @@ HELPMEHELPME
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
   exit 0
+elif [[ "$1" == "" ]] ; then
+  echo "SPIRE_SERVER is missing"
+  helpme
+  exit 1
 fi
 
-installSpireServer(){
-
+installSpireAgent(){
   oc get projects | grep $PROJECT
   if [ "$?" == "0" ]; then
-    # check if spire-server project exists:
+    # check if spire-agent project exists:
     echo "$PROJECT project already exists. "
     read -n 1 -r -p "Do you want to re-install it? [y/n]" REPLY
     echo # create a new line
     if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]] ; then
       echo "Re-installing $PROJECT project"
-      oc delete project $PROJECT
+      # oc delete project $PROJECT
+      cleanup
       while (oc get projects | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
+      oc new-project $PROJECT --description="My TSI Spire Agent project on OpenShift" > /dev/null
+      oc project $PROJECT
     else
-      echo "Keeping the existing spire-server project as is"
-      exit 0
+      echo "Keeping the existing $PROJECT project as is"
     fi
+  else
+    oc new-project $PROJECT --description="My TSI Spire Agent project on OpenShift" > /dev/null
+    oc project $PROJECT
   fi
 
-oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" > /dev/null
-oc project $PROJECT
+# Need to copy the spire-bundle from the server namespace
+oc get configmap spire-bundle -n $SPIRESERVERPROJECT -o yaml | sed "s/namespace: $SPIRESERVERPROJECT/namespace: $PROJECT/" | oc apply -n $PROJECT -f -
 
-SPIRESA="spire-server"
-oc create sa $SPIRESA
-oc policy add-role-to-user cluster-admin system:serviceaccount:$PROJECT:$SPIRESA
-oc adm groups new $SPIREGROUP $SPIRESA
-
-SPIRESCC="spire-server"
-oc apply -f- <<EOF
-kind: SecurityContextConstraints
-apiVersion: v1
-metadata:
-  name: $SPIRESCC
-allowHostDirVolumePlugin: true
-allowPrivilegedContainer: true
-allowHostPorts: true
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-fsGroup:
-  type: RunAsAny
-supplementalGroups:
-  type: RunAsAny
-groups:
-- system:authenticated
-EOF
-oc describe scc $SPIRESCC
-
-helm install spire-server charts/spire-server --debug
-helm list
-
-# oc -n $PROJECT expose svc/$SPIRESERVER
-oc -n $PROJECT create route passthrough --service spire-server
-oc -n $PROJECT get route
-INGRESS=$(oc -n $PROJECT get route $SPIRESERVER -o jsonpath='{.spec.host}{"\n"}')
-echo $INGRESS
-
-# alternatively:
-ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
-INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
-INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
-ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
-
-# setup TLS secret:
-CRN=$(ibmcloud oc ingress secret get -c "$CLUSTERNAME" --name "$INGSEC" --namespace openshift-ingress --output json | jq -r '.crn')
-ibmcloud oc ingress secret create --cluster "$CLUSTERNAME" --cert-crn "$CRN" --name "$INGSEC" --namespace $PROJECT
-if [ "$?" == "0" ]; then
-  echo "All good"
-fi
-
-# create ingress deployment:
-oc create -f- <<EOF
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: myingress
-spec:
-  tls:
-  - hosts:
-    - $INGRESS
-    secretName: $INGSEC
-  rules:
-  - host: $INGRESS
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: spire-server
-          servicePort: 8081
-EOF
-
-SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
-echo "https://$SPIRESERV"
-
-}
-
-installSpireAgent(){
-#PROJECT="spire-agent"
-#oc new-project $PROJECT --description="My TSI Spire AGENT project on OpenShift" > /dev/null
-#oc project $PROJECT
-
-SPIREGROUP="spiregroup"
-SPIREAGSA="spire-agent"
 oc create sa $SPIREAGSA
 oc adm groups add-users $SPIREGROUP $SPIREAGSA
 
-SPIREAGSCC="spire-agent"
 oc create -f- <<EOF
 kind: SecurityContextConstraints
 apiVersion: v1
@@ -162,9 +91,56 @@ oc describe scc $SPIREAGSCC
 oc adm policy add-scc-to-user spire-agent system:serviceaccount:$PROJECT:$SPIREAGSA
 
 # this works:
-oc adm policy add-scc-to-user privileged -z spire-agent
+oc adm policy add-scc-to-user privileged -z $SPIREAGSA
 
-helm install spire-agent charts/spire-agent --debug
+helm install --set spireAddress=$SPIRESERVER --set namespace=$PROJECT \
+ spire-agent charts/spire-agent --debug
+
+cat << EOF
+
+Next, login to the SPIRE Server and register the Workload Registrar
+to gain admin access to the server.
+
+oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
+
+ A few, sample server commands:
+
+# show entries:
+/opt/spire/bin/spire-server entry show -registrationUDSPath /tmp/registration.sock
+# show agents:
+/opt/spire/bin/spire-server agent list -registrationUDSPath /tmp/registration.sock
+# delete entry:
+/opt/spire/bin/spire-server entry delete -registrationUDSPath /tmp/registration.sock --entryID
+
+# sample reqistration:
+/opt/spire/bin/spire-server entry create -admin \
+-selector k8s:sa:spire-k8s-registrar \
+-selector k8s:ns:$PROJECT \
+-selector k8s:container-image:gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704 \
+-selector k8s:container-name:k8s-workload-registrar \
+-spiffeID spiffe://test.com/workload-registrar \
+-parentID spiffe://test.com/spire/agent/k8s_psat/spire-example/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-registrationUDSPath /tmp/registration.sock
+
+# sample registration with subset selectors:
+/opt/spire/bin/spire-server entry create -admin \
+-selector k8s:ns:$PROJECT \
+-selector k8s:container-name:k8s-workload-registrar \
+-spiffeID spiffe://test.com/workload-registrar \
+-parentID spiffe://test.com/spire/agent/k8s_psat/spire-example/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-registrationUDSPath /tmp/registration.sock
+
+/opt/spire/bin/spire-server entry create -admin \
+-selector k8s:sa:spire-k8s-registrar \
+-selector k8s:ns:$PROJECT \
+-selector k8s:container-image:gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704 \
+-selector k8s:container-name:k8s-workload-registrar \
+-spiffeID spiffe://test.com/workload-registrar2 \
+-parentID spiffe://test.com/spire/agent/k8s_psat/spire-example/a60e2719-4eb7-4d52-9190-475f4986542e \
+-registrationUDSPath /tmp/registration.sock
+
+EOF
+
 }
 
 checkPrereqs(){
@@ -219,11 +195,10 @@ fi
 }
 
 cleanup() {
-  oc delete scc $SCCHOST --ignore-not-found=true
-  oc delete scc $SCCPOD --ignore-not-found=true
-  oc delete sa $SANAME --ignore-not-found=true
-  oc delete group $GROUPNAME --ignore-not-found=true
-  oc delete project $PROJECTNAME --ignore-not-found=true
+  helm uninstall spire-agent -n $PROJECT
+  oc delete scc $SPIREAGSCC --ignore-not-found=true
+  oc delete sa $SPIREAGSA --ignore-not-found=true
+  oc delete project $PROJECT --ignore-not-found=true
 }
 
 checkPrereqs

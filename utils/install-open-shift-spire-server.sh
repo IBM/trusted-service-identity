@@ -4,10 +4,12 @@ SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
-CLUSTERNAME="${1:-tsi-roks02}"
+CLUSTERNAME="$1"
 PROJECT="${2:-spire-server}"
 SPIRESERVER="spire-server"
 SPIREGROUP="spiregroup"
+SPIRESA="spire-server"
+SPIRESCC="spire-server"
 
 ## create help menu:
 helpme()
@@ -18,8 +20,8 @@ Install SPIRE server for TSI
 Syntax: ${0} <CLUSTER_NAME> <PROJECT_NAME>
 
 Where:
-  CLUSTER_NAME - name of the OpenShift cluster
-  PROJECT_NAME - OpenShift project (namespace), default: spire-server [optional]
+  CLUSTER_NAME - name of the OpenShift cluster (required)
+  PROJECT_NAME - OpenShift project [namespace] to install the Server, default: spire-server (optional)
 HELPMEHELPME
 }
 
@@ -27,6 +29,10 @@ HELPMEHELPME
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
   exit 0
+elif [[ "$1" == "" ]] ; then
+  echo "CLUSTER_NAME is missing"
+  helpme
+  exit 1
 fi
 
 installSpireServer(){
@@ -39,23 +45,25 @@ installSpireServer(){
     echo # create a new line
     if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]] ; then
       echo "Re-installing $PROJECT project"
-      oc delete project $PROJECT
+      # oc delete project $PROJECT
+      cleanup
       while (oc get projects | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
+      oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" > /dev/null
+      oc project $PROJECT
     else
-      echo "Keeping the existing spire-server project as is"
-      exit 0
+      echo "Keeping the existing $PROJECT project as is"
+      echo 0
     fi
+  else
+    oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" > /dev/null
+    oc project $PROJECT
   fi
 
-oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" > /dev/null
-oc project $PROJECT
-
-SPIRESA="spire-server"
+# create serviceAccount and setup permissions
 oc create sa $SPIRESA
 oc policy add-role-to-user cluster-admin system:serviceaccount:$PROJECT:$SPIRESA
 oc adm groups new $SPIREGROUP $SPIRESA
 
-SPIRESCC="spire-server"
 oc apply -f- <<EOF
 kind: SecurityContextConstraints
 apiVersion: v1
@@ -77,7 +85,7 @@ groups:
 EOF
 oc describe scc $SPIRESCC
 
-helm install spire-server charts/spire-server --debug
+helm install --set namespace=$PROJECT spire-server charts/spire-server --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -123,48 +131,6 @@ EOF
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo "https://$SPIRESERV"
 
-}
-
-installSpireAgent(){
-PROJECT="spire-agent"
-oc new-project $PROJECT --description="My TSI Spire AGENT project on OpenShift" > /dev/null
-oc project $PROJECT
-
-SPIREGROUP="spiregroup"
-SPIREAGSA="spire-agent"
-oc create sa $SPIREAGSA
-oc adm groups add-users $SPIREGROUP $SPIREAGSA
-
-SPIREAGSCC="spire-agent"
-oc create -f- <<EOF
-kind: SecurityContextConstraints
-apiVersion: v1
-metadata:
-  name: $SPIREAGSCC
-allowHostIPC: true
-allowHostNetwork: true
-allowHostDirVolumePlugin: true
-allowPrivilegedContainer: true
-allowHostPorts: true
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-fsGroup:
-  type: RunAsAny
-supplementalGroups:
-  type: RunAsAny
-groups:
-- system:authenticated
-EOF
-oc describe scc $SPIREAGSCC
-
-oc adm policy add-scc-to-user spire-agent system:serviceaccount:spire:spire-agent
-
-# this works:
-oc adm policy add-scc-to-user privileged -z spire-agent
-
-helm install spire-agent charts/spire-agent --debug
 }
 
 checkPrereqs(){
@@ -219,11 +185,11 @@ fi
 }
 
 cleanup() {
-  oc delete scc $SCCHOST --ignore-not-found=true
-  oc delete scc $SCCPOD --ignore-not-found=true
-  oc delete sa $SANAME --ignore-not-found=true
-  oc delete group $GROUPNAME --ignore-not-found=true
-  oc delete project $PROJECTNAME --ignore-not-found=true
+  helm uninstall spire-server -n $PROJECT
+  oc delete scc $SPIRESCC --ignore-not-found=true
+  oc delete sa $SPIRESA --ignore-not-found=true
+  #oc delete group $GROUPNAME --ignore-not-found=true
+  oc delete project $PROJECT --ignore-not-found=true
 }
 
 checkPrereqs
