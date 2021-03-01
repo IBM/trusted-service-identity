@@ -1,0 +1,17 @@
+The installation of the SPIRE Agent and Workload Registrar for
+Universal Trusted Workload Identity Service has completed.
+
+      Cluster name: {{ .Values.clustername }}
+      Trusted Domain: {{ .Values.trustdomain }}
+
+  SPIRE info:
+      Spire Address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}
+      Spire Image: {{ .Values.spireImage }}
+
+    Chart Name: {{ .Chart.Name }}.
+    Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}

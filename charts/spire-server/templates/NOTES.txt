@@ -1,0 +1,13 @@
+The installation of the SPIRE Server for
+Universal Trusted Workload Identity Service has completed.
+
+      Cluster name: {{ .Values.clustername }}
+      Trusted Domain: {{ .Values.trustdomain }}
+
+      Chart Name: {{ .Chart.Name }}.
+      Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
