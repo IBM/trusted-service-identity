@@ -6,9 +6,10 @@ TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 # SPIRE Server info:
 SPIRESERVERPROJECT="spire-server"
-SPIRESERVER=$1
+CLUSTERNAME=$1
+SPIRESERVER=$2
 # SPIRE Agent info:
-PROJECT="${2:-spire-agent}"
+PROJECT="${3:-spire-agent}"
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
 SPIREAGSCC="spire-agent"
@@ -19,10 +20,11 @@ helpme()
   cat <<HELPMEHELPME
 Install SPIRE agent and workload registrar for TSI
 
-Syntax: ${0} <SPIRE_SERVER> <PROJECT_NAME>
+Syntax: ${0} <CLUSTER_NAME> <SPIRE_SERVER> <PROJECT_NAME>
 
 Where:
-  SPIRE_SERVER - SPIRE server end-point (mandatory)
+  CLUSTER_NAME - name of the OpenShift cluster (required)
+  SPIRE_SERVER - SPIRE server end-point (required)
   PROJECT_NAME - OpenShift project (namespace) to install the Agent, default: spire-agent [optional]
 HELPMEHELPME
 }
@@ -31,8 +33,8 @@ HELPMEHELPME
 if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
   helpme
   exit 0
-elif [[ "$1" == "" ]] ; then
-  echo "SPIRE_SERVER is missing"
+elif [[ "$2" == "" ]] ; then
+  echo "Both CLUSTER_NAME and SPIRE_SERVER are required"
   helpme
   exit 1
 fi
@@ -94,7 +96,7 @@ oc adm policy add-scc-to-user spire-agent system:serviceaccount:$PROJECT:$SPIREA
 oc adm policy add-scc-to-user privileged -z $SPIREAGSA
 
 helm install --set spireAddress=$SPIRESERVER --set namespace=$PROJECT \
- spire-agent charts/spire-agent --debug
+ --set clustername=$CLUSTERNAME spire-agent charts/spire-agent --debug
 
 cat << EOF
 
@@ -112,35 +114,24 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 # delete entry:
 /opt/spire/bin/spire-server entry delete -registrationUDSPath /tmp/registration.sock --entryID
 
-# sample reqistration:
+# sample Registrar reqistration:
 /opt/spire/bin/spire-server entry create -admin \
 -selector k8s:sa:spire-k8s-registrar \
 -selector k8s:ns:$PROJECT \
 -selector k8s:container-image:gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704 \
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://test.com/workload-registrar \
--parentID spiffe://test.com/spire/agent/k8s_psat/spire-example/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-parentID spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
 
-# sample registration with subset selectors:
+# sample Registrar registration with just a subset of selectors:
 /opt/spire/bin/spire-server entry create -admin \
 -selector k8s:ns:$PROJECT \
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://test.com/workload-registrar \
--parentID spiffe://test.com/spire/agent/k8s_psat/spire-example/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-parentID spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
-
-/opt/spire/bin/spire-server entry create -admin \
--selector k8s:sa:spire-k8s-registrar \
--selector k8s:ns:$PROJECT \
--selector k8s:container-image:gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704 \
--selector k8s:container-name:k8s-workload-registrar \
--spiffeID spiffe://test.com/workload-registrar2 \
--parentID spiffe://test.com/spire/agent/k8s_psat/spire-example/a60e2719-4eb7-4d52-9190-475f4986542e \
--registrationUDSPath /tmp/registration.sock
-
 EOF
-
 }
 
 checkPrereqs(){

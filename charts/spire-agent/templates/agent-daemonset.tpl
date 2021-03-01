@@ -25,9 +25,7 @@ spec:
           # you prefer that waits for a service to be up. This image is built
           # from https://github.com/lqhl/wait-for-it
           image: gcr.io/spiffe-io/wait-for-it
-          # args: ["-t", "30", "spire-server-spire-server.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud:443"]
           args: ["-t", "30", "{{ .Values.spireAddress }}:{{ .Values.spirePort }}"]
-          # args: ["-t", "30", "spire-server:8081"]
       containers:
         - name: spire-agent
           image: gcr.io/spiffe-io/spire-agent:0.11.0
