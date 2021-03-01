@@ -22,7 +22,7 @@ spec:
       containers:
         - name: k8s-workload-registrar
           #image: k8s-workload-registrar:latest
-          image: gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704
+          image: {{ .Values.spireImage }}
           imagePullPolicy: Always
           securityContext:
             # privilaged is needed to create socket and bundle files

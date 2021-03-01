@@ -47,17 +47,17 @@ spec:
               readOnly: true
             - name: spire-agent-token
               mountPath: /var/run/secrets/tokens
-        #  livenessProbe:
-        #    exec:
-        #      command:
-        #        - /opt/spire/bin/spire-agent
-        #        - healthcheck
-        #        - -socketPath
-        #        - /run/spire/sockets/agent.sock
-        #    failureThreshold: 2
-        #    initialDelaySeconds: 15
-        #    periodSeconds: 60
-        #    timeoutSeconds: 3
+          livenessProbe:
+            exec:
+              command:
+                - /opt/spire/bin/spire-agent
+                - healthcheck
+                - -socketPath
+                - /run/spire/sockets/agent.sock
+            failureThreshold: 2
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 3
       volumes:
         - name: spire-config
           configMap:

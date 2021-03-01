@@ -10,7 +10,7 @@ data:
     trust_domain = "{{ .Values.trustdomain }}"
     # server_socket_path = "/run/spire/sockets/registration.sock"
     agent_socket_path = "/run/spire/sockets/agent.sock"
-    server_address = "spire-server:8081"
+    server_address = "{{ .Values.spireAddress }}:{{ .Values.spirePort }}"
     cluster = "{{ .Values.clustername }}"
     # enable label based registration:
     # pod_label = "spire-workload-id"
