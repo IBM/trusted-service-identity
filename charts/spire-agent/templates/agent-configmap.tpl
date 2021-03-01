@@ -8,11 +8,7 @@ data:
     agent {
       data_dir = "/run/spire"
       log_level = "DEBUG"
-      # server_address = "spire-server"
-      # server_address = "spire-server-spire-server.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
       server_address = "{{ .Values.spireAddress }}"
-      # server_port = "8081"
-      # server_port = "443"
       server_port = "{{ .Values.spirePort }}"
       socket_path = "/run/spire/sockets/agent.sock"
       trust_bundle_path = "/run/spire/bundle/bundle.crt"
