@@ -24,7 +24,7 @@ spec:
           # image: gcr.io/spiffe-io/spire-server:0.11.0
           image: tsidentity/tornjak-spire-server:latest
           securityContext:
-            # privilaged is needed to create socket and bundle files
+            # privilaged is needed to access mounted files
             privileged: true
           args:
             - -config
@@ -32,17 +32,12 @@ spec:
           ports:
             - containerPort: 8081
           volumeMounts:
-          #  - name: spire-server-socket
-          #    mountPath: /run/spire/sockets
-          #    readOnly: false
             - name: spire-config
               mountPath: /run/spire/config
               readOnly: true
             - name: spire-data
               mountPath: /run/spire/data
               readOnly: false
-          #  - name: spire-secret
-          #    mountPath: /run/spire/secret
           livenessProbe:
             exec:
               command:
@@ -52,37 +47,10 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 6000
             timeoutSeconds: 3
-      #  - name: k8s-workload-registrar
-      #    #image: k8s-workload-registrar:latest
-      #    image: gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704
-      #    imagePullPolicy: Always
-      #    securityContext:
-      #      # privilaged is needed to create socket and bundle files
-      #      privileged: true
-      #    args:
-      #      - -config
-      #      - /run/k8s-workload-registrar/config/registrar.conf
-      #    volumeMounts:
-      #      - name: spire-server-socket
-      #        mountPath: /run/spire/sockets
-      #        readOnly: false
-      #      - name: k8s-workload-registrar-config
-      #        mountPath: /run/k8s-workload-registrar/config
-      #        readOnly: true
       volumes:
-      #  - name: spire-server-socket
-      #    hostPath:
-      #      path: /run/spire/server-sockets
-      #      type: DirectoryOrCreate
         - name: spire-config
           configMap:
             name: spire-server
-      #  - name: k8s-workload-registrar-config
-      #    configMap:
-      #      name: k8s-workload-registrar
-      #  - name: spire-secret
-      #    secret:
-      #      secretName: spire-secret
         - name: spire-entries
           configMap:
             name: spire-entries

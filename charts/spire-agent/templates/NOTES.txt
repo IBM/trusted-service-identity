@@ -2,7 +2,7 @@ The installation of the SPIRE Agent and Workload Registrar for
 Universal Trusted Workload Identity Service has completed.
 
       Cluster name: {{ .Values.clustername }}
-      Trusted Domain: {{ .Values.trustdomain }}
+      Trust Domain: {{ .Values.trustdomain }}
 
   SPIRE info:
       Spire Address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}

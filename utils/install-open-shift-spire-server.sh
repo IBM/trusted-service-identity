@@ -85,7 +85,7 @@ groups:
 EOF
 oc describe scc $SPIRESCC
 
-helm install --set namespace=$PROJECT spire-server charts/spire-server --debug
+helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME spire-server charts/spire-server --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -112,7 +112,7 @@ oc create -f- <<EOF
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: myingress
+  name: spireingress
 spec:
   tls:
   - hosts:
@@ -130,7 +130,8 @@ EOF
 
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo "https://$SPIRESERV"
-
+echo
+echo "spireServer: $SPIRESERV"
 }
 
 checkPrereqs(){
