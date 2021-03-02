@@ -37,7 +37,7 @@ data:
         plugin_data {
             clusters = {
                 "{{ .Values.clustername }}" = {
-                    service_account_whitelist = ["spire-agent:spire-agent"]
+                    service_account_whitelist = ["spire:spire-agent"]
                 }
             }
         }

@@ -1,4 +1,4 @@
-The installation of the SPIRE Server for
+The installation of the Tornjak with SPIRE Server for
 Universal Trusted Workload Identity Service has completed.
 
       Cluster name: {{ .Values.clustername }}
