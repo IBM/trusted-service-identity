@@ -1,6 +1,6 @@
 initContainers:
 - name: jwt-init
-  image: tsidentity/ti-jwt-sidecar:v1.8.3
+  image: tsidentity/ti-jwt-sidecar:v1.8.4
   imagePullPolicy: Always
   securityContext:
     runAsUser: 0
@@ -14,7 +14,7 @@ initContainers:
   - name: JWT_TTL_SEC
     value: 60
   - name: VAULT_ADDR
-    value: http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+    value: http://tsi-test2-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
   - name: SECRET_REFRESH_SEC
     value: 600
   - name: IDENTITY_REFRESH_SEC
@@ -32,7 +32,7 @@ initContainers:
       readOnly: true
 sidecarContainers:
 - name: jwt-sidecar
-  image: tsidentity/ti-jwt-sidecar:v1.8.3
+  image: tsidentity/ti-jwt-sidecar:v1.8.4
   imagePullPolicy: Always
   securityContext:
     runAsUser: 0
@@ -46,7 +46,7 @@ sidecarContainers:
   - name: JWT_TTL_SEC
     value: 60
   - name: VAULT_ADDR
-    value: http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+    value: http://tsi-test2-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
   - name: SECRET_REFRESH_SEC
     value: 600
   - name: IDENTITY_REFRESH_SEC

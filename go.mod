@@ -40,7 +40,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/nsf/jsondiff v0.0.0-20160203110537-7de28ed2b6e3
+	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pierrec/lz4 v0.0.0-20190222153722-062282ea0dcf // indirect

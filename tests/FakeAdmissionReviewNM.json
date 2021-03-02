@@ -2,7 +2,7 @@
     "kind": "AdmissionReview",
     "apiVersion": "admission.k8s.io/v1beta1",
     "request": {
-        "uid": "b2ceb3a2-f760-4142-a3ca-92593e7d37e3",
+        "uid": "ba12381c-1351-49ac-8144-ca1092b169aa",
         "kind": {
             "group": "",
             "version": "v1",
@@ -17,7 +17,7 @@
         "operation": "CREATE",
         "userInfo": {
             "username": "system:serviceaccount:kube-system:replicaset-controller",
-            "uid": "8280ec5e-e324-4251-8bf1-77c847a39952",
+            "uid": "32a5bd13-bbe6-429d-9922-0f69b034acb7",
             "groups": [
                 "system:serviceaccounts",
                 "system:serviceaccounts:kube-system",
@@ -28,81 +28,32 @@
             "kind": "Pod",
             "apiVersion": "v1",
             "metadata": {
-                "generateName": "myubuntunm-7997c68749-",
+                "generateName": "myubuntunm-79665c56b7-",
                 "creationTimestamp": null,
                 "labels": {
                     "app": "myubuntunm",
-                    "pod-template-hash": "7997c68749"
+                    "pod-template-hash": "79665c56b7"
+                },
+                "annotations": {
+                    "kubernetes.io/psp": "ibm-privileged-psp"
                 },
                 "ownerReferences": [
                     {
                         "apiVersion": "apps/v1",
                         "kind": "ReplicaSet",
-                        "name": "myubuntunm-7997c68749",
-                        "uid": "fc2d9676-47c2-42e1-9e9c-b7dc75de0171",
+                        "name": "myubuntunm-79665c56b7",
+                        "uid": "930303a3-ebaf-496c-9c6b-b27597111beb",
                         "controller": true,
                         "blockOwnerDeletion": true
-                    }
-                ],
-                "managedFields": [
-                    {
-                        "manager": "kube-controller-manager",
-                        "operation": "Update",
-                        "apiVersion": "v1",
-                        "time": "2020-12-09T15:59:04Z",
-                        "fieldsType": "FieldsV1",
-                        "fieldsV1": {
-                            "f:metadata": {
-                                "f:generateName": {},
-                                "f:labels": {
-                                    ".": {},
-                                    "f:app": {},
-                                    "f:pod-template-hash": {}
-                                },
-                                "f:ownerReferences": {
-                                    ".": {},
-                                    "k:{\"uid\":\"fc2d9676-47c2-42e1-9e9c-b7dc75de0171\"}": {
-                                        ".": {},
-                                        "f:apiVersion": {},
-                                        "f:blockOwnerDeletion": {},
-                                        "f:controller": {},
-                                        "f:kind": {},
-                                        "f:name": {},
-                                        "f:uid": {}
-                                    }
-                                }
-                            },
-                            "f:spec": {
-                                "f:containers": {
-                                    "k:{\"name\":\"myubuntunm\"}": {
-                                        ".": {},
-                                        "f:args": {},
-                                        "f:command": {},
-                                        "f:image": {},
-                                        "f:imagePullPolicy": {},
-                                        "f:name": {},
-                                        "f:resources": {},
-                                        "f:terminationMessagePath": {},
-                                        "f:terminationMessagePolicy": {}
-                                    }
-                                },
-                                "f:dnsPolicy": {},
-                                "f:enableServiceLinks": {},
-                                "f:restartPolicy": {},
-                                "f:schedulerName": {},
-                                "f:securityContext": {},
-                                "f:terminationGracePeriodSeconds": {}
-                            }
-                        }
                     }
                 ]
             },
             "spec": {
                 "volumes": [
                     {
-                        "name": "default-token-ncgzw",
+                        "name": "default-token-r2mx4",
                         "secret": {
-                            "secretName": "default-token-ncgzw"
+                            "secretName": "default-token-r2mx4"
                         }
                     }
                 ],
@@ -121,7 +72,7 @@
                         "resources": {},
                         "volumeMounts": [
                             {
-                                "name": "default-token-ncgzw",
+                                "name": "default-token-r2mx4",
                                 "readOnly": true,
                                 "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                             }
@@ -143,13 +94,13 @@
                         "key": "node.kubernetes.io/not-ready",
                         "operator": "Exists",
                         "effect": "NoExecute",
-                        "tolerationSeconds": 300
+                        "tolerationSeconds": 600
                     },
                     {
                         "key": "node.kubernetes.io/unreachable",
                         "operator": "Exists",
                         "effect": "NoExecute",
-                        "tolerationSeconds": 300
+                        "tolerationSeconds": 600
                     }
                 ],
                 "priority": 0,

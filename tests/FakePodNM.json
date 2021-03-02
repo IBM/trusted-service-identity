@@ -2,23 +2,24 @@
     "kind": "Pod",
     "apiVersion": "v1",
     "metadata": {
-        "generateName": "myubuntu-6d5c486b66-",
+        "generateName": "myubuntu-65d59b896d-",
         "namespace": "test",
         "creationTimestamp": null,
         "labels": {
             "app": "myubuntu",
-            "pod-template-hash": "6d5c486b66"
+            "pod-template-hash": "65d59b896d"
         },
         "annotations": {
             "admission.trusted.identity/inject": "false",
+            "kubernetes.io/psp": "ibm-privileged-psp",
             "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
         },
         "ownerReferences": [
             {
                 "apiVersion": "apps/v1",
                 "kind": "ReplicaSet",
-                "name": "myubuntu-6d5c486b66",
-                "uid": "67635c98-ddee-49eb-a3c1-12a0c7bb15f0",
+                "name": "myubuntu-65d59b896d",
+                "uid": "16ab2598-8f9c-4ebb-bb20-047e7d8da873",
                 "controller": true,
                 "blockOwnerDeletion": true
             }
@@ -27,9 +28,9 @@
     "spec": {
         "volumes": [
             {
-                "name": "default-token-ncgzw",
+                "name": "default-token-r2mx4",
                 "secret": {
-                    "secretName": "default-token-ncgzw"
+                    "secretName": "default-token-r2mx4"
                 }
             }
         ],
@@ -48,7 +49,7 @@
                 "resources": {},
                 "volumeMounts": [
                     {
-                        "name": "default-token-ncgzw",
+                        "name": "default-token-r2mx4",
                         "readOnly": true,
                         "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                     }
@@ -70,13 +71,13 @@
                 "key": "node.kubernetes.io/not-ready",
                 "operator": "Exists",
                 "effect": "NoExecute",
-                "tolerationSeconds": 300
+                "tolerationSeconds": 600
             },
             {
                 "key": "node.kubernetes.io/unreachable",
                 "operator": "Exists",
                 "effect": "NoExecute",
-                "tolerationSeconds": 300
+                "tolerationSeconds": 600
             }
         ],
         "priority": 0
