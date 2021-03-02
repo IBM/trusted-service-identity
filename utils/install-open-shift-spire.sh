@@ -5,11 +5,11 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 # SPIRE Server info:
-SPIRESERVERPROJECT="spire-server"
+SPIRESERVERPROJECT="tornjak"
 CLUSTERNAME=$1
 SPIRESERVER=$2
 # SPIRE Agent info:
-PROJECT="${3:-spire-agent}"
+PROJECT="${3:-spire}"
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
 SPIREAGSCC="spire-agent"
@@ -25,7 +25,7 @@ Syntax: ${0} <CLUSTER_NAME> <SPIRE_SERVER> <PROJECT_NAME>
 Where:
   CLUSTER_NAME - name of the OpenShift cluster (required)
   SPIRE_SERVER - SPIRE server end-point (required)
-  PROJECT_NAME - OpenShift project (namespace) to install the Agent, default: spire-agent [optional]
+  PROJECT_NAME - OpenShift project (namespace) to install the Agent, default: spire [optional]
 HELPMEHELPME
 }
 
@@ -50,7 +50,7 @@ installSpireAgent(){
       echo "Re-installing $PROJECT project"
       # oc delete project $PROJECT
       cleanup
-      while (oc get projects | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
+      while (oc get projects | grep -v spire-server | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
       oc new-project $PROJECT --description="My TSI Spire Agent project on OpenShift" > /dev/null
       oc project $PROJECT
     else
@@ -96,7 +96,7 @@ oc adm policy add-scc-to-user spire-agent system:serviceaccount:$PROJECT:$SPIREA
 oc adm policy add-scc-to-user privileged -z $SPIREAGSA
 
 helm install --set spireAddress=$SPIRESERVER --set namespace=$PROJECT \
- --set clustername=$CLUSTERNAME spire-agent charts/spire-agent --debug
+ --set clustername=$CLUSTERNAME spire charts/spire --debug
 
 cat << EOF
 
@@ -186,10 +186,12 @@ fi
 }
 
 cleanup() {
-  helm uninstall spire-agent -n $PROJECT
-  oc delete scc $SPIREAGSCC --ignore-not-found=true
-  oc delete sa $SPIREAGSA --ignore-not-found=true
-  oc delete project $PROJECT --ignore-not-found=true
+  helm uninstall spire -n $PROJECT 2>/dev/null
+  oc delete ClusterRole spire-agent-cluster-role spire-k8s-registrar-cluster-role 2>/dev/null
+  oc delete ClusterRoleBinding spire-agent-cluster-role-binding spire-k8s-registrar-cluster-role-binding 2>/dev/null
+  oc delete scc $SPIREAGSCC 2>/dev/null
+  oc delete sa $SPIREAGSA 2>/dev/null
+  oc delete project $PROJECT 2>/dev/null
 }
 
 checkPrereqs

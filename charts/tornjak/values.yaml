@@ -10,7 +10,7 @@ pullPolicy: IfNotPresent
 
 # workaround since Azure doesn't support by default 10250 security port for kubelet
 azure: false
-namespace: spire-agent
+namespace: tornjak
 selfSignedCA: true
 
 # SPIRE specific values
@@ -18,8 +18,3 @@ selfSignedCA: true
 clustername: spire-example
 # trustdomain is arbitrary but needs to match between spire-config and k8s-workload-registrar config
 trustdomain: test.com
-
-# SPIRE workload registrar values:
-spireAddress: spire-server
-spirePort: 443
-spireImage: gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704
