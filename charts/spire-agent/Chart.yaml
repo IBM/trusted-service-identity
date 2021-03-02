@@ -1,6 +1,0 @@
----
-apiVersion: v1
-appVersion: "0.1"
-description: SPIRE Agent TSI Example
-name: spire-agent
-version: 0.1.0

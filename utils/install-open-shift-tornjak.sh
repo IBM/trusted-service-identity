@@ -5,8 +5,7 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 CLUSTERNAME="$1"
-PROJECT="${2:-spire-server}"
-SPIRESERVER="spire-server"
+PROJECT="${2:-tornjak}"
 SPIREGROUP="spiregroup"
 SPIRESA="spire-server"
 SPIRESCC="spire-server"
@@ -85,7 +84,7 @@ groups:
 EOF
 oc describe scc $SPIRESCC
 
-helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME spire-server charts/spire-server # --debug
+helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME tornjak charts/tornjak # --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -201,11 +200,14 @@ fi
 }
 
 cleanup() {
-  helm uninstall spire-server -n $PROJECT
-  oc delete scc $SPIRESCC --ignore-not-found=true
-  oc delete sa $SPIRESA --ignore-not-found=true
+  helm uninstall spire-server -n $PROJECT 2>/dev/null
+  oc delete ClusterRole spire-server-role 2>/dev/null
+  oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
+
+  oc delete scc $SPIRESCC 2>/dev/null
+  oc delete sa $SPIRESA 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
-  oc delete project $PROJECT --ignore-not-found=true
+  oc delete project $PROJECT 2>/dev/null
 }
 
 checkPrereqs
