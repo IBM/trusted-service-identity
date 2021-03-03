@@ -131,10 +131,21 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -spiffeID spiffe://test.com/workload-registrar \
 -parentID spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
+
+# Create Entry in Tornjak:
+SPIFFE ID:
+spiffe://test.com/$CLUSTERNAME/workload-registrarX
+Parent ID:
+spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
+Selectors:
+k8s:sa:spire-k8s-registrar,k8s:ns:$PROJECT,k8s:container-name:k8s-workload-registrar
+* check Admin Flag
+
 EOF
 }
 
 checkPrereqs(){
+
 jq_test_cmd="jq --version"
 if [[ $(eval $jq_test_cmd) ]]; then
   echo "jq client setup properly"
@@ -154,14 +165,25 @@ else
   exit 1
 fi
 
-kubectl_test_cmd="kubectl version"
-if [[ $(eval $kubectl_test_cmd) ]]; then
-  echo "kubectl client setup properly"
+# make sure k8s server is at least v1.18, to support
+# projected ServiceAccountTokens
+# sample: "gitVersion": "v1.18.3+e574db2",
+k8sver=$(oc version --output json | jq -r '.serverVersion.gitVersion' |grep "v1."| cut -d'.' -f 2)
+if [ "$k8sver" -gt 17 ]; then
+  echo "Kubernetes server version is correct"
 else
-  echo "kubectl client must be installed and configured."
-  echo "(https://kubernetes.io/docs/tasks/tools/install-kubectl/)"
+  echo "To support functionality like projected ServiceAccountTokens, required Kubernetes version is at least v1.18+"
   exit 1
 fi
+
+# kubectl_test_cmd="kubectl version"
+# if [[ $(eval $kubectl_test_cmd) ]]; then
+#   echo "kubectl client setup properly"
+# else
+#   echo "kubectl client must be installed and configured."
+#   echo "(https://kubernetes.io/docs/tasks/tools/install-kubectl/)"
+#   exit 1
+# fi
 
 # This install requires helm verion 3:
 helm_test_cmd="helm version --client| grep 'Version:\"v3'"
