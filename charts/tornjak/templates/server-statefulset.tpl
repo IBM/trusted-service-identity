@@ -38,6 +38,8 @@ spec:
             - name: spire-data
               mountPath: /run/spire/data
               readOnly: false
+            - name: certs
+              mountPath: /opt/spire/sample-keys
           livenessProbe:
             exec:
               command:
@@ -58,3 +60,7 @@ spec:
           hostPath:
             path: /var/spire-data
             type: DirectoryOrCreate
+        - name: certs
+          secret:
+            defaultMode: 0400
+            secretName: tornjak-certs
