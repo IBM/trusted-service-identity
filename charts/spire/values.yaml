@@ -17,7 +17,7 @@ selfSignedCA: true
 # clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
 clustername: spire-example
 # trustdomain is arbitrary but needs to match between spire-config and k8s-workload-registrar config
-trustdomain: test.com
+trustdomain: spiretest.com
 
 # SPIRE workload registrar values:
 spireAddress: spire-server
