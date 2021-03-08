@@ -9,7 +9,8 @@ SPIRESERVERPROJECT="tornjak"
 CLUSTERNAME=$1
 SPIRESERVER=$2
 # SPIRE Agent info:
-PROJECT="${3:-spire}"
+TRUSTD="${3:-spiretest.com}"
+PROJECT="${4:-spire}"
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
 SPIREAGSCC="spire-agent"
@@ -25,7 +26,8 @@ Syntax: ${0} <CLUSTER_NAME> <SPIRE_SERVER> <PROJECT_NAME>
 Where:
   CLUSTER_NAME - name of the OpenShift cluster (required)
   SPIRE_SERVER - SPIRE server end-point (required)
-  PROJECT_NAME - OpenShift project (namespace) to install the Agent, default: spire [optional]
+  TRUST_DOMAIN - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
+  PROJECT_NAME - OpenShift project [namespace] to install the Agent, default: spire (optional)
 HELPMEHELPME
 }
 
@@ -96,7 +98,7 @@ oc adm policy add-scc-to-user spire-agent system:serviceaccount:$PROJECT:$SPIREA
 oc adm policy add-scc-to-user privileged -z $SPIREAGSA
 
 helm install --set spireAddress=$SPIRESERVER --set namespace=$PROJECT \
- --set clustername=$CLUSTERNAME spire charts/spire --debug
+ --set clustername=$CLUSTERNAME --set trustdomain=$TRUSTD spire charts/spire --debug
 
 cat << EOF
 
@@ -120,23 +122,23 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -selector k8s:ns:$PROJECT \
 -selector k8s:container-image:gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704 \
 -selector k8s:container-name:k8s-workload-registrar \
--spiffeID spiffe://test.com/workload-registrar \
--parentID spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-spiffeID spiffe://${TRUSTD}/workload-registrar \
+-parentID spiffe://${TRUSTD}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
 
 # sample Registrar registration with just a subset of selectors:
 /opt/spire/bin/spire-server entry create -admin \
 -selector k8s:ns:$PROJECT \
 -selector k8s:container-name:k8s-workload-registrar \
--spiffeID spiffe://test.com/workload-registrar \
--parentID spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-spiffeID spiffe://${TRUSTD}/workload-registrar \
+-parentID spiffe://${TRUSTD}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
 
 # Create Entry in Tornjak:
 SPIFFE ID:
-spiffe://test.com/$CLUSTERNAME/workload-registrarX
+spiffe://${TRUSTD}/$CLUSTERNAME/workload-registrarX
 Parent ID:
-spiffe://test.com/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
+spiffe://${TRUSTD}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
 Selectors:
 k8s:sa:spire-k8s-registrar,k8s:ns:$PROJECT,k8s:container-name:k8s-workload-registrar
 * check Admin Flag
@@ -195,7 +197,7 @@ else
   exit 1
 fi
 
-# This install requires helm verion 3:
+# This install requires ibmcloud cli with oc plugin:
 ibmcloud_test_cmd="ibmcloud oc versions"
 if [[ $(eval $ibmcloud_test_cmd) ]]; then
   echo "ibmcloud oc installed properly"

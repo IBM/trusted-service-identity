@@ -5,7 +5,8 @@ TSI_ROOT="${SCRIPT_PATH}/.."
 TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 CLUSTERNAME="$1"
-PROJECT="${2:-tornjak}"
+TRUSTD="${2:-spiretest.com}"
+PROJECT="${3:-tornjak}"
 SPIREGROUP="spiregroup"
 SPIRESA="spire-server"
 SPIRESCC="spire-server"
@@ -20,6 +21,7 @@ Syntax: ${0} <CLUSTER_NAME> <PROJECT_NAME>
 
 Where:
   CLUSTER_NAME - name of the OpenShift cluster (required)
+  TRUST_DOMAIN - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   PROJECT_NAME - OpenShift project [namespace] to install the Server, default: spire-server (optional)
 HELPMEHELPME
 }
@@ -47,21 +49,21 @@ installSpireServer(){
       # oc delete project $PROJECT
       cleanup
       while (oc get projects | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
-      oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" > /dev/null
+      oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
       oc project $PROJECT
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
   else
-    oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" > /dev/null
+    oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
     oc project $PROJECT
   fi
 
 # create serviceAccount and setup permissions
 oc create sa $SPIRESA
 oc policy add-role-to-user cluster-admin system:serviceaccount:$PROJECT:$SPIRESA
-oc adm groups new $SPIREGROUP $SPIRESA
+oc adm groups new $SPIREGROUP $SPIRESA 2> /dev/null
 
 oc apply -f- <<EOF
 kind: SecurityContextConstraints
@@ -84,7 +86,30 @@ groups:
 EOF
 oc describe scc $SPIRESCC
 
-helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME tornjak charts/tornjak # --debug
+# get ingress information:
+ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
+INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
+INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
+ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
+
+
+# add the certs and keys
+#here=$(pwd)
+#cd /Users/sabath/workspace/mrsabath/tornjak/sample-keys
+# ./gen_domain.sh *.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud $CLUSTERNAME
+#$SCRIPT_PATH/gen_domain.sh "*.$ING" $CLUSTERNAME
+echo "Generating certs..."
+openssl req -new -x509 -sha256 -key "$SCRIPT_PATH/../sample-keys/key.pem" -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -extensions SAN -config <(cat "$SCRIPT_PATH/../sample-keys/openssl.cnf" <(printf "[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com")) -out "$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+# store the certs in the secret
+oc -n tornjak create secret generic tornjak-certs \
+ --from-file="$SCRIPT_PATH/../sample-keys/key.pem" \
+ --from-file=cert.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
+ --from-file=tls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
+ --from-file=mtls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+# cd $here
+
+# run helm install for the tornjak server
+helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME --set trustdomain=$TRUSTD tornjak charts/tornjak # --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -93,12 +118,6 @@ oc -n $PROJECT create route passthrough --service spire-server
 oc -n $PROJECT get route
 INGRESS=$(oc -n $PROJECT get route spire-server -o jsonpath='{.spec.host}{"\n"}')
 echo $INGRESS
-
-# alternatively:
-ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
-INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
-INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
-ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
 
 # setup TLS secret:
 CRN=$(ibmcloud oc ingress secret get -c "$CLUSTERNAME" --name "$INGSEC" --namespace openshift-ingress --output json | jq -r '.crn')
@@ -137,15 +156,16 @@ oc -n $PROJECT create route passthrough tornjak-mtls --service tornjak-mtls
 oc -n $PROJECT expose svc/tornjak-http
 
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
-#echo "https://$SPIRESERV"
-echo "spireServer: $SPIRESERV"
+echo # "https://$SPIRESERV"
+echo "export SPIRESERVER=$SPIRESERV"
+echo # empty line to separate visually
 
 TORNJAKHTTP=$(oc get route tornjak-http --output json |  jq -r '.spec.host')
-echo "Tornjak (http): http://$TORNJAKHTTP"
+echo "Tornjak (http): http://$TORNJAKHTTP/"
 TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
-echo "Tornjak (TLS): https://$TORNJAKTLS"
+echo "Tornjak (TLS): https://$TORNJAKTLS/"
 TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
-echo "Tornjak (mTLS): https://$TORNJAKMTLS"
+echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
 }
 
 checkPrereqs(){
@@ -168,14 +188,14 @@ else
   exit 1
 fi
 
-kubectl_test_cmd="kubectl version"
-if [[ $(eval $kubectl_test_cmd) ]]; then
-  echo "kubectl client setup properly"
-else
-  echo "kubectl client must be installed and configured."
-  echo "(https://kubernetes.io/docs/tasks/tools/install-kubectl/)"
-  exit 1
-fi
+# kubectl_test_cmd="kubectl version"
+# if [[ $(eval $kubectl_test_cmd) ]]; then
+#   echo "kubectl client setup properly"
+# else
+#   echo "kubectl client must be installed and configured."
+#   echo "(https://kubernetes.io/docs/tasks/tools/install-kubectl/)"
+#   exit 1
+# fi
 
 # This install requires helm verion 3:
 helm_test_cmd="helm version --client | grep 'Version:\"v3'"
