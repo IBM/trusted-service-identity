@@ -19,3 +19,5 @@ clustername: spire-example
 # trustdomain is arbitrary but needs to match between Server and Agent
 trustdomain: spiretest.com
 spireVersion: 0.12.1
+
+MY_DISCOVERY_DOMAIN: MY_DISCOVERY_DOMAIN

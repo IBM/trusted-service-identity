@@ -115,11 +115,11 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
  A few, sample server commands:
 
 # show entries:
-/opt/spire/bin/spire-server entry show -registrationUDSPath /tmp/registration.sock
+/opt/spire/bin/spire-server entry show -registrationUDSPath /run/spire/sockets/registration.sock
 # show agents:
-/opt/spire/bin/spire-server agent list -registrationUDSPath /tmp/registration.sock
+/opt/spire/bin/spire-server agent list -registrationUDSPath /run/spire/sockets/registration.sock
 # delete entry:
-/opt/spire/bin/spire-server entry delete -registrationUDSPath /tmp/registration.sock --entryID
+/opt/spire/bin/spire-server entry delete -registrationUDSPath /run/spire/sockets/registration.sock --entryID
 
 # sample Registrar reqistration:
 /opt/spire/bin/spire-server entry create -admin \
