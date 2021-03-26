@@ -59,14 +59,14 @@ installSpireServer(){
       cleanup
       while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
       oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-      oc project "$PROJECT"
+      oc project "$PROJECT" 2> /dev/null
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
   else
     oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-    oc project "$PROJECT"
+    oc project "$PROJECT" 2> /dev/null
   fi
 
 # create serviceAccount and setup permissions
@@ -104,15 +104,38 @@ ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingress
 
 
 # add the certs and keys
-#here=$(pwd)
-#cd /Users/sabath/workspace/mrsabath/tornjak/sample-keys
-# ./gen_domain.sh *.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud $CLUSTERNAME
-#$SCRIPT_PATH/gen_domain.sh "*.$ING" $CLUSTERNAME
 echo "Generating certs..."
-openssl req -new -x509 -sha256 -key "$SCRIPT_PATH/../sample-keys/key.pem" -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -extensions SAN -config <(cat "$SCRIPT_PATH/../sample-keys/openssl.cnf" <(printf "[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com")) -out "$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+ROOTCA="$SCRIPT_PATH/../sample-keys/CA/rootCA"
+if [[ ! -f "$ROOTCA.key" ]]; then
+  echo "Create CA certs:"
+  echo "   openssl genrsa -out $ROOTCA.key 4096"
+  echo "   openssl req -x509 -subj \"/C=US/ST=CA/O=Acme, Inc./CN=example.com\" -new -nodes -key $ROOTCA.key -sha256 -days 1024 -out $ROOTCA.crt"
+  echo # empty line
+  exit 1
+fi
+
+#openssl req -new -x509 -sha256 -key "$SCRIPT_PATH/../sample-keys/key.pem" -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -extensions SAN -config <(cat "$SCRIPT_PATH/../sample-keys/openssl.cnf" <(printf "[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com")) -out "$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+KEYSDIR="$SCRIPT_PATH/../sample-keys"
+SUBJ="/C=US/ST=CA/O=MyOrg, Inc./CN=mydomain.com"
+SANSTR="[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com"
+CERTNAME=$CLUSTERNAME
+
+openssl genrsa -out ${KEYSDIR}/${CERTNAME}.key 2048
+openssl req -new -sha256 -key ${KEYSDIR}/${CERTNAME}.key -subj "${SUBJ}" -out ${KEYSDIR}/${CERTNAME}.csr \
+ -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf ${SANSTR}))
+openssl req -in ${KEYSDIR}/${CERTNAME}.csr -noout -text
+echo "1"#
+openssl x509 -req -extensions SAN \
+    -extfile <(cat /etc/ssl/openssl.cnf <(printf $SANSTR)) \
+    -in ${KEYSDIR}/${CERTNAME}.csr -CA ${ROOTCA}.crt \
+    -CAkey ${ROOTCA}.key -CAcreateserial -out ${KEYSDIR}/${CERTNAME}.crt -days 500 -sha256
+echo "2"
+openssl x509 -in ${KEYSDIR}/${CERTNAME}.crt -text -noout
+
 # store the certs in the secret
 oc_cli -n tornjak create secret generic tornjak-certs \
  --from-file="$SCRIPT_PATH/../sample-keys/key.pem" \
+<<<<<<< HEAD
  --from-file=cert.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
  --from-file=tls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
  --from-file=mtls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem"
@@ -120,6 +143,16 @@ oc_cli -n tornjak create secret generic tornjak-certs \
 
 # run helm install for the tornjak server
 helm install --set "namespace=$PROJECT" --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" tornjak charts/tornjak # --debug
+=======
+ --from-file=cert.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
+ --from-file=tls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
+ --from-file=mtls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+
+# run helm install for the tornjak server
+helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME \
+ --set trustdomain=$TRUSTD tornjak charts/tornjak \
+ --set MY_DISCOVERY_DOMAIN=$ING   # --debug
+>>>>>>> 3884a55 (Introduce OIDC support)
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -165,9 +198,12 @@ oc_cli -n "$PROJECT" create route passthrough tornjak-mtls --service tornjak-mtl
 # oc create route passthrough tornjak-http --service tornjak-http
 oc_cli -n "$PROJECT" expose svc/tornjak-http
 
+# open edge access for oidc
+oc -n $PROJECT create route edge oidc --service spire-oidc
+
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
-echo "export SPIRESERVER=$SPIRESERV"
+echo "export SPIRE_SERVER=$SPIRESERV"
 echo # empty line to separate visually
 
 TORNJAKHTTP=$(oc get route tornjak-http --output json |  jq -r '.spec.host')
@@ -176,6 +212,11 @@ TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
 echo "Tornjak (TLS): https://$TORNJAKTLS/"
 TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
 echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
+OIDC=$(oc get route oidc --output json |  jq -r '.spec.host')
+echo "Tornjak (oidc): https://$OIDC/"
+echo "  For testing oidc: curl -k https://$OIDC/.well-known/openid-configuration"
+echo "                    curl -k https://$OIDC/keys"
+echo "Trust Domain: $TRUSTD"
 }
 
 checkPrereqs(){

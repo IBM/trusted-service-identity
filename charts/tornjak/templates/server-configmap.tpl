@@ -18,8 +18,26 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
-      # registration_uds_path = "/run/spire/sockets/registration.sock"
-      registration_uds_path = "/tmp/registration.sock"
+      registration_uds_path = "/run/spire/sockets/registration.sock"
+      # registration_uds_path = "/tmp/registration.sock"
+
+      #AWS requires the use of RSA.  EC cryptography is not supported
+      ca_key_type = "rsa-2048"
+
+      # Creates the iss claim in JWT-SVIDs.
+      # TODO: Replace MY_DISCOVERY_DOMAIN with the FQDN of the Discovery Provider that you will configure in DNS
+      jwt_issuer = "https://oidc-tornjak.{{ .Values.MY_DISCOVERY_DOMAIN }}"
+
+      experimental {
+        // Turns on the bundle endpoint (required, true)
+        bundle_endpoint_enabled = true
+
+        // The address to listen on (optional, defaults to 0.0.0.0)
+        // bundle_endpoint_address = "0.0.0.0"
+
+        // The port to listen on (optional, defaults to 443)
+        bundle_endpoint_port = 8443
+      }
       ca_subject = {
         country = ["US"],
         organization = ["SPIFFE"],
@@ -37,6 +55,7 @@ data:
         plugin_data {
             clusters = {
                 "{{ .Values.clustername }}" = {
+                    # use_token_review_api_validation = true
                     service_account_whitelist = ["spire:spire-agent"]
                 }
             }
