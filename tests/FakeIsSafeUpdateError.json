@@ -345,7 +345,7 @@
         "containerStatuses": [
             {
                 "containerID": "containerd://795db373e92de09e925abd26eaa8bd0cb5afdc14c961091f0570360e420eb62b",
-                "image": "docker.io/tsidentity/ti-jwt-sidecar:v1.8.3",
+                "image": "docker.io/tsidentity/ti-jwt-sidecar:v1.8.4",
                 "imageID": "docker.io/ubuntu@sha256:0aa55e038891a379e3778d87adffeb59051c22dc0b6903322931f13fbd8c2e5a",
                 "lastState": {},
                 "name": "jwt-sidecar",
@@ -378,7 +378,7 @@
         "initContainerStatuses": [
             {
                 "containerID": "containerd://69967c305b6b2eb3fd556d852d7a297bf1916326bc401c367e18b8e5878c021f",
-                "image": "docker.io/tsidentity/ti-jwt-sidecar:v1.8.3",
+                "image": "docker.io/tsidentity/ti-jwt-sidecar:v1.8.4",
                 "imageID": "docker.io/ubuntu@sha256:0aa55e038891a379e3778d87adffeb59051c22dc0b6903322931f13fbd8c2e5a",
                 "lastState": {},
                 "name": "jwt-init",
