@@ -22,4 +22,5 @@ trustdomain: spiretest.com
 # SPIRE workload registrar values:
 spireAddress: spire-server
 spirePort: 443
-spireImage: gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704
+spireRegistrar: gcr.io/spiffe-io/k8s-workload-registrar
+spireVersion: 0.12.1

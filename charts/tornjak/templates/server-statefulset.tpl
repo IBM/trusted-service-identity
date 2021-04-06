@@ -22,7 +22,8 @@ spec:
       containers:
         - name: spire-server
           # image: gcr.io/spiffe-io/spire-server:0.11.0
-          image: tsidentity/tornjak-spire-server:latest
+          # image: tsidentity/tornjak-spire-server:latest
+          image: tsidentity/tornjak-spire-server:{{ .Values.spireVersion }}
           securityContext:
             # privilaged is needed to access mounted files
             privileged: true

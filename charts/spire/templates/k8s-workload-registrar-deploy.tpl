@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: spire-registrar
-  #serviceName: spire-registrar
   template:
     metadata:
       namespace: {{ .Values.namespace }}
@@ -22,7 +21,7 @@ spec:
       containers:
         - name: k8s-workload-registrar
           #image: k8s-workload-registrar:latest
-          image: {{ .Values.spireImage }}
+          image: {{ .Values.spireRegistrar }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           securityContext:
             # privilaged is needed to create socket and bundle files
@@ -45,13 +44,3 @@ spec:
         - name: k8s-workload-registrar-config
           configMap:
             name: k8s-workload-registrar
-      #  - name: spire-secret
-      #    secret:
-      #      secretName: spire-secret
-      #  - name: spire-entries
-      #    configMap:
-      #      name: spire-entries
-      #  - name: spire-data
-      #    hostPath:
-      #      path: /var/spire-data
-      #      type: DirectoryOrCreate
