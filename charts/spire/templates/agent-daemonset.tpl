@@ -28,7 +28,7 @@ spec:
           args: ["-t", "30", "{{ .Values.spireAddress }}:{{ .Values.spirePort }}"]
       containers:
         - name: spire-agent
-          image: gcr.io/spiffe-io/spire-agent:0.11.0
+          image: gcr.io/spiffe-io/spire-agent:{{ .Values.spireVersion }}
           securityContext:
             # privilaged is needed to create socket and bundle files
             privileged: true

@@ -1,15 +1,11 @@
 #!/bin/bash
-# get the SCRIPT and TSI ROOT directories
-SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-TSI_ROOT="${SCRIPT_PATH}/.."
-TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
 
 # SPIRE Server info:
 SPIRESERVERPROJECT="tornjak"
 CLUSTERNAME=$1
 SPIRESERVER=$2
 # SPIRE Agent info:
-TRUSTD="${3:-spiretest.com}"
+TRUSTDOMAIN="${3:-spiretest.com}"
 PROJECT="${4:-spire}"
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
@@ -41,8 +37,17 @@ elif [[ "$2" == "" ]] ; then
   exit 1
 fi
 
+# function for executing oc cli calls
+oc_cli() {
+oc "$@"
+if [ "$?" != "0" ]; then
+  echo "Error executing: oc" "$@"
+  exit 1
+fi
+}
+
 installSpireAgent(){
-  oc get projects | grep $PROJECT
+  oc get projects | grep "${PROJECT}"
   if [ "$?" == "0" ]; then
     # check if spire-agent project exists:
     echo "$PROJECT project already exists. "
@@ -52,24 +57,24 @@ installSpireAgent(){
       echo "Re-installing $PROJECT project"
       # oc delete project $PROJECT
       cleanup
-      while (oc get projects | grep -v spire-server | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
-      oc new-project $PROJECT --description="My TSI Spire Agent project on OpenShift" > /dev/null
-      oc project $PROJECT
+      while (oc get projects | grep -v spire-server | grep "$PROJECT"); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
+      oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
+      oc project "$PROJECT"
     else
       echo "Keeping the existing $PROJECT project as is"
     fi
   else
-    oc new-project $PROJECT --description="My TSI Spire Agent project on OpenShift" > /dev/null
-    oc project $PROJECT
+    oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
+    oc project "$PROJECT"
   fi
 
 # Need to copy the spire-bundle from the server namespace
-oc get configmap spire-bundle -n $SPIRESERVERPROJECT -o yaml | sed "s/namespace: $SPIRESERVERPROJECT/namespace: $PROJECT/" | oc apply -n $PROJECT -f -
+oc_cli get configmap spire-bundle -n "$SPIRESERVERPROJECT" -o yaml | sed "s/namespace: $SPIRESERVERPROJECT/namespace: $PROJECT/" | oc apply -n "$PROJECT" -f -
 
-oc create sa $SPIREAGSA
-oc adm groups add-users $SPIREGROUP $SPIREAGSA
+oc_cli create sa $SPIREAGSA
+oc_cli adm groups add-users $SPIREGROUP $SPIREAGSA
 
-oc create -f- <<EOF
+oc_cli create -f- <<EOF
 kind: SecurityContextConstraints
 apiVersion: v1
 metadata:
@@ -90,15 +95,15 @@ supplementalGroups:
 groups:
 - system:authenticated
 EOF
-oc describe scc $SPIREAGSCC
+oc_cli describe scc $SPIREAGSCC
 
-oc adm policy add-scc-to-user spire-agent system:serviceaccount:$PROJECT:$SPIREAGSA
+oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$SPIREAGSA"
 
 # this works:
-oc adm policy add-scc-to-user privileged -z $SPIREAGSA
+oc_cli adm policy add-scc-to-user privileged -z $SPIREAGSA
 
-helm install --set spireAddress=$SPIRESERVER --set namespace=$PROJECT \
- --set clustername=$CLUSTERNAME --set trustdomain=$TRUSTD spire charts/spire --debug
+helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
+ --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" spire charts/spire --debug
 
 cat << EOF
 
@@ -122,23 +127,23 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -selector k8s:ns:$PROJECT \
 -selector k8s:container-image:gcr.io/spiffe-io/k8s-workload-registrar@sha256:912484f6c0fb40eafb16ba4dd2d0e1b0c9d057c2625b8ece509f5510eaf5b704 \
 -selector k8s:container-name:k8s-workload-registrar \
--spiffeID spiffe://${TRUSTD}/workload-registrar \
--parentID spiffe://${TRUSTD}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-spiffeID spiffe://${TRUSTDOMAIN}/workload-registrar \
+-parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
 
 # sample Registrar registration with just a subset of selectors:
 /opt/spire/bin/spire-server entry create -admin \
 -selector k8s:ns:$PROJECT \
 -selector k8s:container-name:k8s-workload-registrar \
--spiffeID spiffe://${TRUSTD}/workload-registrar \
--parentID spiffe://${TRUSTD}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
+-spiffeID spiffe://${TRUSTDOMAIN}/workload-registrar \
+-parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /tmp/registration.sock
 
 # Create Entry in Tornjak:
 SPIFFE ID:
-spiffe://${TRUSTD}/$CLUSTERNAME/workload-registrarX
+spiffe://${TRUSTDOMAIN}/$CLUSTERNAME/workload-registrarX
 Parent ID:
-spiffe://${TRUSTD}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
+spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
 Selectors:
 k8s:sa:spire-k8s-registrar,k8s:ns:$PROJECT,k8s:container-name:k8s-workload-registrar
 * check Admin Flag
@@ -163,7 +168,7 @@ if [[ $(eval $oc_test_cmd) ]]; then
 else
   echo "oc client must be installed and configured."
   echo "(https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)"
-  echo "Get `oc` cli from https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/"
+  echo "Get 'oc' cli from https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/"
   exit 1
 fi
 
@@ -171,7 +176,7 @@ fi
 # projected ServiceAccountTokens
 # sample: "gitVersion": "v1.18.3+e574db2",
 k8sver=$(oc version --output json | jq -r '.serverVersion.gitVersion' |grep "v1."| cut -d'.' -f 2)
-if [ "$k8sver" -gt 17 ]; then
+if [ "$k8sver" -ge 18 ]; then
   echo "Kubernetes server version is correct"
 else
   echo "To support functionality like projected ServiceAccountTokens, required Kubernetes version is at least v1.18+"

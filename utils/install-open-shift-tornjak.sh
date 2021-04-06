@@ -2,10 +2,10 @@
 # get the SCRIPT and TSI ROOT directories
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_ROOT="${SCRIPT_PATH}/.."
-TSI_VERSION=$(cat ${SCRIPT_PATH}/../tsi-version.txt)
+#TSI_VERSION="$TSI_ROOT/tsi-version.txt"
 
 CLUSTERNAME="$1"
-TRUSTD="${2:-spiretest.com}"
+TRUSTDOMAIN="${2:-spiretest.com}"
 PROJECT="${3:-tornjak}"
 SPIREGROUP="spiregroup"
 SPIRESA="spire-server"
@@ -36,6 +36,15 @@ elif [[ "$1" == "" ]] ; then
   exit 1
 fi
 
+# function for executing oc cli calls
+oc_cli() {
+oc "$@"
+if [ "$?" != "0" ]; then
+  echo "Error executing: oc" "$@"
+  exit 1
+fi
+}
+
 installSpireServer(){
 
   oc get projects | grep $PROJECT
@@ -61,11 +70,12 @@ installSpireServer(){
   fi
 
 # create serviceAccount and setup permissions
-oc create sa $SPIRESA
-oc policy add-role-to-user cluster-admin system:serviceaccount:$PROJECT:$SPIRESA
-oc adm groups new $SPIREGROUP $SPIRESA 2> /dev/null
+oc_cli create sa $SPIRESA
+oc_cli policy add-role-to-user cluster-admin "system:serviceaccount:$PROJECT:$SPIRESA"
+# if the group exists, just ignore the error
+oc adm groups new "$SPIREGROUP" "$SPIRESA" 2> /dev/null
 
-oc apply -f- <<EOF
+oc_cli apply -f- <<EOF
 kind: SecurityContextConstraints
 apiVersion: v1
 metadata:
@@ -84,7 +94,7 @@ supplementalGroups:
 groups:
 - system:authenticated
 EOF
-oc describe scc $SPIRESCC
+oc_cli describe scc $SPIRESCC
 
 # get ingress information:
 ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
@@ -101,33 +111,33 @@ ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingress
 echo "Generating certs..."
 openssl req -new -x509 -sha256 -key "$SCRIPT_PATH/../sample-keys/key.pem" -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -extensions SAN -config <(cat "$SCRIPT_PATH/../sample-keys/openssl.cnf" <(printf "[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com")) -out "$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
 # store the certs in the secret
-oc -n tornjak create secret generic tornjak-certs \
+oc_cli -n tornjak create secret generic tornjak-certs \
  --from-file="$SCRIPT_PATH/../sample-keys/key.pem" \
- --from-file=cert.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
- --from-file=tls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
- --from-file=mtls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+ --from-file=cert.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
+ --from-file=tls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
+ --from-file=mtls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem"
 # cd $here
 
 # run helm install for the tornjak server
-helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME --set trustdomain=$TRUSTD tornjak charts/tornjak # --debug
+helm install --set "namespace=$PROJECT" --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" tornjak charts/tornjak # --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
 # Ingress route for spire-server
-oc -n $PROJECT create route passthrough --service spire-server
-oc -n $PROJECT get route
-INGRESS=$(oc -n $PROJECT get route spire-server -o jsonpath='{.spec.host}{"\n"}')
-echo $INGRESS
+oc_cli -n "$PROJECT" create route passthrough --service spire-server
+oc_cli -n "$PROJECT" get route
+INGRESS=$(oc -n "$PROJECT" get route spire-server -o jsonpath='{.spec.host}{"\n"}')
+echo "$INGRESS"
 
 # setup TLS secret:
 CRN=$(ibmcloud oc ingress secret get -c "$CLUSTERNAME" --name "$INGSEC" --namespace openshift-ingress --output json | jq -r '.crn')
-ibmcloud oc ingress secret create --cluster "$CLUSTERNAME" --cert-crn "$CRN" --name "$INGSEC" --namespace $PROJECT
+ibmcloud oc ingress secret create --cluster "$CLUSTERNAME" --cert-crn "$CRN" --name "$INGSEC" --namespace "$PROJECT"
 if [ "$?" == "0" ]; then
   echo "All good"
 fi
 
 # create ingress deployment:
-oc create -f- <<EOF
+oc_cli create -f- <<EOF
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -148,12 +158,12 @@ spec:
 EOF
 
 # create route for Tornjak TLS:
-oc -n $PROJECT create route passthrough tornjak-tls --service tornjak-tls
+oc_cli -n $PROJECT create route passthrough tornjak-tls --service tornjak-tls
 # create route for Tornjak mTLS:
-oc -n $PROJECT create route passthrough tornjak-mtls --service tornjak-mtls
+oc_cli -n $PROJECT create route passthrough tornjak-mtls --service tornjak-mtls
 # create route for Tornjak HTTP:
 # oc create route passthrough tornjak-http --service tornjak-http
-oc -n $PROJECT expose svc/tornjak-http
+oc_cli -n $PROJECT expose svc/tornjak-http
 
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
