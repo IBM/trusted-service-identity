@@ -611,8 +611,8 @@ func validateResult(r interface{}, expectedFile string) error {
 	opts := jsondiff.DefaultHTMLOptions()
 	diff, text := jsondiff.Compare(result, exp, &opts)
 	if diff == jsondiff.FullMatch {
-		// fmt.Printf("Results match expections: %v", diff)
+		// fmt.Printf("Results match expectations: %v", diff)
 		return nil
 	}
-	return fmt.Errorf("Results do not match expections. diff: %v text: %v", diff, text)
+	return fmt.Errorf("Results do not match expectations. diff: %v text: %v", diff, text)
 }
