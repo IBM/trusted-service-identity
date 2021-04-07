@@ -87,9 +87,6 @@ spec:
           - containerPort: 8989
             name: nginx-oidc-port
           args:
-          #- /bin/bash
-          #- -c
-          #- 'nginx -c /run/spire/oidc/config/nginx.conf && sleep 10000000'
           - nginx
           - -g
           - "daemon off;"

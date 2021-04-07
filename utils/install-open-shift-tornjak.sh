@@ -105,7 +105,7 @@ ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingress
 
 # add the certs and keys
 echo "Generating certs..."
-ROOTCA="$SCRIPT_PATH/../sample-keys/CA/rootCA"
+ROOTCA="$TSI_ROOT/sample-keys/CA/rootCA"
 if [[ ! -f "$ROOTCA.key" ]]; then
   echo "Create CA certs:"
   echo "   openssl genrsa -out $ROOTCA.key 4096"
@@ -135,24 +135,14 @@ openssl x509 -in ${KEYSDIR}/${CERTNAME}.crt -text -noout
 # store the certs in the secret
 oc_cli -n tornjak create secret generic tornjak-certs \
  --from-file="$SCRIPT_PATH/../sample-keys/key.pem" \
-<<<<<<< HEAD
  --from-file=cert.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
  --from-file=tls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
  --from-file=mtls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem"
-# cd $here
 
 # run helm install for the tornjak server
-helm install --set "namespace=$PROJECT" --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" tornjak charts/tornjak # --debug
-=======
- --from-file=cert.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
- --from-file=tls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem" \
- --from-file=mtls.pem="$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
-
-# run helm install for the tornjak server
-helm install --set namespace=$PROJECT --set clustername=$CLUSTERNAME \
- --set trustdomain=$TRUSTD tornjak charts/tornjak \
- --set MY_DISCOVERY_DOMAIN=$ING   # --debug
->>>>>>> 3884a55 (Introduce OIDC support)
+helm install --set "namespace=$PROJECT" --set "clustername=$CLUSTERNAME" \
+ --set "trustdomain=$TRUSTD" tornjak charts/tornjak \
+ --set "MY_DISCOVERY_DOMAIN=$ING"   # --debug
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
