@@ -57,16 +57,16 @@ installSpireServer(){
       echo "Re-installing $PROJECT project"
       # oc delete project $PROJECT
       cleanup
-      while (oc get projects | grep $PROJECT); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
-      oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-      oc project $PROJECT
+      while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
+      oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
+      oc project "$PROJECT"
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
   else
-    oc new-project $PROJECT --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-    oc project $PROJECT
+    oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
+    oc project "$PROJECT"
   fi
 
 # create serviceAccount and setup permissions
@@ -158,12 +158,12 @@ spec:
 EOF
 
 # create route for Tornjak TLS:
-oc_cli -n $PROJECT create route passthrough tornjak-tls --service tornjak-tls
+oc_cli -n "$PROJECT" create route passthrough tornjak-tls --service tornjak-tls
 # create route for Tornjak mTLS:
-oc_cli -n $PROJECT create route passthrough tornjak-mtls --service tornjak-mtls
+oc_cli -n "$PROJECT" create route passthrough tornjak-mtls --service tornjak-mtls
 # create route for Tornjak HTTP:
 # oc create route passthrough tornjak-http --service tornjak-http
-oc_cli -n $PROJECT expose svc/tornjak-http
+oc_cli -n "$PROJECT" expose svc/tornjak-http
 
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
@@ -180,7 +180,7 @@ echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
 
 checkPrereqs(){
 jq_test_cmd="jq --version"
-if [[ $(eval $jq_test_cmd) ]]; then
+if [[ $(eval "$jq_test_cmd") ]]; then
   echo "jq client setup properly"
 else
   echo "jq client must be installed and configured."
@@ -189,11 +189,11 @@ else
 fi
 
 oc_test_cmd="oc status"
-if [[ $(eval $oc_test_cmd) ]]; then
+if [[ $(eval "$oc_test_cmd") ]]; then
   echo "oc client setup properly"
 else
   echo "oc client must be installed and configured."
-  echo "(https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)"
+  echo "(https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html)"
   echo "Get `oc` cli from https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/"
   exit 1
 fi
@@ -209,7 +209,7 @@ fi
 
 # This install requires helm verion 3:
 helm_test_cmd="helm version --client | grep 'Version:\"v3'"
-if [[ $(eval $helm_test_cmd) ]]; then
+if [[ $(eval "$helm_test_cmd") ]]; then
   echo "helm client v3 installed properly"
 else
   echo "helm client v3 must be installed and configured. "
@@ -219,7 +219,7 @@ fi
 
 # This install requires helm verion 3:
 ibmcloud_test_cmd="ibmcloud oc versions"
-if [[ $(eval $ibmcloud_test_cmd) ]]; then
+if [[ $(eval "$ibmcloud_test_cmd") ]]; then
   echo "ibmcloud oc installed properly"
 else
   echo "ibmcloud cli with oc plugin must be installed and configured. "
@@ -230,14 +230,14 @@ fi
 }
 
 cleanup() {
-  helm uninstall spire-server -n $PROJECT 2>/dev/null
+  helm uninstall spire-server -n "$PROJECT" 2>/dev/null
   oc delete ClusterRole spire-server-role 2>/dev/null
   oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
 
-  oc delete scc $SPIRESCC 2>/dev/null
-  oc delete sa $SPIRESA 2>/dev/null
+  oc delete scc "$SPIRESCC" 2>/dev/null
+  oc delete sa "$SPIRESA" 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
-  oc delete project $PROJECT 2>/dev/null
+  oc delete project "$PROJECT" 2>/dev/null
 }
 
 checkPrereqs
