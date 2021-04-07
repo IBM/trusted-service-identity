@@ -241,9 +241,9 @@ func isSafe(pod *corev1.Pod, operationType string) error {
 			// glog.Infof("****** CNAME: %v, CIMG: %v, CVOLUMEMOUNTS: %v", c.Name, c.Image, c.VolumeMounts)
 			if c.Name == "jwt-sidecar" {
 				// extract the image name, skip the version label
-				// trustedseriviceidentity/ti-jwt-sidecar:v1.3
+				// tsidentity/ti-jwt-sidecar:v1.3
 				img := strings.Split(c.Image, ":")
-				if img[0] == "trustedseriviceidentity/ti-jwt-sidecar" {
+				if img[0] == "tsidentity/ti-jwt-sidecar" {
 					glog.Infof("Sidecar image matches! %v", c.Image)
 				} else {
 					return ErrSidecarImg

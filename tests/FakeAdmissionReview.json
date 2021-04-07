@@ -2,7 +2,7 @@
     "kind": "AdmissionReview",
     "apiVersion": "admission.k8s.io/v1beta1",
     "request": {
-        "uid": "ce84f498-67bc-4895-a184-1f926bd68faa",
+        "uid": "8336f28e-76e3-4d77-8734-fead378ae867",
         "kind": {
             "group": "",
             "version": "v1",
@@ -17,7 +17,7 @@
         "operation": "CREATE",
         "userInfo": {
             "username": "system:serviceaccount:kube-system:replicaset-controller",
-            "uid": "8280ec5e-e324-4251-8bf1-77c847a39952",
+            "uid": "32a5bd13-bbe6-429d-9922-0f69b034acb7",
             "groups": [
                 "system:serviceaccounts",
                 "system:serviceaccounts:kube-system",
@@ -28,90 +28,34 @@
             "kind": "Pod",
             "apiVersion": "v1",
             "metadata": {
-                "generateName": "myubuntu-6d5c486b66-",
+                "generateName": "myubuntu-65d59b896d-",
                 "creationTimestamp": null,
                 "labels": {
                     "app": "myubuntu",
-                    "pod-template-hash": "6d5c486b66"
+                    "pod-template-hash": "65d59b896d"
                 },
                 "annotations": {
                     "admission.trusted.identity/inject": "true",
+                    "kubernetes.io/psp": "ibm-privileged-psp",
                     "tsi.secrets": "- tsi.secret/name: \"mysecret1\"\n  tsi.secret/constraints: \"region,images\"\n  tsi.secret/local-path: \"tsi-secrets/\"\n- tsi.secret/name: \"mysecret2\"\n  tsi.secret/constraints: \"region\"\n  tsi.secret/local-path: \"tsi-secrets\"\n"
                 },
                 "ownerReferences": [
                     {
                         "apiVersion": "apps/v1",
                         "kind": "ReplicaSet",
-                        "name": "myubuntu-6d5c486b66",
-                        "uid": "67635c98-ddee-49eb-a3c1-12a0c7bb15f0",
+                        "name": "myubuntu-65d59b896d",
+                        "uid": "16ab2598-8f9c-4ebb-bb20-047e7d8da873",
                         "controller": true,
                         "blockOwnerDeletion": true
-                    }
-                ],
-                "managedFields": [
-                    {
-                        "manager": "kube-controller-manager",
-                        "operation": "Update",
-                        "apiVersion": "v1",
-                        "time": "2020-12-09T15:57:57Z",
-                        "fieldsType": "FieldsV1",
-                        "fieldsV1": {
-                            "f:metadata": {
-                                "f:annotations": {
-                                    ".": {},
-                                    "f:admission.trusted.identity/inject": {},
-                                    "f:tsi.secrets": {}
-                                },
-                                "f:generateName": {},
-                                "f:labels": {
-                                    ".": {},
-                                    "f:app": {},
-                                    "f:pod-template-hash": {}
-                                },
-                                "f:ownerReferences": {
-                                    ".": {},
-                                    "k:{\"uid\":\"67635c98-ddee-49eb-a3c1-12a0c7bb15f0\"}": {
-                                        ".": {},
-                                        "f:apiVersion": {},
-                                        "f:blockOwnerDeletion": {},
-                                        "f:controller": {},
-                                        "f:kind": {},
-                                        "f:name": {},
-                                        "f:uid": {}
-                                    }
-                                }
-                            },
-                            "f:spec": {
-                                "f:containers": {
-                                    "k:{\"name\":\"myubuntu\"}": {
-                                        ".": {},
-                                        "f:args": {},
-                                        "f:command": {},
-                                        "f:image": {},
-                                        "f:imagePullPolicy": {},
-                                        "f:name": {},
-                                        "f:resources": {},
-                                        "f:terminationMessagePath": {},
-                                        "f:terminationMessagePolicy": {}
-                                    }
-                                },
-                                "f:dnsPolicy": {},
-                                "f:enableServiceLinks": {},
-                                "f:restartPolicy": {},
-                                "f:schedulerName": {},
-                                "f:securityContext": {},
-                                "f:terminationGracePeriodSeconds": {}
-                            }
-                        }
                     }
                 ]
             },
             "spec": {
                 "volumes": [
                     {
-                        "name": "default-token-ncgzw",
+                        "name": "default-token-r2mx4",
                         "secret": {
-                            "secretName": "default-token-ncgzw"
+                            "secretName": "default-token-r2mx4"
                         }
                     }
                 ],
@@ -130,7 +74,7 @@
                         "resources": {},
                         "volumeMounts": [
                             {
-                                "name": "default-token-ncgzw",
+                                "name": "default-token-r2mx4",
                                 "readOnly": true,
                                 "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
                             }
@@ -152,13 +96,13 @@
                         "key": "node.kubernetes.io/not-ready",
                         "operator": "Exists",
                         "effect": "NoExecute",
-                        "tolerationSeconds": 300
+                        "tolerationSeconds": 600
                     },
                     {
                         "key": "node.kubernetes.io/unreachable",
                         "operator": "Exists",
                         "effect": "NoExecute",
-                        "tolerationSeconds": 300
+                        "tolerationSeconds": 600
                     }
                 ],
                 "priority": 0,

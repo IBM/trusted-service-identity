@@ -11,7 +11,7 @@ GIT_COMMIT_SHA="$(shell git rev-parse --short HEAD 2>/dev/null)"
 GIT_REMOTE_URL="$(shell git config --get remote.origin.url 2>/dev/null)"
 BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 IMG_NAME="ti-vault"
-REPO ?= trustedseriviceidentity
+REPO ?= tsidentity
 IMAGE := $(REPO)/$(IMG_NAME):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE := $(REPO)/$(IMG_NAME):$(TSI_VERSION)
 

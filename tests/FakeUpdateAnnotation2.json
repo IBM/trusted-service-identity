@@ -1,6 +1,6 @@
 {
     "admission.trusted.identity/status": "mutated",
-    "admission.trusted.identity/tsi-cluster-name": "minikube",
-    "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4,trustedseriviceidentity/ti-jwt-sidecar:v1.8.3,trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
+    "admission.trusted.identity/tsi-cluster-name": "tsi-test2",
+    "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4,tsidentity/ti-jwt-sidecar:v1.8.4,tsidentity/ti-jwt-sidecar:v1.8.4",
     "admission.trusted.identity/tsi-region": "eu-de"
 }

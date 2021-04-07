@@ -61,7 +61,7 @@ register()
   RESP=$(docker run --rm --name=register-jss -v ${TEMPDIR}:/tmp/vault \
    --env "ROOT_TOKEN=${ROOT_TOKEN}" \
    --env "VAULT_ADDR=${VAULT_ADDR}" \
-   trustedseriviceidentity/tsi-util:"${TSI_VERSION}" /usr/local/bin/register-JSS.sh $1)
+   tsidentity/tsi-util:"${TSI_VERSION}" /usr/local/bin/register-JSS.sh $1)
   RT=$?
 
   if [ "$RT" != "0" ]; then

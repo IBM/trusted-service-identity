@@ -4,7 +4,7 @@
 export PLUGIN="vault-plugin-auth-ti-jwt"
 # test image names
 # VIMG - Vault Client image, UIMG - myubuntu image
-export VIMG="trustedseriviceidentity/vault-cli:v0.3"
+export VIMG="tsidentity/vault-cli:v0.3"
 export UIMG="ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4"
 getSHA()
 {
@@ -40,7 +40,7 @@ where:
       [region]: eu-de, us-south, eu-gb, ...
       [cluster]: cluster name
       [namespace]: namespace of the application container
-      [full image name (optional)]: e.g. trustedseriviceidentity/vault-cli:v0.3
+      [full image name (optional)]: e.g. tsidentity/vault-cli:v0.3
 
 HELPMEHELPME
 }

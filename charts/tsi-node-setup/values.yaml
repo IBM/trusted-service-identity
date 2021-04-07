@@ -6,7 +6,7 @@
 namespace: trusted-identity
 
 # target docker repo
-tsiRepo: trustedseriviceidentity
+tsiRepo: tsidentity
 
 # reset parameters are used ONLY when the "jssService.type=jss-server" above.
 # reset - indicates whether the setup will remove the existing securtiy

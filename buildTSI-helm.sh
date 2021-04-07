@@ -51,4 +51,4 @@ EOF
 run "helm --debug dep update charts/ti-key-release-2"
 run "helm --debug package --dependency-update --app-version ${TSI_VERSION} --version ${TSI_VERSION}  charts/ti-key-release-2"
 
-mv *.tgz charts/
+mv *.tgz charts/repo/

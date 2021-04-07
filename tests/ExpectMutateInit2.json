@@ -2,7 +2,7 @@
     "InitContainers": [
         {
             "name": "jwt-init",
-            "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
+            "image": "tsidentity/ti-jwt-sidecar:v1.8.4",
             "env": [
                 {
                     "name": "HOST_IP",
@@ -23,7 +23,7 @@
                 },
                 {
                     "name": "VAULT_ADDR",
-                    "value": "http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
+                    "value": "http://tsi-test2-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
                 },
                 {
                     "name": "SECRET_REFRESH_SEC",
@@ -66,7 +66,7 @@
     "SidecarContainers": [
         {
             "name": "jwt-sidecar",
-            "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
+            "image": "tsidentity/ti-jwt-sidecar:v1.8.4",
             "env": [
                 {
                     "name": "HOST_IP",
@@ -86,7 +86,7 @@
                 },
                 {
                     "name": "VAULT_ADDR",
-                    "value": "http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
+                    "value": "http://tsi-test2-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
                 },
                 {
                     "name": "SECRET_REFRESH_SEC",
@@ -216,7 +216,7 @@
     ],
     "Annotations": {
         "admission.trusted.identity/status": "mutated",
-        "admission.trusted.identity/tsi-cluster-name": "testCluster",
+        "admission.trusted.identity/tsi-cluster-name": "tsi-test2",
         "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
         "admission.trusted.identity/tsi-region": "testRegion"
     }

@@ -3,7 +3,7 @@ GIT_COMMIT_SHA="$(shell git rev-parse --short HEAD 2>/dev/null)"
 GIT_REMOTE_URL="$(shell git config --get remote.origin.url 2>/dev/null)"
 BUILD_DATE="$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")"
 BINARY_NAME="ti-jwt-sidecar"
-REPO ?= trustedseriviceidentity
+REPO ?= tsidentity
 IMAGE := $(REPO)/$(BINARY_NAME):$(GIT_COMMIT_SHA)
 MUTABLE_IMAGE := $(REPO)/$(BINARY_NAME):$(TSI_VERSION)
 

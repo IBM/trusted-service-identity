@@ -54,13 +54,13 @@ sed 's/inject": "true"/inject": "false"/g' ${TESTS}/FakePod.json > ${TESTS}/Fake
 
 $pod_cmd get po $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -ojson > ${TESTS}/FakeIsSafeUpdate.json
 sed 's/mysecret1/mysecret1xxx/g' ${TESTS}/FakeIsSafeUpdate.json > ${TESTS}/FakeIsSafeUpdateOK.json
-sed 's/trustedseriviceidentity\/ti-jwt-sidecar/ubuntu/g' ${TESTS}/FakeIsSafeUpdate.json  > ${TESTS}/FakeIsSafeUpdateError.json
+sed 's/tsidentity\/ti-jwt-sidecar/ubuntu/g' ${TESTS}/FakeIsSafeUpdate.json  > ${TESTS}/FakeIsSafeUpdateError.json
 # kubectl patch pod valid-pod -p '{"spec":{"containers":[{"name":"kubernetes-serve-hostname","image":"new image"}]}}'
 
 $pod_cmd apply -f ${TESTS}/FakeIsSafeUpdateOK.json
 $pod_cmd get po $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -ojson > ${TESTS}/FakePodUpdate.json
 sed 's/mysecret1/mysecret1xxx/g' ${TESTS}/FakeIsSafeUpdateOK.json > ${TESTS}/FakePodUpdate.json
-sed 's/trustedseriviceidentity/badplace/g' ${TESTS}/FakePodUpdate.json > ${TESTS}/FakePodUpdateErr.json
+sed 's/tsidentity/badplace/g' ${TESTS}/FakePodUpdate.json > ${TESTS}/FakePodUpdateErr.json
 
 $pod_cmd patch pod $($pod_cmd get po | grep "myubuntu-" | awk '{print $1}') -p '{"spec":{"containers":[{"name":"jwt-sidecar","image":"ubuntu"}]}}'
 $webhoook_cmd cat /tmp/FakeAdmissionReview.json > ${TESTS}/FakeAdmissionReviewUpdateErr.json

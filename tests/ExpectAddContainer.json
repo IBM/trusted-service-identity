@@ -4,7 +4,7 @@
         "path": "/spec/containers/-",
         "value": {
             "name": "jwt-sidecar",
-            "image": "trustedseriviceidentity/ti-jwt-sidecar:v1.8.3",
+            "image": "tsidentity/ti-jwt-sidecar:v1.8.4",
             "env": [
                 {
                     "name": "HOST_IP",
@@ -24,7 +24,7 @@
                 },
                 {
                     "name": "VAULT_ADDR",
-                    "value": "http://tsi-vault-v171.tsi-fra02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
+                    "value": "http://tsi-test2-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud"
                 },
                 {
                     "name": "SECRET_REFRESH_SEC",

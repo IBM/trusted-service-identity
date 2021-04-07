@@ -99,7 +99,7 @@ kubectl create clusterrolebinding kube-system:default --clusterrole=cluster-admi
 ```
 
 #### Installation images
-The images are publicly available from Docker hub. For example, [https://hub.docker.com/repository/docker/trustedseriviceidentity/ti-webhook](https://hub.docker.com/repository/docker/trustedseriviceidentity/ti-webhook)
+The images are publicly available from Docker hub. For example, [https://hub.docker.com/repository/docker/tsidentity/ti-webhook](https://hub.docker.com/repository/docker/tsidentity/ti-webhook)
 
 The deployment is done in `trusted-identity` namespace. If you are testing
 or developing the code and execute the deployment several times, it is a good
@@ -151,7 +151,7 @@ Another option is an experimental work with Intel using Intel's Verification Ser
     --env VER_SERV_PASSWD="$ISECL_PASSWD" \
     --env TOKEN_SERVICE="$AUTH_ENDPOINT" \
     --env VER_SERVICE="$ISECL_ENDPOINT" \
-    trustedseriviceidentity/tsi-util:v1.8.0 /bin/bash -c "/usr/local/bin/setIdentity.sh $REGION $CLUSTER_NAME"
+    tsidentity/tsi-util:v1.8.0 /bin/bash -c "/usr/local/bin/setIdentity.sh $REGION $CLUSTER_NAME"
     ```
     This script creates an ASSET_TAG Flavor and deploys it to the Verification Server. As a result, the server calculates the hash of the certificate, calls the Intel Trust Agent for the given host to store the tag info in local TPM. As soon as the tag is provisioned, the attestation report will include the newly created tag value for each Security Assertion Markup Language (SAML) report.
 
@@ -457,7 +457,7 @@ Sample JWT Claims:
   "exp": 1557170306,
   "iat": 1557170276,
   "images": "f36b6d491e0a62cb704aea74d65fabf1f7130832e9f32d0771de1d7c727a79cc",
-  "images-names": "trustedseriviceidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
+  "images-names": "tsidentity/myubuntu@sha256:5b224e11f0e8daf35deb9aebc86218f1c444d2b88f89c57420a61b1b3c24584c",
   "iss": "wsched@us.ibm.com",
   "machineid": "fa967df1a948495596ad6ba5f665f340",
   "namespace": "trusted-identity",

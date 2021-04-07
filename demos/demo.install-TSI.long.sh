@@ -91,15 +91,15 @@ setup() {
 
 tsi_helm(){
 if [ "$JSS_TYPE" == "jss-server" ]; then
-  doit "helm install ../charts/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup --set reset.all=true \
+  doit "helm install ../charts/repo/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup --set reset.all=true \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION"
 else
-  doit "helm install ../charts/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup \
+  doit "helm install ../charts/repo/tsi-node-setup-${TSI_VERSION}.tgz --debug --name tsi-setup \
 --set cluster.name=$CLUSTER_NAME --set cluster.region=$REGION"
 fi
 doit "$kk get po"
 
-doit "helm install ../charts/ti-key-release-2-${TSI_VERSION}.tgz --debug --name tsi \
+doit "helm install ../charts/repo/ti-key-release-2-${TSI_VERSION}.tgz --debug --name tsi \
 --set ti-key-release-1.cluster.name=$CLUSTER_NAME \
 --set ti-key-release-1.cluster.region=$REGION \
 --set ti-key-release-1.vaultAddress=$VAULT_ADDR \

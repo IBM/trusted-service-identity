@@ -10,7 +10,7 @@
         "resources": {},
         "volumeMounts": [
             {
-                "name": "default-token-ncgzw",
+                "name": "default-token-r2mx4",
                 "readOnly": true,
                 "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
             }
@@ -30,7 +30,7 @@
         "resources": {},
         "volumeMounts": [
             {
-                "name": "default-token-ncgzw",
+                "name": "default-token-r2mx4",
                 "readOnly": true,
                 "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
             }
