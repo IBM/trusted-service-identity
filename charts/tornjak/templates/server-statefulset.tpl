@@ -22,8 +22,8 @@ spec:
       containers:
         - name: spire-server
           # image: gcr.io/spiffe-io/spire-server:0.11.0
-          # image: tsidentity/tornjak-spire-server:latest
           image: tsidentity/tornjak-spire-server:{{ .Values.spireVersion }}
+          imagePullPolicy: Always
           securityContext:
             # privilaged is needed to access mounted files
             privileged: true
@@ -57,7 +57,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
         - name: spire-oidc
-          image: gcr.io/spiffe-io/oidc-discovery-provider:0.12.0
+          image: gcr.io/spiffe-io/oidc-discovery-provider:{{ .Values.spireVersion }}
           args:
           - -config
           - /run/spire/oidc/config/oidc-discovery-provider.conf
