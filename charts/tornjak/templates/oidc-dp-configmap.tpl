@@ -9,10 +9,6 @@ data:
     # TODO: Replace MY_DISCOVERY_DOMAIN with the FQDN of the Discovery Provider that you will configure in DNS
     domain = "oidc-tornjak.{{ .Values.MY_DISCOVERY_DOMAIN }}"
     listen_socket_path = "/run/oidc-discovery-provider/server.sock"
-    #acme {
-    #  tos_accepted = true
-    #  email = "lumjjb@gmail.com"
-    #}
     log_level = "error"
     server_api {
       address = "unix:///run/spire/sockets/registration.sock"
