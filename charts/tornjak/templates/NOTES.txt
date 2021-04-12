@@ -2,7 +2,7 @@ The installation of the Tornjak with SPIRE Server for
 Universal Trusted Workload Identity Service has completed.
 
       Cluster name: {{ .Values.clustername }}
-      Trusted Domain: {{ .Values.trustdomain }}
+      Trust Domain: {{ .Values.trustdomain }}
 
       Chart Name: {{ .Chart.Name }}.
       Your release is named {{ .Release.Name }}.
