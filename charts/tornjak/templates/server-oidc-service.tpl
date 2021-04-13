@@ -1,3 +1,4 @@
+{{- if .Values.OIDC.enable }}
 # Service definition for the admission webhook
 apiVersion: v1
 kind: Service
@@ -12,3 +13,4 @@ spec:
     - name: https
       port: 443
       targetPort: nginx-oidc-port
+{{- end }}
