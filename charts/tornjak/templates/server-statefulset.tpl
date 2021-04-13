@@ -56,8 +56,10 @@ spec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
-{{- if .Values.OIDC.enable }}
               - "-registrationUDSPath"
+{{- if not .Values.OIDC.enable }}
+              - "/tmp/registration.sock"
+{{- else }}
               - "/run/spire/sockets/registration.sock"
 {{- end }}
             failureThreshold: 2
