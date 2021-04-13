@@ -24,9 +24,6 @@ spec:
           # image: gcr.io/spiffe-io/spire-server:0.11.0
           image: tsidentity/tornjak-spire-server:{{ .Values.spireVersion }}
           imagePullPolicy: Always
-          securityContext:
-            # privilaged is needed to access mounted files
-            privileged: true
           args:
             - -config
             - /run/spire/config/server.conf
@@ -34,6 +31,7 @@ spec:
             - containerPort: 8081
 {{- if .Values.OIDC.enable }}
           securityContext:
+            # privileged is needed to access mounted files
             privileged: true
 {{- end }}
           volumeMounts:
@@ -76,7 +74,7 @@ spec:
               - "/run/spire/sockets/registration.sock"
               - "--shallow"
             initialDelaySeconds: 5
-            periodSeconds: 5
+            periodSeconds: 10
 {{- end }}
 {{- if .Values.OIDC.enable }}
         - name: spire-oidc
