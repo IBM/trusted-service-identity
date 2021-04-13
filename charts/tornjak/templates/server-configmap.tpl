@@ -18,15 +18,17 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
-      registration_uds_path = "/run/spire/sockets/registration.sock"
-      # registration_uds_path = "/tmp/registration.sock"
 
+      {{- if not .Values.OIDC.enable }}
+      registration_uds_path = "/tmp/registration.sock"
+      {{- else }}
+      registration_uds_path = "/run/spire/sockets/registration.sock"
       #AWS requires the use of RSA.  EC cryptography is not supported
       ca_key_type = "rsa-2048"
 
       # Creates the iss claim in JWT-SVIDs.
       # TODO: Replace MY_DISCOVERY_DOMAIN with the FQDN of the Discovery Provider that you will configure in DNS
-      jwt_issuer = "https://oidc-tornjak.{{ .Values.MY_DISCOVERY_DOMAIN }}"
+      jwt_issuer = "https://oidc-tornjak.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
 
       experimental {
         // Turns on the bundle endpoint (required, true)
@@ -38,6 +40,8 @@ data:
         // The port to listen on (optional, defaults to 443)
         bundle_endpoint_port = 8443
       }
+      {{- end }}
+
       ca_subject = {
         country = ["US"],
         organization = ["SPIFFE"],

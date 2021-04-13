@@ -4,8 +4,12 @@ Universal Trusted Workload Identity Service has completed.
       Cluster name: {{ .Values.clustername }}
       Trust Domain: {{ .Values.trustdomain }}
 
-      Chart Name: {{ .Chart.Name }}.
-      Your release is named {{ .Release.Name }}.
+      Chart Name: {{ .Chart.Name }}
+      Your release is named {{ .Release.Name }}
+{{- if .Values.OIDC.enable }}
+      OIDC enable: true
+      MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
+{{- end }}
 
 To learn more about the release, try:
 
