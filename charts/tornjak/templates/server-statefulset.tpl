@@ -32,10 +32,10 @@ spec:
             - /run/spire/config/server.conf
           ports:
             - containerPort: 8081
-          {{- if .Values.OIDC.enable }}
+{{- if .Values.OIDC.enable }}
           securityContext:
             privileged: true
-          {{- end }}
+{{- end }}
           volumeMounts:
             - name: spire-config
               mountPath: /run/spire/config
@@ -43,23 +43,23 @@ spec:
             - name: spire-data
               mountPath: /run/spire/data
               readOnly: false
-            {{- if not .Values.OIDC.enable }}
+{{- if not .Values.OIDC.enable }}
             - name: certs
               mountPath: /opt/spire/sample-keys
-            {{- else }}
+{{- else }}
             - name: spire-server-socket
               mountPath: /run/spire/sockets
               readOnly: false
-            {{- end }}
+{{- end }}
           livenessProbe:
             exec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
-              {{- if .Values.OIDC.enable }}
+{{- if .Values.OIDC.enable }}
               - "-registrationUDSPath"
               - "/run/spire/sockets/registration.sock"
-              {{- end }}
+{{- end }}
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
@@ -70,15 +70,13 @@ spec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
-              {{- if .Values.OIDC.enable }}
               - "-registrationUDSPath"
               - "/run/spire/sockets/registration.sock"
               - "--shallow"
-              {{- end }}
             initialDelaySeconds: 5
             periodSeconds: 5
-
-            ## here goes the OIDC 
+{{- end }}
+{{- if .Values.OIDC.enable }}
         - name: spire-oidc
           image: gcr.io/spiffe-io/oidc-discovery-provider:{{ .Values.spireVersion }}
           args:
@@ -126,14 +124,6 @@ spec:
         - name: spire-config
           configMap:
             name: spire-server
-        - name: spire-server-socket
-          hostPath:
-            path: /run/spire/sockets/server
-            type: DirectoryOrCreate
-        - name: spire-oidc-config
-          configMap:
-            name: oidc-discovery-provider
-
 {{- if not .Values.OIDC.enable }}
         - name: spire-entries
           configMap:
@@ -143,6 +133,10 @@ spec:
             defaultMode: 0400
             secretName: tornjak-certs
 {{- else }}
+        - name: spire-server-socket
+          hostPath:
+            path: /run/spire/sockets/server
+            type: DirectoryOrCreate
         - name: spire-oidc-socket
           emptyDir: {}
         - name: spire-server-socket
