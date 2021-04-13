@@ -141,8 +141,9 @@ oc_cli -n tornjak create secret generic tornjak-certs \
 
 # run helm install for the tornjak server
 helm install --set "namespace=$PROJECT" --set "clustername=$CLUSTERNAME" \
- --set "trustdomain=$TRUSTD" tornjak charts/tornjak \
- --set "MY_DISCOVERY_DOMAIN=$ING"   # --debug
+ --set "trustdomain=$TRUSTDOMAIN" \
+ tornjak charts/tornjak # --debug
+
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -188,9 +189,6 @@ oc_cli -n "$PROJECT" create route passthrough tornjak-mtls --service tornjak-mtl
 # oc create route passthrough tornjak-http --service tornjak-http
 oc_cli -n "$PROJECT" expose svc/tornjak-http
 
-# open edge access for oidc
-oc -n $PROJECT create route edge oidc --service spire-oidc
-
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
 echo "export SPIRE_SERVER=$SPIRESERV"
@@ -202,11 +200,7 @@ TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
 echo "Tornjak (TLS): https://$TORNJAKTLS/"
 TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
 echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
-OIDC=$(oc get route oidc --output json |  jq -r '.spec.host')
-echo "Tornjak (oidc): https://$OIDC/"
-echo "  For testing oidc: curl -k https://$OIDC/.well-known/openid-configuration"
-echo "                    curl -k https://$OIDC/keys"
-echo "Trust Domain: $TRUSTD"
+echo "Trust Domain: $TRUSTDOMAIN"
 }
 
 checkPrereqs(){
