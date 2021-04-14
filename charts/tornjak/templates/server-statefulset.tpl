@@ -29,11 +29,10 @@ spec:
             - /run/spire/config/server.conf
           ports:
             - containerPort: 8081
-{{- if .Values.OIDC.enable }}
           securityContext:
-            # privileged is needed to access mounted files
+            # privileged is needed to access mounted files (e.g. /run/spire/data)
+            # not needed if using volumeClaimTemplates and sockets
             privileged: true
-{{- end }}
           volumeMounts:
             - name: spire-config
               mountPath: /run/spire/config
@@ -139,10 +138,6 @@ spec:
             type: DirectoryOrCreate
         - name: spire-oidc-socket
           emptyDir: {}
-        - name: spire-server-socket
-          hostPath:
-            path: /run/spire/sockets/server
-            type: DirectoryOrCreate
         - name: spire-oidc-config
           configMap:
             name: oidc-discovery-provider
