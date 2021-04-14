@@ -6,7 +6,8 @@ Universal Trusted Workload Identity Service has completed.
 
   SPIRE info:
       Spire Address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}
-      Spire Registrar Image: {{ .Values.spireRegistrar }}:{{ .Values.spireVersion }}
+      Spire Registrar Image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
+      Spire Agent Image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
 
     Chart Name: {{ .Chart.Name }}.
     Your release is named {{ .Release.Name }}.

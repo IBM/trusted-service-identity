@@ -3,6 +3,7 @@ Universal Trusted Workload Identity Service has completed.
 
       Cluster name: {{ .Values.clustername }}
       Trust Domain: {{ .Values.trustdomain }}
+      Tornjak Image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
 
       Chart Name: {{ .Chart.Name }}
       Your release is named {{ .Release.Name }}

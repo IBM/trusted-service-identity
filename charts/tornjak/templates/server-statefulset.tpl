@@ -22,7 +22,7 @@ spec:
       containers:
         - name: spire-server
           # image: gcr.io/spiffe-io/spire-server:0.11.0
-          image: tsidentity/tornjak-spire-server:{{ .Values.spireVersion }}
+          image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           args:
             - -config
