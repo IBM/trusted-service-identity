@@ -20,6 +20,7 @@ clustername: spire-example
 trustdomain: spiretest.com
 spireVersion: 0.12.1
 tornjakImg: tsidentity/tornjak-spire-server
+spireServerSocket: /run/spire/sockets/registration.sock
 
 
 # Enable OIDC

@@ -54,11 +54,7 @@ spec:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-registrationUDSPath"
-{{- if not .Values.OIDC.enable }}
-              - "/tmp/registration.sock"
-{{- else }}
-              - "/run/spire/sockets/registration.sock"
-{{- end }}
+              - "{{ .Values.spireServerSocket }}"
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
@@ -70,7 +66,7 @@ spec:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-registrationUDSPath"
-              - "/run/spire/sockets/registration.sock"
+              - "{{ .Values.spireServerSocket }}"
               - "--shallow"
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -123,7 +119,9 @@ spec:
         - name: spire-config
           configMap:
             name: spire-server
+        - name: spire-server-socket
 {{- if not .Values.OIDC.enable }}
+          emptyDir: {}
         - name: spire-entries
           configMap:
             name: spire-entries
@@ -132,9 +130,8 @@ spec:
             defaultMode: 0400
             secretName: tornjak-certs
 {{- else }}
-        - name: spire-server-socket
           hostPath:
-            path: /run/spire/sockets/server
+            path: {{ .Values.spireServerSocket }}
             type: DirectoryOrCreate
         - name: spire-oidc-socket
           emptyDir: {}
@@ -142,7 +139,6 @@ spec:
           configMap:
             name: oidc-discovery-provider
 {{- end }}
-
         # remove if using volumeClaimTemplates
         - name: spire-data
           hostPath:
