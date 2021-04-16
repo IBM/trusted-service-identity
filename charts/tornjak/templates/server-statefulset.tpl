@@ -40,10 +40,9 @@ spec:
             - name: spire-data
               mountPath: /run/spire/data
               readOnly: false
-{{- if not .Values.OIDC.enable }}
             - name: certs
               mountPath: /opt/spire/sample-keys
-{{- else }}
+{{- if .Values.OIDC.enable }}
             - name: spire-server-socket
               mountPath: /run/spire/sockets
               readOnly: false
@@ -119,16 +118,16 @@ spec:
         - name: spire-config
           configMap:
             name: spire-server
+        - name: certs
+          secret:
+            defaultMode: 0400
+            secretName: tornjak-certs
         - name: spire-server-socket
 {{- if not .Values.OIDC.enable }}
           emptyDir: {}
         - name: spire-entries
           configMap:
             name: spire-entries
-        - name: certs
-          secret:
-            defaultMode: 0400
-            secretName: tornjak-certs
 {{- else }}
           hostPath:
             path: {{ .Values.spireServerSocket }}

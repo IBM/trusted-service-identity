@@ -146,7 +146,7 @@ fi
 
 # store the certs in the secret
 oc_cli -n tornjak create secret generic tornjak-certs \
- --from-file="$KEYSDIR/$CLUSTERNAME.key" \
+ --from-file=key.pem="$KEYSDIR/$CLUSTERNAME.key" \
  --from-file=cert.pem="$KEYSDIR/$CLUSTERNAME.crt" \
  --from-file=tls.pem="$KEYSDIR/$CLUSTERNAME.crt" \
  --from-file=mtls.pem="$KEYSDIR/$CLUSTERNAME.crt"
