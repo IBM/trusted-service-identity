@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elon-musk
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mars-mission
+  labels:
+    app: mars-mission
+spec:
+  replicas: 1
+  serviceAccountName: elon-musk
+  selector:
+    matchLabels:
+      app: mars-mission
+  template:
+    metadata:
+      annotations:
+        spire-workload-id: eu-de/tsi-roks01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b
+      labels:
+        app: mars-mission
+    spec:
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: mars-mission-main
+          securityContext:
+            # privilaged is needed to create socket and bundle files
+            privileged: true
+          image: us.gcr.io/scytale-registry/aws-cli:latest
+          command: ["sleep"]
+          args: ["1000000000"]
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+      volumes:
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: Directory
