@@ -21,7 +21,7 @@ spec:
       containers:
         - name: k8s-workload-registrar
           #image: k8s-workload-registrar:latest
-          image: {{ .Values.spireRegistrar }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           securityContext:
             # privilaged is needed to create socket and bundle files

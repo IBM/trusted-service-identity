@@ -19,3 +19,15 @@ clustername: spire-example
 # trustdomain is arbitrary but needs to match between Server and Agent
 trustdomain: spiretest.com
 spireVersion: 0.12.1
+tornjakImg: tsidentity/tornjak-spire-server
+spireServerSocket: /run/spire/sockets/registration.sock
+
+
+# Enable OIDC
+OIDC:
+  # to enable support for OIDC, change the value to true
+  enable: false
+  # replace the MY_DISCOVERY_DOMAIN with the Ingress information
+  # e.g. this could be an output of IBM Cloud command:
+  #     ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'
+#  MY_DISCOVERY_DOMAIN: MY_DISCOVERY_DOMAIN

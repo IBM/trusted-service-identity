@@ -2,14 +2,15 @@
 # get the SCRIPT and TSI ROOT directories
 SCRIPT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 TSI_ROOT="${SCRIPT_PATH}/.."
+KEYSDIR="$TSI_ROOT/sample-keys"
 #TSI_VERSION="$TSI_ROOT/tsi-version.txt"
 
-CLUSTERNAME="$1"
-TRUSTDOMAIN="${2:-spiretest.com}"
-PROJECT="${3:-tornjak}"
+TRUSTDOMAIN="spiretest.com"
+PROJECT="tornjak"
 SPIREGROUP="spiregroup"
 SPIRESA="spire-server"
 SPIRESCC="spire-server"
+OIDC=false
 
 ## create help menu:
 helpme()
@@ -17,21 +18,55 @@ helpme()
   cat <<HELPMEHELPME
 Install SPIRE server for TSI
 
-Syntax: ${0} <CLUSTER_NAME> <PROJECT_NAME>
+Syntax: ${0} -c <CLUSTER_NAME> -t <TRUST_DOMAIN> -p <PROJECT_NAME> --oidc
 
 Where:
-  CLUSTER_NAME - name of the OpenShift cluster (required)
-  TRUST_DOMAIN - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
-  PROJECT_NAME - OpenShift project [namespace] to install the Server, default: spire-server (optional)
+  -c <CLUSTER_NAME> - name of the OpenShift cluster (required)
+  -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
+  -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
+  --oidc - execute OIDC installation (optional)
 HELPMEHELPME
 }
 
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -c|--cluster)
+    CLUSTERNAME="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -t|--trust)
+    TRUSTDOMAIN="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--project)
+    PROJECT="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --oidc)
+    OIDC=true
+    shift # past argument
+    ;;
+    -h|--help)
+    helpme
+    exit 0
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+
 # validate the arguments
-if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
-  helpme
-  exit 0
-elif [[ "$1" == "" ]] ; then
-  echo "CLUSTER_NAME is missing"
+if [[ "$CLUSTERNAME" == "" ]] ; then
+  echo "-c CLUSTER_NAME must be provided"
   helpme
   exit 1
 fi
@@ -59,14 +94,14 @@ installSpireServer(){
       cleanup
       while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
       oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-      oc project "$PROJECT"
+      oc project "$PROJECT" 2> /dev/null
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
   else
     oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-    oc project "$PROJECT"
+    oc project "$PROJECT" 2> /dev/null
   fi
 
 # create serviceAccount and setup permissions
@@ -94,7 +129,7 @@ supplementalGroups:
 groups:
 - system:authenticated
 EOF
-oc_cli describe scc $SPIRESCC
+#oc_cli describe scc $SPIRESCC
 
 # get ingress information:
 ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
@@ -102,24 +137,35 @@ INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r 
 INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
 ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
 
-
 # add the certs and keys
-#here=$(pwd)
-#cd /Users/sabath/workspace/mrsabath/tornjak/sample-keys
-# ./gen_domain.sh *.tsi-roks02-5240a919746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud $CLUSTERNAME
-#$SCRIPT_PATH/gen_domain.sh "*.$ING" $CLUSTERNAME
-echo "Generating certs..."
-openssl req -new -x509 -sha256 -key "$SCRIPT_PATH/../sample-keys/key.pem" -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -extensions SAN -config <(cat "$SCRIPT_PATH/../sample-keys/openssl.cnf" <(printf "[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com")) -out "$SCRIPT_PATH/../sample-keys/$CLUSTERNAME.pem"
+keys_cmd="$SCRIPT_PATH/createKeys.sh ${KEYSDIR} ${CLUSTERNAME} ${ING}"
+if ! $keys_cmd; then
+  echo "Error creating keys!"
+  exit 1
+fi
+
 # store the certs in the secret
 oc_cli -n tornjak create secret generic tornjak-certs \
- --from-file="$SCRIPT_PATH/../sample-keys/key.pem" \
- --from-file=cert.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
- --from-file=tls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem" \
- --from-file=mtls.pem="$TSI_ROOT/sample-keys/$CLUSTERNAME.pem"
-# cd $here
+ --from-file=key.pem="$KEYSDIR/$CLUSTERNAME.key" \
+ --from-file=cert.pem="$KEYSDIR/$CLUSTERNAME.crt" \
+ --from-file=tls.pem="$KEYSDIR/$CLUSTERNAME.crt" \
+ --from-file=mtls.pem="$KEYSDIR/$CLUSTERNAME.crt"
 
 # run helm install for the tornjak server
-helm install --set "namespace=$PROJECT" --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" tornjak charts/tornjak # --debug
+if ! $OIDC ; then
+  helm install --set "namespace=$PROJECT" \
+  --set "clustername=$CLUSTERNAME" \
+  --set "trustdomain=$TRUSTDOMAIN" \
+  tornjak charts/tornjak # --debug
+else
+  helm install --set "namespace=$PROJECT" \
+  --set "clustername=$CLUSTERNAME" \
+  --set "trustdomain=$TRUSTDOMAIN" \
+  --set "OIDC.enable=true" \
+  --set "OIDC.MY_DISCOVERY_DOMAIN=$ING" \
+  tornjak charts/tornjak # --debug
+fi
+
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
@@ -165,9 +211,14 @@ oc_cli -n "$PROJECT" create route passthrough tornjak-mtls --service tornjak-mtl
 # oc create route passthrough tornjak-http --service tornjak-http
 oc_cli -n "$PROJECT" expose svc/tornjak-http
 
+if $OIDC ; then
+  # open edge access for oidc
+  oc -n $PROJECT create route edge oidc --service spire-oidc
+fi
+
 SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
-echo "export SPIRESERVER=$SPIRESERV"
+echo "export SPIRE_SERVER=$SPIRESERV"
 echo # empty line to separate visually
 
 TORNJAKHTTP=$(oc get route tornjak-http --output json |  jq -r '.spec.host')
@@ -176,6 +227,13 @@ TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
 echo "Tornjak (TLS): https://$TORNJAKTLS/"
 TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
 echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
+echo "Trust Domain: $TRUSTDOMAIN"
+if $OIDC ; then
+  OIDCURL=$(oc get route oidc --output json |  jq -r '.spec.host')
+  echo "Tornjak (oidc): https://$OIDCURL/"
+  echo "  For testing oidc: curl -k https://$OIDCURL/.well-known/openid-configuration"
+  echo "                    curl -k https://$OIDCURL/keys"
+fi
 }
 
 checkPrereqs(){

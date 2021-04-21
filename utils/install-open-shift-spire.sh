@@ -2,11 +2,9 @@
 
 # SPIRE Server info:
 SPIRESERVERPROJECT="tornjak"
-CLUSTERNAME=$1
-SPIRESERVER=$2
 # SPIRE Agent info:
-TRUSTDOMAIN="${3:-spiretest.com}"
-PROJECT="${4:-spire}"
+TRUSTDOMAIN="spiretest.com"
+PROJECT="spire"
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
 SPIREAGSCC="spire-agent"
@@ -17,22 +15,60 @@ helpme()
   cat <<HELPMEHELPME
 Install SPIRE agent and workload registrar for TSI
 
-Syntax: ${0} <CLUSTER_NAME> <SPIRE_SERVER> <PROJECT_NAME>
+Syntax: ${0} -c <CLUSTER_NAME> -s <SPIRE_SERVER> -t <TRUST_DOMAIN> -p <PROJECT_NAME>
 
 Where:
-  CLUSTER_NAME - name of the OpenShift cluster (required)
-  SPIRE_SERVER - SPIRE server end-point (required)
-  TRUST_DOMAIN - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
-  PROJECT_NAME - OpenShift project [namespace] to install the Agent, default: spire (optional)
+  -c <CLUSTER_NAME> - name of the OpenShift cluster (required)
+  -s <SPIRE_SERVER> - SPIRE server end-point (required)
+  -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
+  -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
 HELPMEHELPME
 }
 
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -c|--cluster)
+    CLUSTERNAME="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -s|--server)
+    SPIRESERVER="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -t|--trust)
+    TRUSTDOMAIN="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--project)
+    PROJECT="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -h|--help)
+    helpme
+    exit 0
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+
 # validate the arguments
-if [[ "$1" == "-?" || "$1" == "-h" || "$1" == "--help" ]] ; then
+if [[ "$CLUSTERNAME" == "" ]] ; then
+  echo "-c CLUSTER_NAME must be provided"
   helpme
-  exit 0
-elif [[ "$2" == "" ]] ; then
-  echo "Both CLUSTER_NAME and SPIRE_SERVER are required"
+  exit 1
+elif [[ "$SPIRESERVER" == "" ]] ; then
+  echo "-s SPIRE_SERVER must be provided"
   helpme
   exit 1
 fi
@@ -95,7 +131,7 @@ supplementalGroups:
 groups:
 - system:authenticated
 EOF
-oc_cli describe scc $SPIREAGSCC
+# oc_cli describe scc $SPIREAGSCC
 
 oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$SPIREAGSA"
 
@@ -103,7 +139,7 @@ oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$S
 oc_cli adm policy add-scc-to-user privileged -z $SPIREAGSA
 
 helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
- --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" spire charts/spire --debug
+ --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" spire charts/spire # --debug
 
 cat << EOF
 
@@ -115,11 +151,11 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
  A few, sample server commands:
 
 # show entries:
-/opt/spire/bin/spire-server entry show -registrationUDSPath /tmp/registration.sock
+/opt/spire/bin/spire-server entry show -registrationUDSPath /run/spire/sockets/registration.sock
 # show agents:
-/opt/spire/bin/spire-server agent list -registrationUDSPath /tmp/registration.sock
+/opt/spire/bin/spire-server agent list -registrationUDSPath /run/spire/sockets/registration.sock
 # delete entry:
-/opt/spire/bin/spire-server entry delete -registrationUDSPath /tmp/registration.sock --entryID
+/opt/spire/bin/spire-server entry delete -registrationUDSPath /run/spire/sockets/registration.sock --entryID
 
 # sample Registrar reqistration:
 /opt/spire/bin/spire-server entry create -admin \
@@ -129,7 +165,7 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://${TRUSTDOMAIN}/workload-registrar \
 -parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
--registrationUDSPath /tmp/registration.sock
+-registrationUDSPath /run/spire/sockets/registration.sock
 
 # sample Registrar registration with just a subset of selectors:
 /opt/spire/bin/spire-server entry create -admin \
@@ -137,7 +173,7 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://${TRUSTDOMAIN}/workload-registrar \
 -parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
--registrationUDSPath /tmp/registration.sock
+-registrationUDSPath /run/spire/sockets/registration.sock
 
 # Create Entry in Tornjak:
 SPIFFE ID:

@@ -2,10 +2,16 @@ The installation of the Tornjak with SPIRE Server for
 Universal Trusted Workload Identity Service has completed.
 
       Cluster name: {{ .Values.clustername }}
-      Trusted Domain: {{ .Values.trustdomain }}
+      Trust Domain: {{ .Values.trustdomain }}
+      Tornjak Image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
+      SPIRE Server Socket: {{ .Values.spireServerSocket }}
 
-      Chart Name: {{ .Chart.Name }}.
-      Your release is named {{ .Release.Name }}.
+      Chart Name: {{ .Chart.Name }}
+      Your release is named {{ .Release.Name }}
+{{- if .Values.OIDC.enable }}
+      OIDC enable: true
+      MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
+{{- end }}
 
 To learn more about the release, try:
 
