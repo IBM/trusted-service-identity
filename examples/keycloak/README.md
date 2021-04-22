@@ -79,15 +79,15 @@ Obtain the ingress name using `ibmcloud` cli:
 $ # first obtain the cluster name:
 $ ibmcloud ks clusters
 $ # then use the cluster name to get the Ingress info:
-$ ibmcloud ks cluster-get --cluster <cluster_name> | grep Ingress
+$ ibmcloud ks cluster get --cluster <cluster_name> | grep Ingress
 ```
-Build an ingress file from `example/keycloak/ingress-IKS.template.yaml`,
+Build an ingress file from `example/keycloak/ingress.IKS.template.yaml`,
 using the `Ingress Subdomain` information obtained above. You can use any arbitrary
 prefix in addition to the Ingress value. For example:
 `host: tsi-keycloak.my-tsi-cluster-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud`
 
 ```yaml
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: keycloak-ingress
@@ -96,16 +96,18 @@ spec:
     # provide the actual Ingress for `host` value:
     # use the following command to get the subdomain:
     #    ibmcloud ks cluster get --cluster <cluster-name> | grep Ingress
-    # any prefix can be defined as a result (e.g.):
-    # - host: tsi-keycloak-v001.tsi-fra02-5240a746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
-    # provide the actual Ingress for `host` value:
-  - host: tsi-keycloak.my-tsi-cluster-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+    # any prefix can be added (e.g.):
+    #  host: tsi-keycloak.tsi-fra-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+  - host: tsi-keycloak.tsi-fra-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
     http:
       paths:
-      - backend:
-          serviceName: tsi-keycloak
-          servicePort: 9090
-        path: /
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: tsi-keycloak
+            port:
+              number: 9090
 ```
 
 create ingress:

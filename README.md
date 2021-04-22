@@ -41,12 +41,13 @@ cd trusted-service-identity
 ```
 
 #### Kubernetes cluster
-* Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](https://www.ibm.com/cloud/container-service/),
+* Trusted Service Identity requires Kubernetes cluster. You can use [IBM Cloud Kubernetes Service](https://www.ibm.com/cloud/container-service/),
 [IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube) or any other solution that provides Kubernetes cluster.
+* The installation was tested using Kubernetes version 1.16 and higher
 * Make sure the Kubernetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
 * Make sure the `KUBECONFIG` is properly set and you can access the cluster. Test the access with
 ```console
-export KUBECONFIG=<location of your kubernetes configuration files, as per documentation for your cluster>
+export KUBECONFIG=<location of your Kubernetes configuration files, as per documentation for your cluster>
 kubectl get pods --all-namespaces
 ```
 
@@ -276,37 +277,45 @@ $ # first obtain the cluster name:
 $ ibmcloud ks clusters
 $ # then use the cluster name to get the Ingress info:
 $ ibmcloud ks cluster get --cluster <cluster_name> | grep Ingress
-Ingress Subdomain:              tsi-kube01-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud   
-Ingress Secret:                 tsi-kube01-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000   
-Ingress Status:                 healthy   
-Ingress Message:                All Ingress components are healthy 
+Ingress Subdomain:              tsi-kube01-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud
+Ingress Secret:                 tsi-kube01-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000
+Ingress Status:                 healthy
+Ingress Message:                All Ingress components are healthy
 ```
-Build an ingress file from `example/vault/ingress-IKS.template.yaml`,
+Build an ingress file from `example/vault/ingress.IKS.template.yaml`,
 using the `Ingress Subdomain` information obtained above. You can use any arbitrary
 prefix in addition to the Ingress value. For example:
+
 `host: tsi-vault.my-tsi-cluster-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud`
 
 ```yaml
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: vault-ingress
   namespace: tsi-vault
 spec:
   rules:
-    # provide the actual Ingress for `host` value:
   - host: tsi-vault.my-tsi-cluster-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud
     http:
       paths:
-      - backend:
-          serviceName: tsi-vault
-          servicePort: 8200
-        path: /
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: tsi-vault
+            port:
+              number: 8200
 ```
 
 create ingress:
 ```console
 $ kubectl -n tsi-vault create -f ingress-IKS.yaml
+```
+
+Create VAULT_ADDR env. variable:
+```console
+export VAULT_ADDR="http://<Ingress>"
 ```
 </details>
 
