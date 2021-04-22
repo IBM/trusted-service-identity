@@ -275,7 +275,6 @@ Obtain the ingress name using `ibmcloud` cli:
 $ # first obtain the cluster name:
 $ ibmcloud ks clusters
 $ # then use the cluster name to get the Ingress info:
-$ ibmcloud ks cluster-get --cluster <cluster_name> | grep Ingress
 $ ibmcloud ks cluster get --cluster <cluster_name> | grep Ingress
 Ingress Subdomain:              tsi-kube01-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud   
 Ingress Secret:                 tsi-kube01-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000   
