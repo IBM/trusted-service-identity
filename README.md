@@ -41,12 +41,13 @@ cd trusted-service-identity
 ```
 
 #### Kubernetes cluster
-* Trusted Service Identity requires Kuberenetes cluster. You can use [IBM Cloud Kubernetes Service](https://www.ibm.com/cloud/container-service/),
+* Trusted Service Identity requires Kubernetes cluster. You can use [IBM Cloud Kubernetes Service](https://www.ibm.com/cloud/container-service/),
 [IBM Cloud Private](https://www.ibm.com/cloud/private), [Openshift](https://docs.openshift.com/container-platform/3.3/install_config/install/quick_install.html) or [minikube](https://github.com/kubernetes/minikube) or any other solution that provides Kubernetes cluster.
+* The installation was tested using Kubernetes version 1.16 and higher
 * Make sure the Kubernetes cluster is operational and you can access it remotely using [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) tool
 * Make sure the `KUBECONFIG` is properly set and you can access the cluster. Test the access with
 ```console
-export KUBECONFIG=<location of your kubernetes configuration files, as per documentation for your cluster>
+export KUBECONFIG=<location of your Kubernetes configuration files, as per documentation for your cluster>
 kubectl get pods --all-namespaces
 ```
 
