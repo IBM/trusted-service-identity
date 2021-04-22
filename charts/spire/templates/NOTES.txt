@@ -8,7 +8,9 @@ Universal Trusted Workload Identity Service has completed.
       Spire Address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}
       Spire Registrar Image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
       Spire Agent Image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
-
+{{- if .Values.openShift }}
+      OpenShift mode: true
+{{- end }}
     Chart Name: {{ .Chart.Name }}.
     Your release is named {{ .Release.Name }}.
 

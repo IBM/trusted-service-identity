@@ -8,6 +8,9 @@ Universal Trusted Workload Identity Service has completed.
 
       Chart Name: {{ .Chart.Name }}
       Your release is named {{ .Release.Name }}
+{{- if .Values.openShift }}
+      OpenShift mode: true
+{{- end }}
 {{- if .Values.OIDC.enable }}
       OIDC enable: true
       MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
