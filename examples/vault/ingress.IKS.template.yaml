@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: vault-ingress
@@ -8,12 +8,15 @@ spec:
     # provide the actual Ingress for `host` value:
     # use the following command to get the subdomain:
     #    ibmcloud ks cluster get --cluster <cluster-name> | grep Ingress
-    # any prefix can be defined as a result (e.g.):
+    # any prefix can be added (e.g.):
     #  host: tsi-vault.tsi-fra-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
   - host:
     http:
       paths:
-      - backend:
-          serviceName: tsi-vault
-          servicePort: 8200
-        path: /
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: tsi-vault
+            port:
+              number: 8200

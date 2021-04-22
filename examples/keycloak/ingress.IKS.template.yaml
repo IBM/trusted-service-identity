@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: keycloak-ingress
@@ -7,13 +7,15 @@ spec:
     # provide the actual Ingress for `host` value:
     # use the following command to get the subdomain:
     #    ibmcloud ks cluster get --cluster <cluster-name> | grep Ingress
-    # any prefix can be defined as a result (e.g.):
-    # - host: tsi-keycloak-v001.tsi-fra02-5240a746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
-    # provide the actual Ingress for `host` value:
-  - host:
+    # any prefix can be added (e.g.):
+    #  host: tsi-keycloak..tsi-fra-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+  - host: 
     http:
       paths:
-      - backend:
-          serviceName: tsi-keycloak
-          servicePort: 9090
-        path: /
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: tsi-keycloak
+            port:
+              number: 9090
