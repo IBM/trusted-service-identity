@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 function usage {
     echo "$0 [key-directory] [cluster-name] [ingress]"
     exit 1
@@ -23,12 +23,12 @@ echo "Generating certs..."
 SUBJ="/C=US/ST=CA/O=MyOrg, Inc./CN=mydomain.com"
 SANSTR="[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com"
 
-openssl genrsa -out ${KEYSDIR}/${CERTNAME}.key 2048
+openssl genrsa -out ${KEYSDIR}/${CERTNAME}.key 2048 2>/dev/null
 openssl req -new -sha256 -key ${KEYSDIR}/${CERTNAME}.key -subj "${SUBJ}" -out ${KEYSDIR}/${CERTNAME}.csr \
- -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf ${SANSTR}))
-openssl req -in ${KEYSDIR}/${CERTNAME}.csr -noout -text
+ -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf ${SANSTR})) 2>/dev/null
+# openssl req -in ${KEYSDIR}/${CERTNAME}.csr -noout -text
 openssl x509 -req -extensions SAN \
     -extfile <(cat /etc/ssl/openssl.cnf <(printf $SANSTR)) \
     -in ${KEYSDIR}/${CERTNAME}.csr -CA ${ROOTCA}.crt \
-    -CAkey ${ROOTCA}.key -CAcreateserial -out ${KEYSDIR}/${CERTNAME}.crt -days 500 -sha256
-openssl x509 -in ${KEYSDIR}/${CERTNAME}.crt -text -noout
+    -CAkey ${ROOTCA}.key -CAcreateserial -out ${KEYSDIR}/${CERTNAME}.crt -days 500 -sha256 2>/dev/null
+# openssl x509 -in ${KEYSDIR}/${CERTNAME}.crt -text -noout

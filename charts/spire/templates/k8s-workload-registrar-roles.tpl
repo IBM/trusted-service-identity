@@ -4,7 +4,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: spire-k8s-registrar-cluster-role
+  name: spire-k8s-registrar-{{ .Values.namespace }}-cluster-role
 rules:
   - apiGroups: [""]
     resources: ["pods", "nodes", "endpoints"]
@@ -13,11 +13,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: spire-k8s-registrar-cluster-role-binding
+  name: spire-k8s-registrar-{{ .Values.namespace }}-cluster-role-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: spire-k8s-registrar-cluster-role
+  name: spire-k8s-registrar-{{ .Values.namespace }}-cluster-role
 subjects:
   - kind: ServiceAccount
     name: spire-k8s-registrar
@@ -26,7 +26,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: spire-k8s-registrar-role
+  name: spire-k8s-registrar-{{ .Values.namespace }}-role
   namespace: {{ .Values.namespace }}
 rules:
   - apiGroups: [""]
@@ -43,7 +43,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: spire-k8s-registrar-role-binding
+  name: spire-k8s-registrar-{{ .Values.namespace }}-role-binding
   namespace: {{ .Values.namespace }}
 subjects:
   - kind: ServiceAccount
@@ -51,5 +51,5 @@ subjects:
     namespace: {{ .Values.namespace }}
 roleRef:
   kind: Role
-  name: spire-k8s-registrar-role
+  name: spire-k8s-registrar-{{ .Values.namespace }}-role
   apiGroup: rbac.authorization.k8s.io

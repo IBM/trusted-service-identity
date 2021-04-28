@@ -139,7 +139,8 @@ oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$S
 oc_cli adm policy add-scc-to-user privileged -z $SPIREAGSA
 
 helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
- --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" spire charts/spire # --debug
+ --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" \
+ --set "openShift=true" spire charts/spire # --debug
 
 cat << EOF
 
@@ -189,6 +190,7 @@ EOF
 
 checkPrereqs(){
 
+# jq is needed for parsing the json output
 jq_test_cmd="jq --version"
 if [[ $(eval $jq_test_cmd) ]]; then
   echo "jq client setup properly"
@@ -198,6 +200,7 @@ else
   exit 1
 fi
 
+# openshift client
 oc_test_cmd="oc status"
 if [[ $(eval $oc_test_cmd) ]]; then
   echo "oc client setup properly"

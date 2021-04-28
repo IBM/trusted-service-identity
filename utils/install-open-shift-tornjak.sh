@@ -156,6 +156,7 @@ if ! $OIDC ; then
   helm install --set "namespace=$PROJECT" \
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
+  --set "openShift=true" \
   tornjak charts/tornjak # --debug
 else
   helm install --set "namespace=$PROJECT" \
@@ -163,6 +164,7 @@ else
   --set "trustdomain=$TRUSTDOMAIN" \
   --set "OIDC.enable=true" \
   --set "OIDC.MY_DISCOVERY_DOMAIN=$ING" \
+  --set "openShift=true" \
   tornjak charts/tornjak # --debug
 fi
 
@@ -227,16 +229,21 @@ TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
 echo "Tornjak (TLS): https://$TORNJAKTLS/"
 TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
 echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
+echo # empty line to separate visually
+
 echo "Trust Domain: $TRUSTDOMAIN"
 if $OIDC ; then
   OIDCURL=$(oc get route oidc --output json |  jq -r '.spec.host')
-  echo "Tornjak (oidc): https://$OIDCURL/"
-  echo "  For testing oidc: curl -k https://$OIDCURL/.well-known/openid-configuration"
-  echo "                    curl -k https://$OIDCURL/keys"
+  echo "Tornjak (oidc): "
+  echo " https://$OIDCURL/"
+  echo "For testing oidc: "
+  echo "  curl -k https://$OIDCURL/.well-known/openid-configuration"
+  echo "  curl -k https://$OIDCURL/keys"
 fi
 }
 
 checkPrereqs(){
+  # jq is needed for parsing the json output
 jq_test_cmd="jq --version"
 if [[ $(eval "$jq_test_cmd") ]]; then
   echo "jq client setup properly"
@@ -246,6 +253,7 @@ else
   exit 1
 fi
 
+# openshift client
 oc_test_cmd="oc status"
 if [[ $(eval "$oc_test_cmd") ]]; then
   echo "oc client setup properly"
@@ -253,6 +261,17 @@ else
   echo "oc client must be installed and configured."
   echo "(https://docs.openshift.com/container-platform/4.3/cli_reference/openshift_cli/getting-started-cli.html)"
   echo "Get `oc` cli from https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/"
+  exit 1
+fi
+
+# make sure k8s server is at least v1.18, to support
+# projected ServiceAccountTokens
+# sample: "gitVersion": "v1.18.3+e574db2",
+k8sver=$(oc version --output json | jq -r '.serverVersion.gitVersion' |grep "v1."| cut -d'.' -f 2)
+if [ "$k8sver" -ge 18 ]; then
+  echo "Kubernetes server version is correct"
+else
+  echo "To support functionality like projected ServiceAccountTokens, required Kubernetes version is at least v1.18+"
   exit 1
 fi
 
@@ -275,7 +294,7 @@ else
   exit 1
 fi
 
-# This install requires helm verion 3:
+# This install requires ibmcloud cli with oc plugin:
 ibmcloud_test_cmd="ibmcloud oc versions"
 if [[ $(eval "$ibmcloud_test_cmd") ]]; then
   echo "ibmcloud oc installed properly"
