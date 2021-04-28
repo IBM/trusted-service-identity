@@ -176,15 +176,6 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /run/spire/sockets/registration.sock
 
-# Create Entry in Tornjak:
-SPIFFE ID:
-spiffe://${TRUSTDOMAIN}/$CLUSTERNAME/workload-registrarX
-Parent ID:
-spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
-Selectors:
-k8s:sa:spire-k8s-registrar,k8s:ns:$PROJECT,k8s:container-name:k8s-workload-registrar
-* check Admin Flag
-
 EOF
 }
 

@@ -1,10 +1,9 @@
 # Deploying Tornjak with Helm charts
-This tutorial demonstrates the steps required to deploy Tornjak elements in Kuberentes
-cluster.
+This tutorial demonstrates the steps required to deploy Tornjak and SPIRE elements in Kubernetes cluster.
 
 There are two helm charts available:
 * tornjak - this helm chart deploys Tornjak server, SPIRE Server and all the components to support the management. Additionally, this chart contains a plugin for deploying [OIDC component](./spire-oidc-tutorial.md)
-* spire - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart also install some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
+* spire - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart install some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
 
 ## Prerequisites
 The following installation was tested with:
@@ -24,13 +23,11 @@ Tutorial requirements:
 
 
 ## Important information
-It is worth mentioning that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via COS) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under /run/spire/date directory, or delete the persistent volume claims (in COS), prior to installing the Tornjak server.
-Deploy on non-OpenShift Kubernetes platform
-To deploy Tornjak and all required services on the non-OpenShift Kubernetes platform we will use helm charts.
-Step 1. Deploy a Tornjak with SPIRE Server
+It is worth mentioning that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via COS) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date directory`, or delete the persistent volume claims (in COS), prior to installing the Tornjak server.
+
+## Step 1. Deploy Tornjak with a SPIRE Server
 The first part of the tutorial deploys Tornjak bundled with SPIRE Server using helm charts.
 
-## Deployment
 We can deploy the helm charts on any Kubernetes platform. [Here are instructions](./spire-on-openshift.md) for installing on OpenShift.
 
 For purpose of this tutorial we can deploy it on minikube (https://minikube.sigs.k8s.io/docs/start/)
@@ -50,7 +47,7 @@ export CLUSTERNAME=minikube
 ### Create Keys
 Next step is to co create private key and certificates based on a given CA. If you have don’t have your roocCA, use the sample one from here: https://github.com/lumjjb/tornjak/tree/main/sample-keys/ca_process/CA
 
-Use “utils/createKeys.sh” script to setup keys. Pass cluster name and domain name associate with your ingress:
+Use `utils/createKeys.sh` script to setup keys. Pass the cluster name and the domain name associated with your ingress:
 
 ```console
 utils/createKeys.sh sample-keys/ $CLUSTERNAME $INGRESS-DOMAIN-NAME
@@ -96,10 +93,10 @@ tornjak-mtls   NodePort   10.111.38.89    <none>        30000:30238/TCP   158m
 tornjak-tls    NodePort   10.108.8.17     <none>        20000:30258/TCP   158m
 ```
 
-“spire-server” service is used by the SPIRE agents and Workload Registrar to communicate with the SPIRE server and it needs to be accessible to them (used in step 2).
-The “tornjak-*” services are used to access Tornjak server.
+“spire-server” service is used by the SPIRE agents to communicate with the SPIRE server and it needs to be accessible to them (used in step 2).
+The “tornjak-*” services are used to access Tornjak server in various protocols.
 
-On minikube, retrieve the access points using service names:
+On minikube, we can retrieve the access points using service names:
 
 ```console
 minikube service spire-server -n tornjak --url
@@ -110,30 +107,29 @@ minikube service tornjak-tls -n tornjak --url
 http://192.168.99.112:30670
 ```
 
-Now you can test the connection to Tornjak by going to `http://192.168.99.112:32390` using your local browser, or secure (HTTPS) connection here: `https://192.168.99.112:30670`
+Now you can test the connection to Tornjak server by going to `http://192.168.99.112:32390` using your local browser, or secure (HTTPS) connection here: `https://192.168.99.112:30670`
 
-In case of minikube, we will use the following for accessing the SPIRE server:
+In case of minikube, to access SPIRE server we will use the following:
 
 ```console
 export SPIRE_SERVER=192.168.99.112
 export SPIRE_PORT=30064
 ```
 
-If we use other platforms, setup the Ingress values accordingly:
+On other platforms setup the Ingress values accordingly:
 ```
 export SPIRE_SERVER=<Ingress value to spire-server service>
 export SPIRE_PORT=<Port value for spire-server service>
 ```
 
-## Step 2. Deploy a SPIRE Agent and Workload Registrar
-This part of the tutorial deploys SPIRE Agents, one per each worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries.
-More about the workload registrar [here](./spire-workload-registrar.md).
+## Step 2. Deploy a SPIRE Agents
+This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries. More about the workload registrar [here](./spire-workload-registrar.md).
 
 We suggest NOT to run more than one instance of SPIRE Agent deployment. One of them might crash, even if running in a different namespace.
 
-First create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial we will use “spire”.
+First, create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial, we will use “spire”.
 
-Now we need to copy the spire-bundle that contains all the keys and certificates, from the SPIRE server to this new namespace. Assuming both are deployed in the same cluster, just in a different namespaces, the format is following:
+Next, we need to copy the `spire-bundle` that contains all the keys and certificates, from the SPIRE server to this new namespace. Assuming both are deployed in the same cluster, just in different namespaces, the format is following:
 
 ```console
 kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | oc apply -n "$AGENT_NS" -f -
@@ -150,7 +146,7 @@ Next step, we need to define access to the SPIRE Server. This is typically the I
 export SPIRE_SERVER=192.168.99.112
 export SPIRE_PORT=30064
 ```
-For the purpose of this tutorial, where both server and agents are deployed in the same cluster, we can either use the Ingress values defined above, or we can use `ExternalName Service`, and point at the service created in a different namespace (e.g. tornjak):
+For this tutorial, where both server and agents are deployed in the same cluster, we can either use the Ingress values defined above, or we can use `ExternalName Service`, and point at the service created in a different namespace (e.g. tornjak):
 
 ```console
 kubectl -n spire create -f- <<EOF
@@ -243,4 +239,11 @@ spire-agent-4g8tg                  1/1     Running   0          20m
 spire-registrar-85fcc94797-r8rc8   1/1     Running   0          20m
 ```
 
-This looks good. The next step is [registering The Workload Registrar with the SPIRE Server](./spire-workload-registrar.md).
+This looks good. The next step is [registering The Workload Registrar with the SPIRE Server](./spire-workload-registrar.md#register-workload-registrar-with-the-spire-server).
+
+## Uninstall
+To uninstall helm charts:
+```
+helm uninstall spire
+helm uninstall tornjak
+```

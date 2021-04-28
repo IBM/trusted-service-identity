@@ -1,11 +1,11 @@
 The installation of the SPIRE Agent and Workload Registrar for
 Universal Trusted Workload Identity Service has completed.
 
-  Cluster name: {{ .Values.clustername }}
-  Trust Domain: {{ .Values.trustdomain }}
-  Namespace:    {{ .Values.namespace }}
+    Cluster name: {{ .Values.clustername }}
+    Trust Domain: {{ .Values.trustdomain }}
+    Namespace:    {{ .Values.namespace }}
   {{- if .Values.openShift }}
-        OpenShift mode: true
+    OpenShift mode: true
   {{- end }}
 
   SPIRE info:
@@ -21,14 +21,13 @@ To enable Workload Registrar, create an entry on Tornjak UI:
 3. create Entry (Tornjak -> Entries -> Create Entry) using appropriate Agent
 SPIFFE ID as Parent ID:
 
-  SPIFFE ID:
-    spiffe://{{ .Values.trustdomain }}/{{ .Values.clustername }}/workload-registrar
-  Parent ID:
-    spiffe://{{ .Values.trustdomain }}/spire/agent/k8s_psat/{{ .Values.clustername }}/xxx
-  Selectors:
-    k8s:sa:spire-k8s-registrar,k8s:ns:{{ .Values.namespace }},k8s:container-name:k8s-workload-registrar
-  * check Admin Flag
-
+SPIFFE ID:
+  spiffe://{{ .Values.trustdomain }}/{{ .Values.clustername }}/workload-registrar
+Parent ID:
+  spiffe://{{ .Values.trustdomain }}/spire/agent/k8s_psat/{{ .Values.clustername }}/xxx
+Selectors:
+  k8s:sa:spire-k8s-registrar,k8s:ns:{{ .Values.namespace }},k8s:container-name:k8s-workload-registrar
+* check Admin Flag
 
   Chart Name: {{ .Chart.Name }}.
   Your release is named {{ .Release.Name }}.

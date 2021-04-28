@@ -19,10 +19,10 @@ When deploying on OpenShift, in addition to above the tutorial requires:
 
 
 ## Deploy on OpenShift
-For this tutorial we will use OpenShift cluster running in IBM Cloud. To get a test ROKS (Red Hat OpenShift on Kubernetes) cluster in IBM Cloud follow the steps outlined here: https://www.ibm.com/cloud/openshift
+For this tutorial, we will use OpenShift cluster running in IBM Cloud. To get a test cluster, Red Hat OpenShift on Kubernetes (ROKS) in IBM Cloud, follow the steps outlined here: https://www.ibm.com/cloud/openshift
 
 Deployment of Tornjak Server on OpenShift in IBM Cloud is rather simple. Assuming all the OpenShift prereqs are satisfied, the installation can be done using provided scripts.
-First setup the OpenShift environment using admin privileges.
+First set up the OpenShift environment using admin privileges.
 
 ```console
 export KUBECONFIG=<open-shift configuration>.yaml
@@ -36,8 +36,7 @@ oc get nodes
 ```
 
 ## Step 1. Installing Tornjak Server with SPIRE on OpenShift
-
-We should be ready to execute the installation now. Execute the script to get the most recent syntax.
+Execute the installation script to get the most up to date syntax:
 
 ```
 utils/install-open-shift-tornjak.sh
@@ -54,9 +53,9 @@ Where:
   --oidc - execute OIDC installation (optional)
 ```
 
-Include the `CLUSTER_NAME` and the `TRUST_DOMAIN` as parameters. If you like to install in namespace other than “tornjak” pass the namespace with “-p” flag.
+Include the `CLUSTER_NAME` and the `TRUST_DOMAIN` as parameters. If you like to install in project (namespace) other than “tornjak”, pass the name with “-p” flag.
 
-To use “--oidc” please refer to our separate [OIDC document](./spire-oidc-tutorial.md).
+To use “--oidc” flag, please refer to our separate [OIDC document](./spire-oidc-tutorial.md).
 
 This script detects a previous installation of Tornjak and prompts the user if the uninstallation is required.
 
@@ -64,7 +63,7 @@ Sample execution:
 ```
 utils/install-open-shift-tornjak.sh -c space-x.01 -t openshift.space-x.com
 ```
-This scripts takes care of the namespaces/project creation, sets up appropriate permissions, sets up the public access via Ingress, defines HTTP, TLS and mTLS access points and displays all the relevant information at the end.
+This script takes care of the namespaces/project creation, sets up appropriate permissions, sets up the public access via Ingress, defines HTTP, TLS, and mTLS access points, and displays all the relevant information at the end.
 
 Sample output:
 ```
@@ -105,17 +104,14 @@ Tornjak (mTLS): https://tornjak-mtls-tornjak.space-x-01-9d995c4a8c7c5f281ce13d54
 Trust Domain: openshift.space-x.com
 ```
 
-Installation of the Tornjak and SPIRE server has completed. We will use information output by the script for the next steps.
-We need the `SPIRE_SERVER` value and URLs for accessing Tornjak server (HTTP, TLS or mTLS, depending on the needs).
-
-Now we can move on to the SPIRE Agents deployment
+Installation of the Tornjak and SPIRE server has completed. We will use the script output for the next steps.
 
 ## Step 2. Installing SPIRE Agents on OpenShift
-Define the access to the SPIRE server as shown above:
+Define the access to the SPIRE server as it was output in previous step:
 ```console
 export SPIRE_SERVER=spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud
 ```
-Execute the script to get the most recent syntax:
+Execute the installation script to get the most up to date syntax:
 
 ```
 utils/install-open-shift-spire.sh
@@ -132,7 +128,7 @@ Where:
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
 ```
 
-Include the required values `CLUSTER_NAME`, `SPIRE_SERVER` and `TRUST_DOMAIN`. Make sure they correspond to values from Step 1.
+Include the required values `CLUSTER_NAME`, `SPIRE_SERVER`, and `TRUST_DOMAIN`. Make sure they correspond to values from Step 1.
 
 ```
 utils/install-open-shift-spire.sh -c space-x.01 -s $SPIRE_SERVER -t openshift.space-x.com
@@ -151,11 +147,8 @@ Do you want to re-install it? [y/n]
 Re-installing spire project
 release "spire" uninstalled
 securitycontextconstraints.security.openshift.io "spire-agent" deleted
+serviceaccount "spire-agent" deleted
 project.project.openshift.io "spire" deleted
-spire                                                             Terminating
-Waiting for spire removal to complete
-spire                                                             Terminating
-Waiting for spire removal to complete
 spire                                                             Terminating
 Waiting for spire removal to complete
 Already on project "spire" on server "https://c107-e.us-south.containers.cloud.ibm.com:32643".
@@ -166,7 +159,7 @@ securitycontextconstraints.security.openshift.io/spire-agent created
 securitycontextconstraints.security.openshift.io/spire-agent added to: ["system:serviceaccount:spire:spire-agent"]
 securitycontextconstraints.security.openshift.io/privileged added to: ["system:serviceaccount:spire:spire-agent"]
 NAME: spire
-LAST DEPLOYED: Wed Apr 21 14:49:36 2021
+LAST DEPLOYED: Wed Apr 28 16:19:29 2021
 NAMESPACE: spire
 STATUS: deployed
 REVISION: 1
@@ -175,26 +168,76 @@ NOTES:
 The installation of the SPIRE Agent and Workload Registrar for
 Universal Trusted Workload Identity Service has completed.
 
-      Cluster name: space-x.01
-      Trust Domain: openshift.space-x.com
+    Cluster name: space-x.01
+    Trust Domain: openshift.space-x.com
+    Namespace:    spire
+    OpenShift mode: true
 
   SPIRE info:
-      Spire Address:  spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud:443
-      Spire Registrar Image: gcr.io/spiffe-io/k8s-workload-registrar:0.12.1
-      Spire Agent Image: gcr.io/spiffe-io/spire-agent:0.12.1
+      Spire Server address:  spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud:443
+      Spire Agent image: gcr.io/spiffe-io/spire-agent:0.12.1
+      Spire Registrar image: gcr.io/spiffe-io/k8s-workload-registrar:0.12.1
 
-    Chart Name: spire.
-    Your release is named spire.
+
+To enable Workload Registrar, create an entry on Tornjak UI:
+1. find out what node the registrar is running on:
+    kubectl -n spire get pods -o wide
+2. get the SPIFFE ID of the agent for this node (Tornjak -> Agents -> Agent List)
+3. create Entry (Tornjak -> Entries -> Create Entry) using appropriate Agent
+SPIFFE ID as Parent ID:
+
+SPIFFE ID:
+  spiffe://openshift.space-x.com/space-x.01/workload-registrar
+Parent ID:
+  spiffe://openshift.space-x.com/spire/agent/k8s_psat/space-x.01/xxx
+Selectors:
+  k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
+* check Admin Flag
+
+
+  Chart Name: spire.
+  Your release is named spire.
 
 To learn more about the release, try:
 
   $ helm status spire
   $ helm get all spire
 
-Next, login to the SPIRE Server and register the Workload Registrar
-to gain admin access to the server.
+Next, login to the SPIRE Server and register the Workload Registrar to gain admin access to the server.
 
 oc exec -it spire-server-0 -n tornjak -- sh
 ```
 
-Once the agents deployment is completed move on to section Register Workload Registrar with the SPIRE Server
+## Validate the installation
+Check if all the components were properly deployed:
+
+```
+oc project tornjak
+oc get po
+NAME             READY   STATUS    RESTARTS   AGE
+spire-server-0   3/3     Running   0          48m
+trusted-service-identity$oc get routes
+NAME                 HOST/PORT                                                                                               PATH   SERVICES       PORT     TERMINATION     WILDCARD
+oidc                 oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud                  spire-oidc     https    edge            None
+spire-server         spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud          spire-server   grpc     passthrough     None
+tornjak-http         tornjak-http-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud          tornjak-http   t-http                   None
+tornjak-mtls         tornjak-mtls-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud          tornjak-mtls   t-mtls   passthrough     None
+tornjak-tls          tornjak-tls-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud           tornjak-tls    t-tls    passthrough     None
+
+
+
+```
+Now verify the deployment in the spire project:
+```
+oc project spire
+oc get po
+NAME                               READY   STATUS    RESTARTS   AGE
+spire-agent-222kh                  1/1     Running   0          36m
+spire-agent-6l9tf                  1/1     Running   0          36m
+spire-agent-tgbmn                  1/1     Running   0          36m
+spire-registrar-85fcc94797-v9q6w   1/1     Running   0          36m
+
+```
+All looks good.
+
+The next step is [registering The Workload Registrar with the SPIRE Server](./spire-workload-registrar.md#register-workload-registrar-with-the-spire-server).
