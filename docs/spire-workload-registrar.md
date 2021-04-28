@@ -15,29 +15,29 @@ First, we need to create an entry in SPIRE that would represent the Workload Reg
 This requires few steps:
 * find out what node the registrar is running on. This is needed to find out the Parent ID (Agent SVID) of the Agent associated with the same node. Alternatively, we can create individual entries, one per node/agent.
 
-```
-kubectl -n spire get pods -o wide
+  ```
+  kubectl -n spire get pods -o wide
 
-NAME                               READY   STATUS    RESTARTS   AGE     IP              NODE            NOMINATED NODE   READINESS GATES
-spire-agent-d8s5v                  1/1     Running   0          0h24m   10.38.240.214   10.38.240.214   <none>           <none>
-spire-agent-sd44n                  1/1     Running   0          0h24m   10.38.240.223   10.38.240.223   <none>           <none>
-spire-agent-tms46                  1/1     Running   0          0h24m   10.38.240.226   10.38.240.226   <none>           <none>
-spire-registrar-77ff576ccb-tsr4t   1/1     Running   0          0h24m   172.30.40.199   10.38.240.214   <none>           <none>
-```
-In this case the registrar is running on the node `10.38.240.214`
+  NAME                               READY   STATUS    RESTARTS   AGE     IP              NODE            NOMINATED NODE   READINESS GATES
+  spire-agent-d8s5v                  1/1     Running   0          0h24m   10.38.240.214   10.38.240.214   <none>           <none>
+  spire-agent-sd44n                  1/1     Running   0          0h24m   10.38.240.223   10.38.240.223   <none>           <none>
+  spire-agent-tms46                  1/1     Running   0          0h24m   10.38.240.226   10.38.240.226   <none>           <none>
+  spire-registrar-77ff576ccb-tsr4t   1/1     Running   0          0h24m   172.30.40.199   10.38.240.214   <none>           <none>
+  ```
+  In this case the registrar is running on the node `10.38.240.214`
 * Connect to Tornjak server UI, and list the agents.
 Get the SVID (SPIFFE ID) of the agent running on the specific node (as above). You can use the search function.
 * Create a new entry `(Select Entries → Create Entry)`
- * and paste the Agent SVID as a `Parent ID`
- * Use the sample string suggested at the end of the helm/OpenShift deployment as `SPIFFE ID` for the registrar:
-```
- spiffe://openshift.space-x.com/space-x.01/workload-registrar
-```
- * Use the `selectors` suggested by the installation: e.g:
-```
-k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
-```
- * Make sure to check the `Admin Flag`, so the registrar gets enough permissions to create new entries.
+   - and paste the Agent SVID as a `Parent ID`
+   - Use the sample string suggested at the end of the helm/OpenShift deployment as `SPIFFE ID` for the registrar:
+   ```
+   spiffe://openshift.space-x.com/space-x.01/workload-registrar
+   ```
+   - Use the `selectors` suggested by the installation: e.g:
+   ```
+   k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
+   ```
+   - Make sure to check the `Admin Flag`, so the registrar gets enough permissions to create new entries.
 
 If everything was fine, we should start seeing new entries, including the agents and the registrar `(Entries → Entry List)`
 Otherwise, review the registrar logs.
