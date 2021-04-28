@@ -1,5 +1,5 @@
 # Deploying Tornjak on OpenShift
-This tutorial demonstrates the steps required to deploy Tornjak elements on OpenShift platform. To see instructions for installing on non-OpenShift platform, please see the following documentation on [deploying Tornjak with helm charts](./spire-helm.md).
+This tutorial demonstrates the steps to deploy Tornjak elements on OpenShift platform. To see instructions for installing on non-OpenShift platform, please see the following documentation on [deploying Tornjak with helm charts](./spire-helm.md).
 
 
 ## Prerequisites
@@ -11,12 +11,16 @@ The following installation was tested with:
 Tutorial requirements:
 * [git client](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * [helm3 client](https://helm.sh/docs/intro/install/)
-
-When deploying on OpenShift, in addition to above the tutorial requires:
 * [ibmcloud client](https://cloud.ibm.com/docs/cli?topic=cli-getting-started)
-* [open shift client](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift-cli)
+* [openShift client (oc)](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift-cli)
 * [jq parser](https://stedolan.github.io/jq/)
 
+For our tutorial, we would use following parameters:
+* Platform: `openShift` (ROKS on IBMCloud)
+* Cluster name: `space-x.01`
+* Trust domain: `openshift.space-x.com`
+* Tornjak namespace: `tornjak`
+* Agents namespace: `spire`
 
 ## Deploy on OpenShift
 For this tutorial, we will use OpenShift cluster running in IBM Cloud. To get a test cluster, Red Hat OpenShift on Kubernetes (ROKS) in IBM Cloud, follow the steps outlined here: https://www.ibm.com/cloud/openshift
@@ -209,7 +213,8 @@ oc exec -it spire-server-0 -n tornjak -- sh
 ```
 
 ## Validate the installation
-Check if all the components were properly deployed:
+Check if all the components were properly deployed.
+First, the `tornjak` project:
 
 ```
 oc project tornjak
@@ -223,11 +228,8 @@ spire-server         spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467f
 tornjak-http         tornjak-http-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud          tornjak-http   t-http                   None
 tornjak-mtls         tornjak-mtls-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud          tornjak-mtls   t-mtls   passthrough     None
 tornjak-tls          tornjak-tls-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud           tornjak-tls    t-tls    passthrough     None
-
-
-
 ```
-Now verify the deployment in the spire project:
+Now verify the deployment in the `spire` project:
 ```
 oc project spire
 oc get po
