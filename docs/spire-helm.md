@@ -3,7 +3,7 @@ This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in Kub
 
 There are two helm charts available:
 * tornjak - this helm chart deploys Tornjak server, SPIRE Server and all the components to support the server management. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
-* spire - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart install some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
+* spire - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart installs some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
 
 ## Prerequisites
 The following installation was tested with:
