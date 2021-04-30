@@ -1,5 +1,5 @@
 # Deploying Tornjak with Helm charts
-This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in Kubernetes cluster.
+This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in a Kubernetes cluster.
 
 There are two helm charts available:
 * tornjak - this helm chart deploys Tornjak server, SPIRE Server and all the components to support the server management. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
