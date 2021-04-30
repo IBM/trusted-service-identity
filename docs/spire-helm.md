@@ -146,7 +146,7 @@ export SPIRE_PORT=<Port value for spire-server service>
 ## Step 2. Deploy a SPIRE Agents
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries. More about the workload registrar [here](./spire-workload-registrar.md).
 
-We suggest NOT to run more than one instance of SPIRE Agent deployment. One of them might crash, even if running in a different namespace.
+Only ONE instance of SPIRE Agent deployment should be run at once as it runs a daemonset on all the node. Running more than one may result in conflicts.
 
 First, create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial, we will use “spire”.
 
