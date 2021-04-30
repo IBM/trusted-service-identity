@@ -1,5 +1,5 @@
 # Deploying Tornjak with Helm charts
-This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in Kubernetes cluster.
+This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in a Kubernetes cluster.
 
 There are two helm charts available:
 * tornjak - this helm chart deploys the Tornjak server and the SPIRE Server. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
@@ -36,7 +36,7 @@ The first part of the tutorial deploys Tornjak bundled with SPIRE Server using h
 
 We can deploy the helm charts on any Kubernetes platform. [Here are instructions](./spire-on-openshift.md) for installing on OpenShift.
 
-For this tutorial, we can deploy it all on minikube (https://minikube.sigs.k8s.io/docs/start/)
+For this tutorial, we can deploy it all on [minikube](https://minikube.sigs.k8s.io/docs/start/)
 
 ```console
 minikube start --kubernetes-version=v1.20.2
@@ -146,7 +146,7 @@ export SPIRE_PORT=<Port value for spire-server service>
 ## Step 2. Deploy a SPIRE Agents
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries. More about the workload registrar [here](./spire-workload-registrar.md).
 
-We suggest NOT to run more than one instance of SPIRE Agent deployment. One of them might crash, even if running in a different namespace.
+Only ONE instance of SPIRE Agent deployment should be run at once as it runs a daemonset on all the node. Running more than one may result in conflicts.
 
 First, create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial, we will use “spire”.
 ```console
