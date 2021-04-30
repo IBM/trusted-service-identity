@@ -36,7 +36,7 @@ The first part of the tutorial deploys Tornjak bundled with SPIRE Server using h
 
 We can deploy the helm charts on any Kubernetes platform. [Here are instructions](./spire-on-openshift.md) for installing on OpenShift.
 
-For this tutorial, we can deploy it all on minikube (https://minikube.sigs.k8s.io/docs/start/)
+For this tutorial, we can deploy it all on [minikube](https://minikube.sigs.k8s.io/docs/start/)
 
 ```console
 minikube start --kubernetes-version=v1.20.2
