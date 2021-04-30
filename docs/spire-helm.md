@@ -2,7 +2,7 @@
 This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in Kubernetes cluster.
 
 There are two helm charts available:
-* tornjak - this helm chart deploys Tornjak server, SPIRE Server and all the components to support the server management. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
+* tornjak - this helm chart deploys the Tornjak server and the SPIRE Server. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
 * spire - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart installs some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
 
 ## Prerequisites
@@ -29,7 +29,7 @@ For our tutorial, we would use following parameters:
 * Agents namespace: `spire`
 
 ## Important information
-It is worth mentioning that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via COS) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date` directory, or delete the persistent volume claims (in COS), prior to installing the Tornjak server.
+It is worth mentioning that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via Persistent Storage) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date` directory, or delete the persistent storage volume, prior to installing the Tornjak server.
 
 ## Step 1. Deploy Tornjak with a SPIRE Server
 The first part of the tutorial deploys Tornjak bundled with SPIRE Server using helm charts.
@@ -43,7 +43,7 @@ minikube start --kubernetes-version=v1.20.2
 ```
 
 ### Create a namespace
-Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” and "minikube" as the cluster name.
+Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” as namespace and "minikube" as the cluster name.
 
 ```
 kubectl create ns tornjak
@@ -149,11 +149,14 @@ This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node
 We suggest NOT to run more than one instance of SPIRE Agent deployment. One of them might crash, even if running in a different namespace.
 
 First, create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial, we will use “spire”.
+```console
+kubectl create namespace spire
+```
 
 Next, we need to get the `spire-bundle` that contains all the keys and certificates, from the SPIRE server and copy it to this new namespace. Assuming both are deployed in the same cluster, just in different namespaces, the format is following:
 
 ```console
-kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | oc apply -n "$AGENT_NS" -f -
+kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | kubectl apply -n "$AGENT_NS" -f -
 ```
 In our example, `$SPIRESERVER_NS` is “tornjak” and `$AGENT_NS` is “spire”:
 
