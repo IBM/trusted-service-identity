@@ -87,4 +87,4 @@ bin/spire-agent api fetch jwt -audience client-test  -socketPath /run/spire/sock
 ```
 
 Since the container successfully obtained its identity, what can we do with it?
-See our “[OIDC Tutorial with Vault and AWS S3](./spire-oidc-tutorial.md)” to learn more.
+See our [“OIDC Tutorial with Vault and AWS S3“](./spire-oidc-tutorial.md) to learn more.
