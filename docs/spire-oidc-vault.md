@@ -27,7 +27,7 @@ vault login -no-print "${ROOT_TOKEN}"
 ```
 
 ## Configure a Vault instace:
-We have a script [examples/spire/vault-oidc.sh](examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
+We have a script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
 
 First few commands enable the Secret Engine and setup Vault OIDC Federation with
 our instance of SPIRE.
@@ -80,7 +80,8 @@ EOF
 vault write auth/jwt/role/eurole -<role.json
 ```
 
-We are ready to run the setup script.
+We are ready to run the setup script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh)
+
 Please make sure the following env. variables are set:
 * OIDC_URL
 * ROOT_TOKEN
