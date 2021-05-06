@@ -79,9 +79,10 @@ EOF
 
 vault write auth/jwt/role/eurole -<role.json
 ```
-Now we are ready to run the script.
+
+We are ready to run the setup script.
 Please make sure the following env. variables are set:
-* SPIRE_SERVER
+* OIDC_URL
 * ROOT_TOKEN
 * VAULT_ADDR
 
@@ -90,7 +91,7 @@ or pass them as script parameters:
 ```console
 examples/spire/vault-oidc.sh
 # or
-examples/spire/vault-oidc.sh <SPIRE_SERVER> <ROOT_TOKEN> <VAULT_ADDR>
+examples/spire/vault-oidc.sh <OIDC_URL> <ROOT_TOKEN> <VAULT_ADDR>
 
 ```
 
@@ -112,7 +113,7 @@ metadata:
     spire-workload-id: eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b
 
 ```
-this container will get the followig identity:
+this container will get the following identity:
 
 `eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b`
 
