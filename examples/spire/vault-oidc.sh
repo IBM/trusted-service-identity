@@ -92,10 +92,8 @@ create the secret in Vault (e.g.):
 
 Then start the workload container and get inside:
 
-  oc project default
-  oc create -f examples/spire/mars-spaceX.yaml
-
-  oc exec -it <container id> -- sh
+  kubectl -n default create -f examples/spire/mars-spaceX.yaml
+  kubectl -n default exec -it <container id> -- sh
 
 Once inside:
   # install jq parser
