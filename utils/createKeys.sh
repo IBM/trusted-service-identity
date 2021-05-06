@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 function usage {
     echo "$0 [key-directory] [cluster-name] [ingress]"
     exit 1
