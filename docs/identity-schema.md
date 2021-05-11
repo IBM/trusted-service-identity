@@ -11,7 +11,7 @@ A SPIFFE identity is always prefixed by "spiffe://" and the trust domain of the 
 defined by the user. The following allows one to define an identity schema based on the concepts talked about in
 the [SPIFFE/SPIRE book](https://spiffe.io/book) Chapter 8: Using SPIFFE Identities to Inform Authorization.
 
-A simple example of an identity can be defined such as:
+An example of an identity schema can be like the following:
 ```
 spiffe://trustdomain.org/<version>/<provider>/<region>/<env>/<cluster>/<workload>
 ```
@@ -26,9 +26,16 @@ cluster, node or workloads via annotations and labels.
 
 ## Example Specification of schema
 
-We define the ability to specify a schema through a YAML/JSON structure.
+We define the ability to specify a schema through a YAML/JSON structure. In this
+section, we will show how one can define a simpler schema that looks like the 
+following:
+
+```
+spiffe://trustdomain.org/v1/<provider>/<region>/<workload-namespace>/<workload-pod-name>
 ```
 
+The following YAML is an example of a definition to achieve the above identity schema:
+```
 identity-schema:
     version: v1
     fields:
@@ -64,13 +71,12 @@ identity-schema:
 ```
 
 
-The above would result in a schema that 
+Based on the above designed schema:
+```
+spiffe://trustdomain.org/v1/<provider>/<region>/<workload-namespace>/<workload-pod-name>
 
 ```
-spiffe://trustdomain.org/v1/<provider>/<regioon>/<workload-namespace>/<workload-pod-name>
-
-```
-Of which an instance would look like:
+An instance of an identity registered would look like:
 ```
 spiffe://trustdomain.org/v1/aws/eu-de/medical/patient-data-processor
 ```
