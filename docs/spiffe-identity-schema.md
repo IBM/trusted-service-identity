@@ -13,7 +13,7 @@ the [SPIFFE/SPIRE book](https://spiffe.io/book) Chapter 8: Using SPIFFE Identiti
 
 An example of an identity schema can be like the following:
 ```
-spiffe://trustdomain.org/<version>/<provider>/<region>/<env>/<cluster>/<workload>
+spiffe://trustdomain.org/v1/<provider>/<region>/<workload-namespace>/<workload-pod-name>
 ```
 Where version is the versioning of the identity schema. The other fields would
 indicate user defined or attestation properties. For example, provider would 
@@ -99,3 +99,75 @@ The policy engine will use this identity schema definition to ensure that entrie
 necessary attestation enforcements when available. For example, if an identity of 
 `spiffe://trustdomain.org/v1/aws/.../patient-data-processor` is registered, the entry being 
 registered must have the node selector`aws_iit:...` and workload selector  `k8s:pod-name: patient-data-processor`.
+
+
+## Complex schema trees
+
+In some scenarios, there may be a need for a schema to branch. An example of this is illustrated
+in the [SPIFFE/SPIRE book](https://spiffe.io/book) Chapter 8: Using SPIFFE Identities to Inform Authorization.
+In that scenario there are two different platforms, Kubernetes and Openstack and each has its own
+set of metadata.
+
+A definition of a split may look something like the following:
+```
+identity-schema:
+    version: v1
+    fields:
+    - name:provider
+      source: 
+        nodeAttestor:
+          mapping:
+          - from: aws_iid:*
+            to: aws
+          - from: gcp_iit:*
+            to: gcloud
+          - from: azure_msi:*
+            to: azure
+    - name: platform
+      schema-branch:
+      - name: kubernetes
+        subSchema: kubernetes-schema
+      - name: openstack
+        subSchema: openstack-schema
+
+    subSchemas:
+    - name: kubernetes-schema
+      schema:
+      - name: region
+        source: 
+          k8s:
+            configMap:
+              ns: kube-system
+              name: cluster-info
+              field: cluster-region
+      - name: workload-namespace
+        source:
+          workloadAttestor:
+            mapping:
+            - from: k8s:ns:?ns
+              to: ${ns}
+      - name: workload-podname
+        source:
+          workloadAttestor:
+            mapping:
+            - from: k8s:pod-name:?podName
+              to: ${podName}
+    - name: openstack-schema
+      schema:
+      - name: vm-name
+        source: 
+        ...
+```
+
+This above configuration would result in the following schema for both platforms:
+
+Kubernetes
+```
+spiffe://trustdomain.org/v1/<provider>/kubernetes/<region>/<workload-namespace>/<workload-pod-name>
+spiffe://trustdomain.org/v1/aws/kubernetes/eu-de/medical/patient-data-processor
+```
+Openstack
+```
+Schema:  spiffe://trustdomain.org/<version>/<provider>openstack/<vm-name>
+Example: spiffe://trustdomain.org/v1/aws/openstack/my-vm
+```
