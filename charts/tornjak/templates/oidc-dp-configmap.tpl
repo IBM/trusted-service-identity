@@ -7,12 +7,11 @@ metadata:
 data:
   oidc-discovery-provider.conf: |
     log_level = "INFO"
-    # TODO: Replace MY_DISCOVERY_DOMAIN with the FQDN of the Discovery Provider that you will configure in DNS
     domain = "oidc-tornjak.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
     listen_socket_path = "/run/oidc-discovery-provider/server.sock"
     log_level = "error"
     server_api {
-      address = "unix:///run/spire/sockets/registration.sock"
+      address = "unix:///{{ .Values.spireServerSocket }}"
     }
   nginx.conf: |
     user root;

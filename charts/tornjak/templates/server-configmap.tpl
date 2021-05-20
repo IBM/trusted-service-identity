@@ -25,7 +25,6 @@ data:
       ca_key_type = "rsa-2048"
 
       # Creates the iss claim in JWT-SVIDs.
-      # TODO: Replace MY_DISCOVERY_DOMAIN with the FQDN of the Discovery Provider that you will configure in DNS
       jwt_issuer = "https://oidc-tornjak.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
 
       experimental {

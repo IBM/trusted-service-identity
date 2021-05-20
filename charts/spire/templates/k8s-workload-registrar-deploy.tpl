@@ -24,6 +24,7 @@ spec:
           image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           securityContext:
+            # TODO: review this, maybe applicable for OpenShift only:
             # privilaged is needed to create socket and bundle files
             privileged: true
           args:

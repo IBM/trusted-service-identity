@@ -30,6 +30,7 @@ spec:
         - name: spire-agent
           image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
           securityContext:
+            # TODO: review this, maybe applicable for OpenShift only:
             # privilaged is needed to create socket and bundle files
             privileged: true
           args: ["-config", "/run/spire/config/agent.conf"]

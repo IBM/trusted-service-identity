@@ -17,7 +17,6 @@ data:
     plugins {
       NodeAttestor "k8s_psat" {
         plugin_data {
-          # NOTE: Change this to your cluster name
           cluster = "{{ .Values.clustername }}"
         }
       }
