@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        spire-workload-id: eu-de/tsi-roks01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b
+        spire-workload-id: eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b
       labels:
         app: mars-mission
     spec:

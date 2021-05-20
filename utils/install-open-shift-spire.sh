@@ -139,7 +139,8 @@ oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$S
 oc_cli adm policy add-scc-to-user privileged -z $SPIREAGSA
 
 helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
- --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" spire charts/spire # --debug
+ --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" \
+ --set "openShift=true" spire charts/spire # --debug
 
 cat << EOF
 
@@ -175,20 +176,12 @@ oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
 -parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
 -registrationUDSPath /run/spire/sockets/registration.sock
 
-# Create Entry in Tornjak:
-SPIFFE ID:
-spiffe://${TRUSTDOMAIN}/$CLUSTERNAME/workload-registrarX
-Parent ID:
-spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37
-Selectors:
-k8s:sa:spire-k8s-registrar,k8s:ns:$PROJECT,k8s:container-name:k8s-workload-registrar
-* check Admin Flag
-
 EOF
 }
 
 checkPrereqs(){
 
+# jq is needed for parsing the json output
 jq_test_cmd="jq --version"
 if [[ $(eval $jq_test_cmd) ]]; then
   echo "jq client setup properly"
@@ -198,6 +191,7 @@ else
   exit 1
 fi
 
+# openshift client
 oc_test_cmd="oc status"
 if [[ $(eval $oc_test_cmd) ]]; then
   echo "oc client setup properly"

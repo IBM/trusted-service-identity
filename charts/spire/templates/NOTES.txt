@@ -1,16 +1,36 @@
 The installation of the SPIRE Agent and Workload Registrar for
 Universal Trusted Workload Identity Service has completed.
 
-      Cluster name: {{ .Values.clustername }}
-      Trust Domain: {{ .Values.trustdomain }}
+    Cluster name: {{ .Values.clustername }}
+    Trust Domain: {{ .Values.trustdomain }}
+    Namespace:    {{ .Values.namespace }}
+  {{- if .Values.openShift }}
+    OpenShift mode: true
+  {{- end }}
 
   SPIRE info:
-      Spire Address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}
-      Spire Registrar Image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
-      Spire Agent Image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
+      Spire Server address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}
+      Spire Agent image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
+      Spire Registrar image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
 
-    Chart Name: {{ .Chart.Name }}.
-    Your release is named {{ .Release.Name }}.
+
+To enable Workload Registrar, create an entry on Tornjak UI:
+1. find out what node the registrar is running on:
+    kubectl -n {{ .Values.namespace }} get pods -o wide
+2. get the SPIFFE ID of the agent for this node (Tornjak -> Agents -> Agent List)
+3. create Entry (Tornjak -> Entries -> Create Entry) using appropriate Agent
+SPIFFE ID as Parent ID:
+
+SPIFFE ID:
+  spiffe://{{ .Values.trustdomain }}/{{ .Values.clustername }}/workload-registrar
+Parent ID:
+  spiffe://{{ .Values.trustdomain }}/spire/agent/k8s_psat/{{ .Values.clustername }}/xxx
+Selectors:
+  k8s:sa:spire-k8s-registrar,k8s:ns:{{ .Values.namespace }},k8s:container-name:k8s-workload-registrar
+* check Admin Flag
+
+  Chart Name: {{ .Chart.Name }}.
+  Your release is named {{ .Release.Name }}.
 
 To learn more about the release, try:
 

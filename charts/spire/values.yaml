@@ -12,6 +12,8 @@ pullPolicy: IfNotPresent
 azure: false
 namespace: spire
 selfSignedCA: true
+# openShift requires special configuration, including different security level
+openShift: false
 
 # SPIRE specific values
 # clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
