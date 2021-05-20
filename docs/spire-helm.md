@@ -2,8 +2,8 @@
 This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in a Kubernetes cluster.
 
 There are two helm charts available:
-* tornjak - this helm chart deploys the Tornjak server and the SPIRE Server. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
-* spire - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart installs some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
+* **tornjak** - this helm chart deploys the Tornjak server and the SPIRE Server. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
+* **spire** - this helm chart deploys SPIRE agents, one per every worker node. Additionally, the chart installs some optional elements like [workload registrar](./spire-workload-registrar.md) and webhook (TBD).
 
 ## Prerequisites
 The following installation was tested with:
@@ -50,32 +50,6 @@ kubectl create ns tornjak
 export CLUSTERNAME=minikube
 ```
 
-### Create Keys
-Next step is to create private key and certificates based on a given CA. If you have don’t have your own rootCA, you can use the sample one from here: https://github.com/lumjjb/tornjak/tree/main/sample-keys/ca_process/CA.
-
-Put the `rootCA.key` and `rootCA.crt` files in `sample-keys/CA` directory.
-
-Use `utils/createKeys.sh` script to setup keys. Pass the cluster name and the domain name associated with your ingress:
-
-The syntax is:
-```console
-utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
-```
-For our example, this is:
-```console
-utils/createKeys.sh sample-keys/ $CLUSTERNAME $INGRESS-DOMAIN-NAME
-```
-
-Create a secret that is using the generated key and certificates:
-
-```
-kubectl -n tornjak create secret generic tornjak-certs \
---from-file=key.pem="sample-keys/$CLUSTERNAME.key" \
---from-file=cert.pem="sample-keys/$CLUSTERNAME.crt" \
---from-file=tls.pem="sample-keys/$CLUSTERNAME.crt" \
---from-file=mtls.pem="sample-keys/$CLUSTERNAME.crt"
-```
-
 ## Helm Deployment
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
 * clustername - name of the cluster (required)
@@ -94,18 +68,25 @@ helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "t
 
 Let's review the Tornjak deployment:
 ```
-kubectl -n tornjak get po
+kubectl -n tornjak get pods
 NAME             READY   STATUS    RESTARTS   AGE
 spire-server-0   1/1     Running   0          2m
 ```
 Looks good!
 
 ## Setup Ingress
-Ingress represents the external access to the cluster. The ingress setup depends on the Cloud service provider, so please refer to your specific cloud documentation.
+If you are running these steps on local **minikube** you can skip this section and go directly to Step 2.
 
-Setting up ingress for [minikube](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/)
+Ingress represents the external access to the cluster and it depends on the Cloud provider.
 
-There are currently 4 services that require Ingress access.  Here are their names and ports:
+When deploying these helm charts on the **minikube** in the same cluster we can setup `ExternalName Service` to allow access to services in different namespace. These steps are described in Step 2. But if you like to setup external access, please see the following documentation for [minikube](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/) and here is
+for [kind](https://kind.sigs.k8s.io/docs/user/ingress/#using-ingress)
+
+For other deployments, please refer to your specific cloud documentation.
+
+Basically, we need the SPIRE agents to be able to communicate with the SPIRE Server. We also need to be able to access the **Tornjak** server with the browser.
+
+Here is a complete list of services that require Ingress access, their names, and ports:
 ```
 NAME           TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)           AGE
 spire-server   NodePort   10.98.205.215   <none>        8081:30770/TCP    158m
@@ -114,23 +95,21 @@ tornjak-mtls   NodePort   10.111.38.89    <none>        30000:30238/TCP   158m
 tornjak-tls    NodePort   10.108.8.17     <none>        20000:30258/TCP   158m
 ```
 
-“spire-server” service is used by the SPIRE agents to communicate with the SPIRE server and it needs to be accessible to them (used in step 2).
-The “tornjak-*” services are used to access Tornjak server in various protocols.
+For this tutorial we just need the first two `spire-server` (used in step 2) and `tornajk-http` to access the **Tornjak** server via simple HTTP. For more advance
+protocols please refer to section [Advanced Features](./spire-helm.md#advanced-features).
 
-On minikube, we can retrieve the access points using service names:
+On **minikube**, we can retrieve the access points using the service names:
 
 ```console
 minikube service spire-server -n tornjak --url
 http://192.168.99.112:30064
 minikube service tornjak-http -n tornjak --url
 http://192.168.99.112:32390
-minikube service tornjak-tls -n tornjak --url
-http://192.168.99.112:30670
 ```
 
-Now you can test the connection to Tornjak server by going to `http://192.168.99.112:32390` using your local browser, or secure (HTTPS) connection here: `https://192.168.99.112:30670`
+Now you can test the connection to **Tornjak** server by going to `http://192.168.99.112:32390` using your local browser.
 
-For minikube, to access SPIRE server we can use the following:
+For **minikube**, to access SPIRE server we can use the following:
 
 ```console
 export SPIRE_SERVER=192.168.99.112
@@ -250,7 +229,7 @@ tornjak    default      1           2021-04-22 18:27:54.712062 -0400 EDT    depl
 
 Let's check the SPIRE agents deployment. Since this is running on minikube with only one node, there should be only one SPIRE agent active:
 ```
-kubectl -n spire get po
+kubectl -n spire get pods
 NAME                               READY   STATUS    RESTARTS   AGE
 spire-agent-4g8tg                  1/1     Running   0          20m
 spire-registrar-85fcc94797-r8rc8   1/1     Running   0          20m
@@ -264,3 +243,72 @@ To uninstall helm charts:
 helm uninstall spire
 helm uninstall tornjak
 ```
+
+## Advanced Features
+For a production usage, we want to better protect the access to various components.
+
+### Keys for Tornjak TLS/mTLS
+Tornjak access is available via HTTP, TLS and mTLS protocols. In a production
+environment you should use TLS/mTLS that are based on certificates created from
+the organization rootCA. If you just like to  test these protocols, and don't have
+your own rootCA, you can use the sample from here: https://github.com/lumjjb/tornjak/tree/main/sample-keys/ca_process/CA
+or create your own:
+
+```
+ROOTCA="sample-keys/CA/rootCA"
+# Create CA certs:
+openssl genrsa -out $ROOTCA.key 4096
+openssl req -x509 -subj \"/C=US/ST=CA/O=Acme, Inc./CN=example.com\" -new -nodes -key $ROOTCA.key -sha256 -days 1024 -out $ROOTCA.crt
+```
+Put the `rootCA.key` and `rootCA.crt` files in `sample-keys/CA` directory.
+Then use `utils/createKeys.sh` script to create private key and certificate.
+Pass the cluster name and the domain name associated with your ingress:
+
+The syntax is:
+```console
+utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
+```
+For our example, this is:
+```console
+utils/createKeys.sh sample-keys/ $CLUSTERNAME $INGRESS-DOMAIN-NAME
+```
+
+Create a secret that is using the generated key and certificates:
+
+```
+kubectl -n tornjak create secret generic tornjak-certs \
+--from-file=key.pem="sample-keys/$CLUSTERNAME.key" \
+--from-file=cert.pem="sample-keys/$CLUSTERNAME.crt" \
+--from-file=tls.pem="sample-keys/$CLUSTERNAME.crt" \
+--from-file=mtls.pem="sample-keys/$CLUSTERNAME.crt"
+```
+
+Then just simply restart the spire server by killing the **spire-server-0** pod
+
+```
+kubectl -n tornjak get pods
+kubectl -n tornjak delete po spire-server-0
+```
+
+New pod should be created using the newly created secret with key and certs.
+
+### Ingress for TLS/mTLS
+As we setup HTTP ingress to Tornjak server earlier, to take advantage of the
+secure connection we have to also enable TLS/mTLS ingress.
+
+On **minikube**, we can retrieve the access points using service names:
+```console
+minikube service tornjak-http -n tornjak --url
+http://192.168.99.112:32390
+minikube service tornjak-tls -n tornjak --url
+http://192.168.99.112:30670
+minikube service tornjak-mtls -n tornjak --url
+http://192.168.99.112:31740
+```
+
+Now you can test the connection to Tornjak server by going to `http://192.168.99.112:32390` using your local browser, or secure (HTTPS) connection here: `https://192.168.99.112:30670`
+
+Once TLS/mTLS access points are validated, in production we should disable the
+HTTP service and HTTP Ingress for Tornjak.
+
+For non-minikube environments open Ingress to either `tornjak-tls` or `tornjak-mtls` service and remove Ingress for `tornjak-http` service. 
