@@ -9,7 +9,7 @@ data:
     log_level = "INFO"
     domain = "oidc-tornjak.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
     listen_socket_path = "/run/oidc-discovery-provider/server.sock"
-    log_level = "error"
+    log_level = "info"
     server_api {
       address = "unix:///{{ .Values.spireServerSocket }}"
     }

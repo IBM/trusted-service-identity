@@ -25,7 +25,7 @@ data:
       ca_key_type = "rsa-2048"
 
       # Creates the iss claim in JWT-SVIDs.
-      jwt_issuer = "https://oidc-tornjak.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
+      jwt_issuer = "https://{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
 
       experimental {
         // Turns on the bundle endpoint (required, true)
