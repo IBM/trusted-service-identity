@@ -1,5 +1,7 @@
 # Identity Schema Definition Design
 
+**Warning: This document is considered Work In Progress (WIP) and is subject to change.**
+
 This document is a design doc that talks about how identity schema can be defined and configured so that workloads can automatically 
 be registered with its associated identity that adheres to the defined schema. This is based around the idea of
 behavior and property based identity (from attestations, metadata, etc.) as well as the ability to have user 
