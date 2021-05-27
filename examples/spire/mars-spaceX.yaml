@@ -11,7 +11,6 @@ metadata:
     app: mars-mission
 spec:
   replicas: 1
-  serviceAccountName: elon-musk
   selector:
     matchLabels:
       app: mars-mission
@@ -25,6 +24,7 @@ spec:
       hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: elon-musk
       containers:
         - name: mars-mission-main
           securityContext:
