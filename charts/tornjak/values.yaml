@@ -23,6 +23,7 @@ spireServerSocket: /run/spire/sockets/registration.sock
 OIDC:
   # to enable support for OIDC, change the value to true
   enable: false
+  serviceName: oidc-tornjak
   # replace the MY_DISCOVERY_DOMAIN with the Ingress information
   # e.g. this could be an output of IBM Cloud command:
   #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'

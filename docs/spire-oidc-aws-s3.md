@@ -123,7 +123,7 @@ To allow the workload from outside AWS to access AWS S3, add the workload’s SP
     "Condition": {
       "ForAllValues:StringLike": {
         "oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud:sub": "spiffe://openshift.space-x.com/eu-*/*/*/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b",
-        "oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud:aud": "mys3"
+        "oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud:aud": "mys3"
       }
     }
   ```

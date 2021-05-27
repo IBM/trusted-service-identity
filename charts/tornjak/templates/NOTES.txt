@@ -13,6 +13,7 @@ Universal Trusted Workload Identity Service has completed.
 {{- end }}
 {{- if .Values.OIDC.enable }}
       OIDC enable: true
+      OIDC service name:   {{ .Values.OIDC.serviceName }}
       MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
 {{- end }}
 

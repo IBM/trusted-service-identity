@@ -91,6 +91,9 @@ spec:
             mountPath: /run/oidc-discovery-provider/
           readinessProbe:
             exec:
+            # TODO: This needs to be revisited.
+            # the following code looks correct, but it breaks the test:
+            # command: ["/bin/ps", "aux", " |",  "grep", "oidc-discovery-provider -config /run/spire/oidc/config/oidc-discovery-provider.conf", " |", "grep -v", "dumb-init"]
               command: ["/bin/ps", "aux", " ||", "grep", "oidc-discovery-provider -config /run/spire/oidc/config/oidc-discovery-provider.conf"]
             initialDelaySeconds: 5
             periodSeconds: 5

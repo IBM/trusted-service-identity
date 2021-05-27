@@ -7,7 +7,7 @@ metadata:
 data:
   oidc-discovery-provider.conf: |
     log_level = "INFO"
-    domain = "oidc-tornjak.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
+    domain = "{{ .Values.OIDC.serviceName }}.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
     listen_socket_path = "/run/oidc-discovery-provider/server.sock"
     log_level = "info"
     server_api {

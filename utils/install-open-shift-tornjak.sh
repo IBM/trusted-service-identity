@@ -137,19 +137,22 @@ INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r 
 INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
 ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
 
+# TODO we disabled the create Keys here. Instead we will use the default keys
+# included in the helm charts. This process can be done manually, when needed.
+#
 # add the certs and keys
-keys_cmd="$SCRIPT_PATH/createKeys.sh ${KEYSDIR} ${CLUSTERNAME} ${ING}"
-if ! $keys_cmd; then
-  echo "Error creating keys!"
-  exit 1
-fi
-
-# store the certs in the secret
-oc_cli -n tornjak create secret generic tornjak-certs \
- --from-file=key.pem="$KEYSDIR/$CLUSTERNAME.key" \
- --from-file=cert.pem="$KEYSDIR/$CLUSTERNAME.crt" \
- --from-file=tls.pem="$KEYSDIR/$CLUSTERNAME.crt" \
- --from-file=mtls.pem="$KEYSDIR/$CLUSTERNAME.crt"
+# keys_cmd="$SCRIPT_PATH/createKeys.sh ${KEYSDIR} ${CLUSTERNAME} ${ING}"
+# if ! $keys_cmd; then
+#   echo "Error creating keys!"
+#   exit 1
+# fi
+#
+# # store the certs in the secret
+# oc_cli -n tornjak create secret generic tornjak-certs \
+#  --from-file=key.pem="$KEYSDIR/$CLUSTERNAME.key" \
+#  --from-file=cert.pem="$KEYSDIR/$CLUSTERNAME.crt" \
+#  --from-file=tls.pem="$KEYSDIR/$CLUSTERNAME.crt" \
+#  --from-file=mtls.pem="$KEYSDIR/$CLUSTERNAME.crt"
 
 # run helm install for the tornjak server
 if ! $OIDC ; then
