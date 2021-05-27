@@ -1,0 +1,14 @@
+apiVersion: spiffeid.spiffe.io/v1beta1
+kind: SpiffeID
+metadata:
+  name: mars-mission1-849b568c64-5x5v7
+  namespace: default
+spec:
+  dnsNames:
+  - mars-mission1-849b568c64-5x5v7
+  parentId: spiffe://openshift.space-x.com/k8s-workload-registrar/minikube/node/minikube
+  selector:
+    namespace: default
+    nodeName: minikube
+    podUid: 43bd9ab5-1152-4a20-ba7d-02662d3b8d7a
+  spiffeId: spiffe://openshift.space-x.com/eu-de/space-x.01/xxxx

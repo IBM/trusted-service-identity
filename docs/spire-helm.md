@@ -45,8 +45,9 @@ minikube start --kubernetes-version=v1.20.2
 ### Create a namespace
 Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” as namespace and "minikube" as the cluster name.
 
-```
-kubectl create ns tornjak
+```console
+export SPIRESERVER_NS=tornjak
+kubectl create ns $SPIRESERVER_NS
 export CLUSTERNAME=minikube
 ```
 
@@ -57,7 +58,7 @@ Now we should be ready to deploy the helm charts. This Helm chart requires sever
 * namespace - using “tornjak” by default
 
 To get a complete list of values:
-```
+```console
 helm inspect values charts/tornjak/
 ```
 
@@ -67,15 +68,17 @@ helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "t
 ```
 
 Let's review the Tornjak deployment:
+```console
+kubectl -n $SPIRESERVER_NS get pods
 ```
-kubectl -n tornjak get pods
+```
 NAME             READY   STATUS    RESTARTS   AGE
 spire-server-0   1/1     Running   0          2m
 ```
 Looks good!
 
 ## Setup Ingress
-If you are running these steps on local **minikube** you can skip this section and go directly to Step 2.
+If you are running these steps on local **minikube** you can skip this section and go directly to [Accessing Tornjak Server](#accessing-tornjak-server)
 
 Ingress represents the external access to the cluster and it depends on the Cloud provider.
 
@@ -87,6 +90,11 @@ For other deployments, please refer to your specific cloud documentation.
 Basically, we need the SPIRE agents to be able to communicate with the SPIRE Server. We also need to be able to access the **Tornjak** server with the browser.
 
 Here is a complete list of services that require Ingress access, their names, and ports:
+
+```console
+kubectl get service -n $SPIRESERVER_NS
+```
+
 ```
 NAME           TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)           AGE
 spire-server   NodePort   10.98.205.215   <none>        8081:30770/TCP    158m
@@ -95,23 +103,19 @@ tornjak-mtls   NodePort   10.111.38.89    <none>        30000:30238/TCP   158m
 tornjak-tls    NodePort   10.108.8.17     <none>        20000:30258/TCP   158m
 ```
 
-For this tutorial we just need the first two `spire-server` (used in step 2) and `tornajk-http` to access the **Tornjak** server via simple HTTP. For more advance
-protocols please refer to section [Advanced Features](./spire-helm.md#advanced-features).
+For this tutorial we just need the first two `spire-server` (used in step 2) and `tornajk-http` to access the **Tornjak** server via simple HTTP.
 
 On **minikube**, we can retrieve the access points using the service names:
 
 ```console
-minikube service spire-server -n tornjak --url
-http://192.168.99.112:30064
-minikube service tornjak-http -n tornjak --url
-http://192.168.99.112:32390
+minikube service spire-server -n $SPIRESERVER_NS --url
 ```
+```
+http://192.168.99.112:30064
+```
+As as result, to access SPIRE server we would use the following:
 
-Now you can test the connection to **Tornjak** server by going to `http://192.168.99.112:32390` using your local browser.
-
-For **minikube**, to access SPIRE server we can use the following:
-
-```console
+```
 export SPIRE_SERVER=192.168.99.112
 export SPIRE_PORT=30064
 ```
@@ -122,6 +126,28 @@ export SPIRE_SERVER=<Ingress value to spire-server service>
 export SPIRE_PORT=<Port value for spire-server service>
 ```
 
+## Accessing Tornjak Server
+In this tutorial we just need the simple HTTP access to the Tornjak Server. For more advanced protocols, please refer to the section [Advanced Features](./spire-helm.md#advanced-features).
+
+Get the HTTP Ingress access to Tornjak. On **minikube**, as seen above, we can retrieve the access points using the service names:
+
+```console
+minikube service tornjak-http -n $SPIRESERVER_NS --url
+```
+```
+🏃  Starting tunnel for service tornjak-http.
+|-----------|--------------|-------------|------------------------|
+| NAMESPACE |     NAME     | TARGET PORT |          URL           |
+|-----------|--------------|-------------|------------------------|
+| tornjak   | tornjak-http |             | http://127.0.0.1:56404 |
+|-----------|--------------|-------------|------------------------|
+http://127.0.0.1:56404
+❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+
+```
+
+Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:56404` using your local browser.
+
 ## Step 2. Deploy a SPIRE Agents
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries. More about the workload registrar [here](./spire-workload-registrar.md).
 
@@ -129,7 +155,8 @@ Only ONE instance of SPIRE Agent deployment should be run at once as it runs a d
 
 First, create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial, we will use “spire”.
 ```console
-kubectl create namespace spire
+export AGENT_NS=spire
+kubectl create namespace $AGENT_NS
 ```
 
 Next, we need to get the `spire-bundle` that contains all the keys and certificates, from the SPIRE server and copy it to this new namespace. Assuming both are deployed in the same cluster, just in different namespaces, the format is following:
@@ -137,22 +164,17 @@ Next, we need to get the `spire-bundle` that contains all the keys and certifica
 ```console
 kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | kubectl apply -n "$AGENT_NS" -f -
 ```
-In our example, `$SPIRESERVER_NS` is “tornjak” and `$AGENT_NS` is “spire”:
-
-```console
-kubectl get configmap spire-bundle -n "tornjak" -o yaml | sed "s/namespace: tornjak/namespace: spire/" | kubectl apply -n "spire" -f -
-```
 
 Next step, we need to set the public access to the SPIRE Server, so SPIRE agents can access it. This is typically the Ingress value defined during the SPIRE Server deployment above:
 
-```console
+```
 export SPIRE_SERVER=192.168.99.112
 export SPIRE_PORT=30064
 ```
 But for this tutorial, where both SPIRE server and SPIRE agents are deployed in the same cluster, we can either use the Ingress value defined above, or we can use `ExternalName Service` and point at the `spire-service` created in a different namespace (e.g. tornjak):
 
 ```console
-kubectl -n spire create -f- <<EOF
+kubectl -n $AGENT_NS create -f- <<EOF
 kind: Service
 apiVersion: v1
 metadata:
@@ -163,7 +185,9 @@ spec:
   ports:
   - port: 8081
 EOF
-
+```
+Once created successfully, set up env. variable:
+```console
 export SPIRE_SERVER=spire-server.tornjak.svc.cluster.local
 export SPIRE_PORT=8081
 ```
@@ -173,7 +197,7 @@ We continue using the same cluster name “minikube” and trust domain “opens
 
 `--debug` flag shows additional information about the helm deployment:
 
-```
+```console
 helm install --set "spireAddress=$SPIRE_SERVER" --set "spirePort=$SPIRE_PORT"  --set "namespace=spire" --set "clustername=minikube" --set "trustdomain=openshift.space-x.com" spire charts/spire --debug
 ```
 
@@ -220,16 +244,20 @@ To learn more about the release, try:
 ```
 
 The steps relating to Workload Registrar will be useful in few minutes, but first let’s list all the helm deployments:
-```
+```console
 helm ls
+```
+```
 NAME       NAMESPACE    REVISION    UPDATED                                 STATUS      CHART            APP VERSION
 spire      default      1           2021-04-26 11:16:37.327068 -0400 EDT    deployed    spire-0.1.0      0.1
 tornjak    default      1           2021-04-22 18:27:54.712062 -0400 EDT    deployed    tornjak-0.1.0    0.1
 ```
 
 Let's check the SPIRE agents deployment. Since this is running on minikube with only one node, there should be only one SPIRE agent active:
-```
+```console
 kubectl -n spire get pods
+```
+```
 NAME                               READY   STATUS    RESTARTS   AGE
 spire-agent-4g8tg                  1/1     Running   0          20m
 spire-registrar-85fcc94797-r8rc8   1/1     Running   0          20m
@@ -239,9 +267,14 @@ This looks good. The next step is [registering The Workload Registrar with the S
 
 ## Uninstall
 To uninstall helm charts:
-```
+```console
 helm uninstall spire
 helm uninstall tornjak
+```
+To delete the minikube VM:
+```console
+minikube status
+minikube delete
 ```
 
 ## Advanced Features
@@ -299,16 +332,16 @@ secure connection we have to also enable TLS/mTLS ingress.
 On **minikube**, we can retrieve the access points using service names:
 ```console
 minikube service tornjak-http -n tornjak --url
-http://192.168.99.112:32390
+http://127.0.0.1:56404
 minikube service tornjak-tls -n tornjak --url
-http://192.168.99.112:30670
+http://127.0.0.1:30670
 minikube service tornjak-mtls -n tornjak --url
-http://192.168.99.112:31740
+http://127.0.0.1:31740
 ```
 
-Now you can test the connection to Tornjak server by going to `http://192.168.99.112:32390` using your local browser, or secure (HTTPS) connection here: `https://192.168.99.112:30670`
+Now you can test the connection to Tornjak server by going to `http://127.0.0.1:56404` using your local browser, or secure (HTTPS) connection here: `http://127.0.0.1:30670`
 
 Once TLS/mTLS access points are validated, in production we should disable the
 HTTP service and HTTP Ingress for Tornjak.
 
-For non-minikube environments open Ingress to either `tornjak-tls` or `tornjak-mtls` service and remove Ingress for `tornjak-http` service. 
+For non-minikube environments open Ingress to either `tornjak-tls` or `tornjak-mtls` service and remove Ingress for `tornjak-http` service.

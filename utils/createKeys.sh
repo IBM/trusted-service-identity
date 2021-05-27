@@ -21,7 +21,7 @@ fi
 echo "Generating certs..."
 
 SUBJ="/C=US/ST=CA/O=MyOrg, Inc./CN=mydomain.com"
-SANSTR="[SAN]\nsubjectAltName=DNS:*.${ING},DNS:example.com,DNS:www.example.com"
+SANSTR="[SAN]\nsubjectAltName=DNS:*.${ING}"
 
 openssl genrsa -out ${KEYSDIR}/${CERTNAME}.key 2048 2>/dev/null
 openssl req -new -sha256 -key ${KEYSDIR}/${CERTNAME}.key -subj "${SUBJ}" -out ${KEYSDIR}/${CERTNAME}.csr \
