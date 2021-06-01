@@ -31,6 +31,17 @@ For our tutorial, we would use following parameters:
 ## Important information
 It is worth mentioning that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via Persistent Storage) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date` directory, or delete the persistent storage volume, prior to installing the Tornjak server.
 
+## Step 0. Get code
+Before starting the tutorial, get the most recent code to your local system.
+All the SPIRE related work is kept under `spire-master` branch that is separate
+from the default `master` branch.
+
+```console
+git clone git@github.com:IBM/trusted-service-identity.git
+cd trusted-service-identity
+git checkout spire-master
+```
+
 ## Step 1. Deploy Tornjak with a SPIRE Server
 The first part of the tutorial deploys Tornjak bundled with SPIRE Server using helm charts.
 
