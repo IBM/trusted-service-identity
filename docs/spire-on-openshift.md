@@ -39,6 +39,17 @@ oc get config
 oc get nodes
 ```
 
+## Step 0. Get code
+Before starting the tutorial, get the most recent code to your local system.
+All the SPIRE related work is kept under `spire-master` branch that is separate
+from the default `master` branch.
+
+```console
+git clone git@github.com:IBM/trusted-service-identity.git
+cd trusted-service-identity
+git checkout spire-master
+```
+
 ## Step 1. Installing Tornjak Server with SPIRE on OpenShift
 Execute the installation script to get the most up to date syntax:
 
