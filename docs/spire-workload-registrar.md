@@ -13,7 +13,7 @@ Workload Registrar will use its own identity to register itself with the SPIRE s
 
 First, we need to create an entry in SPIRE that would represent the Workload Registrar.
 This requires few steps:
-* find out what node the registrar is running on. This is needed to find out the Parent ID (Agent SVID) of the Agent associated with the same node. Alternatively, we can create individual entries, one per node/agent.
+* Find out what node the registrar is running on. This is needed to find out the Parent ID (Agent SVID) of the Agent associated with the same node. Alternatively, we can create individual entries, one per node/agent.
 
   ```
   kubectl -n spire get pods -o wide
@@ -27,16 +27,18 @@ This requires few steps:
   In this case the registrar is running on the node `10.38.240.214`
 * Connect to Tornjak server UI, and list the agents.
 Get the SVID (SPIFFE ID) of the agent running on the specific node (as above). You can use the search function.
+* In the selected agent row in the table, click on the three dots in the rightmost column under `Workload Attestor Plugin`.  Under `Add WorkLoad Attestor Info→WorkLoad Attestor Plugin`, select Kubernetes, and click `Save & Add`.  
 * Create a new entry `(Select Entries → Create Entry)`
-   - and paste the Agent SVID as a `Parent ID`
+   - Select the matching Agent SVID as a `Parent ID`
    - Use the sample string suggested at the end of the helm/OpenShift deployment as `SPIFFE ID` for the registrar:
    ```
    spiffe://openshift.space-x.com/space-x.01/workload-registrar
    ```
-   - Use the `selectors` suggested by the installation: e.g:
+   - Under Selectors Recommendation, select the `selectors` suggested by the installation under `Selectors Recommendation`.  For example, if the installation suggests the following:
    ```
    k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
    ```
+   check off `k8s:sa`, `k8s:ns`, `k8s:container-name`.  Then under `Selectors`, fill in the suggested values.  
    - Make sure to check the `Admin Flag`, so the registrar gets enough permissions to create new entries.
 
 If everything was fine, we should start seeing new entries, including the agents and the registrar `(Entries → Entry List)`
