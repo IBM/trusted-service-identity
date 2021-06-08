@@ -157,7 +157,19 @@ http://127.0.0.1:56404
 
 ```
 
-Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:56404` using your local browser.
+Now you can test the connection to the **Tornjak** server by going to `http://127.0.0.1:56404` using your local browser.  
+
+On **kind**, we can use port-forwarding to get HTTP access to Tornjak:
+
+```
+kubectl -n $SPIRESERVER_NS port-forward spire-server-0 10000:10000
+```
+```
+Forwarding from 127.0.0.1:10000 -> 10000
+Forwarding from [::1]:10000 -> 10000
+```
+
+Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:10000` in your local browser.
 
 ## Step 2. Deploy a SPIRE Agents
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries. More about the workload registrar [here](./spire-workload-registrar.md).
@@ -209,7 +221,7 @@ We continue using the same cluster name “minikube” and trust domain “opens
 `--debug` flag shows additional information about the helm deployment:
 
 ```console
-helm install --set "spireAddress=$SPIRE_SERVER" --set "spirePort=$SPIRE_PORT"  --set "namespace=spire" --set "clustername=minikube" --set "trustdomain=openshift.space-x.com" spire charts/spire --debug
+helm install --set "spireAddress=$SPIRE_SERVER" --set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" spire charts/spire --debug
 ```
 
 When successfully executed, the helm chart shows NOTES output.  Something like this:
@@ -231,7 +243,7 @@ Universal Trusted Workload Identity Service has completed.
 
 To enable Workload Registrar, create an entry on Tornjak UI:
 1. find out what node the registrar is running on:
-    kubectl -n spire1 get pods -o wide
+    kubectl -n spire get pods -o wide
 2. get the SPIFFE ID of the agent for this node (Tornjak -> Agents -> Agent List)
 3. create Entry (Tornjak -> Entries -> Create Entry) using appropriate Agent
 SPIFFE ID as Parent ID:
