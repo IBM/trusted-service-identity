@@ -6,7 +6,8 @@ metadata:
 data:
   registrar.conf: |
     log_level = "debug"
-    mode = "reconcile"
+    # mode = "reconcile"
+    mode = "crd"
     trust_domain = "{{ .Values.trustdomain }}"
     # enable when direct socket access to SPIRE Server available:
     # server_socket_path = "/run/spire/sockets/registration.sock"
@@ -16,4 +17,5 @@ data:
     # enable for label based registration:
     # pod_label = "spire-workload-id"
     # enable for annotation based registration:
-    pod_annotation = "spire-workload-id"
+    # pod_annotation = "spire-workload-id"
+    identity_schema_path = "/run/identity-schema/config/identity-schema.yaml"

@@ -37,6 +37,9 @@ spec:
             - name: k8s-workload-registrar-config
               mountPath: /run/k8s-workload-registrar/config
               readOnly: true
+            - name: identity-schema-config
+              mountPath: /run/identity-schema/config
+              readOnly: true
       volumes:
         - name: spire-registrar-socket
           hostPath:
@@ -45,3 +48,6 @@ spec:
         - name: k8s-workload-registrar-config
           configMap:
             name: k8s-workload-registrar
+        - name: identity-schema-config
+          configMap:
+            name: identity-schema
