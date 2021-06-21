@@ -7,7 +7,7 @@ metadata:
   name: spire-k8s-registrar-{{ .Values.namespace }}-cluster-role
 rules:
   - apiGroups: [""]
-    resources: ["pods", "nodes", "endpoints"]
+    resources: ["pods", "nodes", "endpoints", "configmaps"]
     verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
