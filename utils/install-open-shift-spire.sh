@@ -7,6 +7,7 @@ TRUSTDOMAIN="spiretest.com"
 PROJECT="spire"
 SPIREGROUP="spiregroup"
 SPIREAGSA="spire-agent"
+SPIRESA="spire-server"
 SPIREAGSCC="spire-agent"
 
 ## create help menu:
@@ -105,10 +106,18 @@ installSpireAgent(){
   fi
 
 # Need to copy the spire-bundle from the server namespace
-oc_cli get configmap spire-bundle -n "$SPIRESERVERPROJECT" -o yaml | sed "s/namespace: $SPIRESERVERPROJECT/namespace: $PROJECT/" | oc apply -n "$PROJECT" -f -
+oc -n "$PROJECT" get cm spire-bundle
+if [ "$?" == "0" ]; then
+  echo "WARNING: using the existing configmap spire-bundle in $PROJECT. "
+else
+  oc_cli get configmap spire-bundle -n "$SPIRESERVERPROJECT" -o yaml | sed "s/namespace: $SPIRESERVERPROJECT/namespace: $PROJECT/" | oc apply -n "$PROJECT" -f -
+fi
 
-oc_cli create sa $SPIREAGSA
-oc_cli adm groups add-users $SPIREGROUP $SPIREAGSA
+# if the group exists, just ignore the error
+oc adm groups new "$SPIREGROUP" "$SPIRESA" 2> /dev/null
+
+oc create sa $SPIREAGSA 2> /dev/null
+oc adm groups add-users $SPIREGROUP $SPIREAGSA 2> /dev/null
 
 oc_cli create -f- <<EOF
 kind: SecurityContextConstraints
