@@ -18,4 +18,3 @@ data:
     # pod_label = "spire-workload-id"
     # enable for annotation based registration:
     # pod_annotation = "spire-workload-id"
-    identity_schema_path = "/run/identity-schema/config/identity-schema.yaml"
