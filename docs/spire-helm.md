@@ -57,9 +57,9 @@ minikube start --kubernetes-version=v1.20.2
 Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” as namespace and "minikube" as the cluster name.
 
 ```console
+export CLUSTERNAME=minikube
 export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
-export CLUSTERNAME=minikube
 ```
 
 ## Helm Deployment
@@ -157,7 +157,7 @@ http://127.0.0.1:56404
 
 ```
 
-Now you can test the connection to the **Tornjak** server by going to `http://127.0.0.1:56404` using your local browser.  
+Now you can test the connection to the **Tornjak** server by going to `http://127.0.0.1:56404` using your local browser.
 
 On **kind**, we can use port-forwarding to get HTTP access to Tornjak:
 
