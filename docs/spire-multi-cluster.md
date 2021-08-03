@@ -1,6 +1,6 @@
 # Deploying Tornjak in multi-cluster environment
 This document describes the steps required to setup Tornjak with SPIRE Server
-hosting identities for multiple clusters.
+providing identities for multiple clusters.
 
 This assumes the Tornjak Server is already deployed as described in
 [SPIRE with Helm](./spire-helm.md) or [SPIRE on OpenShift](./spire-on-openshift.md)
@@ -27,27 +27,21 @@ files using  `kubectl config view --flatten`:
 ```
 export KUBECONFIG=....
 export CLUSTERNAME=....
-mkdir /tmp/$CLUSTERNAME
-kubectl config view --flatten > /tmp/$CLUSTERNAME/kubeconfig
+mkdir /tmp/kubeconfigs
+kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
 ```
 
-For our example we will have the following:
+In our example we will have the following:
 ```
-/tmp/space-x02/kubeconfig
-/tmp/kube-01/kubeconfig
+/tmp/kubeconfigs/space-x02
+/tmp/kubeconfigs/kube-01
 ```
 
-Then using these individual files, create secrets in Tornjak cluster.
+Then using these individual files, create a secret in Tornjak cluster.
 _Note_: don't use special characters, stick to alphanumerics.
 
-```
-export CLUSTERNAME=...
-kubectl -n tornjak create secret generic $CLUSTERNAME --from-file=/tmp/$CLUSTERNAME/kubeconfig
-```
-so we get:
-```
-kubectl -n tornjak create secret generic space-x02 --from-file=/tmp/space-x02/kubeconfig
-kubectl -n tornjak create secret generic kube-01 --from-file=/tmp/kube-01/kubeconfig
+```console
+kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs
 ```
 
 ## Step 2. Update SPIRE Server configuration.
@@ -57,8 +51,9 @@ arguments.
 For all remote servers we need `kube_config_file` that contains its cluster KUBECONFIG.
 We don't need this for the local cluster.
 
-We assume all the SPIRE agent are deployed in `spire` namespace under
-`spire-agent` service-account, otherwise change the configuration accordingly:
+We assume all the SPIRE agent are deployed in `spire` namespace
+under `spire-agent` service-account,
+otherwise change the configuration accordingly:
 
 Update the spire-server ConfigMap:
 
@@ -75,11 +70,11 @@ NodeAttestor "k8s_psat" {
           },
           "space-x02" = {
               service_account_whitelist = ["spire:spire-agent"]
-              kube_config_file = "/tmp/space-x02/kubeconfig"
+              kube_config_file = "/tmp/kubeconfigs/space-x02"
           },
           "kube-01" = {
               service_account_whitelist = ["spire:spire-agent"]
-              kube_config_file = "/tmp/kube-01/kubeconfig"
+              kube_config_file = "/tmp/kubeconfigs/kube-01"
           },
       }
   }
@@ -87,10 +82,12 @@ NodeAttestor "k8s_psat" {
 ```
 
 ## Step 3. Modify SPIRE Server StatefulSet deployment
-Here we want to add the KUBECONFIG to be available to SPIRE server. We will mount
-the secrets created earlier to SPIRE server instance.
-Update the spire-server StatefulSet and look for `spire-server` container, then
-add the volume mounts, one per every remote cluster (secret)
+Here we want to make the KUBECONFIGs available to the SPIRE server.
+We will mount the secret to the SPIRE server instance.
+Edit the spire-server StatefulSet
+and look for `spire-server` container,
+then add the volume mount reference,
+and create a volume from the `kubeconfigs` secret.
 
 ```console
 kubectl -n tornjak edit statefulset spire-server
@@ -102,20 +99,14 @@ This might look like this:
 name: spire-server
 ...
 volumeMounts:
-- mountPath: /tmp/space-x02
-  name: kubeconfig-space-x02
-- mountPath: /tmp/kube-01
-  name: kubeconfig-kube-01
+- mountPath: /tmp/kubeconfig
+  name: kubeconfigs
 ...
 volumes:
-- name: kubeconfig-space-x02
+- name: kubeconfigs
   secret:
     defaultMode: 420
-    secretName: space-x02
-- name: kubeconfig-kube-01
-  secret:
-    defaultMode: 420
-    secretName: kube-01
+    secretName: kubeconfigs
 ```
 
 Then restart the SPIRE/Tornjak pod
