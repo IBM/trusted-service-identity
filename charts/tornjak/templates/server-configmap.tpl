@@ -58,7 +58,15 @@ data:
                 "{{ .Values.clustername }}" = {
                     # use_token_review_api_validation = true
                     service_account_whitelist = ["spire:spire-agent"]
-                }
+                },
+{{- if .Values.multiCluster.remoteClusters }}
+    {{- range $k, $v := .Values.multiCluster.remoteClusters }}
+                "{{ $v.name }}" = {
+                    service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
+                    kube_config_file = "/tmp/kubeconfigs/{{ $v.name }}"
+                },
+    {{- end }}
+{{- end }}
             }
         }
       }

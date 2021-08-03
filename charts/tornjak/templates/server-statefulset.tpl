@@ -45,6 +45,10 @@ spec:
             - name: spire-server-socket
               mountPath: /run/spire/sockets
               readOnly: false
+{{- if .Values.multiCluster.remoteClusters }}
+            - name: kubeconfigs
+              mountPath: /tmp/kubeconfig
+{{- end }}
           livenessProbe:
             exec:
               command:
@@ -123,6 +127,12 @@ spec:
           secret:
             defaultMode: 0400
             secretName: tornjak-certs
+{{- if .Values.multiCluster.remoteClusters }}
+        - name: kubeconfigs
+          secret:
+            defaultMode: 0200
+            secretName: kubeconfigs
+{{- end }}
 {{- if .Values.OIDC.enable }}
         - name: spire-server-socket
           hostPath:

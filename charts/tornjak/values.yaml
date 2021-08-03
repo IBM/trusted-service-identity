@@ -18,7 +18,6 @@ spireVersion: 0.12.1
 tornjakImg: tsidentity/tornjak-spire-server
 spireServerSocket: /run/spire/sockets/registration.sock
 
-
 # Enable OIDC
 OIDC:
   # to enable support for OIDC, change the value to true
@@ -28,3 +27,24 @@ OIDC:
   # e.g. this could be an output of IBM Cloud command:
   #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'
   #  MY_DISCOVERY_DOMAIN: MY_DISCOVERY_DOMAIN
+
+# multiCluster - enables support for a single SPIRE server managing
+# agents deployed in multiple, different clusters.
+# Prior to this deployment, create a secret that contains KUBECONFIG information
+# for every remoteCluster.
+#    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name1>`
+#    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name2>`
+# Then create a secret:
+#     `kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs`
+#
+#  default namespace value = "spire"
+#  default serviceAccount value = spire-agent
+multiCluster:
+  remoteClusters:
+  # - name: cluster1
+  #   namespace: spire
+  #   serviceAccount: spire-agent
+  # - name: cluster2
+  # - name: cluster3
+  #   namespace: spire
+  #   serviceAccount: spire-agent
