@@ -6,7 +6,6 @@ metadata:
 data:
   registrar.conf: |
     log_level = "debug"
-    # mode = "reconcile"
     mode = "crd"
     trust_domain = "{{ .Values.trustdomain }}"
     # enable when direct socket access to SPIRE Server available:
@@ -18,3 +17,9 @@ data:
     # pod_label = "spire-workload-id"
     # enable for annotation based registration:
     # pod_annotation = "spire-workload-id"
+    identity_template = "{{ "region/{{.Context.Region}}/cluster_name/{{.Context.ClusterName}}/ns/{{.Pod.Namespace}}/sa/{{.Pod.ServiceAccount}}/pod_name/{{.Pod.Name}}" }}"
+    identity_template_label = "identity_template"
+    context {
+      Region = "{{ .Values.region }}"
+      ClusterName = "{{ .Values.clustername }}"
+    }
