@@ -22,8 +22,10 @@ SPIRE server attests the remote agents by verifying the KUBECONFIG configuration
 Therefore, for every remote cluster, other then the cluster hosting the Tornjak,
 we need KUBECONFIG for this cluster.
 
-So gather the KUBECONFIG for every remote cluster and dump them into individual
-files using  `kubectl config view --flatten`:
+Gather the KUBECONFIG for every remote cluster
+and output them into individual files
+using  `kubectl config view --flatten`:
+
 ```
 export KUBECONFIG=....
 export CLUSTERNAME=....

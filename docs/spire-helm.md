@@ -1,5 +1,6 @@
 # Deploying Tornjak with Helm charts
-This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in a Kubernetes cluster.
+This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements
+in a Kubernetes cluster.
 
 There are two helm charts available:
 * **tornjak** - this helm chart deploys the Tornjak server and the SPIRE Server. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
@@ -62,6 +63,46 @@ export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
 ```
 
+### Multi-cluster Support
+If you want to setup a SPIRE Server
+that supports multi-cluster deployment
+where SPIRE agents are distributed in several, remote clusters,
+all reporting to a single SPIRE Server,
+please follow the additional steps outlined here,
+otherwise skip to [Helm Deployment](#helm-deployment)
+
+### Capture the remote KUBCONFIG configurations
+SPIRE server attests the remote agents by verifying the KUBECONFIG configuration.
+Therefore, for every remote cluster, other then the cluster hosting the Tornjak,
+we need KUBECONFIG for this cluster.
+
+Gather the KUBECONFIG for every remote cluster
+and output them into individual files
+using  `kubectl config view --flatten`:
+```
+export KUBECONFIG=....
+export CLUSTERNAME=....
+mkdir /tmp/kubeconfigs
+kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
+```
+
+For example, to capture 2 clusters
+`space-x01` and `space-x02`
+we will have the following:
+```
+/tmp/kubeconfigs/space-x01
+/tmp/kubeconfigs/space-x02
+```
+
+Then using these individual files, create a secret in Tornjak cluster.
+_Note_: don't use special characters, stick to alphanumerics.
+
+```console
+kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs
+```
+This has to be done before executing the Helm deployment.
+
+
 ## Helm Deployment
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
 * clustername - name of the cluster (required)
@@ -73,6 +114,27 @@ To get a complete list of values:
 helm inspect values charts/tornjak/
 ```
 
+### Multi-cluster Support
+For multi-cluster scenario, update
+[charts/tornjak/values.yaml](./charts/tornjak/values.yaml) file.
+Include `name`, `namespace` and `serviceAccount`
+for every remote cluster:
+
+```
+multiCluster:
+  remoteClusters:
+  - name: cluster1
+    namespace: spire
+    serviceAccount: spire-agent
+  - name: cluster2
+  - name: cluster3
+    namespace: spire
+    serviceAccount: spire-agent
+```
+Then follow standard installation as shown below.
+
+
+### Helm installation
 Sample execution:
 ```console
 helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
