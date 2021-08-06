@@ -12,12 +12,17 @@ openShift: false
 # SPIRE specific values
 # clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
 clustername: spire-example
+# region - arbitrary label to describe the region
+region: sample-region
 # trustdomain is arbitrary but needs to match between spire-config and k8s-workload-registrar config
+# for multi-cluster support, trustdomain must be identical for all clusters and
+# SPIRE server
 trustdomain: spiretest.com
 
 # SPIRE workload registrar values:
 spireAddress: spire-server
 spirePort: 443
-spireRegistrarImg: gcr.io/spiffe-io/k8s-workload-registrar
+#spireRegistrarImg: gcr.io/spiffe-io/k8s-workload-registrar
+spireRegistrarImg: tsidentity/k8s-workload-registrar
 spireAgentImg: gcr.io/spiffe-io/spire-agent
 spireVersion: 0.12.1
