@@ -143,7 +143,7 @@ multiCluster:
 Then follow standard installation as shown below.
 
 
-### Helm installation
+### Helm installation execution
 Sample execution:
 ```console
 helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
