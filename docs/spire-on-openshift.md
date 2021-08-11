@@ -51,6 +51,93 @@ git checkout spire-master
 ```
 
 ## Step 1. Installing Tornjak Server with SPIRE on OpenShift
+To install Tornjak Server on OpenShift
+we need some information about the cluster.
+
+### Gather Cluster Info
+When installing on
+[ROKS](https://cloud.redhat.com/products/openshift-ibm-cloud)
+(Red Hat® OpenShift®) on IBM Cloud™,
+you can get cluster information by executing the following script:
+
+```console
+utils/get-cluster-info.sh
+```
+then export the output:
+```
+export CLUSTER_NAME=
+export REGION=
+```
+
+### Create a Project (Kubernetes namespace)
+Typically Tornjak server is installed in `tornjak` namespace.
+If you like to change the default namespace,
+make sure to use the actual name during the next steps of the deployment.
+
+```console
+export PROJECT=tornjak
+oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
+```
+
+### Multi-cloud Support
+Single Tornjak/SPIRE server can support multiple remote clusters
+as outlined in the [multi-cluster](./spire-multi-cluster.md) document.
+In order to allow the SPIRE server to validate the remote clusters,
+it needs access to KUBECONFIG information for each cluster.
+
+Capture the individual cluster KUBECONFIG into the file:
+```
+export KUBECONFIG=....
+export CLUSTERNAME=....
+mkdir /tmp/kubeconfigs
+kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
+```
+
+For example, to capture 2 clusters
+`space-01` and `space-02`
+we will have the following:
+```
+/tmp/kubeconfigs/space-01
+/tmp/kubeconfigs/space-02
+```
+
+Then using these individual files,
+create one secret in `tornjak` project.
+_Note_: don't use special characters, stick to alphanumerics.
+
+```console
+kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs
+```
+
+Next for multi-cluster scenario, update
+[charts/tornjak/values.yaml](./charts/tornjak/values.yaml) file.
+Include `name`, `namespace` and `serviceAccount`
+for every remote cluster.
+If not provided, it defaults to:
+```
+namespace: spire
+serviceAccount: spire-agent
+```
+Here is a sample configuration:
+```
+multiCluster:
+  remoteClusters:
+  - name: space-01
+    namespace: spire
+    serviceAccount: spire-agent
+  - name: space-02
+  - name: space-03
+    namespace: spire
+    serviceAccount: spire-agent
+```
+Then follow standard installation as shown below.
+
+### Advanced, more secure deployment
+This demo deployment uses pre-created keys included with the helm chats.
+To create your own keys, please follow [keys documentation](./spire-helm.md#keys-for-tornjak-tlsmtls)
+
+### Run Tornjak installation script
+
 Execute the installation script to get the most up to date syntax:
 
 ```
@@ -121,11 +208,43 @@ Trust Domain: openshift.space-x.com
 
 Installation of the Tornjak and SPIRE server has completed. We will use the script output for the next steps.
 
-## Step 2. Installing SPIRE Agents on OpenShift
-Define the access to the SPIRE server as it was output in previous step:
+## Step 2. Installing SPIRE Agents on OpenShift (including the remote clusters)
+
+### Create a Project (Kubernetes namespace)
+Typically SPIRE agents are installed in `spire` namespace.
+If you like to change the default namespace,
+make sure to use the actual name during the next steps of the deployment.
+
+```console
+export PROJECT=spire
+oc new-project "$PROJECT" --description="My TSI Spire agent project on OpenShift" 2> /dev/null
+```
+
+### Setup information about SPIRE Server
+For every cluster hosting SPIRE agents,
+including the remote clusters,
+define the access to the SPIRE server as it was output in the previous step:
 ```console
 export SPIRE_SERVER=spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud
 ```
+
+Capture the `spire-bundle` ConfigMap
+in cluster where Tornjak and SPIRE Server are deployed.
+This script changes the namespace to `spire`:
+```console
+kubectl -n tornjak get configmap spire-bundle -oyaml | kubectl patch --type json --patch '[{"op": "replace", "path": "/metadata/namespace", "value":"spire"}]' -f - --dry-run=client -oyaml > spire-bundle.yaml
+```
+
+In every namespace where SPIRE agents will be deployed,
+including the remote clusters,
+deploy `spire-bundle` ConfigMap:
+
+```console
+oc -n spire apply -f spire-bundle.yaml
+```
+
+### Run SPIRE agent installation
+
 Execute the installation script to get the most up to date syntax:
 
 ```
@@ -139,6 +258,7 @@ Syntax: utils/install-open-shift-spire.sh -c <CLUSTER_NAME> -s <SPIRE_SERVER> -t
 Where:
   -c <CLUSTER_NAME> - name of the OpenShift cluster (required)
   -s <SPIRE_SERVER> - SPIRE server end-point (required)
+  -r <REGION>       - region, geo-location (required)
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
 ```
@@ -146,7 +266,7 @@ Where:
 Include the required values `CLUSTER_NAME`, `SPIRE_SERVER`, and `TRUST_DOMAIN`. Make sure they correspond to values from Step 1.
 
 ```
-utils/install-open-shift-spire.sh -c space-x.01 -s $SPIRE_SERVER -t openshift.space-x.com
+utils/install-open-shift-spire.sh -c space-x.01 -s $SPIRE_SERVER -r us-east -t openshift.space-x.com
 ```
 Sample output:
 ```

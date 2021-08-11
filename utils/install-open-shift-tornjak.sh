@@ -7,9 +7,9 @@ KEYSDIR="$TSI_ROOT/sample-keys"
 
 TRUSTDOMAIN="spiretest.com"
 PROJECT="tornjak"
-SPIREGROUP="spiregroup"
-SPIRESA="spire-server"
-SPIRESCC="spire-server"
+SPIRE_GROUP="spiregroup"
+SPIRE_SA="spire-server"
+SPIRE_SCC="spire-server"
 OIDC=false
 
 ## create help menu:
@@ -83,6 +83,12 @@ fi
 installSpireServer(){
 
   oc get projects | grep $PROJECT
+  if [ "$?" != "0" ]; then
+    echo "Project $PROJECT must be created first"
+    echo "oc new-project $PROJECT --description=\"My TSI Spire SERVER project on OpenShift\" 2> /dev/null"
+  fi
+
+  oc -n $PROJECT get statefulset spire-server
   if [ "$?" == "0" ]; then
     # check if spire-server project exists:
     echo "$PROJECT project already exists. "
@@ -92,29 +98,27 @@ installSpireServer(){
       echo "Re-installing $PROJECT project"
       # oc delete project $PROJECT
       cleanup
-      while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
-      oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
+      # while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
+      # oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
       oc project "$PROJECT" 2> /dev/null
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
-  else
-    oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-    oc project "$PROJECT" 2> /dev/null
+
   fi
 
 # create serviceAccount and setup permissions
-oc_cli create sa $SPIRESA
-oc_cli policy add-role-to-user cluster-admin "system:serviceaccount:$PROJECT:$SPIRESA"
+oc_cli create sa $SPIRE_SA
+oc_cli policy add-role-to-user cluster-admin "system:serviceaccount:$PROJECT:$SPIRE_SA"
 # if the group exists, just ignore the error
-oc adm groups new "$SPIREGROUP" "$SPIRESA" 2> /dev/null
+oc adm groups new "$SPIRE_GROUP" "$SPIRE_SA" 2> /dev/null
 
 oc_cli apply -f- <<EOF
 kind: SecurityContextConstraints
 apiVersion: v1
 metadata:
-  name: $SPIRESCC
+  name: $SPIRE_SCC
 allowHostDirVolumePlugin: true
 allowPrivilegedContainer: true
 allowHostPorts: true
@@ -129,7 +133,7 @@ supplementalGroups:
 groups:
 - system:authenticated
 EOF
-#oc_cli describe scc $SPIRESCC
+#oc_cli describe scc $SPIRE_SCC
 
 # get ingress information:
 ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
@@ -314,10 +318,15 @@ cleanup() {
   oc delete ClusterRole spire-server-role 2>/dev/null
   oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
 
-  oc delete scc "$SPIRESCC" 2>/dev/null
-  oc delete sa "$SPIRESA" 2>/dev/null
+  oc delete scc "$SPIRE_SCC" 2>/dev/null
+  oc delete sa "$SPIRE_SA" 2>/dev/null
+  oc delete route spire-server 2>/dev/null
+  oc delete route tornjak-http 2>/dev/null
+  oc delete route tornjak-mtls 2>/dev/null
+  oc delete route tornjak-tls 2>/dev/null
+  oc delete ingress spireingress 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
-  oc delete project "$PROJECT" 2>/dev/null
+  # oc delete project "$PROJECT" 2>/dev/null
 }
 
 checkPrereqs

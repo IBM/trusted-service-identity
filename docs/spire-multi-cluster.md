@@ -1,10 +1,11 @@
 # Deploying Tornjak in multi-cluster environment
-This document describes the steps required to setup Tornjak with SPIRE Server
-providing identities for multiple clusters.
+This document describes the steps required to extend the existing
+Tornjak/SPIRE Server to support multiple clusters.
 
 This assumes the Tornjak Server is already deployed as described in
 [SPIRE with Helm](./spire-helm.md) or [SPIRE on OpenShift](./spire-on-openshift.md)
-documents.
+documents. If this is a new install, please follow the steps there for setting
+a multi-cluster support.
 
 Tornjak Server and all the remote cluster must use the same trust domain. E.g:
 ```
@@ -12,19 +13,21 @@ trust_domain = "openshift.space-x.com"
 ```
 
 For this example we would use the following clusters:
-* `space-x01` - local cluster, with public Ingress access. Here we run Tornjak/SPIRE
+* `space-x01` - local cluster, with public Ingress access. Here we run the Tornjak/SPIRE
 Server under `tornjak` namespace, and local SPIRE agents.
 * `space-x02` - remote cluster (OpenShift)
 * `kube-01` - remote cluster (standard Kubernetes)
 
 ## Step 1. Gather all KUBECONFIGs from the remote servers.
 SPIRE server attests the remote agents by verifying the KUBECONFIG configuration.
-Therefore, for every remote cluster, other then the cluster hosting the Tornjak,
-we need KUBECONFIG for this cluster.
+Therefore, for every remote cluster,
+other then the cluster hosting the Tornjak,
+we need KUBECONFIG information.
 
-Gather the KUBECONFIG for every remote cluster
+Gather the portable KUBECONFIGs for every remote cluster
 and output them into individual files
-using  `kubectl config view --flatten`:
+using  `kubectl config view --flatten`.
+Make sure to use `--flatten` flag as it makes the output portable:
 
 ```
 export KUBECONFIG=....
@@ -39,7 +42,8 @@ In our example we will have the following:
 /tmp/kubeconfigs/kube-01
 ```
 
-Then using these individual files, create a secret in Tornjak cluster.
+Then using these individual files,
+create one secret in Tornjak hosting cluster, in `tornjak` namespace.
 _Note_: don't use special characters, stick to alphanumerics.
 
 ```console
@@ -72,11 +76,11 @@ NodeAttestor "k8s_psat" {
           },
           "space-x02" = {
               service_account_whitelist = ["spire:spire-agent"]
-              kube_config_file = "/tmp/kubeconfigs/space-x02"
+              kube_config_file = "/run/spire/kubeconfigs/space-x02"
           },
           "kube-01" = {
               service_account_whitelist = ["spire:spire-agent"]
-              kube_config_file = "/tmp/kubeconfigs/kube-01"
+              kube_config_file = "/run/spire/kubeconfigs/kube-01"
           },
       }
   }
@@ -101,13 +105,13 @@ This might look like this:
 name: spire-server
 ...
 volumeMounts:
-- mountPath: /tmp/kubeconfig
+- mountPath: /run/spire/kubeconfigs
   name: kubeconfigs
 ...
 volumes:
 - name: kubeconfigs
   secret:
-    defaultMode: 420
+    defaultMode: 0400
     secretName: kubeconfigs
 ```
 
@@ -118,19 +122,18 @@ kubectl -n tornjak delete po spire-server-0
 ```
 
 Verify if Tornjak/SPIRE server is running well, check the logs and make sure you
-can connect to Tornjak dashboard.
+can connect to the Tornjak dashboard.
 
 ## Step 4. Configure remote agents
-This work has to be done in every remote cluster.
-
-Gather from Tornjak server the `spire-bundle` that contains the certificates.
-
+Capture the `spire-bundle` ConfigMap
+in cluster where Tornjak and SPIRE Server are deployed.
+This script changes the namespace to `spire`:
 ```console
-kubectl -n tornjak get spire-bundle -oyaml > spire-bundle.yaml
+kubectl -n tornjak get configmap spire-bundle -oyaml | kubectl patch --type json --patch '[{"op": "replace", "path": "/metadata/namespace", "value":"spire"}]' -f - --dry-run=client -oyaml > spire-bundle.yaml
 ```
-Edit the file by changing the namespace from `tornjak` to `spire`
-and then update the `spire-bundle` on every remote cluster:
 
+Then create `spire-bundle` in every namespace hosting SPIRE agents,
+including all the remote clusters.
 ```console
 kubectl -n spire apply -f spire-bundle.yaml
 ```
@@ -144,6 +147,7 @@ Ingress.
 * make sure `trust_domain` is the same as Tornjak's
 * make sure the provided cluster corresponds to the values defined earlier
 
+Here is example from `space-x02` cluster:
 ```
 data:
   agent.conf: |
@@ -265,7 +269,7 @@ spec:
 
 ## Helpful Hints
 ### Delete mistakenly created `spiffeid`s
-In `crd` mode, registar creates `spiffeid` custom resources for every processes
+In `crd` mode, the registar creates `spiffeid` custom resources for every processes
 pod. To cleanup mistakenly created ones, you can use the following trick.
 
 Make sure the registrar is running correctly, able to communicate with SPRIRE,

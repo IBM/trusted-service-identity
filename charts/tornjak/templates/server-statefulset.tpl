@@ -47,7 +47,7 @@ spec:
               readOnly: false
 {{- if .Values.multiCluster.remoteClusters }}
             - name: kubeconfigs
-              mountPath: /tmp/kubeconfig
+              mountPath: /run/spire/kubeconfigs
 {{- end }}
           livenessProbe:
             exec:
@@ -130,7 +130,7 @@ spec:
 {{- if .Values.multiCluster.remoteClusters }}
         - name: kubeconfigs
           secret:
-            defaultMode: 0200
+            defaultMode: 0400
             secretName: kubeconfigs
 {{- end }}
 {{- if .Values.OIDC.enable }}

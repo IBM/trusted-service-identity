@@ -63,7 +63,7 @@ data:
     {{- range $k, $v := .Values.multiCluster.remoteClusters }}
                 "{{ $v.name }}" = {
                     service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
-                    kube_config_file = "/tmp/kubeconfigs/{{ $v.name }}"
+                    kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
                 },
     {{- end }}
 {{- end }}

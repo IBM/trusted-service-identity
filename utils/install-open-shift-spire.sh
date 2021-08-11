@@ -1,14 +1,13 @@
 #!/bin/bash
 
 # SPIRE Server info:
-SPIRESERVERPROJECT="tornjak"
+SPIRE_SERVER_PROJECT="tornjak"
 # SPIRE Agent info:
 TRUSTDOMAIN="spiretest.com"
 PROJECT="spire"
-SPIREGROUP="spiregroup"
-SPIREAGSA="spire-agent"
-SPIRESA="spire-server"
-SPIREAGSCC="spire-agent"
+SPIRE_GROUP="spiregroup"
+SPIRE_AG_SA="spire-agent"
+SPIREAG_SCC="spire-agent"
 
 ## create help menu:
 helpme()
@@ -16,11 +15,12 @@ helpme()
   cat <<HELPMEHELPME
 Install SPIRE agent and workload registrar for TSI
 
-Syntax: ${0} -c <CLUSTER_NAME> -s <SPIRE_SERVER> -t <TRUST_DOMAIN> -p <PROJECT_NAME>
+Syntax: ${0} -c <CLUSTER_NAME> -s <SPIRE_SERVER> -t <TRUST_DOMAIN> -p <PROJECT_NAME> -r <REGION>
 
 Where:
   -c <CLUSTER_NAME> - name of the OpenShift cluster (required)
   -s <SPIRE_SERVER> - SPIRE server end-point (required)
+  -r <REGION>       - region, geo-location (required)
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
 HELPMEHELPME
@@ -44,6 +44,11 @@ case $key in
     ;;
     -t|--trust)
     TRUSTDOMAIN="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -r|--region)
+    REGION="$2"
     shift # past argument
     shift # past value
     ;;
@@ -85,24 +90,27 @@ fi
 
 installSpireAgent(){
   oc get projects | grep "${PROJECT}"
+  if [ "$?" != "0" ]; then
+    echo "Project $PROJECT must be created first"
+    echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" 2> /dev/null"
+  fi
+
+  oc -n $PROJECT get scc $SPIREAG_SCC
   if [ "$?" == "0" ]; then
     # check if spire-agent project exists:
-    echo "$PROJECT project already exists. "
+    echo "SPIRE Agent environment in $PROJECT project already exists. "
     read -n 1 -r -p "Do you want to re-install it? [y/n]" REPLY
     echo # create a new line
     if [[ $REPLY =~ ^[Yy]$ || $REPLY == "" ]] ; then
       echo "Re-installing $PROJECT project"
       # oc delete project $PROJECT
       cleanup
-      while (oc get projects | grep -v spire-server | grep "$PROJECT"); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
-      oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
+      # while (oc get projects | grep -v spire-server | grep "$PROJECT"); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
+      # oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
       oc project "$PROJECT"
     else
       echo "Keeping the existing $PROJECT project as is"
     fi
-  else
-    oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
-    oc project "$PROJECT"
   fi
 
 # Need to copy the spire-bundle from the server namespace
@@ -110,20 +118,22 @@ oc -n "$PROJECT" get cm spire-bundle
 if [ "$?" == "0" ]; then
   echo "WARNING: using the existing configmap spire-bundle in $PROJECT. "
 else
-  oc_cli get configmap spire-bundle -n "$SPIRESERVERPROJECT" -o yaml | sed "s/namespace: $SPIRESERVERPROJECT/namespace: $PROJECT/" | oc apply -n "$PROJECT" -f -
+  echo "ConfigMap 'spire-bundle' must be created"
+  exit 1
+  # echo " oc_cli get configmap spire-bundle -n $SPIRE_SERVER_PROJECT -o yaml | sed \"s/namespace: $SPIRE_SERVER_PROJECT/namespace: $PROJECT/" | oc apply -n "$PROJECT" -f -
 fi
 
 # if the group exists, just ignore the error
-oc adm groups new "$SPIREGROUP" "$SPIRESA" 2> /dev/null
+oc adm groups new "$SPIRE_GROUP" 2> /dev/null
 
-oc create sa $SPIREAGSA 2> /dev/null
-oc adm groups add-users $SPIREGROUP $SPIREAGSA 2> /dev/null
+oc create sa $SPIRE_AG_SA 2> /dev/null
+oc adm groups add-users $SPIRE_GROUP $SPIRE_AG_SA 2> /dev/null
 
 oc_cli create -f- <<EOF
 kind: SecurityContextConstraints
 apiVersion: v1
 metadata:
-  name: $SPIREAGSCC
+  name: $SPIREAG_SCC
 allowHostIPC: true
 allowHostNetwork: true
 allowHostDirVolumePlugin: true
@@ -140,15 +150,16 @@ supplementalGroups:
 groups:
 - system:authenticated
 EOF
-# oc_cli describe scc $SPIREAGSCC
+# oc_cli describe scc $SPIREAG_SCC
 
-oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$SPIREAGSA"
+oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$SPIRE_AG_SA"
 
 # this works:
-oc_cli adm policy add-scc-to-user privileged -z $SPIREAGSA
+oc_cli adm policy add-scc-to-user privileged -z $SPIRE_AG_SA
 
 helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
  --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" \
+ --set "region=$REGION" \
  --set "openShift=true" spire charts/spire # --debug
 
 cat << EOF
@@ -156,7 +167,7 @@ cat << EOF
 Next, login to the SPIRE Server and register the Workload Registrar
 to gain admin access to the server.
 
-oc exec -it spire-server-0 -n $SPIRESERVERPROJECT -- sh
+oc exec -it spire-server-0 -n $SPIRE_SERVER_PROJECT -- sh
 
  A few, sample server commands:
 
@@ -257,9 +268,9 @@ cleanup() {
   helm uninstall spire -n $PROJECT 2>/dev/null
   oc delete ClusterRole spire-agent-cluster-role spire-k8s-registrar-cluster-role 2>/dev/null
   oc delete ClusterRoleBinding spire-agent-cluster-role-binding spire-k8s-registrar-cluster-role-binding 2>/dev/null
-  oc delete scc $SPIREAGSCC 2>/dev/null
-  oc delete sa $SPIREAGSA 2>/dev/null
-  oc delete project $PROJECT 2>/dev/null
+  oc delete scc $SPIREAG_SCC 2>/dev/null
+  oc delete sa $SPIRE_AG_SA 2>/dev/null
+  # oc delete project $PROJECT 2>/dev/null
 }
 
 checkPrereqs
