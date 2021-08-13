@@ -93,6 +93,7 @@ installSpireAgent(){
   if [ "$?" != "0" ]; then
     echo "Project $PROJECT must be created first"
     echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" 2> /dev/null"
+    exit 1
   fi
 
   oc -n $PROJECT get scc $SPIREAG_SCC
