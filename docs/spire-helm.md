@@ -1,5 +1,6 @@
 # Deploying Tornjak with Helm charts
-This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements in a Kubernetes cluster.
+This tutorial demonstrates the steps to deploy Tornjak and SPIRE elements
+in a Kubernetes cluster.
 
 There are two helm charts available:
 * **tornjak** - this helm chart deploys the Tornjak server and the SPIRE Server. Additionally, this chart contains a plugin for deploying OIDC component that is used for [OIDC Tutorial](./spire-oidc-tutorial.md)
@@ -21,7 +22,7 @@ Tutorial requirements:
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [helm3 client](https://helm.sh/docs/intro/install/)
 
-For our tutorial, we would use following parameters:
+For our tutorial, we would use the following parameters:
 * Platform: `minikube`
 * Cluster name: `minikube`
 * Trust domain: `openshift.space-x.com`
@@ -62,6 +63,49 @@ export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
 ```
 
+### Multi-cluster Support
+If you want to setup a SPIRE Server
+that supports multi-cluster deployment
+where SPIRE agents are distributed in several, remote clusters,
+all reporting to a single SPIRE Server,
+please follow the additional steps outlined here,
+otherwise skip to [Helm Deployment](#helm-deployment)
+
+### Capture the portable KUBCONFIG from remote clusters
+SPIRE server attests the remote agents by verifying the KUBECONFIG configuration.
+Therefore, for every remote cluster,
+other then the cluster hosting the Tornjak,
+we need KUBECONFIG information.
+
+Gather the portable KUBECONFIGs for every remote cluster
+and output them into individual files
+using  `kubectl config view --flatten`.
+Make sure to use `--flatten` flag as it makes the output portable:
+```
+export KUBECONFIG=....
+export CLUSTERNAME=....
+mkdir /tmp/kubeconfigs
+kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
+```
+
+For example, to support 2 remote clusters
+`cluster1` and `cluster2`
+we will have the following files:
+```
+/tmp/kubeconfigs/cluster1
+/tmp/kubeconfigs/cluster2
+```
+
+Then using these individual files,
+create one secret in `tornjak` project.
+_Note_: don't use special characters, stick to alphanumerics.
+
+```console
+kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs
+```
+This has to be done before executing the Helm deployment.
+
+
 ## Helm Deployment
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
 * clustername - name of the cluster (required)
@@ -73,6 +117,33 @@ To get a complete list of values:
 helm inspect values charts/tornjak/
 ```
 
+### Multi-cluster Support
+For multi-cluster scenario, update
+[charts/tornjak/values.yaml](./charts/tornjak/values.yaml) file.
+Include `name`, `namespace` and `serviceAccount`
+for every remote cluster:
+If not provided, it defaults to:
+```
+namespace: spire
+serviceAccount: spire-agent
+```
+Here is a sample configuration:
+
+```
+multiCluster:
+  remoteClusters:
+  - name: cluster1
+    namespace: spire
+    serviceAccount: spire-agent
+  - name: cluster2
+  - name: cluster3
+    namespace: spire
+    serviceAccount: spire-agent
+```
+Then follow standard installation as shown below.
+
+
+### Helm installation execution
 Sample execution:
 ```console
 helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
@@ -187,6 +258,10 @@ Next, we need to get the `spire-bundle` that contains all the keys and certifica
 ```console
 kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | kubectl apply -n "$AGENT_NS" -f -
 ```
+In our example this would be:
+```console
+kubectl get configmap spire-bundle -n tornjak -o yaml | sed "s/namespace: tornjak/namespace: spire/" | kubectl apply -n spire -f -
+```
 
 Next step, we need to set the public access to the SPIRE Server, so SPIRE agents can access it. This is typically the Ingress value defined during the SPIRE Server deployment above:
 
@@ -216,12 +291,14 @@ export SPIRE_PORT=8081
 ```
 Assuming the SPIRE server can now be access from `spire` namespace, either via Ingress or Service on port 8081, we can deploy the helm charts.
 
-We continue using the same cluster name “minikube” and trust domain “openshift.space-x.com”.
+We continue using the same cluster name “minikube”,
+trust domain “openshift.space-x.com”
+and region "us-east".
 
 `--debug` flag shows additional information about the helm deployment:
 
 ```console
-helm install --set "spireAddress=$SPIRE_SERVER" --set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" spire charts/spire --debug
+helm install --set "spireAddress=$SPIRE_SERVER" --set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" --set "clustername=$CLUSTERNAME" --set "region=us-east" --set "trustdomain=openshift.space-x.com" spire charts/spire --debug
 ```
 
 When successfully executed, the helm chart shows NOTES output.  Something like this:

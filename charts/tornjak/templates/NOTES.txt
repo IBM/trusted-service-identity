@@ -1,13 +1,13 @@
 The installation of the Tornjak with SPIRE Server for
 Universal Trusted Workload Identity Service has completed.
 
+      Chart Name: {{ .Chart.Name }}
+      Your release is named {{ .Release.Name }}
+
       Cluster name: {{ .Values.clustername }}
       Trust Domain: {{ .Values.trustdomain }}
       Tornjak Image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
       SPIRE Server Socket: {{ .Values.spireServerSocket }}
-
-      Chart Name: {{ .Chart.Name }}
-      Your release is named {{ .Release.Name }}
 {{- if .Values.openShift }}
       OpenShift mode: true
 {{- end }}
@@ -16,6 +16,24 @@ Universal Trusted Workload Identity Service has completed.
       OIDC service name:   {{ .Values.OIDC.serviceName }}
       MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
 {{- end }}
+
+{{- if .Values.multiCluster.remoteClusters }}
+      Multi-cluster support enabled.
+      Make sure `kubeconfig` secret is created to support a following:
+
+      clusters = {
+          "{{ .Values.clustername }}" = {
+              # use_token_review_api_validation = true
+              service_account_whitelist = ["spire:spire-agent"]
+          },
+      {{- range $k, $v := .Values.multiCluster.remoteClusters }}
+          "{{ $v.name }}" = {
+              service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
+              kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
+          },
+      {{- end }}
+{{- end }}
+   }
 
 To learn more about the release, try:
 
