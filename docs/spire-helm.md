@@ -34,13 +34,13 @@ It is worth mentioning that once the trust domain is set, the SPIRE server persi
 
 ## Step 0. Get code
 Before starting the tutorial, get the most recent code to your local system.
-All the SPIRE related work is kept under `spire-master` branch that is separate
-from the default `master` branch.
+All the SPIRE related work
+has been integrated into `master` branch.
+For the pre-SPIRE code, visit `main-no-spire` branch.
 
 ```console
 git clone git@github.com:IBM/trusted-service-identity.git
 cd trusted-service-identity
-git checkout spire-master
 ```
 
 ## Step 1. Deploy Tornjak with a SPIRE Server
