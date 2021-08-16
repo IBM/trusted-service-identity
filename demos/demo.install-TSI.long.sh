@@ -3,7 +3,7 @@
 # For JSS_TYPE: `vtpm2-server` or `jss-server`
 JSS_TYPE=vtpm2-server
 
-# this script requires https://github.com/duglin/tools/tree/master/demoscript
+# this script requires https://github.com/duglin/tools/tree/main/demoscript
 declare DEMOFILE=~/workspace/tools/demoscript/demoscript
 if [ ! -f "$DEMOFILE" ]; then
     echo "$DEMOFILE does not exist."

@@ -35,7 +35,7 @@ It is worth mentioning that once the trust domain is set, the SPIRE server persi
 ## Step 0. Get code
 Before starting the tutorial, get the most recent code to your local system.
 All the SPIRE related work
-has been integrated into `master` branch.
+has been integrated into `main` branch.
 For the pre-SPIRE code, visit `main-no-spire` branch.
 
 ```console
