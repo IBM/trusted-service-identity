@@ -295,7 +295,7 @@ cat << EOF
 Wait for all Running or Completed
 *** One time initial bootstrapping setup required ***
 For complete setup description please visit:
-  https://github.com/IBM/trusted-service-identity/blob/master/examples/vault/README.md#register-jwt-signing-service-jss-with-vault
+  https://github.com/IBM/trusted-service-identity/blob/main/examples/vault/README.md#register-jwt-signing-service-jss-with-vault
 
 This process assumes Vault is already setup at another location as described:
   https://github.com/IBM/trusted-service-identity#setup-vault"
@@ -307,7 +307,7 @@ echo '     curl $VAULT_ADDR'
 cat << EOF
    expected result: <a href=\"/ui/\">Temporary Redirect</a>
 2. obtain the ROOT_TOKEN from the cluster with a running Vault instance and export it:
-   (see https://github.com/IBM/trusted-service-identity/blob/master/examples/vault/README.md#vault-setup-as-vault-admin)
+   (see https://github.com/IBM/trusted-service-identity/blob/main/examples/vault/README.md#vault-setup-as-vault-admin)
 EOF
 echo '     export ROOT_TOKEN=$(kubectl -n tsi-vault logs $(kubectl -n tsi-vault get po | grep tsi-vault-|'" awk '{" 'print $1}' "') | grep Root | cut -d' ' -f3);" ' echo "export ROOT_TOKEN=$ROOT_TOKEN"'
 cat << EOF
