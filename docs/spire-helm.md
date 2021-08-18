@@ -29,8 +29,13 @@ For our tutorial, we would use the following parameters:
 * Tornjak namespace: `tornjak`
 * Agents namespace: `spire`
 
-## Important information
-It is worth mentioning that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via Persistent Storage) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date` directory, or delete the persistent storage volume, prior to installing the Tornjak server.
+<br>
+
+>## Important information
+> **It is worth mentioning** that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via Persistent Storage) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date` directory, or delete the persistent storage volume, prior to installing the Tornjak server.
+
+---
+<br>
 
 ## Step 0. Get code
 Before starting the tutorial, get the most recent code to your local system.
@@ -43,7 +48,12 @@ git clone git@github.com:IBM/trusted-service-identity.git
 cd trusted-service-identity
 ```
 
+---
+<br>
+
 ## Step 1. Deploy Tornjak with a SPIRE Server
+<br>
+
 The first part of the tutorial deploys Tornjak bundled with SPIRE Server using helm charts.
 
 We can deploy the helm charts on any Kubernetes platform. [Here are instructions](./spire-on-openshift.md) for installing on OpenShift.
@@ -53,8 +63,9 @@ For this tutorial, we can deploy it all on [minikube](https://minikube.sigs.k8s.
 ```console
 minikube start --kubernetes-version=v1.20.2
 ```
+<br>
 
-### Create a namespace
+## Create a namespace
 Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” as namespace and "minikube" as the cluster name.
 
 ```console
@@ -62,6 +73,7 @@ export CLUSTERNAME=minikube
 export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
 ```
+<br>
 
 ### Multi-cluster Support
 If you want to setup a SPIRE Server
@@ -70,6 +82,8 @@ where SPIRE agents are distributed in several, remote clusters,
 all reporting to a single SPIRE Server,
 please follow the additional steps outlined here,
 otherwise skip to [Helm Deployment](#helm-deployment)
+
+<br>
 
 ### Capture the portable KUBCONFIG from remote clusters
 SPIRE server attests the remote agents by verifying the KUBECONFIG configuration.
@@ -105,6 +119,7 @@ kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfig
 ```
 This has to be done before executing the Helm deployment.
 
+<br>
 
 ## Helm Deployment
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
@@ -116,6 +131,7 @@ To get a complete list of values:
 ```console
 helm inspect values charts/tornjak/
 ```
+<br>
 
 ### Multi-cluster Support
 For multi-cluster scenario, update
@@ -142,6 +158,7 @@ multiCluster:
 ```
 Then follow standard installation as shown below.
 
+<br>
 
 ### Helm installation execution
 Sample execution:
@@ -157,7 +174,21 @@ kubectl -n $SPIRESERVER_NS get pods
 NAME             READY   STATUS    RESTARTS   AGE
 spire-server-0   1/1     Running   0          2m
 ```
-Looks good!
+*Looks good!*
+
+> If it does not *look good* use the following command to see more informations: 
+> ```console 
+> kubectl -n $SPIRESERVER_NS describe pods
+> ```
+> Take a look into the following table:
+> ```
+> Events:
+>  Type     Reason     Age                  From               Message
+>  ----     ------     ----                 ----               -------
+> ```
+> <br>
+
+<br>
 
 ## Setup Ingress
 If you are running these steps on local **minikube** you can skip this section and go directly to [Accessing Tornjak Server](#accessing-tornjak-server)
@@ -193,8 +224,16 @@ On **minikube**, we can retrieve the access points using the service names:
 minikube service spire-server -n $SPIRESERVER_NS --url
 ```
 ```
+🏃  Starting tunnel for service spire-server.
+|-----------|--------------|-------------|-----------------------------|
+| NAMESPACE |     NAME     | TARGET PORT |            URL              |
+|-----------|--------------|-------------|-----------------------------|
+| tornjak   | spire-server |             | http://192.168.99.112:30064 |
+|-----------|--------------|-------------|-----------------------------|
 http://192.168.99.112:30064
+❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
 ```
+
 As as result, to access SPIRE server we would use the following:
 
 ```
@@ -207,11 +246,17 @@ On other platforms setup the Ingress values accordingly:
 export SPIRE_SERVER=<Ingress value to spire-server service>
 export SPIRE_PORT=<Port value for spire-server service>
 ```
+<br>
 
 ## Accessing Tornjak Server
 In this tutorial we just need the simple HTTP access to the Tornjak Server. For more advanced protocols, please refer to the section [Advanced Features](./spire-helm.md#advanced-features).
 
 Get the HTTP Ingress access to Tornjak. On **minikube**, as seen above, we can retrieve the access points using the service names:
+
+> If new console has been opened use:
+> ```console
+> export SPIRESERVER_NS=tornjak
+> ``` 
 
 ```console
 minikube service tornjak-http -n $SPIRESERVER_NS --url
@@ -242,12 +287,22 @@ Forwarding from [::1]:10000 -> 10000
 
 Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:10000` in your local browser.
 
-## Step 2. Deploy a SPIRE Agents
+---
+<br>
+
+## Step 2. Deploy a SPIRE Agents 
+<br>
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node. It also deploys the optional component Workload Registrar that dynamically creates SPIRE entries. More about the workload registrar [here](./spire-workload-registrar.md).
 
 Only ONE instance of SPIRE Agent deployment should be run at once as it runs a daemonset on all the node. Running more than one may result in conflicts.
 
 First, create a namespace where we want to deploy our SPIRE agents. For the purpose of this tutorial, we will use “spire”.
+
+> If new console has been opened use:
+> ```console
+> export SPIRESERVER_NS=tornjak
+> ``` 
+
 ```console
 export AGENT_NS=spire
 kubectl create namespace $AGENT_NS
@@ -384,10 +439,10 @@ For a production usage, we want to better protect the access to various componen
 Tornjak access is available via HTTP, TLS and mTLS protocols. In a production
 environment you should use TLS/mTLS that are based on certificates created from
 the organization rootCA. If you just like to  test these protocols, and don't have
-your own rootCA, you can use the sample from here: https://github.com/lumjjb/tornjak/tree/main/sample-keys/ca_process/CA
+your own rootCA, you can use the sample from [here](https://github.com/IBM/trusted-service-identity/tree/main/sample-keys/CA)
 or create your own:
 
-```
+```console
 ROOTCA="sample-keys/CA/rootCA"
 # Create CA certs:
 openssl genrsa -out $ROOTCA.key 4096
@@ -408,7 +463,7 @@ utils/createKeys.sh sample-keys/ $CLUSTERNAME $INGRESS-DOMAIN-NAME
 
 Create a secret that is using the generated key and certificates:
 
-```
+```console
 kubectl -n tornjak create secret generic tornjak-certs \
 --from-file=key.pem="sample-keys/$CLUSTERNAME.key" \
 --from-file=cert.pem="sample-keys/$CLUSTERNAME.crt" \
@@ -418,7 +473,7 @@ kubectl -n tornjak create secret generic tornjak-certs \
 
 Then just simply restart the spire server by killing the **spire-server-0** pod
 
-```
+```console
 kubectl -n tornjak get pods
 kubectl -n tornjak delete po spire-server-0
 ```
