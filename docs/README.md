@@ -12,14 +12,14 @@ There are multiple ways to deploy Tornjak on Kubernetes.
 The simplest scenario is when Tornjak and SPIRE server
 are deployed in the same cluster as the workloads and SPIRE agents.
 
-Single cluster on local `minikube` or `kind`
+### Single cluster on local `minikube` or `kind`
 ![single cluster on minikube or kind](imgs/single_cluster_local.jpg)
 
-Single cluster in the Cloud with OpenShift
+### Single cluster in the Cloud with OpenShift
 ![single cluster on OpenShift](imgs/single_cluster_openshift.jpg)
 
-Multi-Cluster deployment
-![multi-cluster](imgs/multi-cluster.jpg)
+### Multi-Cluster deployment
+![multi-cluster](imgs/multi_cluster.jpg)
 
 These demos deploy Tornjak Server and SPIRE agents in various scenarios:
 1. deploy in a single cluster locally [via helm charts](./spire-helm.md)
