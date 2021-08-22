@@ -32,9 +32,22 @@ context {
 To change this format, modify `identity-template` value.
 Make sure the referenced values match `context` map.
 
+The template can reference any value
+that is included in the context map
+and Pod arguments.
+Here is the list of currently available,
+self-explanatory Pod arguments:
+* Pod.Name
+* Pod.UID
+* Pod.Namespace
+* Pod.ServiceAccount
+* Pod.Hostname
+* Pod.NodeName
+
+
 To assign identity to all pods in the cluster,
 remove the value for `identity_template_label`.
-Otherwise only pods with label:
+Otherwise, only the pods with a given label:
 
 ```yaml
 identity_template: "true"
@@ -126,7 +139,6 @@ or delete them, if needed, using `Entry ID` value:
 -registrationUDSPath /run/spire/sockets/registration.sock
 ```
 
-
 ## Create sample deployment
 To see this environment in action, let’s deploy a sample workload with a simple SPIRE client. This example starts a pod that contains SPIRE agent binaries. We can use them to get SPIFFE identity.
 Before deploying the client, let’s take a look at the deployment file:
@@ -173,3 +185,26 @@ bin/spire-agent api fetch jwt -audience client-test  -socketPath /run/spire/sock
 
 Since the container successfully obtained its identity, what can we do with it?
 See our [“OIDC Tutorial with Vault and AWS S3“](./spire-oidc-tutorial.md) to learn more.
+
+
+## Helpful Hints
+### Delete mistakenly created `spiffeid`s
+In `crd` mode, the registrar creates `spiffeid`
+custom resources for every processes pod.
+To cleanup mistakenly created ones, you can use the following trick.
+
+Make sure the registrar is running correctly,
+able to communicate with SPRIRE Server,
+and it is configured to use a valid `identity_template_label` preventing new `spiffeid`s to be created for all the pods.
+
+```
+identity_template_label="identity_template"
+```
+
+List spiffeids and iterate through their namespaces:
+
+```console
+kubectl get spiffeid --all-namespaces
+export NS=
+kubectl -n $NS delete spiffeid $(kubectl -n $NS get spiffeid | awk '{print $1}' )
+```

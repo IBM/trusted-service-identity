@@ -28,7 +28,7 @@ OIDC:
   #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'
   #  MY_DISCOVERY_DOMAIN: MY_DISCOVERY_DOMAIN
 
-# multiCluster - enables support for a single SPIRE server managing
+# k8s_psat - enables support for a single SPIRE server managing
 # agents deployed in multiple, different clusters.
 # Prior to this deployment, create a secret that contains KUBECONFIG information
 # for every remoteCluster.
@@ -39,7 +39,7 @@ OIDC:
 #
 #  default namespace value = "spire"
 #  default serviceAccount value = spire-agent
-multiCluster:
+k8s_psat:
   remoteClusters:
   # - name: cluster1
   #   namespace: spire
@@ -48,3 +48,11 @@ multiCluster:
   # - name: cluster3
   #   namespace: spire
   #   serviceAccount: spire-agent
+
+# awd_iid - enables node attestion in AWS EKS.
+# provide "access_key_id" and "secret_access_key"
+# see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md
+# aws_iid:
+#   access_key_id: "ACCESS_KEY_ID"
+#   secret_access_key: "SECRET_ACCESS_KEY"
+#   skip_block_device: true

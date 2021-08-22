@@ -120,7 +120,7 @@ serviceAccount: spire-agent
 ```
 Here is a sample configuration:
 ```
-multiCluster:
+k8s_psat:
   remoteClusters:
   - name: space-01
     namespace: spire
@@ -208,7 +208,8 @@ Trust Domain: openshift.space-x.com
 
 Installation of the Tornjak and SPIRE server has completed. We will use the script output for the next steps.
 
-## Step 2. Installing SPIRE Agents on OpenShift (including the remote clusters)
+## Step 2. Installing SPIRE Agents on OpenShift
+These steps include the remote cluster installation
 
 ### Create a Project (Kubernetes namespace)
 Typically SPIRE agents are installed in `spire` namespace.

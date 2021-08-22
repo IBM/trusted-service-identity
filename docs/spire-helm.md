@@ -219,7 +219,10 @@ export AGENT_NS=spire
 kubectl create namespace $AGENT_NS
 ```
 
-Next, we need to get the `spire-bundle` that contains all the keys and certificates, from the SPIRE server and copy it to this new namespace. Assuming both are deployed in the same cluster, just in different namespaces, the format is following:
+Next, we need to get the `spire-bundle` that contains all the keys and certificates, from the SPIRE server and copy it to this new namespace.
+
+### Single Cluster
+Assuming both are deployed in the same cluster, just in different namespaces, the format is following:
 
 ```console
 kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | kubectl apply -n "$AGENT_NS" -f -
@@ -229,6 +232,21 @@ In our example this would be:
 kubectl get configmap spire-bundle -n tornjak -o yaml | sed "s/namespace: tornjak/namespace: spire/" | kubectl apply -n spire -f -
 ```
 
+### Separate or Multi Cluster
+If the SPIRE server and the SPIRE agents are deployed in separate,
+or remote clusters, follow the steps here.
+
+Capture the current `spire-bundle` ConfigMap
+in cluster where Tornjak and SPIRE Server are deployed.
+This script changes the namespace to `spire`:
+```console
+kubectl -n tornjak get configmap spire-bundle -oyaml | kubectl patch --type json --patch '[{"op": "replace", "path": "/metadata/namespace", "value":"spire"}]' -f - --dry-run=client -oyaml > spire-bundle.yaml
+```
+
+In every cluster hosting SPIRE agents, including remote cluster,  create `spire-bundle`:
+```console
+kubectl -n spire apply -f spire-bundle.yaml
+```
 ---
 In the next step, we need to setup a public access to the SPIRE Server,
 so SPIRE agents can access it.

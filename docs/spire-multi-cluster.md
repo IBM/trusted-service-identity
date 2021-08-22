@@ -1,93 +1,180 @@
 # Deploying Tornjak in multi-cluster environment
-This document describes the steps required to extend the existing
-Tornjak/SPIRE Server to support multiple clusters.
+This document describes the steps to enable support for multiple clusters.
+The workloads and SPIRE agents are deployed in multiple clusters,
+all managed by a single Tornjak/SPIRE Server.
 
-This assumes the Tornjak Server is already deployed as described in
-[SPIRE with Helm](./spire-helm.md) or [SPIRE on OpenShift](./spire-on-openshift.md)
-documents. If this is a new install, please follow the steps there for setting
-a multi-cluster support.
+![multi-cluster](imgs/multi_cluster.jpg)
 
-Tornjak Server and all the remote cluster must use the same trust domain. E.g:
+This document describes steps for:
+* [deploying multi-cluster environments](#deploying-multi-cluster-environment)
+* [adding multi-cluster support to an existing deployment](#adding-multi-cluster-support-to-an-existing-deployment)
+
+## Deploying Tornjak server in multi-cluster environment
+Tornjak Server and all the remote clusters must use the same trust domain. E.g:
 ```
 trust_domain = "openshift.space-x.com"
 ```
+<!-- For this example we would use the following clusters:
+* `openshift-x01` - [OpenShift cluster in IBM Cloud](https://www.ibm.com/cloud/openshift),
+with public Ingress access.
+Here we run the Tornjak/SPIRE Server in `tornjak` namespace,
+and SPIRE agents in `spire` namespace.
+* `openshift-x02` - [OpenShift cluster in IBM Cloud](https://www.ibm.com/cloud/openshift)
+to host workloads and SPIRE agents in `spire` namespace.
+* `kubeibm-01`    - [standard Kubernetes in IBM Cloud](https://www.ibm.com/cloud/kubernetes-service)
+to host workloads and SPIRE agents in `spire` namespace.
+* `aws-eks-01`     - [AWS EKS](https://aws.amazon.com/eks/)
+to host workloads and SPIRE agents in `spire` namespace. -->
 
-For this example we would use the following clusters:
-* `space-x01` - local cluster, with public Ingress access. Here we run the Tornjak/SPIRE
-Server under `tornjak` namespace, and local SPIRE agents.
-* `space-x02` - remote cluster (OpenShift)
-* `kube-01` - remote cluster (standard Kubernetes)
 
-## Step 1. Gather all KUBECONFIGs from the remote servers.
-SPIRE server attests the remote agents by verifying the KUBECONFIG configuration.
+### Attesting the remote clusters
+In order to be trusted by the SPIRE Server,
+all remote agents must be attested.
+SPIRE offers node attestors for some of the Cloud providers,
+like Amazon EKS, Microsoft Azure and Google GCP.
+For others we can use Kubernetes attestor,
+which is using [portable "KUBECONFIG" files](#capture-the-portable-kubeconfig-files).
+
+Configurations below shows various scenarios that depend on
+the deployment type of the remote servers.
+Multiple attestors can be used concurrently,
+depending on the needs.
+
+---
+### Enable AWS node attestor
+To use AWS node_attestor, we need to provide the following values in
+[Tornjak helm chart configuration file](../charts/tornjak/values.yaml):
+```yaml
+aws_iid:
+  access_key_id: "ACCESS_KEY_ID"
+  secret_access_key: "SECRET_ACCESS_KEY"
+  skip_block_device: true
+```
+Procedures for obtaining these values are [here](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html)
+
+For more information about this plugin configuration see the
+[attestor documentation](https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md)
+
+---
+### Enable Azure node attestor
+**TBD**
+
+For more information about this plugin configuration see the
+[attestor documentation](https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_azure_msi.md)
+
+---
+### Enable GCP node attestor
+**TBD**
+
+For more information about this plugin configuration see the
+[attestor documentation](https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_gcp_iit.md)
+
+---
+### Enable Kubernetes attestor
+When none of the cloud specific attestors is available,
+we can use Kubernetes attestor (`k8s_psat`).
+SPIRE server attests the remote Kubernetes nodes by verifying the KUBECONFIG configuration.
 Therefore, for every remote cluster,
 other then the cluster hosting the Tornjak,
 we need KUBECONFIG information.
 
+#### Step 1a. Capture the portable KUBCONFIG files
 Gather the portable KUBECONFIGs for every remote cluster
 and output them into individual files
 using  `kubectl config view --flatten`.
-Make sure to use `--flatten` flag as it makes the output portable:
-
-```
+Make sure to use `--flatten` flag as it makes the output portable
+(includes all the required certificates):
+```console
 export KUBECONFIG=....
 export CLUSTERNAME=....
 mkdir /tmp/kubeconfigs
 kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
 ```
 
-In our example we will have the following:
+For example, to support 2 remote clusters
+`cluster1` and `cluster2`
+we will have the following files:
 ```
-/tmp/kubeconfigs/space-x02
-/tmp/kubeconfigs/kube-01
+/tmp/kubeconfigs/cluster1
+/tmp/kubeconfigs/cluster2
 ```
 
 Then using these individual files,
-create one secret in Tornjak hosting cluster, in `tornjak` namespace.
+create one secret in `tornjak` project.
 _Note_: don't use special characters, stick to alphanumerics.
 
 ```console
 kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs
 ```
+This has to be done before executing the Helm deployment.
 
-## Step 2. Update SPIRE Server configuration.
-Update the SPIRE server configuration, by extending the NodeAttestor "k8s_psat"
-arguments.
+#### Step 1b. Update the Tornjak helm charts
+Once the secret is created, we need to update the helm charts
+to support the Kuberenetes attestor (`k8s_psat`).
 
-For all remote servers we need `kube_config_file` that contains its cluster KUBECONFIG.
-We don't need this for the local cluster.
+Update the content of the
+[charts/tornjak/values.yaml](./charts/tornjak/values.yaml) file.
+Include `name` for every remote cluster that is using Kubernetes attestation.
+If `namespace` and `serviceAccount` are not provided,
+it defaults to:
+```
+namespace: spire
+serviceAccount: spire-agent
+```
+Here is a sample configuration:
 
-We assume all the SPIRE agent are deployed in `spire` namespace
-under `spire-agent` service-account,
-otherwise change the configuration accordingly:
+```
+k8s_psat:
+  remoteClusters:
+  - name: cluster1
+    namespace: spire
+    serviceAccount: spire-agent
+  - name: cluster2
+  - name: cluster3
+    namespace: spire
+    serviceAccount: spire-agent
+```
+---
+### Install Tornjak Server with the helm charts
+Then follow the standard installation as shown in
+[helm](./spire-helm.md#step-1-deploy-tornjak-with-a-spire-server)
+or [OpenShift](./spire-on-openshift.md#step-1-installing-tornjak-server-with-spire-on-openshift)
+deployments.
 
-Update the spire-server ConfigMap:
+### Install SPIRE Agents with the helm charts
+**Reminder:**  all the remote clusters must use the same trust domain
+as the SPIRE Server.
 
+Follow the standard procedure for deploying SPIRE Agents,
+as described in
+[helm charts](./spire-helm.md#step-2-deploy-a-spire-agents)
+of [OpenShift](./spire-on-openshift.md#step-2-installing-spire-agents-on-openshift)
+Agents deployment.
+
+---
+
+
+
+
+## Adding multi-cluster support to an existing deployment
+This part describes the steps required to extend the existing
+Tornjak/SPIRE Server to support multiple clusters.
+
+It assumes the Tornjak Server is already deployed as described in
+[SPIRE with Helm](./spire-helm.md)
+or [SPIRE on OpenShift](./spire-on-openshift.md)
+documents.
+
+### Update SPIRE Server configuration.
+* Review the steps outline above for using individual attestors,
+whether cloud specific or Kubernetes one `k8s_psat`.
+* Create the `kubeconfigs` secret if needed.
+* Update the SPIRE server configuration accordingly:
 ```console
 kubectl -n tornjak edit configmap spire-server
 ```
-
-```yaml
-NodeAttestor "k8s_psat" {
-  plugin_data {
-      clusters = {
-          "space-x01" = {
-              service_account_whitelist = ["spire:spire-agent"]
-          },
-          "space-x02" = {
-              service_account_whitelist = ["spire:spire-agent"]
-              kube_config_file = "/run/spire/kubeconfigs/space-x02"
-          },
-          "kube-01" = {
-              service_account_whitelist = ["spire:spire-agent"]
-              kube_config_file = "/run/spire/kubeconfigs/kube-01"
-          },
-      }
-  }
-}
-```
-
-## Step 3. Modify SPIRE Server StatefulSet deployment
+* If using the secret for `k8s_psat` attestor,
+modify the SPIRE Server StatefulSet deployment
 Here we want to make the KUBECONFIGs available to the SPIRE server.
 We will mount the secret to the SPIRE server instance.
 Edit the spire-server StatefulSet
@@ -124,188 +211,42 @@ kubectl -n tornjak delete po spire-server-0
 Verify if Tornjak/SPIRE server is running well, check the logs and make sure you
 can connect to the Tornjak dashboard.
 
-## Step 4. Configure remote agents
-Capture the `spire-bundle` ConfigMap
-in cluster where Tornjak and SPIRE Server are deployed.
-This script changes the namespace to `spire`:
-```console
-kubectl -n tornjak get configmap spire-bundle -oyaml | kubectl patch --type json --patch '[{"op": "replace", "path": "/metadata/namespace", "value":"spire"}]' -f - --dry-run=client -oyaml > spire-bundle.yaml
-```
+## Configure remote agents
+Deploy the `spire-bundle` ConfigMap to all the agent clusters,
+as described in [helm document](./spire-helm.md#separate-or-multi-cluster)
 
-Then create `spire-bundle` in every namespace hosting SPIRE agents,
-including all the remote clusters.
-```console
-kubectl -n spire apply -f spire-bundle.yaml
-```
-
-Update the SPIRE Agents configuration:
+### AWS Clusters
+For all the remote clusters hosted in AWS,
+you have to update the SPIRE Agent configuration
 ```console
 kubectl -n spire edit configmap spire-agent
 ```
-* make sure all the clusters point to the same Tornjak server via public
-Ingress.
-* make sure `trust_domain` is the same as Tornjak's
-* make sure the provided cluster corresponds to the values defined earlier
 
-Here is example from `space-x02` cluster:
+Add the `NodeAttestor "aws_iid"` to the list of plugins:
+
 ```
-data:
-  agent.conf: |
-    agent {
-      data_dir = "/run/spire"
-      log_level = "DEBUG"
-      server_address = "spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
-      server_port = "443"
-      socket_path = "/run/spire/sockets/agent.sock"
-      trust_bundle_path = "/run/spire/bundle/bundle.crt"
-      trust_domain = "openshift.space-x.com"
+plugins {
+  NodeAttestor "k8s_psat" {
+    plugin_data {
+      cluster = "cluster-name"
     }
-    plugins {
-      NodeAttestor "k8s_psat" {
-        plugin_data {
-          cluster = "space-x02"
-        }
-      }
+  }
+  NodeAttestor "aws_iid" {
+      plugin_data {}
+  }
+}
 ```
 Restart the agents:
-```consle
+```console
 kubectl -n spire get pods
 kubectl -n spire delete pod <pod-name>
 ```
-## Step 5. Configure all workload registrars
-Here we need to define format of the SVIDs created by the registrars.
 
-The easiest is to create a individual configuration files for every cluster.
-This configuration creates the following format:
+**Comment:** If you get the following error:
 ```
- "region/{{.Context.Region}}/cluster_name/{{.Context.ClusterName}}/ns/{{.Pod.Namespace}}/sa/{{.Pod.ServiceAccount}}/pod_name/{{.Pod.Name}}"
- ```
-And this references the context provided in the configuration file as well.
-The template can reference any value that is included in context map.
-Here is the list of available, self-explanatory Pod arguments:
-* Pod.Name
-* Pod.UID
-* Pod.Namespace
-* Pod.ServiceAccount
-* Pod.Hostname
-* Pod.NodeName
-
-Here is an example for `space-x02` cluster. Similar configuration applies to
-`space-x01` and `kube-01`
-
+time="2021-08-19T16:48:43Z" level=error msg="Agent crashed" error="failed to get SVID: error getting attestation response from SPIRE server: rpc error: code = Internal desc = failed to attest: aws-iid: IID has already been used to attest an agent"
 ```
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: k8s-workload-registrar
-  namespace: spire
-data:
-  registrar.conf: |
-    log_level = "debug"
-    mode = "crd"
-    trust_domain = "openshift.space-x.com"
-    # enable when direct socket access to SPIRE Server available:
-    # server_socket_path = "/run/spire/sockets/registration.sock"
-    agent_socket_path = "/run/spire/sockets/agent.sock"
-    server_address = "spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud:443"
-    cluster = "space-x02"
-    # enable for label based registration:
-    # pod_label = ""
-    # enable for annotation based registration:
-    # pod_annotation = ""
-    identity_template = "region/{{.Context.Region}}/cluster_name/{{.Context.ClusterName}}/ns/{{.Pod.Namespace}}/sa/{{.Pod.ServiceAccount}}/pod_name/{{.Pod.Name}}"
-    identity_template_label = "identity_template"
-    context {
-      Region = "us-east"
-      ClusterName = "space-x02"
-    }
-```
+Delete the agent object under "Agents"-->"Agent List" using Tornjak UI.
+This should reset the record and allow agent to re-register.
 
-Please note that `identity_template_label = "identity_template"`, we will use this
-during the workload deployment.
-If this parameter is omitted or set to `""`, the registrar will process ALL the
-containers in the cluster.
-
-Restart the workload registrar pod:
-
-```console
-kubectl -n spire get pods
-kubectl -n spire delete <registrar-pod-name>
-```
-Verify if pod created properly, then registar it with SPIRE Server as described
-in [spire-workload-registrar.md](spire-workload-registrar.md)
-
-
-## Step 6. Create a sample workload:
-
-Create standard deployment. Make sure the pod contains a label as specified in the
-registrar configuration and it is set to `true`:
-`identity_template: "true"`
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mars-mission1
-  labels:
-    app: mars-mission1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mars-mission1
-  template:
-    metadata:
-      labels:
-        app: mars-mission1
-        identity_template: "true"
-    spec:
-      containers:
-        - name: mars-mission1-main
-          image: us.gcr.io/scytale-registry/aws-cli:latest
-          command: ["sleep"]
-          args: ["1000000000"]
-```
-
-## Helpful Hints
-### Delete mistakenly created `spiffeid`s
-In `crd` mode, the registar creates `spiffeid` custom resources for every processes
-pod. To cleanup mistakenly created ones, you can use the following trick.
-
-Make sure the registrar is running correctly, able to communicate with SPRIRE,
-and it is using valid `identity_template_label` preventing new `spiffeid`s to be created.
-
-List spiffeids and iterate through their namespaces:
-
-```console
-kubectl get spiffeid --all-namespaces
-export NS=
-kubectl -n $NS delete spiffeid $(kubectl -n $NS get spiffeid | awk '{print $1}' )
-```
-
-### Manual registrar registration with SPIRE:
-Find what host registrar is running on, find the agent on that host, then register
-by via Tornjak UI, `Create Entry`:
-
-Selectors:
-```
-k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
-```
-
-or connect to SPIRE pod:
-```console
-kubectl -n tornjak exec -it spire-server-0 -- sh
-```
-
-```console
-cd bin
-./spire-server entry create -admin \
--selector k8s:sa:spire-k8s-registrar \
--selector k8s:ns:spire \
--selector k8s:container-name:k8s-workload-registrar  \
--spiffeID spiffe://openshift.space-x.com/space-x03/registrar \
--parentID spiffe://openshift.space-x.com/spire/agent/k8s_psat/space-x03/4405c9fb-442e-495c-ba56-936adf1489fd \
--registrationUDSPath /run/spire/sockets/registration.sock
-
-./spire-server entry show -registrationUDSPath /run/spire/sockets/registration.sock
-```
+Restart the agents.

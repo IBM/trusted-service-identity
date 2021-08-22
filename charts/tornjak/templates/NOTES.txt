@@ -17,7 +17,7 @@ Universal Trusted Workload Identity Service has completed.
       MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
 {{- end }}
 
-{{- if .Values.multiCluster.remoteClusters }}
+{{- if .Values.k8s_psat.remoteClusters }}
       Multi-cluster support enabled.
       Make sure `kubeconfig` secret is created to support a following:
 
@@ -26,7 +26,7 @@ Universal Trusted Workload Identity Service has completed.
               # use_token_review_api_validation = true
               service_account_whitelist = ["spire:spire-agent"]
           },
-      {{- range $k, $v := .Values.multiCluster.remoteClusters }}
+      {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
           "{{ $v.name }}" = {
               service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
               kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
