@@ -26,7 +26,8 @@ For our tutorial, we would use following parameters:
 For this tutorial, we will use OpenShift cluster running in IBM Cloud. To get a test cluster, Red Hat OpenShift on Kubernetes (ROKS) in IBM Cloud, follow the steps outlined here: https://www.ibm.com/cloud/openshift
 
 Deployment of Tornjak Server on OpenShift in IBM Cloud is rather simple. Assuming all the OpenShift prereqs are satisfied, the installation can be done using provided scripts.
-First set up the OpenShift environment using admin privileges.
+First set up the OpenShift environment using **admin** privileges.
+Elevated permissions are required to setup the cluster level configurations. 
 
 ```console
 export KUBECONFIG=<open-shift configuration>.yaml

@@ -16,10 +16,11 @@ The Workload Registrar is deployed by ["spire" helm chart](../charts/spire/) alo
 The Workload Registrar configuration details are available
 [here](https://github.com/spiffe/spire/blob/main/support/k8s/k8s-workload-registrar/README.md#identity-template-based-workload-registration)
 
-The final configuration is created
-[here](../charts/spire/templates/k8s-workload-registrar-configmap.tpl)
+The final configuration is created by
+[this](../charts/spire/templates/k8s-workload-registrar-configmap.tpl)
+template.
 
-The format of the SPIFFE Id might have the following format:
+The format of the SPIFFE Id might be as follow:
 ```
 identity_template = "{{ "region/{{.Context.Region}}/cluster_name/{{.Context.ClusterName}}/ns/{{.Pod.Namespace}}/sa/{{.Pod.ServiceAccount}}/pod_name/{{.Pod.Name}}" }}"
 identity_template_label = "identity_template"
@@ -46,22 +47,31 @@ self-explanatory Pod arguments:
 
 
 To assign identity to all pods in the cluster,
-remove the value for `identity_template_label`.
-Otherwise, only the pods with a given label:
+remove the value for `identity_template_label`:
+
+```
+identity_template_label = ""
+```
+
+Otherwise, only the pods with a matching label set to `true`:
 
 ```yaml
-identity_template: "true"
+metadata:
+  labels:
+    identity_template: "true"
 ```
 will get their identity.
 
 ## Register Workload Registrar with the SPIRE server.
-Workload Registrar will use its own identity to register itself with the SPIRE server.
+Workload Registrar will use its own identity to register other elements
+with the SPIRE server.
 Once registered, it would monitor all the activities in the K8s cluster,
 register all the labeled pods with the SPIRE server.
 
-First, we need to create an entry in SPIRE that would represent the Workload Registrar.
-This requires few steps:
-* Find out what node the registrar is running on. This is needed to find out the Parent ID (Agent SVID) of the Agent associated with the same node. Alternatively, we can create individual entries, one per node/agent.
+First, we need to create manually an entry in SPIRE,
+that represents the Workload Registrar.
+This requires a few steps:
+* Find out what node the registrar is running on. This is needed to get the Parent ID (Agent SVID) of the Agent associated with the same node. Alternatively, we can create individual entries, one per node/agent.
 
   ```
   kubectl -n spire get pods -o wide
@@ -201,10 +211,15 @@ and it is configured to use a valid `identity_template_label` preventing new `sp
 identity_template_label="identity_template"
 ```
 
-List spiffeids and iterate through their namespaces:
-
+List spiffeids
 ```console
 kubectl get spiffeid --all-namespaces
+```
+
+and iterate through their namespaces deleting the entries:
+```
 export NS=
 kubectl -n $NS delete spiffeid $(kubectl -n $NS get spiffeid | awk '{print $1}' )
 ```
+Once the `spiffeid`s are marked for a deletion,
+they will be removed by the registrar operator. 

@@ -11,6 +11,14 @@ Universal Trusted Workload Identity Service has completed.
 {{- if .Values.openShift }}
       OpenShift mode: true
 {{- end }}
+{{- if .Values.aws_iid -}}
+{{- if .Values.aws_iid.access_key_id -}}
+{{- if .Values.aws_iid.secret_access_key -}}
+      Using NodeAttestor "aws_iid" with
+         "access_key_id" and "secret_access_key"
+{{- end }}
+{{- end }}
+{{- end }}
 {{- if .Values.OIDC.enable }}
       OIDC enable: true
       OIDC service name:   {{ .Values.OIDC.serviceName }}

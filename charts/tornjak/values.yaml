@@ -29,7 +29,7 @@ OIDC:
   #  MY_DISCOVERY_DOMAIN: MY_DISCOVERY_DOMAIN
 
 # k8s_psat - enables support for a single SPIRE server managing
-# agents deployed in multiple, different clusters.
+# agents deployed in multiple, different clusters, with K8S PSAT NodeAttestor
 # Prior to this deployment, create a secret that contains KUBECONFIG information
 # for every remoteCluster.
 #    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name1>`
