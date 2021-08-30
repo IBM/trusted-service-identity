@@ -443,5 +443,3 @@ Now you can test the connection to Tornjak server by going to `http://127.0.0.1:
 
 Once TLS/mTLS access points are validated, in production we should disable the
 HTTP service and HTTP Ingress for Tornjak.
-
-For non-minikube environments open Ingress to either `tornjak-tls` or `tornjak-mtls` service and remove Ingress for `tornjak-http` service.
