@@ -137,9 +137,6 @@ if [ -z "${INGSEC}" ]; then
 fi
 # TODO: check if needed
 # INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
-# if [ -z "${INGSTATUS}" ]; then
-#   echo "-> INGSTATUS"
-# fi
 ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
 
 # create serviceAccount and setup permissions
