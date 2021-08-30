@@ -28,12 +28,32 @@ Where:
 HELPMEHELPME
 }
 
+cleanup() {
+  helm uninstall spire-server -n "$PROJECT" 2>/dev/null
+  oc delete ClusterRole spire-server-role 2>/dev/null
+  oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
+
+  oc delete scc "$SPIRE_SCC" 2>/dev/null
+  oc delete sa "$SPIRE_SA" 2>/dev/null
+  oc delete route spire-server 2>/dev/null
+  oc delete route tornjak-http 2>/dev/null
+  oc delete route tornjak-mtls 2>/dev/null
+  oc delete route tornjak-tls 2>/dev/null
+  oc delete ingress spireingress 2>/dev/null
+  #oc delete group $GROUPNAME --ignore-not-found=true
+  #oc delete project "$PROJECT" 2>/dev/null
+}
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
 key="$1"
 
 case $key in
+    --clean)
+    cleanup
+    exit 0
+    ;;
     -c|--cluster)
     CLUSTERNAME="$2"
     shift # past argument
@@ -109,6 +129,19 @@ installSpireServer(){
 
   fi
 
+# get ingress information:
+INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
+if [ -z "${INGSEC}" ]; then
+  echo "Ingress security name was not retrieved, please check admin rights for your account."
+  exit 1
+fi
+# TODO: check if needed
+# INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
+# if [ -z "${INGSTATUS}" ]; then
+#   echo "-> INGSTATUS"
+# fi
+ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
+
 # create serviceAccount and setup permissions
 oc_cli create sa $SPIRE_SA
 oc_cli policy add-role-to-user cluster-admin "system:serviceaccount:$PROJECT:$SPIRE_SA"
@@ -136,12 +169,6 @@ groups:
 EOF
 #oc_cli describe scc $SPIRE_SCC
 
-# get ingress information:
-ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
-INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
-INGSTATUS=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressStatus')
-ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressMessage'
-
 # TODO we disabled the create Keys here. Instead we will use the default keys
 # included in the helm charts. This process can be done manually, when needed.
 #
@@ -167,6 +194,7 @@ if ! $OIDC ; then
   --set "openShift=true" \
   tornjak charts/tornjak # --debug
 else
+  ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
   helm install --set "namespace=$PROJECT" \
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
@@ -314,21 +342,7 @@ fi
 
 }
 
-cleanup() {
-  helm uninstall spire-server -n "$PROJECT" 2>/dev/null
-  oc delete ClusterRole spire-server-role 2>/dev/null
-  oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
 
-  oc delete scc "$SPIRE_SCC" 2>/dev/null
-  oc delete sa "$SPIRE_SA" 2>/dev/null
-  oc delete route spire-server 2>/dev/null
-  oc delete route tornjak-http 2>/dev/null
-  oc delete route tornjak-mtls 2>/dev/null
-  oc delete route tornjak-tls 2>/dev/null
-  oc delete ingress spireingress 2>/dev/null
-  #oc delete group $GROUPNAME --ignore-not-found=true
-  # oc delete project "$PROJECT" 2>/dev/null
-}
 
 checkPrereqs
 installSpireServer
