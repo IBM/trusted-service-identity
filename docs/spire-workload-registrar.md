@@ -204,8 +204,9 @@ custom resources for every processes pod.
 To cleanup mistakenly created ones, you can use the following trick.
 
 Make sure the registrar is running correctly,
-able to communicate with SPRIRE Server,
-and it is configured to use a valid `identity_template_label` preventing new `spiffeid`s to be created for all the pods.
+able to communicate with the SPRIRE Server,
+and it is configured to use a valid `identity_template_label`,
+preventing new `spiffeid`s to be created for all the pods.
 
 ```
 identity_template_label="identity_template"
@@ -222,4 +223,4 @@ export NS=
 kubectl -n $NS delete spiffeid $(kubectl -n $NS get spiffeid | awk '{print $1}' )
 ```
 Once the `spiffeid`s are marked for a deletion,
-they will be removed by the registrar operator. 
+they will be removed by the registrar operator.

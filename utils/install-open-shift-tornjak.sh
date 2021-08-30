@@ -312,10 +312,21 @@ else
   exit 1
 fi
 
+# This install requires ibmcloud cli with ks plugin version 1.x:
+ibmcloud_test_cmd="ibmcloud plugin list | grep container-service | grep ' 1.'"
+if [[ $(eval $ibmcloud_test_cmd) ]]; then
+  echo "ibmcloud ks installed properly"
+else
+  echo "ibmcloud CLI with ks plugin must be installed and configured. "
+  echo "(https://cloud.ibm.com/docs/containers?topic=containers-cs_cli_install)"
+  exit 1
+fi
 }
 
 cleanup() {
-  helm uninstall spire-server -n "$PROJECT" 2>/dev/null
+  oc project "$PROJECT"
+  helm uninstall tornjak -n "$PROJECT" 2>/dev/null
+
   oc delete ClusterRole spire-server-role 2>/dev/null
   oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
 

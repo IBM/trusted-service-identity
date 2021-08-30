@@ -35,7 +35,24 @@ For our tutorial, we would use the following parameters:
 * Agents namespace: `spire`
 
 ## Important information
-**It is worth mentioning** that once the trust domain is set, the SPIRE server persists the information locally (either on the host or via Persistent Storage) and any consequent installation requires using the same trust domain. The easiest way to change the trust domain, is to remove all the SPIRE data under `/run/spire/date` directory, or delete the persistent storage volume, prior to installing the Tornjak server.
+**SPIRE Trust Domain** corresponds to the trust root of a SPIFFE identity provider.
+A trust domain could represent an individual, organization, environment or department
+running their own independent SPIFFE infrastructure.
+All workloads identified in the same trust domain are issued identity documents
+that can be verified against the root keys of the trust domain.
+
+Each SPIRE server is associated with a single trust domain
+that must be unique within that organization.
+The trust domain takes the same form as a DNS name (for example, prod.acme.com), however it does not need to correspond to any DNS infrastructure.
+
+*It is worth mentioning* that once the trust domain is set,
+the SPIRE server persists the information locally
+(either on the host or via Persistent Storage)
+and any consequent installation requires using the same trust domain.
+The easiest way to change the trust domain,
+is to remove all the SPIRE data under `/run/spire/date` directory,
+or delete the persistent storage volume,
+prior to installing the Tornjak server.
 
 ## Step 0. Get code
 Before starting the tutorial, get the most recent code to your local system.

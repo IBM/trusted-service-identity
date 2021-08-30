@@ -258,17 +258,21 @@ ibmcloud_test_cmd="ibmcloud oc versions"
 if [[ $(eval $ibmcloud_test_cmd) ]]; then
   echo "ibmcloud oc installed properly"
 else
-  echo "ibmcloud cli with oc plugin must be installed and configured. "
+  echo "ibmcloud CLI with oc plugin must be installed and configured. "
   echo "(https://cloud.ibm.com/docs/openshift?topic=openshift-openshift-cli)"
   exit 1
 fi
-
 }
 
 cleanup() {
+  oc project $PROJECT
   helm uninstall spire -n $PROJECT 2>/dev/null
-  oc delete ClusterRole spire-agent-cluster-role spire-k8s-registrar-cluster-role 2>/dev/null
-  oc delete ClusterRoleBinding spire-agent-cluster-role-binding spire-k8s-registrar-cluster-role-binding 2>/dev/null
+
+  # in case the helm information is not available
+  oc delete ClusterRole "$PROJECT-agent-spire-cluster-role" "$PROJECT-k8s-registrar-spire-cluster-role" 2>/dev/null
+  oc delete ClusterRoleBinding "$PROJECT-agent-spire-cluster-role-binding" "$PROJECT-k8s-registrar-spire-cluster-role-binding" 2>/dev/null
+  oc delete deploy spire-registrar
+
   oc delete scc $SPIREAG_SCC 2>/dev/null
   oc delete sa $SPIRE_AG_SA 2>/dev/null
   # oc delete project $PROJECT 2>/dev/null
