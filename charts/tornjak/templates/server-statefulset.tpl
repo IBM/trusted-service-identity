@@ -45,7 +45,7 @@ spec:
             - name: spire-server-socket
               mountPath: /run/spire/sockets
               readOnly: false
-{{- if .Values.multiCluster.remoteClusters }}
+{{- if .Values.k8s_psat.remoteClusters }}
             - name: kubeconfigs
               mountPath: /run/spire/kubeconfigs
 {{- end }}
@@ -127,7 +127,7 @@ spec:
           secret:
             defaultMode: 0400
             secretName: tornjak-certs
-{{- if .Values.multiCluster.remoteClusters }}
+{{- if .Values.k8s_psat.remoteClusters }}
         - name: kubeconfigs
           secret:
             defaultMode: 0400

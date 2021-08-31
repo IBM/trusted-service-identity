@@ -20,6 +20,11 @@ data:
           cluster = "{{ .Values.clustername }}"
         }
       }
+      {{- if .Values.aws }}
+      NodeAttestor "aws_iid" {
+          plugin_data {}
+      }
+      {{- end }}
       KeyManager "memory" {
         plugin_data {
         }

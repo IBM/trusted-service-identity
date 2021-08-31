@@ -5,9 +5,13 @@
 
 # workaround since Azure doesn't support by default 10250 security port for kubelet
 azure: false
-namespace: spire
+# aws - enables the plugin for AWS NodeAttestor
+aws: false
 # openShift requires special configuration, including different security level
 openShift: false
+
+# namespace - namespace for deploying SPIRE agents and workload registrar
+namespace: spire
 
 # SPIRE specific values
 # clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
