@@ -25,6 +25,7 @@ Where:
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
   --oidc - execute OIDC installation (optional)
+  --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
 }
 
@@ -50,10 +51,6 @@ do
 key="$1"
 
 case $key in
-    --clean)
-    cleanup
-    exit 0
-    ;;
     -c|--cluster)
     CLUSTERNAME="$2"
     shift # past argument
@@ -72,6 +69,10 @@ case $key in
     --oidc)
     OIDC=true
     shift # past argument
+    ;;
+    --clean)
+    cleanup
+    exit 0
     ;;
     -h|--help)
     helpme

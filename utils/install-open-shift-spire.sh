@@ -23,8 +23,19 @@ Where:
   -r <REGION>       - region, geo-location (required)
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
+  --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
 }
+
+cleanup() {
+  helm uninstall spire -n $PROJECT 2>/dev/null
+  oc delete ClusterRole spire-agent-cluster-role spire-k8s-registrar-cluster-role 2>/dev/null
+  oc delete ClusterRoleBinding spire-agent-cluster-role-binding spire-k8s-registrar-cluster-role-binding 2>/dev/null
+  oc delete scc $SPIREAG_SCC 2>/dev/null
+  oc delete sa $SPIRE_AG_SA 2>/dev/null
+  # oc delete project $PROJECT 2>/dev/null
+}
+
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -56,6 +67,10 @@ case $key in
     PROJECT="$2"
     shift # past argument
     shift # past value
+    ;;
+    --clean)
+    cleanup
+    exit 0
     ;;
     -h|--help)
     helpme
@@ -263,15 +278,6 @@ else
   exit 1
 fi
 
-}
-
-cleanup() {
-  helm uninstall spire -n $PROJECT 2>/dev/null
-  oc delete ClusterRole spire-agent-cluster-role spire-k8s-registrar-cluster-role 2>/dev/null
-  oc delete ClusterRoleBinding spire-agent-cluster-role-binding spire-k8s-registrar-cluster-role-binding 2>/dev/null
-  oc delete scc $SPIREAG_SCC 2>/dev/null
-  oc delete sa $SPIRE_AG_SA 2>/dev/null
-  # oc delete project $PROJECT 2>/dev/null
 }
 
 checkPrereqs
