@@ -10,9 +10,8 @@ spec:
       app: simple-spire-client
   template:
     metadata:
-      annotations:
-        spire-workload-id: eu-de/my-cluster/my-ns/my-sa/my-spire-agent-image
       labels:
+        identity_template: "true"
         app: simple-spire-client
     spec:
       # hostPID: true

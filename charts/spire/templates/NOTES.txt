@@ -7,6 +7,9 @@ Universal Trusted Workload Identity Service has completed.
   {{- if .Values.openShift }}
     OpenShift mode: true
   {{- end }}
+  {{- if .Values.aws }}
+    AWS NodeAttestor: true
+  {{- end }}
 
   SPIRE info:
       Spire Server address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}

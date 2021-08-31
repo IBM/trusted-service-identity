@@ -1,17 +1,16 @@
 # Deploying Tornjak on OpenShift
 This tutorial demonstrates the steps to deploy Tornjak elements on OpenShift platform. To see instructions for installing on non-OpenShift platform, please see the following documentation on [deploying Tornjak with helm charts](./spire-helm.md).
 
-
 ## Prerequisites
 The following installation was tested with:
 * Red Hat OpenShift 4.5 +
 * Kubernetes version 1.18 +
 
-
 Tutorial requirements:
 * [git client](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * [helm3 client](https://helm.sh/docs/intro/install/)
 * [ibmcloud client](https://cloud.ibm.com/docs/cli?topic=cli-getting-started)
+* [ibmcloud ks plugin](https://cloud.ibm.com/docs/containers?topic=containers-cs_cli_install)
 * [openShift client (oc)](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift-cli)
 * [jq parser](https://stedolan.github.io/jq/)
 
@@ -22,12 +21,46 @@ For our tutorial, we would use following parameters:
 * Tornjak namespace: `tornjak`
 * Agents namespace: `spire`
 
+## Important information
+**SPIRE Trust Domain** corresponds to the trust root of a SPIFFE identity provider.
+A trust domain could represent an individual, organization, environment or department
+running their own independent SPIFFE infrastructure.
+All workloads identified in the same trust domain are issued identity documents
+that can be verified against the root keys of the trust domain.
+
+Each SPIRE server is associated with a single trust domain
+that must be unique within that organization.
+The trust domain takes the same form as a DNS name (for example, prod.acme.com), however it does not need to correspond to any DNS infrastructure.
+
+*It is worth mentioning* that once the trust domain is set,
+the SPIRE server persists the information locally
+(either on the host or via Persistent Storage)
+and any consequent installation requires using the same trust domain.
+The easiest way to change the trust domain,
+is to remove all the SPIRE data under `/run/spire/date` directory,
+or delete the persistent storage volume,
+prior to installing the Tornjak server.
+
 ## Deploy on OpenShift
 For this tutorial, we will use OpenShift cluster running in IBM Cloud. To get a test cluster, Red Hat OpenShift on Kubernetes (ROKS) in IBM Cloud, follow the steps outlined here: https://www.ibm.com/cloud/openshift
 
 Deployment of Tornjak Server on OpenShift in IBM Cloud is rather simple. Assuming all the OpenShift prereqs are satisfied, the installation can be done using provided scripts.
-First set up the OpenShift environment using admin privileges.
+First create the OpenShift environment,
+then configure the access to the this cluster using **admin** privileges.
+Elevated permissions are required to setup the additional,
+cluster level configurations.
 
+When installing on
+[ROKS](https://cloud.redhat.com/products/openshift-ibm-cloud)
+(Red Hat® OpenShift®) on IBM Cloud™:
+```console
+ibmcloud ks clusters
+export KUBECONFIG=$(mktemp).<clustername>.yaml
+ibmcloud ks cluster config --admin -c <clustername>
+echo "export KUBECONFIG=$KUBECONFIG"
+```
+
+Setup k8s configuration:
 ```console
 export KUBECONFIG=<open-shift configuration>.yaml
 ```
@@ -39,7 +72,7 @@ oc get config
 oc get nodes
 ```
 
-## Step 0. Get code
+## Step 0. Get the installation code
 Before starting the tutorial, get the most recent code to your local system.
 All the SPIRE related work
 has been integrated into `main` branch.
@@ -82,55 +115,10 @@ oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShif
 ### Multi-cloud Support
 Single Tornjak/SPIRE server can support multiple remote clusters
 as outlined in the [multi-cluster](./spire-multi-cluster.md) document.
-In order to allow the SPIRE server to validate the remote clusters,
-it needs access to KUBECONFIG information for each cluster.
+Additionally, various Cloud providers are supported for the node attestion.
+Follow the steps for [attesting the remote clusters](./spire-multi-cluster.md#attesting-the-remote-clusters) to enable multi-cluster support in Tornjak server deployment.
 
-Capture the individual cluster KUBECONFIG into the file:
-```
-export KUBECONFIG=....
-export CLUSTERNAME=....
-mkdir /tmp/kubeconfigs
-kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
-```
-
-For example, to capture 2 clusters
-`space-01` and `space-02`
-we will have the following:
-```
-/tmp/kubeconfigs/space-01
-/tmp/kubeconfigs/space-02
-```
-
-Then using these individual files,
-create one secret in `tornjak` project.
-_Note_: don't use special characters, stick to alphanumerics.
-
-```console
-kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs
-```
-
-Next for multi-cluster scenario, update
-[charts/tornjak/values.yaml](./charts/tornjak/values.yaml) file.
-Include `name`, `namespace` and `serviceAccount`
-for every remote cluster.
-If not provided, it defaults to:
-```
-namespace: spire
-serviceAccount: spire-agent
-```
-Here is a sample configuration:
-```
-multiCluster:
-  remoteClusters:
-  - name: space-01
-    namespace: spire
-    serviceAccount: spire-agent
-  - name: space-02
-  - name: space-03
-    namespace: spire
-    serviceAccount: spire-agent
-```
-Then follow standard installation as shown below.
+Then follow the standard installation as shown below.
 
 ### Advanced, more secure deployment
 This demo deployment uses pre-created keys included with the helm chats.
@@ -161,8 +149,13 @@ To use “--oidc” flag, please refer to our separate [OIDC document](./spire-o
 
 This script detects a previous installation of Tornjak and prompts the user if the uninstallation is required.
 
-Sample execution:
+
 ```
+utils/install-open-shift-tornjak.sh -c $CLUSTER_NAME -t trust-domain
+```
+
+Sample execution:
+```console
 utils/install-open-shift-tornjak.sh -c space-x.01 -t openshift.space-x.com
 ```
 This script takes care of the namespaces/project creation, sets up appropriate permissions, sets up the public access via Ingress, defines HTTP, TLS, and mTLS access points, and displays all the relevant information at the end.
@@ -208,7 +201,8 @@ Trust Domain: openshift.space-x.com
 
 Installation of the Tornjak and SPIRE server has completed. We will use the script output for the next steps.
 
-## Step 2. Installing SPIRE Agents on OpenShift (including the remote clusters)
+## Step 2. Installing SPIRE Agents on OpenShift
+These steps include the remote cluster installation
 
 ### Create a Project (Kubernetes namespace)
 Typically SPIRE agents are installed in `spire` namespace.

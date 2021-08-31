@@ -59,17 +59,30 @@ data:
                     # use_token_review_api_validation = true
                     service_account_whitelist = ["spire:spire-agent"]
                 },
-{{- if .Values.multiCluster.remoteClusters }}
-    {{- range $k, $v := .Values.multiCluster.remoteClusters }}
+                {{- if .Values.k8s_psat.remoteClusters }}
+                {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
                 "{{ $v.name }}" = {
                     service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
                     kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
                 },
-    {{- end }}
-{{- end }}
+                {{- end }}
+                {{- end }}
             }
         }
       }
+      {{- if .Values.aws_iid -}}
+      {{- if .Values.aws_iid.access_key_id -}}
+      {{- if .Values.aws_iid.secret_access_key -}}
+      NodeAttestor "aws_iid" {
+          plugin_data {
+            access_key_id = "{{- .Values.aws_iid.access_key_id -}}"
+            secret_access_key = "{{- .Values.aws_iid.secret_access_key -}}"
+            skip_block_device: {{- .Values.aws_iid.skip_block_device -}}
+          }
+      }
+      {{- end }}
+      {{- end }}
+      {{- end }}
       NodeResolver "noop" {
         plugin_data {}
       }
