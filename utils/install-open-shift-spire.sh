@@ -23,8 +23,24 @@ Where:
   -r <REGION>       - region, geo-location (required)
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
+  --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
 }
+
+cleanup() {
+  oc project $PROJECT
+  helm uninstall spire -n $PROJECT 2>/dev/null
+
+  # in case the helm information is not available
+  oc delete ClusterRole "$PROJECT-agent-spire-cluster-role" "$PROJECT-k8s-registrar-spire-cluster-role" 2>/dev/null
+  oc delete ClusterRoleBinding "$PROJECT-agent-spire-cluster-role-binding" "$PROJECT-k8s-registrar-spire-cluster-role-binding" 2>/dev/null
+  oc delete deploy spire-registrar
+
+  oc delete scc $SPIREAG_SCC 2>/dev/null
+  oc delete sa $SPIRE_AG_SA 2>/dev/null
+  # oc delete project $PROJECT 2>/dev/null
+}
+
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -56,6 +72,10 @@ case $key in
     PROJECT="$2"
     shift # past argument
     shift # past value
+    ;;
+    --clean)
+    cleanup
+    exit 0
     ;;
     -h|--help)
     helpme
@@ -262,20 +282,6 @@ else
   echo "(https://cloud.ibm.com/docs/openshift?topic=openshift-openshift-cli)"
   exit 1
 fi
-}
-
-cleanup() {
-  oc project $PROJECT
-  helm uninstall spire -n $PROJECT 2>/dev/null
-
-  # in case the helm information is not available
-  oc delete ClusterRole "$PROJECT-agent-spire-cluster-role" "$PROJECT-k8s-registrar-spire-cluster-role" 2>/dev/null
-  oc delete ClusterRoleBinding "$PROJECT-agent-spire-cluster-role-binding" "$PROJECT-k8s-registrar-spire-cluster-role-binding" 2>/dev/null
-  oc delete deploy spire-registrar
-
-  oc delete scc $SPIREAG_SCC 2>/dev/null
-  oc delete sa $SPIRE_AG_SA 2>/dev/null
-  # oc delete project $PROJECT 2>/dev/null
 }
 
 checkPrereqs
