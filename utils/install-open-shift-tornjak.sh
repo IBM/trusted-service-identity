@@ -35,6 +35,16 @@ cleanup() {
 
   oc delete ClusterRole spire-server-role 2>/dev/null
   oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
+
+  oc delete scc "$SPIRE_SCC" 2>/dev/null
+  oc delete sa "$SPIRE_SA" 2>/dev/null
+  oc delete route spire-server 2>/dev/null
+  oc delete route tornjak-http 2>/dev/null
+  oc delete route tornjak-mtls 2>/dev/null
+  oc delete route tornjak-tls 2>/dev/null
+  oc delete ingress spireingress 2>/dev/null
+  #oc delete group $GROUPNAME --ignore-not-found=true
+  #oc delete project "$PROJECT" 2>/dev/null
 }
 
 POSITIONAL=()
