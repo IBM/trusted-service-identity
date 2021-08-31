@@ -222,7 +222,7 @@ you have to update the SPIRE Agent configuration
 kubectl -n spire edit configmap spire-agent
 ```
 
-Add the `NodeAttestor "aws_iid"` to the list of plugins:
+Add the `NodeAttestor "aws_iid"` to the list of plugins.
 
 ```
 plugins {
@@ -236,6 +236,9 @@ plugins {
   }
 }
 ```
+Generally, no plugin data is needed in AWS, and the above configuration should be used. For testing or non-standard AWS environments, you may need to specify the Metadata endpoint.
+See [more here](https://github.com/spiffe/spire/blob/main/doc/plugin_agent_nodeattestor_aws_iid.md)
+
 Restart the agents:
 ```console
 kubectl -n spire get pods
@@ -247,6 +250,6 @@ kubectl -n spire delete pod <pod-name>
 time="2021-08-19T16:48:43Z" level=error msg="Agent crashed" error="failed to get SVID: error getting attestation response from SPIRE server: rpc error: code = Internal desc = failed to attest: aws-iid: IID has already been used to attest an agent"
 ```
 Delete the agent object under "Agents"-->"Agent List" using Tornjak UI.
-This should reset the record and allow agent to re-register.
+This should remove the SPIRE record and allow the agent to re-register.
 
 Restart the agents.
