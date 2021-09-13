@@ -12,6 +12,7 @@ spec:
   template:
     metadata:
       labels:
+        identity_template: "true"
         app: mars-mission1
     spec:
       containers:
