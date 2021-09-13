@@ -73,7 +73,7 @@ EOF
       "bound_audiences": "vault",
       "bound_claims_type": "glob",
       "bound_claims": {
-          "sub":"spiffe://openshift.space-x.com/eu-*/*/*/elon-musk/mars-mission-main/*"
+          "sub":"spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/elon-musk/pod_name/mars-mission-*"
       },
       "token_ttl": "24h",
       "token_policies": "my-dev-policy"

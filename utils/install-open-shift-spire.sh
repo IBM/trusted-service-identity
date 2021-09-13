@@ -112,7 +112,7 @@ installSpireAgent(){
   oc get projects | grep "${PROJECT}"
   if [ "$?" != "0" ]; then
     echo "Project $PROJECT must be created first"
-    echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" 2> /dev/null"
+    echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" "
     exit 1
   fi
 

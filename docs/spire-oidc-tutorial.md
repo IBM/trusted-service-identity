@@ -9,13 +9,9 @@ In this example we will deploy Tornjak and SPIRE server on OpenShift in IBM Clou
 Follow the documentation to deploy [Tornjak on Openshift](./spire-on-openshift.md#deploy-on-openshift])
 with exception of enabling the `--oidc` flag:
 
-```console
-# check if rootCA is present:
-ls sample-keys/CA
-rootCA.crt	rootCA.key	rootCA.srl
-
+```
 # install:
-utils/install-open-shift-tornjak.sh -c <CLUSTER_NAME> -t <TRUST_DOMAIN> -p <PROJECT_NAME> --oidc
+utils/install-open-shift-tornjak.sh -c $CLUSTER_NAME -t $TRUST_DOMAIN -p $PROJECT_NAME --oidc
 ```
 
 for example:
@@ -65,6 +61,9 @@ This output confirms that the OIDC endpoint is accessible and responds with vali
 Let's install the [SPIRE Agents](./spire-on-openshift.md#step-2-installing-spire-agents-on-openshift):
 
 ```
+oc new-project spire --description="My TSI Spire Agent project on OpenShift"
+kubectl get configmap spire-bundle -n tornjak -o yaml | sed "s/namespace: tornjak/namespace: spire/" | kubectl apply -n spire -f -
+
 export SPIRE_SERVER=spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud
 
 utils/install-open-shift-spire.sh -c space-x.01 -s $SPIRE_SERVER -t openshift.space-x.com
