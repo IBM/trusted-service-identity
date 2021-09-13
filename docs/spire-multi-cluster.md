@@ -42,6 +42,7 @@ depending on the needs.
 
 ---
 ### Enable AWS node attestor
+* Tornjak/SPIRE server
 To use AWS node_attestor, we need to provide the following values in
 [Tornjak helm chart configuration file](../charts/tornjak/values.yaml):
 ```yaml
@@ -54,6 +55,23 @@ Procedures for obtaining these values are [here](https://docs.aws.amazon.com/gen
 
 For more information about this plugin configuration see the
 [attestor documentation](https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md)
+
+* SPIRE Agents:
+To use AWS node_attestor, we need to provide the following value in
+[spire helm chart configuration file](../charts/spire/values.yaml):
+```yaml
+aws: true
+```
+
+Or add the `--set "aws=true"` flag to the helm command: 
+```console
+helm install --set "spireAddress=$SPIRE_SERVER" \
+--set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
+--set "clustername=$CLUSTERNAME" --set "region=us-east" \
+--set "trustdomain=openshift.space-x.com" \
+--set "aws=true" \
+spire charts/spire --debug
+```
 
 ---
 ### Enable Azure node attestor

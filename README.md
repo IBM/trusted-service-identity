@@ -251,8 +251,6 @@ service, deployed in `tsi-vault` namespace in your cluster.
 ```console
 kubectl create ns tsi-vault
 kubectl -n tsi-vault create -f examples/vault/vault.yaml
-service/tsi-vault created
-deployment.apps/tsi-vault created
 ```
 
 #### Obtain remote access to Vault service

@@ -60,7 +60,9 @@ metadata:
   labels:
     identity_template: "true"
 ```
-will get their identity.
+will get their identity. More information about the `identity_template` is
+available in the SPIRE community document about the
+[workload-registrar](https://github.com/spiffe/spire/blob/main/support/k8s/k8s-workload-registrar/mode-crd/README.md#identity-template-based-workload-registration)
 
 ## Register Workload Registrar with the SPIRE server.
 Workload Registrar will use its own identity to register other elements
