@@ -88,7 +88,7 @@ export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
 ```
 
-## Helm Deployment
+## Helm Deployment for Tornjak
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
 * clustername - name of the cluster (required)
 * trustdomain - must match between SPIRE server and agents (required)
@@ -229,6 +229,7 @@ Only ONE instance of SPIRE Agent deployment should be running at once,
 as it runs as a daemonset on all the node.
 Running more than one may result in conflicts.
 
+### Create a namespace
 First, create a namespace where we want to deploy our SPIRE agents.
 For the purpose of this tutorial, we will use “spire”.
 ```console
@@ -265,6 +266,8 @@ In every cluster hosting SPIRE agents, including remote cluster,  create `spire-
 kubectl -n spire apply -f spire-bundle.yaml
 ```
 ---
+
+### Set up access to the SPIRE server
 In the next step, we need to setup a public access to the SPIRE Server,
 so SPIRE agents can access it.
 This is typically the Ingress value defined during the SPIRE Server deployment,
@@ -306,6 +309,7 @@ Assuming the SPIRE server can now be accessed from the `spire` namespace,
 either via Ingress or Service on port 8081,
 we can deploy the helm charts.
 
+## Helm Deployment for Spire Agents
 We continue using the same cluster name “minikube”,
 trust domain “openshift.space-x.com”
 and region "us-east".

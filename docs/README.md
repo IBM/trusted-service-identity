@@ -3,9 +3,9 @@ This document describes the list of available documents to deploy and
 run various Tornjak demos.
 
 The demos are sorted by complexity,
-starting with this simple ones and progressing into more complex.
+starting with the simple ones and progressing into more complex.
 
-We suggest running the demos in specified order.
+We suggest running them in the specified order.
 
 ## Tornjak Deployment
 There are multiple ways to deploy Tornjak on Kubernetes.
