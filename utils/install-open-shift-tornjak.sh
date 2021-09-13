@@ -23,7 +23,7 @@ Syntax: ${0} -c <CLUSTER_NAME> -t <TRUST_DOMAIN> -p <PROJECT_NAME> --oidc
 Where:
   -c <CLUSTER_NAME> - name of the OpenShift cluster (required)
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
-  -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
+  -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: tornjak (optional)
   --oidc - execute OIDC installation (optional)
   --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
@@ -36,12 +36,13 @@ cleanup() {
   oc delete ClusterRole spire-server-role 2>/dev/null
   oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
 
+  oc delete statefulset.apps/spire-server 2>/dev/null
   oc delete scc "$SPIRE_SCC" 2>/dev/null
   oc delete sa "$SPIRE_SA" 2>/dev/null
-  oc delete route spire-server 2>/dev/null
-  oc delete route tornjak-http 2>/dev/null
-  oc delete route tornjak-mtls 2>/dev/null
-  oc delete route tornjak-tls 2>/dev/null
+  oc delete secret spire-secret tornjak-certs  2>/dev/null
+  oc delete cm spire-bundle spire-server oidc-discovery-provider 2>/dev/null
+  oc delete service spire-server spire-oidc tornjak-http tornjak-mtls tornjak-tls 2>/dev/null
+  oc delete route spire-server tornjak-http tornjak-mtls tornjak-tls oidc 2>/dev/null
   oc delete ingress spireingress 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
   #oc delete project "$PROJECT" 2>/dev/null
@@ -108,11 +109,12 @@ installSpireServer(){
   oc get projects | grep $PROJECT
   if [ "$?" != "0" ]; then
     echo "Project $PROJECT must be created first"
-    echo "oc new-project $PROJECT --description=\"My TSI Spire SERVER project on OpenShift\" 2> /dev/null"
+    echo "oc new-project $PROJECT --description=\"My TSI Spire SERVER project on OpenShift\" "
     exit 1
   fi
 
-  oc -n $PROJECT get statefulset spire-server
+  # test if Tornjak already exists:
+  oc -n $PROJECT get statefulset spire-server 2>/dev/null
   if [ "$?" == "0" ]; then
     # check if spire-server project exists:
     echo "$PROJECT project already exists. "

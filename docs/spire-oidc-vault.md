@@ -28,6 +28,7 @@ vault login -no-print "${ROOT_TOKEN}"
 
 ## Configure a Vault instace:
 We have a script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
+**All the commands listed here are in the script, so don't run them!**
 
 First few commands enable the Secret Engine and setup Vault OIDC Federation with
 our instance of SPIRE.
@@ -43,7 +44,7 @@ vault auth enable jwt
 Set up our OIDC Discovery URL, using the values created in [OIDC tutorial setup](./spire-oidc-tutorial.md)
 and using defalt role **dev**:
 ```
-vault write auth/jwt/config oidc_discovery_url=$SPIRE_SERVER default_role=“dev”
+vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“dev”
 ```
 
 Define a policy `my-dev-policy` that gives `read` access to `my-super-secret`:
@@ -70,7 +71,7 @@ cat > role.json <<EOF
       "bound_audiences": "vault",
       "bound_claims_type": "glob",
       "bound_claims": {
-          "sub":"spiffe://openshift.space-x.com/eu-*/*/*/elon-musk/mars-mission-main/*"
+          "sub":"spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/elon-musk/pod_name/mars-mission-*"
       },
       "token_ttl": "1h",
       "token_policies": "my-dev-policy"
@@ -89,14 +90,20 @@ Please make sure the following env. variables are set:
 
 or pass them as script parameters:
 
-```console
+```
 examples/spire/vault-oidc.sh
 # or
 examples/spire/vault-oidc.sh <OIDC_URL> <ROOT_TOKEN> <VAULT_ADDR>
 
 ```
+Here is our example:
+```console
+examples/spire/vault-oidc.sh https://oidc-tornjak.space-x01-9d995c4a8c7c5f281ce13d546a94-0000.us-east.containers.appdomain.cloud $ROOT_TOKEN $VAULT_ADDR
+```
 
-Now, create a test secret value:
+
+Once the script successfully completes,
+create a test secret value:
 ```console
 vault kv put secret/my-super-secret test=123
 ```
@@ -105,20 +112,22 @@ vault kv put secret/my-super-secret test=123
 For testing this setup we are going to use
 [examples/spire/mars-spaceX.yaml](examples/spire/mars-spaceX.yaml) deployment.
 
-Based on the following annotation:
+Make sure the pod label matches the label in The Workload Registrar Configuration.
 
 ```yaml
 
-metadata:
-  annotations:
-    spire-workload-id: eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b
+template:
+  metadata:
+    labels:
+      identity_template: "true"
+      app: mars-mission
 
 ```
-this container will get the following identity:
+this container will get the identity that might look like this:
 
-`eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b`
+`spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x.01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5`
 
-Let's create a container and get inside:
+Let's create a pod and get inside the container:
 
 ```console
 kubectl -n default create -f examples/spire/mars-spaceX.yaml
@@ -148,7 +157,7 @@ The JWT token is the long string that follows the **token**:
 ```console
 bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sock
 ets/agent.sock
-token(spiffe://openshift.space-x.com/eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b):
+token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x.01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5):
 	eyJhbGciOiJSUzI1NiIs....cy46fb465a
 ```
 
@@ -161,7 +170,7 @@ Export also `eurole` as **ROLE** and actual **VAULT_ADDR**
 
 ```console
 export ROLE=eurole
-export VAULT_ADDR=http://tsi-kube01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud
+export VAULT_ADDR=http://tsi-vault-tsi-vault.space-x01-9d995c4a8c7c5f281ce13d546a94-0000.us-east.containers.appdomain.cloud
 ```
 Now let's try to login to Vault using the JWT token:
 
