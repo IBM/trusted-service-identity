@@ -121,7 +121,7 @@ List all the agent objects, and find the spiffeID of the agent
 that is on the same node as the Registrar. This will be our `parentID`:
 
 ```console
-/opt/spire/bin/spire-server agent list -registrationUDSPath /run/spire/sockets/registration.sock
+/opt/spire/bin/spire-server agent list -socketPath /run/spire/sockets/registration.sock
 ```
 
 Now manually create an entry with Admin privileges.
@@ -135,18 +135,18 @@ and `agent_spiffe_id` with `parentID` obtained above:
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://openshift.space-x.com/mycluster/workload-registrar1 \
 -parentID spiffe://openshift.space-x.com/spire/agent/k8s_psat/agent_spiffe_id \
--registrationUDSPath /run/spire/sockets/registration.sock
+-socketPath /run/spire/sockets/registration.sock
 ```
 You can view all the entries:
 ```console
 /opt/spire/bin/spire-server entry show \
--registrationUDSPath /run/spire/sockets/registration.sock
+-socketPath /run/spire/sockets/registration.sock
 ```
 
 or delete them, if needed, using `Entry ID` value:
 ```console
 /opt/spire/bin/spire-server entry delete -entryID 778e71dc-74b7-4899-8d67-2f17ce7604c1 \
--registrationUDSPath /run/spire/sockets/registration.sock
+-socketPath /run/spire/sockets/registration.sock
 ```
 
 ## Create sample deployment

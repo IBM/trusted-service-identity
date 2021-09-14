@@ -18,7 +18,7 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
-      registration_uds_path = "{{ .Values.spireServerSocket }}"
+      socket_path = "{{ .Values.spireServerSocket }}"
 
 {{- if .Values.OIDC.enable }}
       #AWS requires the use of RSA.  EC cryptography is not supported

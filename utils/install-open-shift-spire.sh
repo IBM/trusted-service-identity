@@ -193,11 +193,11 @@ oc exec -it spire-server-0 -n $SPIRE_SERVER_PROJECT -- sh
  A few, sample server commands:
 
 # show entries:
-/opt/spire/bin/spire-server entry show -registrationUDSPath /run/spire/sockets/registration.sock
+/opt/spire/bin/spire-server entry show -socketPath /run/spire/sockets/registration.sock
 # show agents:
-/opt/spire/bin/spire-server agent list -registrationUDSPath /run/spire/sockets/registration.sock
+/opt/spire/bin/spire-server agent list -socketPath /run/spire/sockets/registration.sock
 # delete entry:
-/opt/spire/bin/spire-server entry delete -registrationUDSPath /run/spire/sockets/registration.sock --entryID
+/opt/spire/bin/spire-server entry delete -socketPath /run/spire/sockets/registration.sock --entryID
 
 # sample Registrar reqistration:
 /opt/spire/bin/spire-server entry create -admin \
@@ -207,7 +207,7 @@ oc exec -it spire-server-0 -n $SPIRE_SERVER_PROJECT -- sh
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://${TRUSTDOMAIN}/workload-registrar \
 -parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
--registrationUDSPath /run/spire/sockets/registration.sock
+-socketPath /run/spire/sockets/registration.sock
 
 # sample Registrar registration with just a subset of selectors:
 /opt/spire/bin/spire-server entry create -admin \
@@ -215,7 +215,7 @@ oc exec -it spire-server-0 -n $SPIRE_SERVER_PROJECT -- sh
 -selector k8s:container-name:k8s-workload-registrar \
 -spiffeID spiffe://${TRUSTDOMAIN}/workload-registrar \
 -parentID spiffe://${TRUSTDOMAIN}/spire/agent/k8s_psat/$CLUSTERNAME/b9e0af7a-bdbf-4e23-a3ec-cf2a61885c37 \
--registrationUDSPath /run/spire/sockets/registration.sock
+-socketPath /run/spire/sockets/registration.sock
 
 EOF
 }

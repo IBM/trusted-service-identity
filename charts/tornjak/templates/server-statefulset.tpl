@@ -54,7 +54,7 @@ spec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
-              - "-registrationUDSPath"
+              - "-socketPath"
               - "{{ .Values.spireServerSocket }}"
             failureThreshold: 2
             initialDelaySeconds: 15
@@ -66,7 +66,7 @@ spec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
-              - "-registrationUDSPath"
+              - "-socketPath"
               - "{{ .Values.spireServerSocket }}"
               - "--shallow"
             initialDelaySeconds: 5
