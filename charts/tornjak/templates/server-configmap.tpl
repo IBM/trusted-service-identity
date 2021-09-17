@@ -57,7 +57,7 @@ data:
             clusters = {
                 "{{ .Values.clustername }}" = {
                     # use_token_review_api_validation = true
-                    service_account_whitelist = ["spire:spire-agent"]
+                    service_account_allow_list = ["spire:spire-agent"]
                 },
                 {{- if .Values.k8s_psat.remoteClusters }}
                 {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
