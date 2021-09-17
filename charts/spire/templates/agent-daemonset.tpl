@@ -39,7 +39,7 @@ spec:
               mountPath: /run/spire/config
               readOnly: true
             - name: spire-agent-socket
-              mountPath: /run/spire/sockets
+              mountPath: {{ .Values.agentSocketDir }}
               readOnly: false
             - name: spire-bundle
               mountPath: /run/spire/bundle
@@ -52,7 +52,7 @@ spec:
                 - /opt/spire/bin/spire-agent
                 - healthcheck
                 - -socketPath
-                - /run/spire/sockets/agent.sock
+                - {{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
@@ -66,7 +66,7 @@ spec:
             name: spire-bundle
         - name: spire-agent-socket
           hostPath:
-            path: /run/spire/sockets
+            path: {{ .Values.agentSocketDir }}
             type: DirectoryOrCreate
         - name: spire-agent-token
           projected:

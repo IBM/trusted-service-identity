@@ -14,15 +14,20 @@ openShift: false
 clustername: spire-example
 # trustdomain is arbitrary but needs to match between Server and Agent
 trustdomain: spiretest.com
+# SPIRE version used for consistency
 spireVersion: 1.0.2
+# tornjakImage - Tornjak with SPIRE Server
 tornjakImg: ghcr.io/spiffe/tornjak-spire-server
-spireServerSocket: /run/spire/sockets/registration.sock
+# SPIRE Server socket
+spireServerSocketDir: /run/spire/sockets
+spireServerSocketFile: registration.sock
 
 # Enable OIDC
 OIDC:
   # to enable support for OIDC, change the value to true
   enable: false
   serviceName: oidc-tornjak
+  image: gcr.io/spiffe-io/oidc-discovery-provider
   # replace the MY_DISCOVERY_DOMAIN with the Ingress information
   # e.g. this could be an output of IBM Cloud command:
   #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'

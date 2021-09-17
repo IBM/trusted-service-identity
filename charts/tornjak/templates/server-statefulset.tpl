@@ -43,7 +43,7 @@ spec:
             - name: certs
               mountPath: /opt/spire/sample-keys
             - name: spire-server-socket
-              mountPath: /run/spire/sockets
+              mountPath: {{ .Values.spireServerSocketDir }}
               readOnly: false
 {{- if .Values.k8s_psat.remoteClusters }}
             - name: kubeconfigs
@@ -74,7 +74,7 @@ spec:
 {{- end }}
 {{- if .Values.OIDC.enable }}
         - name: spire-oidc
-          image: gcr.io/spiffe-io/oidc-discovery-provider:{{ .Values.spireVersion }}
+          image: {{ .Value.OIDC.image }}:{{ .Values.spireVersion }}
           args:
           - -config
           - /run/spire/oidc/config/oidc-discovery-provider.conf
@@ -83,7 +83,7 @@ spec:
             name: spire-oidc-port
           volumeMounts:
           - name: spire-server-socket
-            mountPath: /run/spire/sockets
+            mountPath: {{ .Values.spireServerSocketDir }}
             readOnly: true
           - name: spire-oidc-config
             mountPath: /run/spire/oidc/config/
@@ -136,7 +136,7 @@ spec:
 {{- if .Values.OIDC.enable }}
         - name: spire-server-socket
           hostPath:
-            path: {{ .Values.spireServerSocket }}
+            path: {{ .Values.spireServerSocketDir }}
             type: DirectoryOrCreate
         - name: spire-oidc-socket
           emptyDir: {}

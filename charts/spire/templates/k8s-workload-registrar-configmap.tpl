@@ -10,7 +10,7 @@ data:
     trust_domain = "{{ .Values.trustdomain }}"
     # enable when direct socket access to SPIRE Server available:
     # server_socket_path = "/run/spire/sockets/registration.sock"
-    agent_socket_path = "/run/spire/sockets/agent.sock"
+    agent_socket_path = "{{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}"
     server_address = "{{ .Values.spireAddress }}:{{ .Values.spirePort }}"
     cluster = "{{ .Values.clustername }}"
     # enable for label based registration:

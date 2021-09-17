@@ -7,7 +7,7 @@ Universal Trusted Workload Identity Service has completed.
       Cluster name: {{ .Values.clustername }}
       Trust Domain: {{ .Values.trustdomain }}
       Tornjak Image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
-      SPIRE Server Socket: {{ .Values.spireServerSocket }}
+      SPIRE Server socket: {{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}
 {{- if .Values.openShift }}
       OpenShift mode: true
 {{- end }}
@@ -21,6 +21,7 @@ Universal Trusted Workload Identity Service has completed.
 {{- end }}
 {{- if .Values.OIDC.enable }}
       OIDC enable: true
+      OIDC image: {{ .Value.OIDC.image }}
       OIDC service name:   {{ .Values.OIDC.serviceName }}
       MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
 {{- end }}
