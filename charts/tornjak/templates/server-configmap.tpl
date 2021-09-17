@@ -18,9 +18,9 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
-      socket_path = "{{ .Values.spireServerSocket }}"
+      socket_path = "{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
 
-{{- if .Values.OIDC.enable }}
+      {{- if .Values.OIDC.enable }}
       #AWS requires the use of RSA.  EC cryptography is not supported
       ca_key_type = "rsa-2048"
 
@@ -37,7 +37,7 @@ data:
         // The port to listen on (optional, defaults to 443)
         bundle_endpoint_port = 8443
       }
-{{- end }}
+      {{- end }}
 
       ca_subject = {
         country = ["US"],
@@ -83,9 +83,6 @@ data:
       {{- end }}
       {{- end }}
       {{- end }}
-      NodeResolver "noop" {
-        plugin_data {}
-      }
       KeyManager "disk" {
         plugin_data {
           keys_path = "/run/spire/data/keys.json"

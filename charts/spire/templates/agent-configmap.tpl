@@ -10,7 +10,7 @@ data:
       log_level = "DEBUG"
       server_address = "{{ .Values.spireAddress }}"
       server_port = "{{ .Values.spirePort }}"
-      socket_path = "/run/spire/sockets/agent.sock"
+      socket_path = "{{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}"
       trust_bundle_path = "/run/spire/bundle/bundle.crt"
       trust_domain = "{{ .Values.trustdomain }}"
     }

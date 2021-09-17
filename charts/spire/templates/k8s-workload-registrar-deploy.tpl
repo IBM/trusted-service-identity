@@ -32,7 +32,7 @@ spec:
             - /run/k8s-workload-registrar/config/registrar.conf
           volumeMounts:
             - name: spire-registrar-socket
-              mountPath: /run/spire/sockets
+              mountPath: {{ .Values.agentSocketDir }}
               readOnly: false
             - name: k8s-workload-registrar-config
               mountPath: /run/k8s-workload-registrar/config
@@ -40,7 +40,7 @@ spec:
       volumes:
         - name: spire-registrar-socket
           hostPath:
-            path: /run/spire/sockets
+            path: {{ .Values.agentSocketDir }}
             type: DirectoryOrCreate
         - name: k8s-workload-registrar-config
           configMap:

@@ -15,6 +15,7 @@ Universal Trusted Workload Identity Service has completed.
       Spire Server address:  {{ .Values.spireAddress }}:{{ .Values.spirePort }}
       Spire Agent image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
       Spire Registrar image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
+      Spire Agent sockets: {{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}
 
 
 To enable Workload Registrar, create an entry on Tornjak UI:

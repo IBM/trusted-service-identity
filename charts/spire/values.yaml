@@ -29,3 +29,7 @@ spirePort: 443
 spireRegistrarImg: gcr.io/spiffe-io/k8s-workload-registrar
 spireAgentImg: gcr.io/spiffe-io/spire-agent
 spireVersion: 1.0.2
+
+# SPIRE Agent socket
+agentSocketDir: /run/spire/sockets
+agentSocketFile: agent.sock
