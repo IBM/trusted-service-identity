@@ -167,7 +167,7 @@ Universal Trusted Workload Identity Service has completed.
 
       Cluster name: space-x.01
       Trust Domain: openshift.space-x.com
-      Tornjak Image: tsidentity/tornjak-spire-server:0.12.1
+      Tornjak Image: ghcr.io/spiffe/tornjak-spire-server:1.0.1
       SPIRE Server Socket: /run/spire/sockets/registration.sock
 
       Chart Name: tornjak

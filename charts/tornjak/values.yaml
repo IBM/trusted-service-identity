@@ -14,8 +14,8 @@ openShift: false
 clustername: spire-example
 # trustdomain is arbitrary but needs to match between Server and Agent
 trustdomain: spiretest.com
-spireVersion: 0.12.1
-tornjakImg: tsidentity/tornjak-spire-server
+spireVersion: 1.0.2
+tornjakImg: ghcr.io/spiffe/tornjak-spire-server
 spireServerSocket: /run/spire/sockets/registration.sock
 
 # Enable OIDC

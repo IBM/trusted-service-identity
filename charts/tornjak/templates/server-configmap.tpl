@@ -18,7 +18,7 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
-      registration_uds_path = "{{ .Values.spireServerSocket }}"
+      socket_path = "{{ .Values.spireServerSocket }}"
 
 {{- if .Values.OIDC.enable }}
       #AWS requires the use of RSA.  EC cryptography is not supported
@@ -57,7 +57,7 @@ data:
             clusters = {
                 "{{ .Values.clustername }}" = {
                     # use_token_review_api_validation = true
-                    service_account_whitelist = ["spire:spire-agent"]
+                    service_account_allow_list = ["spire:spire-agent"]
                 },
                 {{- if .Values.k8s_psat.remoteClusters }}
                 {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
