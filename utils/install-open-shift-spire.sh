@@ -109,14 +109,14 @@ fi
 }
 
 installSpireAgent(){
-  oc get projects | grep "${PROJECT}"
+  oc get projects | grep "${PROJECT}" 2>/dev/null
   if [ "$?" != "0" ]; then
     echo "Project $PROJECT must be created first"
     echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" "
     exit 1
   fi
 
-  oc -n $PROJECT get scc $SPIREAG_SCC
+  oc -n $PROJECT get scc $SPIREAG_SCC 2>/dev/null
   if [ "$?" == "0" ]; then
     # check if spire-agent project exists:
     echo "SPIRE Agent environment in $PROJECT project already exists. "
@@ -137,7 +137,7 @@ installSpireAgent(){
 # Need to copy the spire-bundle from the server namespace
 oc -n "$PROJECT" get cm spire-bundle
 if [ "$?" == "0" ]; then
-  echo "WARNING: using the existing configmap spire-bundle in $PROJECT. "
+  echo "Using the existing configmap spire-bundle in $PROJECT. "
 else
   echo "ConfigMap 'spire-bundle' must be created"
   exit 1
