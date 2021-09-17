@@ -97,7 +97,7 @@ fi
 
 # function for executing oc cli calls
 oc_cli() {
-oc "$@"
+oc -n "$PROJECT" "$@"
 if [ "$?" != "0" ]; then
   echo "Error executing: oc" "$@"
   exit 1
@@ -126,13 +126,14 @@ installSpireServer(){
       cleanup
       # while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
       # oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-      oc project "$PROJECT" 2> /dev/null
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
-
   fi
+
+# switch to `tornjak` namespace:
+oc project "$PROJECT" 2> /dev/null
 
 # get ingress information:
 INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
@@ -210,8 +211,8 @@ helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
 # Ingress route for spire-server
-oc_cli -n "$PROJECT" create route passthrough --service spire-server
-oc_cli -n "$PROJECT" get route
+oc_cli create route passthrough --service spire-server
+oc_cli get route
 INGRESS=$(oc -n "$PROJECT" get route spire-server -o jsonpath='{.spec.host}{"\n"}')
 echo "$INGRESS"
 
@@ -244,34 +245,34 @@ spec:
 EOF
 
 # create route for Tornjak TLS:
-oc_cli -n "$PROJECT" create route passthrough tornjak-tls --service tornjak-tls
+oc_cli create route passthrough tornjak-tls --service tornjak-tls
 # create route for Tornjak mTLS:
-oc_cli -n "$PROJECT" create route passthrough tornjak-mtls --service tornjak-mtls
+oc_cli create route passthrough tornjak-mtls --service tornjak-mtls
 # create route for Tornjak HTTP:
 # oc create route passthrough tornjak-http --service tornjak-http
-oc_cli -n "$PROJECT" expose svc/tornjak-http
+oc_cli expose svc/tornjak-http
 
 if $OIDC ; then
   # open edge access for oidc
   oc -n $PROJECT create route edge oidc --service spire-oidc
 fi
 
-SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
+SPIRESERV=$(oc -n "$PROJECT" get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
 echo "export SPIRE_SERVER=$SPIRESERV"
 echo # empty line to separate visually
 
-TORNJAKHTTP=$(oc get route tornjak-http --output json |  jq -r '.spec.host')
+TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-http --output json |  jq -r '.spec.host')
 echo "Tornjak (http): http://$TORNJAKHTTP/"
-TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
+TORNJAKTLS=$(oc -n "$PROJECT" get route tornjak-tls --output json |  jq -r '.spec.host')
 echo "Tornjak (TLS): https://$TORNJAKTLS/"
-TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
+TORNJAKMTLS=$(oc -n "$PROJECT" get route tornjak-mtls --output json |  jq -r '.spec.host')
 echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
 echo # empty line to separate visually
 
 echo "Trust Domain: $TRUSTDOMAIN"
 if $OIDC ; then
-  OIDCURL=$(oc get route oidc --output json |  jq -r '.spec.host')
+  OIDCURL=$(oc -n "$PROJECT" get route oidc --output json |  jq -r '.spec.host')
   echo "Tornjak (oidc): "
   echo " https://$OIDCURL/"
   echo "For testing oidc: "
