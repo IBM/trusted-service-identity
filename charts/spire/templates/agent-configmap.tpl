@@ -15,14 +15,20 @@ data:
       trust_domain = "{{ .Values.trustdomain }}"
     }
     plugins {
-      NodeAttestor "k8s_psat" {
-        plugin_data {
-          cluster = "{{ .Values.clustername }}"
-        }
-      }
       {{- if .Values.aws }}
       NodeAttestor "aws_iid" {
           plugin_data {}
+      }
+      {{- else if .Values.azure }}
+      NodeAttestor "azure_msi" {
+          plugin_data {
+           }
+      }
+      {{- else }}
+      NodeAttestor "k8s_psat" {
+          plugin_data {
+            cluster = "{{ .Values.clustername }}"
+          }
       }
       {{- end }}
       KeyManager "memory" {
