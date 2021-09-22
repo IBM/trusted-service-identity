@@ -62,7 +62,7 @@ data:
                 {{- if .Values.k8s_psat.remoteClusters }}
                 {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
                 "{{ $v.name }}" = {
-                    service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
+                    service_account_allow_list = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
                     kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
                 },
                 {{- end }}
@@ -70,6 +70,7 @@ data:
             }
         }
       }
+
       {{- if .Values.aws_iid -}}
       {{- if .Values.aws_iid.access_key_id -}}
       {{- if .Values.aws_iid.secret_access_key -}}
@@ -77,12 +78,30 @@ data:
           plugin_data {
             access_key_id = "{{- .Values.aws_iid.access_key_id -}}"
             secret_access_key = "{{- .Values.aws_iid.secret_access_key -}}"
-            skip_block_device: {{- .Values.aws_iid.skip_block_device -}}
+            skip_block_device = {{- .Values.aws_iid.skip_block_device -}}
           }
+      }
+
+      {{- end }}
+      {{- end }}
+      {{- end }}
+
+      {{- if .Values.azure_msi -}}
+      {{- if .Values.azure_msi.tenants -}}
+      NodeAttestor "azure_msi" {
+        enabled = true
+        plugin_data {
+          tenants = {
+            // Tenant configured with the default resource id (i.e. the resource manager)
+            {{- range $k, $v := .Values.azure_msi.tenants }}
+            "{{ $v.tenant }}" = {},
+            {{- end }}
+          }
+        }
       }
       {{- end }}
       {{- end }}
-      {{- end }}
+
       KeyManager "disk" {
         plugin_data {
           keys_path = "/run/spire/data/keys.json"

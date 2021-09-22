@@ -101,7 +101,7 @@ fi
 
 # function for executing oc cli calls
 oc_cli() {
-oc "$@"
+oc -n $PROJECT "$@"
 if [ "$?" != "0" ]; then
   echo "Error executing: oc" "$@"
   exit 1
@@ -128,11 +128,12 @@ installSpireAgent(){
       cleanup
       # while (oc get projects | grep -v spire-server | grep "$PROJECT"); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
       # oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
-      oc project "$PROJECT"
     else
       echo "Keeping the existing $PROJECT project as is"
     fi
   fi
+
+oc project "$PROJECT"
 
 # Need to copy the spire-bundle from the server namespace
 oc -n "$PROJECT" get cm spire-bundle
