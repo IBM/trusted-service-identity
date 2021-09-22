@@ -21,7 +21,7 @@ Universal Trusted Workload Identity Service has completed.
 {{- end }}
 {{- if .Values.OIDC.enable }}
       OIDC enable: true
-      OIDC image: {{ .Value.OIDC.image }}
+      OIDC image: {{ .Values.OIDC.image }}
       OIDC service name:   {{ .Values.OIDC.serviceName }}
       MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
 {{- end }}
@@ -33,16 +33,16 @@ Universal Trusted Workload Identity Service has completed.
       clusters = {
           "{{ .Values.clustername }}" = {
               # use_token_review_api_validation = true
-              service_account_whitelist = ["spire:spire-agent"]
+              service_account_allow_list = ["spire:spire-agent"]
           },
-      {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
+          {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
           "{{ $v.name }}" = {
-              service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
+              service_account_allow_list = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
               kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
           },
-      {{- end }}
+          {{- end }}
+      }
 {{- end }}
-   }
 
 To learn more about the release, try:
 

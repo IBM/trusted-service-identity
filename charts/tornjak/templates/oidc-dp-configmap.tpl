@@ -11,7 +11,7 @@ data:
     listen_socket_path = "/run/oidc-discovery-provider/server.sock"
     log_level = "info"
     server_api {
-      address = "unix:///{{ .Values.spireServerSocket }}"
+      address = "unix:///{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
     }
   nginx.conf: |
     user root;

@@ -55,7 +55,7 @@ spec:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-socketPath"
-              - "{{ .Values.spireServerSocket }}"
+              - "{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
@@ -67,14 +67,14 @@ spec:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-socketPath"
-              - "{{ .Values.spireServerSocket }}"
+              - "{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
               - "--shallow"
             initialDelaySeconds: 5
             periodSeconds: 10
 {{- end }}
 {{- if .Values.OIDC.enable }}
         - name: spire-oidc
-          image: {{ .Value.OIDC.image }}:{{ .Values.spireVersion }}
+          image: {{ .Values.OIDC.image }}:{{ .Values.spireVersion }}
           args:
           - -config
           - /run/spire/oidc/config/oidc-discovery-provider.conf
