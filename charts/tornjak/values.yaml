@@ -13,6 +13,9 @@ trustdomain: spiretest.com
 # SPIRE version used for consistency across components
 spireVersion: 1.0.2
 # tornjakImage - Tornjak with SPIRE Server
+# TODO this is just a temporary image with several patches. It
+# should be removed after the patches are available in the SPIRE main
+# tornjakImg: ghcr.io/spiffe/tornjak-spire-server
 tornjakImg: tsidentity/local-spire-server
 # SPIRE Server socket
 spireServerSocketDir: /run/spire-server/private
@@ -41,7 +44,7 @@ oidc:
 # Then create a secret:
 #     `kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs`
 #
-# Provide "name" value(s). "namespace" and "serviceAccount" are optional 
+# Provide "name" value(s). "namespace" and "serviceAccount" are optional
 #  default namespace value = "spire"
 #  default serviceAccount value = spire-agent
 k8s_psat:
