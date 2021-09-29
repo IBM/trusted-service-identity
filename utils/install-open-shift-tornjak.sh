@@ -195,16 +195,16 @@ if ! $OIDC ; then
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
   --set "openShift=true" \
-  tornjak charts/tornjak # --debug
+  tornjak charts/tornjak --debug
 else
   ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
   helm install --set "namespace=$PROJECT" \
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
-  --set "OIDC.enable=true" \
-  --set "OIDC.MY_DISCOVERY_DOMAIN=$ING" \
+  --set "oidc.enable=true" \
+  --set "oidc.myDiscoveryDomain=$ING" \
   --set "openShift=true" \
-  tornjak charts/tornjak # --debug
+  tornjak charts/tornjak --debug
 fi
 
 helm list
@@ -263,19 +263,19 @@ echo "export SPIRE_SERVER=$SPIRESERV"
 echo # empty line to separate visually
 
 TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-http --output json |  jq -r '.spec.host')
-echo "Tornjak (http): http://$TORNJAKHTTP/"
+echo "Tornjak (http): http://$TORNJAKHTTP"
 TORNJAKTLS=$(oc -n "$PROJECT" get route tornjak-tls --output json |  jq -r '.spec.host')
-echo "Tornjak (TLS): https://$TORNJAKTLS/"
+echo "Tornjak (TLS): https://$TORNJAKTLS"
 TORNJAKMTLS=$(oc -n "$PROJECT" get route tornjak-mtls --output json |  jq -r '.spec.host')
-echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
+echo "Tornjak (mTLS): https://$TORNJAKMTLS"
 echo # empty line to separate visually
 
 echo "Trust Domain: $TRUSTDOMAIN"
 if $OIDC ; then
   OIDCURL=$(oc -n "$PROJECT" get route oidc --output json |  jq -r '.spec.host')
-  echo "Tornjak (oidc): "
-  echo " https://$OIDCURL/"
-  echo "For testing oidc: "
+  echo "Tornjak with OIDC: "
+  echo " export OIDC_URL=https://$OIDCURL"
+  echo "For testing OIDC: "
   echo "  curl -k https://$OIDCURL/.well-known/openid-configuration"
   echo "  curl -k https://$OIDCURL/keys"
 fi

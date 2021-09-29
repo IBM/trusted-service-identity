@@ -1,4 +1,4 @@
-{{- if .Values.OIDC.enable }}
+{{- if .Values.oidc.enable }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,10 +6,9 @@ metadata:
   namespace: {{ .Values.namespace }}
 data:
   oidc-discovery-provider.conf: |
-    log_level = "INFO"
-    domain = "{{ .Values.OIDC.serviceName }}.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
-    listen_socket_path = "/run/oidc-discovery-provider/server.sock"
-    log_level = "info"
+    log_level = "debug"
+    domain = "{{ .Values.oidc.serviceName }}.{{ .Values.oidc.myDiscoveryDomain }}"
+    listen_socket_path = "{{ .Values.oidc.socketDir }}/{{ .Values.oidc.socketFile }}"
     server_api {
       address = "unix:///{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
     }

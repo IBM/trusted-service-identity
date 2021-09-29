@@ -1,4 +1,4 @@
-{{- if .Values.OIDC.enable }}
+{{- if .Values.oidc.enable }}
 # Service definition for the admission webhook
 apiVersion: v1
 kind: Service

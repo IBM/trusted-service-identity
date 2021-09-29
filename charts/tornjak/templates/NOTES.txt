@@ -19,11 +19,12 @@ Universal Trusted Workload Identity Service has completed.
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if .Values.OIDC.enable }}
+{{- if .Values.oidc.enable }}
       OIDC enable: true
-      OIDC image: {{ .Values.OIDC.image }}
-      OIDC service name:   {{ .Values.OIDC.serviceName }}
-      MY_DISCOVERY_DOMAIN: {{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}
+      OIDC image: {{ .Values.oidc.image }}
+      OIDC service name:   {{ .Values.oidc.serviceName }}
+      listen_socket_path:  {{ .Values.oidc.socketDir }}/{{ .Values.oidc.socketFile }}
+      myDiscoveryDomain: {{ .Values.oidc.myDiscoveryDomain }}
 {{- end }}
 
 {{- if .Values.k8s_psat.remoteClusters }}

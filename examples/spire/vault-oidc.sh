@@ -13,9 +13,9 @@ helpme()
 {
   cat <<HELPMEHELPME
 
-Syntax: ${0} <OIDC URL> <ROOT_TOKEN> <VAULT_ADDR>
+Syntax: ${0} <OIDC_URL> <ROOT_TOKEN> <VAULT_ADDR>
 Where:
-  OIDC URL    - OIDC URL (https://) (optional, if set as env. var)
+  OIDC_URL    - OIDC URL (https://) (optional, if set as env. var)
   ROOT_TOKEN  - Vault root token to setup the plugin (optional, if set as env. var)
   VAULT_ADDR  - Vault address in format http://vault.server:8200 (optional, if set as env. var)
 
