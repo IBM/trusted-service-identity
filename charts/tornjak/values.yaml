@@ -1,25 +1,35 @@
 ---
-# Default values for SPIRE agents deployment.
+# Default values for deployment of SPIRE Server with Tornjak
 # This is a YAML-formatted file.
 
+# namespace - for deploying the Server and Tornjak
 namespace: tornjak
-selfSignedCA: true
 # openShift requires special configuration, including different security level
 openShift: false
-# clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
+# clustername is required to set up access for SPIRE agents deployed
+# in the same cluster
 clustername: spire-example
+
+# SPIRE related elements
 # trustdomain is arbitrary but needs to match between Server and Agent
 trustdomain: spiretest.com
 # SPIRE version used for consistency across components
 spireVersion: 1.0.2
-# tornjakImage - Tornjak with SPIRE Server
-# TODO this is just a temporary image with several patches. It
-# should be removed after the patches are available in the SPIRE main
-# tornjakImg: ghcr.io/spiffe/tornjak-spire-server
-tornjakImg: tsidentity/local-spire-server
-# SPIRE Server socket
-spireServerSocketDir: /run/spire-server/private
-spireServerSocketFile: api.sock
+
+# SPIRE Server configuration
+spireServer:
+  # tornjakImage - Tornjak with SPIRE Server
+  # TODO this is just a temporary image with several patches. It
+  # should be removed after the patches are available in the SPIRE main
+  # img: ghcr.io/spiffe/tornjak-spire-server
+  img: tsidentity/local-spire-server
+  socketDir: /run/spire-server/private
+  socketFile: api.sock
+  # selfSignedCA - SPIRE will create the self signed CA unless this value
+  # is set to 'false'. In this case, make sure the key is accessible by
+  # Server in "/run/spire/secret/bootstrap.key" and the certificate in
+  # "/run/spire/secret/bootstrap.crt"
+  selfSignedCA: true
 
 # Enable OIDC
 oidc:
@@ -29,44 +39,44 @@ oidc:
   image: gcr.io/spiffe-io/oidc-discovery-provider
   socketDir: /run/oidc-discovery-provider
   socketFile: server.sock
-
-  # replace the myDiscoveryDomain with the Ingress information
+  # myDiscoveryDomain - replace the myDiscoveryDomain with the Ingress information
   # e.g. this could be an output of IBM Cloud command:
   #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'
-  #  myDiscoveryDomain: myDiscoveryDomain
+  myDiscoveryDomain: MY_DISCOVERY_DOMAIN
 
-# k8s_psat - enables support for a single SPIRE server managing
-# agents deployed in multiple, different clusters, with K8S PSAT NodeAttestor
-# Prior to this deployment, create a secret that contains KUBECONFIG information
-# for every remoteCluster.
-#    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name1>`
-#    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name2>`
-# Then create a secret:
-#     `kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs`
-#
-# Provide "name" value(s). "namespace" and "serviceAccount" are optional
-#  default namespace value = "spire"
-#  default serviceAccount value = spire-agent
-k8s_psat:
-  remoteClusters:
-  # - name: cluster1
-  #   namespace: spire
-  #   serviceAccount: spire-agent
-  # - name: cluster2
-  # - name: cluster3
-  #   namespace: spire
-  #   serviceAccount: spire-agent
+attestors:
+  # k8s_psat - enables support for a single SPIRE server managing
+  # agents deployed in multiple, different clusters, with K8S PSAT NodeAttestor
+  # Prior to this deployment, create a secret that contains KUBECONFIG information
+  # for every remoteCluster.
+  #    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name1>`
+  #    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name2>`
+  # Then create a secret:
+  #     `kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs`
+  #
+  # Provide "name" value(s). "namespace" and "serviceAccount" are optional
+  #  default namespace value = "spire"
+  #  default serviceAccount value = spire-agent
+  k8s_psat:
+    remoteClusters:
+    # - name: cluster1
+    #   namespace: spire
+    #   serviceAccount: spire-agent
+    # - name: cluster2
+    # - name: cluster3
+    #   namespace: spire
+    #   serviceAccount: spire-agent
 
-# awd_iid - enables node attestion in AWS EKS.
-# provide "access_key_id" and "secret_access_key"
-# see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md
-# aws_iid:
-#   access_key_id: "ACCESS_KEY_ID"
-#   secret_access_key: "SECRET_ACCESS_KEY"
-#   skip_block_device: true
+  # awd_iid - enables node attestion in AWS EKS.
+  # provide "access_key_id" and "secret_access_key"
+  # see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md
+  aws_iid:
+  #   access_key_id: "ACCESS_KEY_ID"
+  #   secret_access_key: "SECRET_ACCESS_KEY"
+  #   skip_block_device: true
 
-# azure_msi - enables node attestion using Azure MSI:
-# see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_azure_msi.md
-# azure_msi:
-#   tenants:
-#   - tenant: "TENANT_ID"
+  # azure_msi - enables node attestion using Azure MSI:
+  # see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_azure_msi.md
+  azure_msi:
+  #   tenants:
+  #   - tenant: "TENANT_ID"

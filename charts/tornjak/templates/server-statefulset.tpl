@@ -21,7 +21,7 @@ spec:
       shareProcessNamespace: true
       containers:
         - name: spire-server
-          image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           args:
             - -config
@@ -42,9 +42,9 @@ spec:
             - name: certs
               mountPath: /opt/spire/sample-keys
             - name: spire-server-socket
-              mountPath: {{ .Values.spireServerSocketDir }}
+              mountPath: {{ .Values.spireServer.socketDir }}
               readOnly: false
-            {{- if .Values.k8s_psat.remoteClusters }}
+            {{- if .Values.attestors.k8s_psat.remoteClusters }}
             - name: kubeconfigs
               mountPath: /run/spire/kubeconfigs
             {{- end }}
@@ -54,7 +54,7 @@ spec:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-socketPath"
-              - "{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
+              - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
@@ -66,7 +66,7 @@ spec:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-socketPath"
-              - "{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
+              - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
               - "--shallow"
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -86,7 +86,7 @@ spec:
               privileged: true
           volumeMounts:
           - name: spire-server-socket
-            mountPath: {{ .Values.spireServerSocketDir }}
+            mountPath: {{ .Values.spireServer.socketDir }}
             # readOnly: true
           - name: spire-oidc-config
             mountPath: /run/spire/oidc/config/
@@ -131,7 +131,7 @@ spec:
           secret:
             defaultMode: 0400
             secretName: tornjak-certs
-        {{- if .Values.k8s_psat.remoteClusters }}
+        {{- if .Values.attestors.k8s_psat.remoteClusters }}
         - name: kubeconfigs
           secret:
             defaultMode: 0400
@@ -140,7 +140,7 @@ spec:
         {{- if .Values.oidc.enable }}
         - name: spire-server-socket
           hostPath:
-            path: {{ .Values.spireServerSocketDir }}
+            path: {{ .Values.spireServer.socketDir }}
             type: DirectoryOrCreate
         - name: spire-oidc-socket
           emptyDir: {}
