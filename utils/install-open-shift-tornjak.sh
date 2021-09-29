@@ -195,7 +195,7 @@ if ! $OIDC ; then
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
   --set "openShift=true" \
-  tornjak charts/tornjak --debug
+  tornjak charts/tornjak #--debug
 else
   ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
   helm install --set "namespace=$PROJECT" \
@@ -204,7 +204,7 @@ else
   --set "oidc.enable=true" \
   --set "oidc.myDiscoveryDomain=$ING" \
   --set "openShift=true" \
-  tornjak charts/tornjak --debug
+  tornjak charts/tornjak #--debug
 fi
 
 helm list

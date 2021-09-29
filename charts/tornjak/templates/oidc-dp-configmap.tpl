@@ -10,7 +10,7 @@ data:
     domain = "{{ .Values.oidc.serviceName }}.{{ .Values.oidc.myDiscoveryDomain }}"
     listen_socket_path = "{{ .Values.oidc.socketDir }}/{{ .Values.oidc.socketFile }}"
     server_api {
-      address = "unix:///{{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}"
+      address = "unix:///{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
     }
   nginx.conf: |
     user root;

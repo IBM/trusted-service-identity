@@ -6,14 +6,14 @@ Universal Trusted Workload Identity Service has completed.
 
       Cluster name: {{ .Values.clustername }}
       Trust Domain: {{ .Values.trustdomain }}
-      Tornjak Image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
-      SPIRE Server socket: {{ .Values.spireServerSocketDir }}/{{ .Values.spireServerSocketFile }}
+      Tornjak Image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
+      SPIRE Server socket: {{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}
 {{- if .Values.openShift }}
       OpenShift mode: true
 {{- end }}
-{{- if .Values.aws_iid -}}
-{{- if .Values.aws_iid.access_key_id -}}
-{{- if .Values.aws_iid.secret_access_key -}}
+{{- if .Values.attestors.aws_iid -}}
+{{- if .Values.attestors.aws_iid.access_key_id -}}
+{{- if .Values.attestors.aws_iid.secret_access_key -}}
       Using NodeAttestor "aws_iid" with
          "access_key_id" and "secret_access_key"
 {{- end }}
@@ -27,7 +27,7 @@ Universal Trusted Workload Identity Service has completed.
       myDiscoveryDomain: {{ .Values.oidc.myDiscoveryDomain }}
 {{- end }}
 
-{{- if .Values.k8s_psat.remoteClusters }}
+{{- if .Values.attestors.k8s_psat.remoteClusters }}
       Multi-cluster support enabled.
       Make sure `kubeconfig` secret is created to support a following:
 
@@ -36,7 +36,7 @@ Universal Trusted Workload Identity Service has completed.
               # use_token_review_api_validation = true
               service_account_allow_list = ["spire:spire-agent"]
           },
-          {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
+          {{- range $k, $v := .Values.attestors.k8s_psat.remoteClusters }}
           "{{ $v.name }}" = {
               service_account_allow_list = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
               kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
