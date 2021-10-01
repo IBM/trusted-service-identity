@@ -21,7 +21,7 @@ spec:
       containers:
         - name: k8s-workload-registrar
           #image: k8s-workload-registrar:latest
-          image: {{ .Values.spireRegistrarImg }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireRegistrar.img }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           securityContext:
             # TODO: review this, maybe applicable for OpenShift only:
@@ -32,7 +32,7 @@ spec:
             - /run/k8s-workload-registrar/config/registrar.conf
           volumeMounts:
             - name: spire-registrar-socket
-              mountPath: {{ .Values.agentSocketDir }}
+              mountPath: {{ .Values.spireAgent.socketDir }}
               readOnly: false
             - name: k8s-workload-registrar-config
               mountPath: /run/k8s-workload-registrar/config
@@ -40,7 +40,7 @@ spec:
       volumes:
         - name: spire-registrar-socket
           hostPath:
-            path: {{ .Values.agentSocketDir }}
+            path: {{ .Values.spireAgent.socketDir }}
             type: DirectoryOrCreate
         - name: k8s-workload-registrar-config
           configMap:
