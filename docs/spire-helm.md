@@ -317,8 +317,8 @@ and region "us-east".
 Use `--debug` flag to show additional information about the helm deployment.
 
 ```console
-helm install --set "spireAddress=$SPIRE_SERVER" \
---set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
+helm install --set "spireServer.address=$SPIRE_SERVER" \
+--set "spireServer.port=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
 --set "clustername=$CLUSTERNAME" --set "region=us-east" \
 --set "trustdomain=openshift.space-x.com" \
 spire charts/spire --debug

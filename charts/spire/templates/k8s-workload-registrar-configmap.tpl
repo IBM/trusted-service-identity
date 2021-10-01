@@ -10,8 +10,8 @@ data:
     trust_domain = "{{ .Values.trustdomain }}"
     # enable when direct socket access to SPIRE Server available:
     # server_socket_path = "/run/spire/sockets/registration.sock"
-    agent_socket_path = "{{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}"
-    server_address = "{{ .Values.spireAddress }}:{{ .Values.spirePort }}"
+    agent_socket_path = "{{ .Values.spireAgent.socketDir }}/{{ .Values.spireAgent.socketFile }}"
+    server_address = "{{ .Values.spireServer.address }}:{{ .Values.spireServer.port }}"
     cluster = "{{ .Values.clustername }}"
     # enable for label based registration:
     # pod_label = "spire-workload-id"

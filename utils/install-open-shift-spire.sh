@@ -179,7 +179,7 @@ oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$S
 # this works:
 oc_cli adm policy add-scc-to-user privileged -z $SPIRE_AG_SA
 
-helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
+helm install --set "spireServer.address=$SPIRESERVER" --set "namespace=$PROJECT" \
  --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" \
  --set "region=$REGION" \
  --set "openShift=true" spire charts/spire # --debug

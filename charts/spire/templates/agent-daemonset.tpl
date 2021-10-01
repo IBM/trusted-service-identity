@@ -25,10 +25,10 @@ spec:
           # you prefer that waits for a service to be up. This image is built
           # from https://github.com/lqhl/wait-for-it
           image: gcr.io/spiffe-io/wait-for-it
-          args: ["-t", "30", "{{ .Values.spireAddress }}:{{ .Values.spirePort }}"]
+          args: ["-t", "30", "{{ .Values.spireServer.address }}:{{ .Values.spireServer.port }}"]
       containers:
         - name: spire-agent
-          image: {{ .Values.spireAgentImg }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireAgent.img }}:{{ .Values.spireVersion }}
           securityContext:
             # TODO: review this, maybe applicable for OpenShift only:
             # privilaged is needed to create socket and bundle files
@@ -39,7 +39,7 @@ spec:
               mountPath: /run/spire/config
               readOnly: true
             - name: spire-agent-socket
-              mountPath: {{ .Values.agentSocketDir }}
+              mountPath: {{ .Values.spireAgent.socketDir }}
               readOnly: false
             - name: spire-bundle
               mountPath: /run/spire/bundle
@@ -52,7 +52,7 @@ spec:
                 - /opt/spire/bin/spire-agent
                 - healthcheck
                 - -socketPath
-                - {{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}
+                - {{ .Values.spireAgent.socketDir }}/{{ .Values.spireAgent.socketFile }}
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
@@ -66,7 +66,7 @@ spec:
             name: spire-bundle
         - name: spire-agent-socket
           hostPath:
-            path: {{ .Values.agentSocketDir }}
+            path: {{ .Values.spireAgent.socketDir }}
             type: DirectoryOrCreate
         - name: spire-agent-token
           projected:

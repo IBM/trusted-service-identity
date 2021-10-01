@@ -86,7 +86,8 @@ This requires a few steps:
   ```
   In this case the registrar is running on the node `10.38.240.214`
 
-  There are 2 methods to register Workload Registrar:
+
+There are currently 2 methods to register Workload Registrar:
 
 ### Register Workload Registrar using Tornjak UI
 * Connect to Tornjak server UI, and list the agents.

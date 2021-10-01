@@ -8,9 +8,9 @@ data:
     agent {
       data_dir = "/run/spire"
       log_level = "DEBUG"
-      server_address = "{{ .Values.spireAddress }}"
-      server_port = "{{ .Values.spirePort }}"
-      socket_path = "{{ .Values.agentSocketDir }}/{{ .Values.agentSocketFile }}"
+      server_address = "{{ .Values.spireServer.address }}"
+      server_port = "{{ .Values.spireServer.port }}"
+      socket_path = "{{ .Values.spireAgent.socketDir }}/{{ .Values.spireAgent.socketFile }}"
       trust_bundle_path = "/run/spire/bundle/bundle.crt"
       trust_domain = "{{ .Values.trustdomain }}"
     }

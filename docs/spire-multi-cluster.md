@@ -63,10 +63,10 @@ To use AWS node_attestor, we need to provide the following value in
 aws: true
 ```
 
-Or add the `--set "aws=true"` flag to the helm command: 
+Or add the `--set "aws=true"` flag to the helm command:
 ```console
-helm install --set "spireAddress=$SPIRE_SERVER" \
---set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
+helm install --set "spireServer.address=$SPIRE_SERVER" \
+--set "spireServer.port=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
 --set "clustername=$CLUSTERNAME" --set "region=us-east" \
 --set "trustdomain=openshift.space-x.com" \
 --set "aws=true" \
@@ -126,6 +126,13 @@ kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfig
 ```
 This has to be done before executing the Helm deployment.
 
+If you ever need to update the existing credentials,
+create new files, and then run:
+
+```console
+kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs --save-config --dry-run=client -o yaml | kubectl -n tornjak apply -f -
+```
+
 #### Step 1b. Update the Tornjak helm charts
 Once the secret is created, we need to update the helm charts
 to support the Kuberenetes attestor (`k8s_psat`).
@@ -171,9 +178,6 @@ Agents deployment.
 
 ---
 
-
-
-
 ## Adding multi-cluster support to an existing deployment
 This part describes the steps required to extend the existing
 Tornjak/SPIRE Server to support multiple clusters.
@@ -190,6 +194,20 @@ whether cloud specific or Kubernetes one `k8s_psat`.
 * Update the SPIRE server configuration accordingly:
 ```console
 kubectl -n tornjak edit configmap spire-server
+```
+Here is a sample configuration:
+
+```yaml
+NodeAttestor "k8s_psat" {
+  plugin_data {
+      clusters = {
+          "tsi-kube01" = {
+              service_account_allow_list = ["spire:spire-agent"]
+              kube_config_file = "/run/spire/kubeconfigs/tsi-kube01"
+          }
+      }
+  }
+}
 ```
 * If using the secret for `k8s_psat` attestor,
 modify the SPIRE Server StatefulSet deployment
