@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      bb: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        bb: db
+    spec:
+      containers:
+        - args:
+            - --default-authentication-plugin=mysql_native_password
+          env:
+            - name: MYSQL_PASSWORD
+              value: testnewroot
+            - name: MYSQL_ROOT_PASSWORD
+              value: testroot
+            - name: MYSQL_USER
+              value: newroot
+          image: mysql:5.7
+          name: mysql57demo
+          ports:
+            - containerPort: 3306
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: default
+spec:
+  ports:
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+  selector:
+    bb: db
+status:
+  loadBalancer: {}

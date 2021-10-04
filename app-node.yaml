@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      bb: app-node
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        bb: app-node
+    spec:
+      containers:
+        - image: tsidentity/tornjak-example-nodejs:v0.1
+          name: node
+          ports:
+            - containerPort: 8080
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-node
+  namespace: default
+spec:
+  selector:
+    bb: app-node
+  ports:
+    - name: "8001"
+      port: 8001
+      targetPort: 8080
+status:
+  loadBalancer: {}

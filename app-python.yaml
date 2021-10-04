@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-py
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      bb: app-py
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        bb: app-py
+    spec:
+      containers:
+        - image: tsidentity/tornjak-example-python
+          name: py
+          ports:
+            - containerPort: 5000
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-py
+  namespace: default
+spec:
+  selector:
+    bb: app-py
+  ports:
+    - name: "8000"
+      port: 8000
+      targetPort: 5000
+status:
+  loadBalancer: {}
