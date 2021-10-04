@@ -19,7 +19,7 @@ bin/python:
 	docker tag $(PYTHON_IMG) $(PYTHON_IMG_MUTABLE)
 
 bin/nodejs:
-	docker build --no-cache -t $(NODEJS_IMG) -f python/Dockerfile .
+	docker build --no-cache -t $(NODEJS_IMG) -f nodejs/Dockerfile .
 	docker tag $(NODEJS_IMG) $(NODEJS_IMG_MUTABLE)
 
 container-python:
