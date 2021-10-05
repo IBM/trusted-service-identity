@@ -83,10 +83,14 @@ minikube start --kubernetes-version=v1.20.2
 Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” as namespace and "minikube" as the cluster name.
 
 ```console
-export CLUSTERNAME=minikube
+export CLUSTER_NAME=minikube
 export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
 ```
+
+*IBMCloud Hint*
+when running in IBMCloud, you can use a handy script to get cluster information
+[utils/get-cluster-info.sh](../utils/get-cluster-info.sh)
 
 ## Helm Deployment for Tornjak
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
@@ -102,7 +106,7 @@ helm inspect values charts/tornjak/
 ### Helm installation execution
 Sample execution:
 ```console
-helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
+helm install --set "namespace=tornjak" --set "clustername=$CLUSTER_NAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
 ```
 
 Let's review the Tornjak deployment:
@@ -319,7 +323,7 @@ Use `--debug` flag to show additional information about the helm deployment.
 ```console
 helm install --set "spireServer.address=$SPIRE_SERVER" \
 --set "spireServer.port=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
---set "clustername=$CLUSTERNAME" --set "region=us-east" \
+--set "clustername=$CLUSTER_NAME" --set "region=us-east" \
 --set "trustdomain=openshift.space-x.com" \
 spire charts/spire --debug
 ```
@@ -426,17 +430,17 @@ utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
 ```
 For our example, this is:
 ```console
-utils/createKeys.sh sample-keys/ $CLUSTERNAME $INGRESS-DOMAIN-NAME
+utils/createKeys.sh sample-keys/ $CLUSTER_NAME $INGRESS-DOMAIN-NAME
 ```
 
 Create a secret that is using the generated key and certificates:
 
 ```
 kubectl -n tornjak create secret generic tornjak-certs \
---from-file=key.pem="sample-keys/$CLUSTERNAME.key" \
---from-file=cert.pem="sample-keys/$CLUSTERNAME.crt" \
---from-file=tls.pem="sample-keys/$CLUSTERNAME.crt" \
---from-file=mtls.pem="sample-keys/$CLUSTERNAME.crt"
+--from-file=key.pem="sample-keys/$CLUSTER_NAME.key" \
+--from-file=cert.pem="sample-keys/$CLUSTER_NAME.crt" \
+--from-file=tls.pem="sample-keys/$CLUSTER_NAME.crt" \
+--from-file=mtls.pem="sample-keys/$CLUSTER_NAME.crt"
 ```
 
 Then just simply restart the spire server by killing the **spire-server-0** pod
