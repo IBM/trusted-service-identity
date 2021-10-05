@@ -26,7 +26,7 @@ secret updated on the SPIRE server.
 
 **Solution:**
 To update the "spire-bundle",
-get the `spire-bundle` configmap from the SPIRE server, update the namespace to match the agent cluster, then deploy it there.
+get the `spire-bundle` configmap from the SPIRE server, update the namespace to match the agent cluster, then deploy it agent namespace.
 
 On the server:
 ```console
@@ -39,6 +39,10 @@ kubectl -n spire create -f spire-bundle.yaml
 ```
 
 In case of the remote clusters, follow steps outline [here](./spire-multi-cluster.md#enable-kubernetes-attestor)
+
+There is no need to restart the agents.
+Once the updated `spire-bundle` is in place
+the agents will pick up the changes on the next restart. 
 
 ---
 
