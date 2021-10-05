@@ -2,8 +2,8 @@
 In this tutorial we show how to use SPIRE and OIDC to authenticate workloads to
 retrieve Vault secrets.
 
-This tutorial is based on the documentation for [Using SPIRE JWT-SVIDs to Authenticate
-to Hashicorp Vault](https://spiffe.io/docs/latest/keyless/vault/readme/)
+This tutorial is based on the SPIFFE documentation [("Using SPIRE JWT-SVIDs to Authenticate
+to Hashicorp Vault")](https://spiffe.io/docs/latest/keyless/vault/readme/)
 
 This part of the tutorial assumes that OIDC is already [enabled on SPIRE](./spire-oidc-tutorial.md)
 
@@ -78,7 +78,7 @@ cat > role.json <<EOF
   }
 EOF
 
-vault write auth/jwt/role/eurole -<role.json
+vault write auth/jwt/role/marsrole -<role.json
 ```
 
 We are ready to run the setup script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh)

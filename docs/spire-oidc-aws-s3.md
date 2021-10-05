@@ -104,46 +104,56 @@ The IAM role contains the connection parameters for the OIDC federation to AWS s
 
 5. Click **Next: Review** to skip the **Add Tags** screen.
 
-6. Type the name `oidc-federation-test-role` for the IAM role and click **Create role**.
+6. Type the name `oidc-federation-spacex-demo-role` for the IAM role and click **Create role**.
 
 
 ### Add the SPIFFE ID to the IAM Role
 To allow the workload from outside AWS to access AWS S3, add the workload’s SPIFFE ID to the IAM role. This restricts access to the IAM role to JWT SVIDs with the specified SPIFFE ID.
 
-1. Click **Roles** on the left, use the search field to find the `oidc-federation-test-role` IAM role that you created in the last section, and click the role.
+1. Click **Roles** on the left, use the search field to find the `oidc-federation-spacex-demo-role` IAM role that you created in the last section, and click the role.
 
 2. At the top of the **Summary** page, next to **Role ARN**, copy the role ARN into the clipboard by clicking the small icon at the end. Save the ARN in a file such as `oidc-arn.txt` for use in the testing section.
 
 3. Click the **Trust relationships** tab near the middle of the page and then click **Edit trust relationship**.
 
-4. In the JSON access control policy, modify a condition line at the end of the `StringEquals` attribute to restrict access to workloads matching the workload SPIFFE ID that we will be using for testing. The new code is:
+4. In the JSON access control policy, modify a condition line at the end of the `StringEquals` attribute to restrict access to workloads matching the workload SPIFFE ID that we will be using for testing.
+The sample code is:
 
   ```
+   . . .
     "Action": "sts:AssumeRoleWithWebIdentity",
     "Condition": {
       "ForAllValues:StringLike": {
-        "oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud:sub": "spiffe://openshift.space-x.com/eu-*/*/*/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b",
+        "oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud:sub": "spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/elon-musk/pod_name/mars-mission-*",
         "oidc-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud:aud": "mys3"
       }
     }
   ```
-  This policy states that only containers with `openshift.space-x.com` trust domain, deployed in Europe, running on `elon-mask` service account with `mars-mission-main` container can access this S3 bucket.
+  This policy states that only containers with `openshift.space-x.com` trust domain,
+  deployed in any `region`, in any `cluster_name` and in any `namespace`,
+  but only using **elon-musk** `serviceAccount` and pod that starts with name **mars-mission**
+  can access this S3 bucket.
 
 5. Click **Update Trust Policy**. This change to the IAM role takes a minute or two to propagate.
 
 
 ## Test Access to AWS S3
-We are going to start a container in our SPIRE environment. This container has AWS S3 as well as SPIRE agent binaries for running the experiment.
+We are going to start a container in our SPIRE environment.
+This container already has AWS S3 cli as well as SPIRE agent binaries
+for running this experiment.
 
-Additionally, the test deployment file [examples/spire/mars-spaceX.yaml](examples/spire/mars-spaceX.yaml) has an annotation like this:
+Additionally, the test deployment file [examples/spire/mars-spaceX.yaml](examples/spire/mars-spaceX.yaml) has a following label:
 
 ```yaml
-metadata:
-  annotations:
-    spire-workload-id: eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b
-
+template:
+  metadata:
+    labels:
+      identity_template: "true"
 ```
-This represent a sample identity of this container. Just for the demo purpose.
+This label indicates that pod will have a identity in the format:
+```
+identity_template = "{{ "region/{{.Context.Region}}/cluster_name/{{.Context.ClusterName}}/ns/{{.Pod.Namespace}}/sa/{{.Pod.ServiceAccount}}/pod_name/{{.Pod.Name}}" }}"
+```
 
 Start the test container in `default` namespace.
 ```
@@ -165,7 +175,7 @@ requesting **audience** for `mys3`:
 bin/spire-agent api fetch jwt -audience mys3 -socketPath /run/spire/sockets/agent.sock
 ```
 
-Get the long JWT token that follows the `token(spiffe://openshift.space-x.com/eu-de/space-x.01/default/elon-musk/mars-mission-main/c0d076b51c28dc937a70a469b4cc946fb465ab6c86d6ae89ae2cf8eac1f55d6b):`
+Get the long JWT token that follows the `token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x03/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rhq9d):`
 and save it in the file `token.jwt`.
 
 Now, build the AWS request, where:
@@ -176,7 +186,7 @@ Now, build the AWS request, where:
 In our example this would be:
 
 ```console
-AWS_ROLE_ARN=arn:aws:iam::581274594392:role/oidc-federation-test-role-space-x-01 AWS_WEB_IDENTITY_TOKEN_FILE=token.jwt aws s3 cp s3://tsi-spire-bucket/test.txt secret-file.txt
+AWS_ROLE_ARN=arn:aws:iam::581274594392:role/oidc-federation-spacex-demo-role AWS_WEB_IDENTITY_TOKEN_FILE=token.jwt aws s3 cp s3://tsi-spire-bucket/test.txt secret-file.txt
 ```
 
 If everything went fine, we should now have a local file `secret-file.txt` that
