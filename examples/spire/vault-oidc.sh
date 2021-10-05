@@ -80,8 +80,8 @@ EOF
   }
 EOF
 
-  vault write auth/jwt/role/eurole -<role.json
-  vault read auth/jwt/role/eurole
+  vault write auth/jwt/role/marsrole -<role.json
+  vault read auth/jwt/role/marsrole
 }
 
 footer() {
@@ -104,7 +104,7 @@ Once inside:
 
   # setup env. variables:
   export JWT=
-  export ROLE=eurole
+  export ROLE=marsrole
   export VAULT_ADDR=$VAULT_ADDR
 
   # using this JWT to login with vault and get a token:
