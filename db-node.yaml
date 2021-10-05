@@ -38,10 +38,12 @@ metadata:
   name: db
   namespace: default
 spec:
+  type: NodePort
   ports:
     - name: "3306"
       port: 3306
       targetPort: 3306
+      protocol: TCP
   selector:
     bb: db
 status:

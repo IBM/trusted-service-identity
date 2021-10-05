@@ -29,6 +29,7 @@ metadata:
   name: app-py
   namespace: default
 spec:
+  type: NodePort
   selector:
     bb: app-py
   ports:

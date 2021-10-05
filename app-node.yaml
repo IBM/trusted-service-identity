@@ -29,6 +29,7 @@ metadata:
   name: app-node
   namespace: default
 spec:
+  type: NodePort
   selector:
     bb: app-node
   ports:
