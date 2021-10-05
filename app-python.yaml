@@ -15,7 +15,7 @@ spec:
         bb: app-py
     spec:
       containers:
-        - image: tsidentity/tornjak-example-python
+        - image: tsidentity/tornjak-example-python:v0.1
           name: py
           ports:
             - containerPort: 5000
