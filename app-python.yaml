@@ -6,13 +6,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      bb: app-py
+      app: app-py
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        bb: app-py
+        app: app-py
     spec:
       containers:
         - image: tsidentity/tornjak-example-python:v0.1
@@ -31,7 +31,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    bb: app-py
+    app: app-py
   ports:
     - name: "8000"
       port: 8000
