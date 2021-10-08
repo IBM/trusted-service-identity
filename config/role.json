@@ -1,0 +1,11 @@
+  {
+      "role_type":"jwt",
+      "user_claim": "sub",
+      "bound_audiences": "vault",
+      "bound_claims_type": "glob",
+      "bound_claims": {
+          "sub":"spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/*/pod_name/apps-*"
+      },
+      "token_ttl": "24h",
+      "token_policies": "my-db-policy"
+  }
