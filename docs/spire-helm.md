@@ -323,7 +323,11 @@ Use `--debug` flag to show additional information about the helm deployment.
 ```console
 helm install --set "spireServer.address=$SPIRE_SERVER" \
 --set "spireServer.port=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
+<<<<<<< HEAD
 --set "clustername=$CLUSTER_NAME" --set "region=us-east" \
+=======
+--set "clustername=$CLUSTERNAME" --set "region=us-east" \
+>>>>>>> 17fd57be54dedab80f45864521f5d0787bf8b3d0
 --set "trustdomain=openshift.space-x.com" \
 spire charts/spire --debug
 ```
