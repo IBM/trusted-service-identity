@@ -101,7 +101,7 @@ Get the SVID (SPIFFE ID) of the agent running on the specific node (as above). Y
    ```
    - Under Selectors Recommendation, select the `selectors` suggested by the installation under `Selectors Recommendation`.  For example, if the installation suggests the following:
    ```
-   k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
+   k8s:sa:spire-k8s-registrar, k8s:ns:spire, k8s:container-name:k8s-workload-registrar
    ```
    check off `k8s:sa`, `k8s:ns`, `k8s:container-name`.  Then under `Selectors`, fill in the suggested values.
    - Make sure to check the `Admin Flag`, so the registrar gets enough permissions to create new entries.

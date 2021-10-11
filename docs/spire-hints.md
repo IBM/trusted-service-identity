@@ -42,7 +42,23 @@ In case of the remote clusters, follow steps outline [here](./spire-multi-cluste
 
 There is no need to restart the agents.
 Once the updated `spire-bundle` is in place
-the agents will pick up the changes on the next restart. 
+the agents will pick up the changes on the next restart.
+
+---
+**Problem:**
+
+Agent log file shows an error:
+```
+time="2021-10-05T18:33:55Z" level=error msg="Agent crashed" error="failed to receive attestation response: rpc error: code = Internal desc = nodeattestor(k8s_psat): unable to validate token with TokenReview API: unable to query token review API: Post \"https://c113.us-south.containers.cloud.ibm.com:31396/apis/authentication.k8s.io/v1/tokenreviews\": failed to refresh token: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"errorCode\":\"BXNIM0408E\",\"errorMessage\":\"Provided refresh token is expired\",\"context\":{\"requestId\":\"aWFtaWQtNi4xMC0xMTc5Ny1lMWY0MWI0LTc4NThmYzY2OWMtbGN4aGQ-a8b3fd9f52ed44cf9e48b274baf0f47f\",\"requestType\":\"incoming.Identity_Token\",\"userAgent\":\"Go-http-client/2.0\",\"url\":\"https://identity-3.us-south.iam.cloud.ibm.com\",\"instanceId\":\"iamid-6.10-11797-e1f41b4-7858fc669c-lcxhd\",\"threadId\":\"5093cf\",\"host\":\"iamid-6.10-11797-e1f41b4-7858fc669c-lcxhd\",\"startTime\":\"05.10.2021 18:33:55:376 UTC\",\"endTime\":\"05.10.2021 18:33:55:386 UTC\",\"elapsedTime\":\"10\",\"locale\":\"en_US\",\"clusterName\":\"iam-id-prod-us-south-dal13\"}}"
+```
+
+**Description:**
+
+Credential used in `kubeconfigs` secret expired for this cluster.
+
+**Solution:**
+
+Refresh the KUBECONFIG creds in the secret as described [here](./spire-multi-cluster.md#enable-kubernetes-attestor)
 
 ---
 

@@ -133,6 +133,9 @@ create new files, and then run:
 kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs --save-config --dry-run=client -o yaml | kubectl -n tornjak apply -f -
 ```
 
+This change requires SPIRE server restart, but not the agents.
+
+
 #### Step 1b. Update the Tornjak helm charts
 Once the secret is created, we need to update the helm charts
 to support the Kuberenetes attestor (`k8s_psat`).
