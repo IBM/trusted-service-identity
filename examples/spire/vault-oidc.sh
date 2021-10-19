@@ -1,5 +1,6 @@
 #!/bin/bash
 
+ROLE="marsrole"
 OIDC_URL=${OIDC_URL:-$1}
 ROOT_TOKEN=${ROOT_TOKEN:-$2}
 VAULT_ADDR=${VAULT_ADDR:-$3}
@@ -45,7 +46,7 @@ setupVault()
 
 
   # Connect OIDC - Set up our OIDC Discovery URL,
-  vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“dev”
+  vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“marsrole”
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo " 'vault write auth/jwt/config oidc_discovery_url=' command failed"
@@ -54,7 +55,7 @@ setupVault()
      #exit 1
   fi
 
-  # Define a policy my-dev-policy that will be assigned to a dev role that we’ll create in the next step.
+  # Define a policy my-mars-policy that will be assigned to a marsrole role that we’ll create in the next step.
   cat > vault-policy.hcl <<EOF
   path "secret/data/my-super-secret" {
      capabilities = ["read"]
@@ -62,7 +63,7 @@ setupVault()
 EOF
 
   # write policy
-  vault policy write my-dev-policy ./vault-policy.hcl
+  vault policy write my-mars-policy ./vault-policy.hcl
 
 # bound_subject does not allow using wildcards
 # so we use bound_claims instead
@@ -76,12 +77,12 @@ EOF
           "sub":"spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/elon-musk/pod_name/mars-mission-*"
       },
       "token_ttl": "24h",
-      "token_policies": "my-dev-policy"
+      "token_policies": "my-mars-policy"
   }
 EOF
 
-  vault write auth/jwt/role/marsrole -<role.json
-  vault read auth/jwt/role/marsrole
+  vault write auth/jwt/role/$ROLE -<role.json
+  vault read auth/jwt/role/$ROLE
 }
 
 footer() {

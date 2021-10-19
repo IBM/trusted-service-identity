@@ -32,6 +32,19 @@ spec:
           image: tsidentity/mars-demo:latest
           command: ["sleep"]
           args: ["1000000000"]
+          env:
+          - name: AG_SOCK
+            value: "/run/spire/sockets/agent.sock"
+          - name: S3_ROLE
+            value: "arn:aws:iam::581274594392:role/mars-mission-role-01"
+          - name: S3_AUD
+            value: "mys3"
+          - name: VAULT_ADDR
+            value: "http://tsi-kube01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
+          - name: VAULT_ROLE
+            value: "marsrole"
+          - name: VAULT_SECRET
+            value: "/v1/secret/data/my-super-secret"
           volumeMounts:
             - name: spire-agent-socket
               mountPath: /run/spire/sockets
