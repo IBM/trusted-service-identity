@@ -8,21 +8,27 @@ data:
     agent {
       data_dir = "/run/spire"
       log_level = "DEBUG"
-      server_address = "{{ .Values.spireAddress }}"
-      server_port = "{{ .Values.spirePort }}"
-      socket_path = "/run/spire/sockets/agent.sock"
+      server_address = "{{ .Values.spireServer.address }}"
+      server_port = "{{ .Values.spireServer.port }}"
+      socket_path = "{{ .Values.spireAgent.socketDir }}/{{ .Values.spireAgent.socketFile }}"
       trust_bundle_path = "/run/spire/bundle/bundle.crt"
       trust_domain = "{{ .Values.trustdomain }}"
     }
     plugins {
-      NodeAttestor "k8s_psat" {
-        plugin_data {
-          cluster = "{{ .Values.clustername }}"
-        }
-      }
       {{- if .Values.aws }}
       NodeAttestor "aws_iid" {
           plugin_data {}
+      }
+      {{- else if .Values.azure }}
+      NodeAttestor "azure_msi" {
+          plugin_data {
+           }
+      }
+      {{- else }}
+      NodeAttestor "k8s_psat" {
+          plugin_data {
+            cluster = "{{ .Values.clustername }}"
+          }
       }
       {{- end }}
       KeyManager "memory" {

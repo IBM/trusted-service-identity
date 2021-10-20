@@ -23,7 +23,7 @@ Syntax: ${0} -c <CLUSTER_NAME> -t <TRUST_DOMAIN> -p <PROJECT_NAME> --oidc
 Where:
   -c <CLUSTER_NAME> - name of the OpenShift cluster (required)
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
-  -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
+  -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: tornjak (optional)
   --oidc - execute OIDC installation (optional)
   --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
@@ -36,12 +36,13 @@ cleanup() {
   oc delete ClusterRole spire-server-role 2>/dev/null
   oc delete ClusterRoleBinding spire-server-binding 2>/dev/null
 
+  oc delete statefulset.apps/spire-server 2>/dev/null
   oc delete scc "$SPIRE_SCC" 2>/dev/null
   oc delete sa "$SPIRE_SA" 2>/dev/null
-  oc delete route spire-server 2>/dev/null
-  oc delete route tornjak-http 2>/dev/null
-  oc delete route tornjak-mtls 2>/dev/null
-  oc delete route tornjak-tls 2>/dev/null
+  oc delete secret spire-secret tornjak-certs  2>/dev/null
+  oc delete cm spire-bundle spire-server oidc-discovery-provider 2>/dev/null
+  oc delete service spire-server spire-oidc tornjak-http tornjak-mtls tornjak-tls 2>/dev/null
+  oc delete route spire-server tornjak-http tornjak-mtls tornjak-tls oidc 2>/dev/null
   oc delete ingress spireingress 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
   #oc delete project "$PROJECT" 2>/dev/null
@@ -96,7 +97,7 @@ fi
 
 # function for executing oc cli calls
 oc_cli() {
-oc "$@"
+oc -n "$PROJECT" "$@"
 if [ "$?" != "0" ]; then
   echo "Error executing: oc" "$@"
   exit 1
@@ -108,11 +109,12 @@ installSpireServer(){
   oc get projects | grep $PROJECT
   if [ "$?" != "0" ]; then
     echo "Project $PROJECT must be created first"
-    echo "oc new-project $PROJECT --description=\"My TSI Spire SERVER project on OpenShift\" 2> /dev/null"
+    echo "oc new-project $PROJECT --description=\"My TSI Spire SERVER project on OpenShift\" "
     exit 1
   fi
 
-  oc -n $PROJECT get statefulset spire-server
+  # test if Tornjak already exists:
+  oc -n $PROJECT get statefulset spire-server 2>/dev/null
   if [ "$?" == "0" ]; then
     # check if spire-server project exists:
     echo "$PROJECT project already exists. "
@@ -124,13 +126,14 @@ installSpireServer(){
       cleanup
       # while (oc get projects | grep "$PROJECT"); do echo "Waiting for "$PROJECT" removal to complete"; sleep 2; done
       # oc new-project "$PROJECT" --description="My TSI Spire SERVER project on OpenShift" 2> /dev/null
-      oc project "$PROJECT" 2> /dev/null
     else
       echo "Keeping the existing $PROJECT project as is"
       echo 0
     fi
-
   fi
+
+# switch to `tornjak` namespace:
+oc project "$PROJECT" 2> /dev/null
 
 # get ingress information:
 INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
@@ -192,24 +195,24 @@ if ! $OIDC ; then
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
   --set "openShift=true" \
-  tornjak charts/tornjak # --debug
+  tornjak charts/tornjak #--debug
 else
   ING=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressHostname')
   helm install --set "namespace=$PROJECT" \
   --set "clustername=$CLUSTERNAME" \
   --set "trustdomain=$TRUSTDOMAIN" \
-  --set "OIDC.enable=true" \
-  --set "OIDC.MY_DISCOVERY_DOMAIN=$ING" \
+  --set "oidc.enable=true" \
+  --set "oidc.myDiscoveryDomain=$ING" \
   --set "openShift=true" \
-  tornjak charts/tornjak # --debug
+  tornjak charts/tornjak #--debug
 fi
 
 helm list
 
 # oc -n $PROJECT expose svc/$SPIRESERVER
 # Ingress route for spire-server
-oc_cli -n "$PROJECT" create route passthrough --service spire-server
-oc_cli -n "$PROJECT" get route
+oc_cli create route passthrough --service spire-server
+oc_cli get route
 INGRESS=$(oc -n "$PROJECT" get route spire-server -o jsonpath='{.spec.host}{"\n"}')
 echo "$INGRESS"
 
@@ -242,37 +245,37 @@ spec:
 EOF
 
 # create route for Tornjak TLS:
-oc_cli -n "$PROJECT" create route passthrough tornjak-tls --service tornjak-tls
+oc_cli create route passthrough tornjak-tls --service tornjak-tls
 # create route for Tornjak mTLS:
-oc_cli -n "$PROJECT" create route passthrough tornjak-mtls --service tornjak-mtls
+oc_cli create route passthrough tornjak-mtls --service tornjak-mtls
 # create route for Tornjak HTTP:
 # oc create route passthrough tornjak-http --service tornjak-http
-oc_cli -n "$PROJECT" expose svc/tornjak-http
+oc_cli expose svc/tornjak-http
 
 if $OIDC ; then
   # open edge access for oidc
   oc -n $PROJECT create route edge oidc --service spire-oidc
 fi
 
-SPIRESERV=$(oc get route spire-server --output json |  jq -r '.spec.host')
+SPIRESERV=$(oc -n "$PROJECT" get route spire-server --output json |  jq -r '.spec.host')
 echo # "https://$SPIRESERV"
 echo "export SPIRE_SERVER=$SPIRESERV"
 echo # empty line to separate visually
 
-TORNJAKHTTP=$(oc get route tornjak-http --output json |  jq -r '.spec.host')
-echo "Tornjak (http): http://$TORNJAKHTTP/"
-TORNJAKTLS=$(oc get route tornjak-tls --output json |  jq -r '.spec.host')
-echo "Tornjak (TLS): https://$TORNJAKTLS/"
-TORNJAKMTLS=$(oc get route tornjak-mtls --output json |  jq -r '.spec.host')
-echo "Tornjak (mTLS): https://$TORNJAKMTLS/"
+TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-http --output json |  jq -r '.spec.host')
+echo "Tornjak (http): http://$TORNJAKHTTP"
+TORNJAKTLS=$(oc -n "$PROJECT" get route tornjak-tls --output json |  jq -r '.spec.host')
+echo "Tornjak (TLS): https://$TORNJAKTLS"
+TORNJAKMTLS=$(oc -n "$PROJECT" get route tornjak-mtls --output json |  jq -r '.spec.host')
+echo "Tornjak (mTLS): https://$TORNJAKMTLS"
 echo # empty line to separate visually
 
 echo "Trust Domain: $TRUSTDOMAIN"
 if $OIDC ; then
-  OIDCURL=$(oc get route oidc --output json |  jq -r '.spec.host')
-  echo "Tornjak (oidc): "
-  echo " https://$OIDCURL/"
-  echo "For testing oidc: "
+  OIDCURL=$(oc -n "$PROJECT" get route oidc --output json |  jq -r '.spec.host')
+  echo "Tornjak with OIDC: "
+  echo " export OIDC_URL=https://$OIDCURL"
+  echo "For testing OIDC: "
   echo "  curl -k https://$OIDCURL/.well-known/openid-configuration"
   echo "  curl -k https://$OIDCURL/keys"
 fi

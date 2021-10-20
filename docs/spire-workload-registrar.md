@@ -60,7 +60,9 @@ metadata:
   labels:
     identity_template: "true"
 ```
-will get their identity.
+will get their identity. More information about the `identity_template` is
+available in the SPIRE community document about the
+[workload-registrar](https://github.com/spiffe/spire/blob/main/support/k8s/k8s-workload-registrar/mode-crd/README.md#identity-template-based-workload-registration)
 
 ## Register Workload Registrar with the SPIRE server.
 Workload Registrar will use its own identity to register other elements
@@ -84,7 +86,8 @@ This requires a few steps:
   ```
   In this case the registrar is running on the node `10.38.240.214`
 
-  There are 2 methods to register Workload Registrar:
+
+There are currently 2 methods to register Workload Registrar:
 
 ### Register Workload Registrar using Tornjak UI
 * Connect to Tornjak server UI, and list the agents.
@@ -98,7 +101,7 @@ Get the SVID (SPIFFE ID) of the agent running on the specific node (as above). Y
    ```
    - Under Selectors Recommendation, select the `selectors` suggested by the installation under `Selectors Recommendation`.  For example, if the installation suggests the following:
    ```
-   k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
+   k8s:sa:spire-k8s-registrar, k8s:ns:spire, k8s:container-name:k8s-workload-registrar
    ```
    check off `k8s:sa`, `k8s:ns`, `k8s:container-name`.  Then under `Selectors`, fill in the suggested values.
    - Make sure to check the `Admin Flag`, so the registrar gets enough permissions to create new entries.

@@ -101,7 +101,7 @@ fi
 
 # function for executing oc cli calls
 oc_cli() {
-oc "$@"
+oc -n $PROJECT "$@"
 if [ "$?" != "0" ]; then
   echo "Error executing: oc" "$@"
   exit 1
@@ -109,14 +109,14 @@ fi
 }
 
 installSpireAgent(){
-  oc get projects | grep "${PROJECT}"
+  oc get projects | grep "${PROJECT}" 2>/dev/null
   if [ "$?" != "0" ]; then
     echo "Project $PROJECT must be created first"
-    echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" 2> /dev/null"
+    echo "oc new-project $PROJECT --description=\"My TSI Spire Agent project on OpenShift\" "
     exit 1
   fi
 
-  oc -n $PROJECT get scc $SPIREAG_SCC
+  oc -n $PROJECT get scc $SPIREAG_SCC 2>/dev/null
   if [ "$?" == "0" ]; then
     # check if spire-agent project exists:
     echo "SPIRE Agent environment in $PROJECT project already exists. "
@@ -128,16 +128,17 @@ installSpireAgent(){
       cleanup
       # while (oc get projects | grep -v spire-server | grep "$PROJECT"); do echo "Waiting for $PROJECT removal to complete"; sleep 2; done
       # oc new-project "$PROJECT" --description="My TSI Spire Agent project on OpenShift" > /dev/null
-      oc project "$PROJECT"
     else
       echo "Keeping the existing $PROJECT project as is"
     fi
   fi
 
+oc project "$PROJECT"
+
 # Need to copy the spire-bundle from the server namespace
 oc -n "$PROJECT" get cm spire-bundle
 if [ "$?" == "0" ]; then
-  echo "WARNING: using the existing configmap spire-bundle in $PROJECT. "
+  echo "Using the existing configmap spire-bundle in $PROJECT. "
 else
   echo "ConfigMap 'spire-bundle' must be created"
   exit 1
@@ -178,7 +179,7 @@ oc_cli adm policy add-scc-to-user spire-agent "system:serviceaccount:$PROJECT:$S
 # this works:
 oc_cli adm policy add-scc-to-user privileged -z $SPIRE_AG_SA
 
-helm install --set "spireAddress=$SPIRESERVER" --set "namespace=$PROJECT" \
+helm install --set "spireServer.address=$SPIRESERVER" --set "namespace=$PROJECT" \
  --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" \
  --set "region=$REGION" \
  --set "openShift=true" spire charts/spire # --debug

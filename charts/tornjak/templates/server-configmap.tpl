@@ -18,14 +18,14 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
-      socket_path = "{{ .Values.spireServerSocket }}"
+      socket_path = "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
 
-{{- if .Values.OIDC.enable }}
+      {{- if .Values.oidc.enable }}
       #AWS requires the use of RSA.  EC cryptography is not supported
       ca_key_type = "rsa-2048"
 
       # Creates the iss claim in JWT-SVIDs.
-      jwt_issuer = "https://{{ .Values.OIDC.serviceName }}.{{ .Values.OIDC.MY_DISCOVERY_DOMAIN }}"
+      jwt_issuer = "https://{{ .Values.oidc.serviceName }}.{{ .Values.oidc.myDiscoveryDomain }}"
 
       experimental {
         // Turns on the bundle endpoint (required, true)
@@ -37,7 +37,7 @@ data:
         // The port to listen on (optional, defaults to 443)
         bundle_endpoint_port = 8443
       }
-{{- end }}
+      {{- end }}
 
       ca_subject = {
         country = ["US"],
@@ -59,10 +59,10 @@ data:
                     # use_token_review_api_validation = true
                     service_account_allow_list = ["spire:spire-agent"]
                 },
-                {{- if .Values.k8s_psat.remoteClusters }}
-                {{- range $k, $v := .Values.k8s_psat.remoteClusters }}
+                {{- if .Values.attestors.k8s_psat.remoteClusters }}
+                {{- range $k, $v := .Values.attestors.k8s_psat.remoteClusters }}
                 "{{ $v.name }}" = {
-                    service_account_whitelist = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
+                    service_account_allow_list = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
                     kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
                 },
                 {{- end }}
@@ -70,28 +70,46 @@ data:
             }
         }
       }
-      {{- if .Values.aws_iid -}}
-      {{- if .Values.aws_iid.access_key_id -}}
-      {{- if .Values.aws_iid.secret_access_key -}}
+
+      {{- if .Values.attestors.aws_iid -}}
+      {{- if .Values.attestors.aws_iid.access_key_id -}}
+      {{- if .Values.attestors.aws_iid.secret_access_key -}}
       NodeAttestor "aws_iid" {
           plugin_data {
-            access_key_id = "{{- .Values.aws_iid.access_key_id -}}"
-            secret_access_key = "{{- .Values.aws_iid.secret_access_key -}}"
-            skip_block_device: {{- .Values.aws_iid.skip_block_device -}}
+            access_key_id = "{{- .Values.attestors.aws_iid.access_key_id -}}"
+            secret_access_key = "{{- .Values.attestors.aws_iid.secret_access_key -}}"
+            skip_block_device = {{- .Values.attestors.aws_iid.skip_block_device -}}
           }
       }
+
       {{- end }}
       {{- end }}
       {{- end }}
-      NodeResolver "noop" {
-        plugin_data {}
+
+      {{- if .Values.attestors.azure_msi -}}
+      {{- if .Values.attestors.azure_msi.tenants -}}
+      NodeAttestor "azure_msi" {
+        enabled = true
+        plugin_data {
+          tenants = {
+            // Tenant configured with the default resource id (i.e. the resource manager)
+            {{- range $k, $v := .Values.attestors.azure_msi.tenants }}
+            "{{ $v.tenant }}" = {},
+            {{- end }}
+          }
+        }
       }
+      {{- end }}
+      {{- end }}
+
       KeyManager "disk" {
         plugin_data {
           keys_path = "/run/spire/data/keys.json"
         }
       }
-      {{- if not .Values.selfSignedCA }}
+
+      {{- if not .Values.spireServer }}
+      {{- if not .Values.spireServer.selfSignedCA }}
       UpstreamAuthority "disk" {
         plugin_data {
           ttl = "12h"
@@ -99,6 +117,7 @@ data:
           cert_file_path = "/run/spire/secret/bootstrap.crt"
         }
       }
+      {{- end }}
       {{- end }}
       Notifier "k8sbundle" {
         plugin_data {

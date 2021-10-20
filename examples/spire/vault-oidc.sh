@@ -13,9 +13,9 @@ helpme()
 {
   cat <<HELPMEHELPME
 
-Syntax: ${0} <OIDC URL> <ROOT_TOKEN> <VAULT_ADDR>
+Syntax: ${0} <OIDC_URL> <ROOT_TOKEN> <VAULT_ADDR>
 Where:
-  OIDC URL    - OIDC URL (https://) (optional, if set as env. var)
+  OIDC_URL    - OIDC URL (https://) (optional, if set as env. var)
   ROOT_TOKEN  - Vault root token to setup the plugin (optional, if set as env. var)
   VAULT_ADDR  - Vault address in format http://vault.server:8200 (optional, if set as env. var)
 
@@ -73,15 +73,15 @@ EOF
       "bound_audiences": "vault",
       "bound_claims_type": "glob",
       "bound_claims": {
-          "sub":"spiffe://openshift.space-x.com/eu-*/*/*/elon-musk/mars-mission-main/*"
+          "sub":"spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/elon-musk/pod_name/mars-mission-*"
       },
       "token_ttl": "24h",
       "token_policies": "my-dev-policy"
   }
 EOF
 
-  vault write auth/jwt/role/eurole -<role.json
-  vault read auth/jwt/role/eurole
+  vault write auth/jwt/role/marsrole -<role.json
+  vault read auth/jwt/role/marsrole
 }
 
 footer() {
@@ -104,7 +104,7 @@ Once inside:
 
   # setup env. variables:
   export JWT=
-  export ROLE=eurole
+  export ROLE=marsrole
   export VAULT_ADDR=$VAULT_ADDR
 
   # using this JWT to login with vault and get a token:

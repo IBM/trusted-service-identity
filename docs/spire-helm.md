@@ -83,12 +83,16 @@ minikube start --kubernetes-version=v1.20.2
 Once the cluster is up and the `KUBECONFIG` is set, create the namespace to deploy Tornjak server. By default we use “tornjak” as namespace and "minikube" as the cluster name.
 
 ```console
-export CLUSTERNAME=minikube
+export CLUSTER_NAME=minikube
 export SPIRESERVER_NS=tornjak
 kubectl create ns $SPIRESERVER_NS
 ```
 
-## Helm Deployment
+*IBMCloud Hint*
+when running in IBMCloud, you can use a handy script to get cluster information
+[utils/get-cluster-info.sh](../utils/get-cluster-info.sh)
+
+## Helm Deployment for Tornjak
 Now we should be ready to deploy the helm charts. This Helm chart requires several configuration parameters:
 * clustername - name of the cluster (required)
 * trustdomain - must match between SPIRE server and agents (required)
@@ -102,7 +106,7 @@ helm inspect values charts/tornjak/
 ### Helm installation execution
 Sample execution:
 ```console
-helm install --set "namespace=tornjak" --set "clustername=$CLUSTERNAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
+helm install --set "namespace=tornjak" --set "clustername=$CLUSTER_NAME" --set "trustdomain=openshift.space-x.com" tornjak charts/tornjak --debug
 ```
 
 Let's review the Tornjak deployment:
@@ -229,6 +233,7 @@ Only ONE instance of SPIRE Agent deployment should be running at once,
 as it runs as a daemonset on all the node.
 Running more than one may result in conflicts.
 
+### Create a namespace
 First, create a namespace where we want to deploy our SPIRE agents.
 For the purpose of this tutorial, we will use “spire”.
 ```console
@@ -265,6 +270,8 @@ In every cluster hosting SPIRE agents, including remote cluster,  create `spire-
 kubectl -n spire apply -f spire-bundle.yaml
 ```
 ---
+
+### Set up access to the SPIRE server
 In the next step, we need to setup a public access to the SPIRE Server,
 so SPIRE agents can access it.
 This is typically the Ingress value defined during the SPIRE Server deployment,
@@ -306,6 +313,7 @@ Assuming the SPIRE server can now be accessed from the `spire` namespace,
 either via Ingress or Service on port 8081,
 we can deploy the helm charts.
 
+## Helm Deployment for Spire Agents
 We continue using the same cluster name “minikube”,
 trust domain “openshift.space-x.com”
 and region "us-east".
@@ -313,9 +321,9 @@ and region "us-east".
 Use `--debug` flag to show additional information about the helm deployment.
 
 ```console
-helm install --set "spireAddress=$SPIRE_SERVER" \
---set "spirePort=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
---set "clustername=$CLUSTERNAME" --set "region=us-east" \
+helm install --set "spireServer.address=$SPIRE_SERVER" \
+--set "spireServer.port=$SPIRE_PORT"  --set "namespace=$AGENT_NS" \
+--set "clustername=$CLUSTER_NAME" --set "region=us-east" \
 --set "trustdomain=openshift.space-x.com" \
 spire charts/spire --debug
 ```
@@ -422,17 +430,17 @@ utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
 ```
 For our example, this is:
 ```console
-utils/createKeys.sh sample-keys/ $CLUSTERNAME $INGRESS-DOMAIN-NAME
+utils/createKeys.sh sample-keys/ $CLUSTER_NAME $INGRESS-DOMAIN-NAME
 ```
 
 Create a secret that is using the generated key and certificates:
 
 ```
 kubectl -n tornjak create secret generic tornjak-certs \
---from-file=key.pem="sample-keys/$CLUSTERNAME.key" \
---from-file=cert.pem="sample-keys/$CLUSTERNAME.crt" \
---from-file=tls.pem="sample-keys/$CLUSTERNAME.crt" \
---from-file=mtls.pem="sample-keys/$CLUSTERNAME.crt"
+--from-file=key.pem="sample-keys/$CLUSTER_NAME.key" \
+--from-file=cert.pem="sample-keys/$CLUSTER_NAME.crt" \
+--from-file=tls.pem="sample-keys/$CLUSTER_NAME.crt" \
+--from-file=mtls.pem="sample-keys/$CLUSTER_NAME.crt"
 ```
 
 Then just simply restart the spire server by killing the **spire-server-0** pod

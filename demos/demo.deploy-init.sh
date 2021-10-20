@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# this script requires https://github.com/duglin/tools/tree/main/demoscript
+# this script requires https://github.com/duglin/tools/tree/master/demoscript
+# or https://github.com/mrsabath/tools/tree/master/demoscript
 declare DEMOFILE=~/workspace/tools/demoscript/demoscript
 if [ ! -f "$DEMOFILE" ]; then
     echo "$DEMOFILE does not exist."

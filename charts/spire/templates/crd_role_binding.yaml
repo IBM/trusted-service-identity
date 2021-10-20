@@ -9,4 +9,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: spire-k8s-registrar
-  namespace: spire
+  namespace: {{ .Values.namespace }}

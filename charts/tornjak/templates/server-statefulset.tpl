@@ -21,8 +21,7 @@ spec:
       shareProcessNamespace: true
       containers:
         - name: spire-server
-          # image: gcr.io/spiffe-io/spire-server:0.11.0
-          image: {{ .Values.tornjakImg }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           args:
             - -config
@@ -43,48 +42,52 @@ spec:
             - name: certs
               mountPath: /opt/spire/sample-keys
             - name: spire-server-socket
-              mountPath: /run/spire/sockets
+              mountPath: {{ .Values.spireServer.socketDir }}
               readOnly: false
-{{- if .Values.k8s_psat.remoteClusters }}
+            {{- if .Values.attestors.k8s_psat.remoteClusters }}
             - name: kubeconfigs
               mountPath: /run/spire/kubeconfigs
-{{- end }}
+            {{- end }}
           livenessProbe:
             exec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-socketPath"
-              - "{{ .Values.spireServerSocket }}"
+              - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
             failureThreshold: 2
             initialDelaySeconds: 15
             periodSeconds: 60
             timeoutSeconds: 3
-{{- if .Values.OIDC.enable }}
+          {{- if .Values.oidc.enable }}
           readinessProbe:
             exec:
               command:
               - "/opt/spire/bin/spire-server"
               - "healthcheck"
               - "-socketPath"
-              - "{{ .Values.spireServerSocket }}"
+              - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
               - "--shallow"
             initialDelaySeconds: 5
             periodSeconds: 10
-{{- end }}
-{{- if .Values.OIDC.enable }}
+          {{- end }}
+        {{- if .Values.oidc.enable }}
         - name: spire-oidc
-          image: gcr.io/spiffe-io/oidc-discovery-provider:{{ .Values.spireVersion }}
+          image: {{ .Values.oidc.image }}:{{ .Values.spireVersion }}
           args:
           - -config
           - /run/spire/oidc/config/oidc-discovery-provider.conf
           ports:
           - containerPort: 443
             name: spire-oidc-port
+          securityContext:
+              # privileged is needed to access mounted files (e.g. /run/spire/data)
+              # not needed if using volumeClaimTemplates and sockets
+              privileged: true
           volumeMounts:
           - name: spire-server-socket
-            mountPath: /run/spire/sockets
-            readOnly: true
+            mountPath: {{ .Values.spireServer.socketDir }}
+            # readOnly: true
           - name: spire-oidc-config
             mountPath: /run/spire/oidc/config/
             readOnly: true
@@ -92,7 +95,7 @@ spec:
             mountPath: /run/spire/data
             readOnly: false
           - name: spire-oidc-socket
-            mountPath: /run/oidc-discovery-provider/
+            mountPath: {{ .Values.oidc.socketDir }}
           readinessProbe:
             exec:
             # TODO: This needs to be revisited.
@@ -101,6 +104,7 @@ spec:
               command: ["/bin/ps", "aux", " ||", "grep", "oidc-discovery-provider -config /run/spire/oidc/config/oidc-discovery-provider.conf"]
             initialDelaySeconds: 5
             periodSeconds: 5
+
         - name: nginx-oidc
           image: nginx:latest
           ports:
@@ -117,8 +121,8 @@ spec:
             mountPath: /run/spire/oidc/config/
             readOnly: true
           - name: spire-oidc-socket
-            mountPath: /run/oidc-discovery-provider/
-{{- end }}
+            mountPath: {{ .Values.oidc.socketDir }}
+        {{- end }}
       volumes:
         - name: spire-config
           configMap:
@@ -127,29 +131,29 @@ spec:
           secret:
             defaultMode: 0400
             secretName: tornjak-certs
-{{- if .Values.k8s_psat.remoteClusters }}
+        {{- if .Values.attestors.k8s_psat.remoteClusters }}
         - name: kubeconfigs
           secret:
             defaultMode: 0400
             secretName: kubeconfigs
-{{- end }}
-{{- if .Values.OIDC.enable }}
+        {{- end }}
+        {{- if .Values.oidc.enable }}
         - name: spire-server-socket
           hostPath:
-            path: {{ .Values.spireServerSocket }}
+            path: {{ .Values.spireServer.socketDir }}
             type: DirectoryOrCreate
         - name: spire-oidc-socket
           emptyDir: {}
         - name: spire-oidc-config
           configMap:
             name: oidc-discovery-provider
-{{- else }}
+        {{- else }}
         - name: spire-server-socket
           emptyDir: {}
         - name: spire-entries
           configMap:
             name: spire-entries
-{{- end }}
+        {{- end }}
         # remove if using volumeClaimTemplates
         - name: spire-data
           hostPath:
