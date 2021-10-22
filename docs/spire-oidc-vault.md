@@ -26,7 +26,7 @@ Now test the connection to Vault:
 vault login -no-print "${ROOT_TOKEN}"
 ```
 
-## Configure a Vault instace:
+## Configure a Vault instance:
 We have a script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
 **All the commands listed here are in the script, so don't run them!**
 

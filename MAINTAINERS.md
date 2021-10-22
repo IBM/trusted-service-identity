@@ -74,4 +74,3 @@ support.
 IBM Research:
 * Mariusz Sabath - [@mrsabath](https://github.com/mrsabath) - sabath@us.ibm.com
 * Brandon Lum - [@lumjjb](https://github.com/lumjjb) - Brandon.Lum@ibm.com
-* Daniel Pittner - [@dpittner](https://github.com/dpittner) - DPITTNER@de.ibm.com
