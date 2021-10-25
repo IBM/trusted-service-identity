@@ -1,8 +1,0 @@
-apiVersion: "trusted.identity/v1"
-kind: ClusterTI
-metadata:
-  name: cluster-policy
-  namespace: {{ .Values.namespace }}
-info:
-  cluster-name: {{ .Values.cluster.name }}
-  region: {{ .Values.cluster.region }}

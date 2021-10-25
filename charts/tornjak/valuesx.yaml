@@ -1,0 +1,69 @@
+---
+# Default values for spire.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+namespace: tornjak
+selfSignedCA: true
+# openShift requires special configuration, including different security level
+openShift: false
+
+# SPIRE specific values
+# clustername needs to match between spire-config, k8s-workload-registrar config, and the actual cluster name
+clustername: spire-example
+# trustdomain is arbitrary but needs to match between Server and Agent
+trustdomain: spiretest.com
+# SPIRE version used for consistency
+spireVersion: 1.0.2
+# tornjakImage - Tornjak with SPIRE Server
+tornjakImg: tsidentity/local-spire-server
+# SPIRE Server socket
+spireServer.socketDir: /run/spire-server/private
+spireServer.socketFile: api.sock
+
+# Enable OIDC
+oidc:
+  # to enable support for OIDC, change the value to true
+  enable: false
+  serviceName: oidc-tornjak
+  image: gcr.io/spiffe-io/oidc-discovery-provider
+  socketDir: /run/oidc-discovery-provider
+  socketFile: server.sock
+
+  # replace the myDiscoveryDomain with the Ingress information
+  # e.g. this could be an output of IBM Cloud command:
+  #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'
+  #  myDiscoveryDomain: myDiscoveryDomain
+
+# k8s_psat - enables support for a single SPIRE server managing
+# agents deployed in multiple, different clusters, with K8S PSAT NodeAttestor
+# Prior to this deployment, create a secret that contains KUBECONFIG information
+# for every remoteCluster.
+#    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name1>`
+#    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name2>`
+# Then create a secret:
+#     `kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs`
+#
+#  default namespace value = "spire"
+#  default serviceAccount value = spire-agent
+k8s_psat:
+   remoteClusters:
+   # - name: tsi-kube01
+   #   namespace: spire
+   #   serviceAccount: spire-agent
+
+# awd_iid - enables node attestion in AWS EKS.
+# provide "access_key_id" and "secret_access_key"
+# see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md
+# aws_iid:
+#    access_key_id: "AKIAYOVVKNRMEIXJ573E"
+#    secret_access_key: "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"
+#    skip_block_device: true
+
+# azure_msi - enables node attestion in Azure.
+# provide the tenant names
+# see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_noderesolver_azure_msi.md
+# azure_msi:
+#    tenants:
+#    - tenant: "fcf67057-50c9-4ad4-98f3-ffca64add9e9"

@@ -1,6 +1,0 @@
-{
-    "admission.trusted.identity/status": "mutated",
-    "admission.trusted.identity/tsi-cluster-name": "tsi-test2",
-    "admission.trusted.identity/tsi-images": "ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4",
-    "admission.trusted.identity/tsi-region": "eu-de"
-}
