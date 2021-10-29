@@ -11,7 +11,7 @@ This part of the tutorial assumes that OIDC is already [enabled on SPIRE](./spir
 For the purpose of this tutorial you can start your own instance of Vault
 as described [here](https://spiffe.io/docs/latest/keyless/vault/readme/#create-the-config-file-and-run-the-vault-server)
 or you can start the simple Vault instance as described in TSI documentation
-[Setup Vault](../README.md#setup-vault)
+[Setup Vault](./vault.md)
 
 Obtain the **VAULT_ADDR** and **ROOT_TOKEN** as documented. (ROOT_TOKEN is displayed
 in the log file)
