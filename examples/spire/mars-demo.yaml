@@ -40,7 +40,7 @@ spec:
           - name: S3_AUD
             value: "mys3"
           - name: VAULT_ADDR
-            value: "http://tsi-kube01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
+            value: "http://tsi-kube01-vault.us-south.containers.appdomain.cloud"
           - name: VAULT_ROLE
             value: "marsrole"
           - name: VAULT_SECRET
