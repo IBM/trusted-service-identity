@@ -30,14 +30,15 @@ workloads can securely obtain identity.
 
 Then we have SPIRE, which implements SPIFFE,
 and it provides the zero trust attestation of workloads and infrastructure.
-SPIFFE is responsible for issuing and rotating of x509 certificates or
+SPIRE is responsible for issuing and rotating of x509 certificates or
 JWT tokens that are used for representing identity.
 SPIRE also provides a single point of federation with OIDC discovery
 to be used across multi-cloud or multi-cluster deployments.
 
 Above the SPIRE, we have Tornjak, a control plane and UI for SPIRE,
-which together with the *K8s workload registrar*, defines the organization-wise
-Universal Workload Identity schema.
+which together with the
+[*K8s workload registrar*](https://github.com/spiffe/spire/blob/main/support/k8s/k8s-workload-registrar/README.md),
+defines the organization-wise Universal Workload Identity schema.
 It provides the identity management across the SPIRE servers.
 
 Then on the top layer we have Universal Trusted Workload Identity that is a

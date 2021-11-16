@@ -1,4 +1,10 @@
 # Trusted Service Identity Demo with Keycloak
+
+**Notice**
+This documentation is outdated and requires an update.
+To see a working version, please refer to the
+[main-no-spire](/tree/main-no-spire/) branch.
+
 [Keycloak](https://www.keycloak.org/) is an open-sourced tool for Identity and Access Managment
 
 This demo can be executed alone or in addition to secrets management [demo with Vault](/examples/vault/README.md)
