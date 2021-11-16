@@ -7,12 +7,19 @@ CNCF community initiatives
 [Tornjak](https://github.com/spiffe/tornjak)
 and [SPIRE](https://github.com/spiffe/spire).
 
-*Notice:*
+*Notice1:*
 * For all the original *Trusted Workload Identity* project,
 that was preceding the SPIRE and Tornjak integration,
 and focusing on keys and credentials management, and preventing
 access to secrets by untrusted administrator,
 please visit our [main-no-spire](../../tree/main-no-spire/) branch.
+
+*Notice2:*
+* The TSI version [tsi-version.txt] attempts to match the most
+recent SPIRE version that is currently supported by Tornjak.
+(See the
+[Tornjak version](https://github.com/spiffe/tornjak/blob/main/SPIRE_BUILD_VERSIONS)
+file)
 
 ## Introduction
 Here is the stack that represents the layers of
