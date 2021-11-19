@@ -110,27 +110,48 @@ vault kv put secret/my-super-secret test=123
 
 ## Testing the workload access to Vault secret
 For testing this setup we are going to use
-[examples/spire/mars-spaceX.yaml](examples/spire/mars-spaceX.yaml) deployment.
+the test deployment file [examples/spire/mars-demo.yaml](examples/spire/mars-demo.yaml)
 
-Make sure the pod label matches the label in The Workload Registrar Configuration.
+This container already has AWS S3 cli, Vault client and the SPIRE agent binaries
+for running this experiment.
+
+This example has a following label:
 
 ```yaml
-
 template:
   metadata:
     labels:
       identity_template: "true"
-      app: mars-mission
+```
+This label indicates that pod gets its identity in format defined in the
+*K8s workload registrar* configuration file
+[k8s-workload-registrar-configmap.tpl](../charts/spire/templates/k8s-workload-registrar-configmap.tpl)
+
+The default format is:
 
 ```
-this container will get the identity that might look like this:
+identity_template = "{{ "region/{{.Context.Region}}/cluster_name/{{.Context.ClusterName}}/ns/{{.Pod.Namespace}}/sa/{{.Pod.ServiceAccount}}/pod_name/{{.Pod.Name}}" }}"
+```
 
-`spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x.01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5`
+Update the `mars-demo` deployment file with the following attributes:
+* *VAULT_ADDR* - Vault address as obtained earlier during the Vault setup
+* *VAULT_ROLE* - Vault role used during setup
+* *VAULT_SECRET* - Secret name and location
+
+Example:
+```yaml
+- name: VAULT_ADDR
+  value: "http://tsi-kube01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
+- name: VAULT_ROLE
+  value: "marsrole"
+- name: VAULT_SECRET
+  value: "/v1/secret/data/my-super-secret"
+```
 
 Let's create a pod and get inside the container:
 
 ```console
-kubectl -n default create -f examples/spire/mars-spaceX.yaml
+kubectl -n default create -f examples/spire/mars-demo.yaml
 
 kubectl -n default get po
 NAME                           READY   STATUS    RESTARTS   AGE
@@ -139,88 +160,37 @@ mars-mission-97745ff46-mmzpb   1/1     Running   0          6h8m
 kubectl -n default exec -it mars-mission-97745ff46-mmzpb -- sh
 ```
 
-We will need a jq parser, so let's install it here:
-
-```console
-apk add jq
-
-```
-
-Now, let's get the identity token from SPIRE agent in form of JWT, using `vault` as audience:
-
-```console
-bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock
-```
-
-The JWT token is the long string that follows the **token**:
-
-```console
-bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sock
-ets/agent.sock
-token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x.01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5):
-	eyJhbGciOiJSUzI1NiIs....cy46fb465a
-```
-
-export this long string as JWT env. variable:
+Once inside, let's run the [demo-vault.sh](../examples/spire/demo.mars-vault.sh) script
+that contains [demoscript](https://github.com/duglin/tools/tree/master/demoscript)
+to execute the demo commands. *(Use the space bar to drive the script steps.)*
 
 ```
-export JWT=eyJhbGciOiJSUzI1NiIs....cy46fb465a
-```
-Export also `eurole` as **ROLE** and actual **VAULT_ADDR**
+root@ip-192-168-62-164:/usr/local/bin# ./demo-vault.sh
 
-```console
-export ROLE=eurole
-export VAULT_ADDR=http://tsi-vault-tsi-vault.space-x01-9d995c4a8c7c5f281ce13d546a94-0000.us-east.containers.appdomain.cloud
+$ /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock
 ```
-Now let's try to login to Vault using the JWT token:
+This operation retrieves the SPIFFE id for this pod with its JWT representation.
+e.g:
+```
+token(spiffe://openshift.space-x.com/region/us-east-1/cluster_name/aws-tsi-test-03/ns/default/sa/elon-musk/pod_name/mars-mission-f5844b797-br5w9)
+. . . .
+```
+Then we capture the JWT into `token.jwt` file. We use `vault` as audience field.
 
-```console
-curl --max-time 10 -s -o out --request POST --data '{"jwt": "'"${JWT}"'", "role": "'"${ROLE}"'"}' "${VAULT_ADDR}"/v1/auth/jwt/login
+```
+$ /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock | sed -n '2p' | xargs > token.jwt
+JWT=$(cat token.jwt)
 ```
 
-If the login was successful, we will get back a response from Vault that ends up in **out** file and might look like this:
-
-```json
-cat out |jq
-{
- "request_id": "248249fe-0cc5-57e9-6510-ea0999bb916e",
- "lease_id": "",
- "renewable": false,
- "lease_duration": 0,
- "data": null,
- "wrap_info": null,
- "warnings": null,
- "auth": {
-   "client_token": "s.v5V8pS6B0ZepwrP2azFxSaA7",
-   "accessor": "G2QIZQ7R9YX1Smebmtp9NzH2",
-   "policies": [
-     "default",
-     "my-dev-policy"
-   ],
-   "token_policies": [
-     "default",
-     "my-dev-policy"
-   ],
-   "metadata": {
-     "role": "eurole"
-   },
-   "lease_duration": 86400,
-   "renewable": true,
-   "entity_id": "d1f13141-079f-0f04-0aa9-4468fd0f93ca",
-   "token_type": "service",
-   "orphan": true
- }
-}
+Using the captured JWT, we try to login to Vault and get the authentication token for this identity:
 ```
-what we need is the `client_token` value. Let's get it by parsing the JSON output with **jq**:
-
-```console
-TOKEN=$(cat out | jq -r '.auth.client_token')
-echo $TOKEN
+$ curl --max-time 10 -s -o vout --request POST --data '{"jwt": "${JWT}", "role": "${VAULT_ROLE}" }' http://tsi-kube01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/v1/auth/jwt/login
+$ TOKEN=$(cat vout | jq -r ".auth.client_token")
 ```
-Now we can request the secret, using this token:
-```console
-curl -s -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/my-super-secret | jq -r '.data.data'
+
+Using this authentication token we request the secret:
+```
+$ curl -s -H "X-Vault-Token: $TOKEN" http://tsi-kube01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/v1/secret/data/my-super-secret | jq -r '.data.data'
 
 {
   "test": "123"
