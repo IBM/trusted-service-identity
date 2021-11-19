@@ -16,7 +16,7 @@ Tutorial requirements:
 
 For our tutorial, we would use following parameters:
 * Platform: `openShift` (ROKS on IBMCloud)
-* Cluster name: `space-x.01`
+* Cluster name: `space-x01`
 * Trust domain: `openshift.space-x.com`
 * Tornjak namespace: `tornjak`
 * Agents namespace: `spire`
@@ -156,7 +156,7 @@ utils/install-open-shift-tornjak.sh -c $CLUSTER_NAME -t trust-domain
 
 Sample execution:
 ```console
-utils/install-open-shift-tornjak.sh -c space-x.01 -t openshift.space-x.com
+utils/install-open-shift-tornjak.sh -c space-x01 -t openshift.space-x.com
 ```
 This script takes care of the namespaces/project creation, sets up appropriate permissions, sets up the public access via Ingress, defines HTTP, TLS, and mTLS access points, and displays all the relevant information at the end.
 
@@ -165,7 +165,7 @@ Sample output:
 The installation of the Tornjak with SPIRE Server for
 Universal Trusted Workload Identity Service has completed.
 
-      Cluster name: space-x.01
+      Cluster name: space-x01
       Trust Domain: openshift.space-x.com
       Tornjak Image: ghcr.io/spiffe/tornjak-spire-server:1.0.1
       SPIRE Server Socket: /run/spire/sockets/registration.sock
@@ -260,7 +260,7 @@ Where:
 Include the required values `CLUSTER_NAME`, `SPIRE_SERVER`, and `TRUST_DOMAIN`. Make sure they correspond to values from Step 1.
 
 ```
-utils/install-open-shift-spire.sh -c space-x.01 -s $SPIRE_SERVER -r us-east -t openshift.space-x.com
+utils/install-open-shift-spire.sh -c space-x01 -s $SPIRE_SERVER -r us-east -t openshift.space-x.com
 ```
 Sample output:
 ```
@@ -297,7 +297,7 @@ NOTES:
 The installation of the SPIRE Agent and Workload Registrar for
 Universal Trusted Workload Identity Service has completed.
 
-    Cluster name: space-x.01
+    Cluster name: space-x01
     Trust Domain: openshift.space-x.com
     Namespace:    spire
     OpenShift mode: true
@@ -316,9 +316,9 @@ To enable Workload Registrar, create an entry on Tornjak UI:
 SPIFFE ID as Parent ID:
 
 SPIFFE ID:
-  spiffe://openshift.space-x.com/space-x.01/workload-registrar
+  spiffe://openshift.space-x.com/space-x01/workload-registrar
 Parent ID:
-  spiffe://openshift.space-x.com/spire/agent/k8s_psat/space-x.01/xxx
+  spiffe://openshift.space-x.com/spire/agent/k8s_psat/space-x01/xxx
 Selectors:
   k8s:sa:spire-k8s-registrar,k8s:ns:spire,k8s:container-name:k8s-workload-registrar
 * check Admin Flag

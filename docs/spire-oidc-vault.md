@@ -125,7 +125,7 @@ template:
 ```
 this container will get the identity that might look like this:
 
-`spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x.01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5`
+`spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5`
 
 Let's create a pod and get inside the container:
 
@@ -157,7 +157,7 @@ The JWT token is the long string that follows the **token**:
 ```console
 bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sock
 ets/agent.sock
-token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x.01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5):
+token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5):
 	eyJhbGciOiJSUzI1NiIs....cy46fb465a
 ```
 

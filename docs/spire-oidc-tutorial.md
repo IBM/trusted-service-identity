@@ -17,7 +17,7 @@ utils/install-open-shift-tornjak.sh -c $CLUSTER_NAME -t $TRUST_DOMAIN -p $PROJEC
 for example:
 
 ```console
-utils/install-open-shift-tornjak.sh -c space-x.01 -t openshift.space-x.com --oidc
+utils/install-open-shift-tornjak.sh -c space-x01 -t openshift.space-x.com --oidc
 ```
 
 This creates an output that has a following ending:
@@ -66,7 +66,7 @@ kubectl get configmap spire-bundle -n tornjak -o yaml | sed "s/namespace: tornja
 
 export SPIRE_SERVER=spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud
 
-utils/install-open-shift-spire.sh -c space-x.01 -s $SPIRE_SERVER -t openshift.space-x.com
+utils/install-open-shift-spire.sh -c space-x01 -s $SPIRE_SERVER -t openshift.space-x.com
 ```
 
 Confirm the agents were successfully deployed and get the host for the registrar:
