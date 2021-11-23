@@ -7,15 +7,15 @@ minikube start --kubernetes-version=v1.20.2
 
 Deploy DB service
 ```
-kubectl apply -f db-node.yaml
+kubectl apply -f config/db-node.yaml
 ```
 Deploy Node App service
 ```
-kubectl apply -f app-node.yaml
+kubectl apply -f config/app-node.yaml
 ```
 Deploy Pyton App service
 ```
-kubectl apply -f app-python.yaml
+kubectl apply -f config/app-python.yaml
 ```
 
 ---
