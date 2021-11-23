@@ -37,4 +37,5 @@ COPY sidecar/run-sidecar.sh /usr/local/bin
 RUN cd /root
 
 # run it forever
-CMD ["/bin/bash", "-c", "tail -f /dev/null"]
+CMD ["/usr/local/bin/run-sidecar.sh"]
+# CMD ["/bin/bash", "-c", "tail -f /dev/null"]

@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/bash -x
 
 SOCKETFILE=${SOCKETFILE:-"/run/spire/sockets/agent.sock"}
-CFGFILE=${CFGFILE:-"/run/db/config.json"}
-ROLE=${ROLE:-"dbrole"}
+CFGDIR=${CFGDIR:-"/run/db"}
+ROLE=${ROLE:-"dbrole1"}
 VAULT_ADDR=${VAULT_ADDR:-"http://tsi-vault-tsi-vault.space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud"}
 
 WAIT=30
@@ -34,13 +34,37 @@ while true
 
   curl --max-time 10 -s -o out --request POST --data '{ "jwt": "'"${JWT}"'", "role": "'"${ROLE}"'"}' "${VAULT_ADDR}"/v1/auth/jwt/login
   TOKEN=$(cat out | jq -r  '.auth.client_token')
-  curl --max-time 10 -s -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config.json  | jq -r '.data.data' > $VTOKEN
-  RT=$?
 
+  curl --max-time 10 -s -o config.json -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.json
+  RT=$?
   if [ "$RT" == "0" ]; then
-    mv $VTOKEN $CFGFILE
+    mv config.json $CFGDIR/
+  fi
+
+  curl -s -o temp -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.ini
+  RT=$?
+  cat temp | jq -r ".data.data.sha" | openssl base64 -d > config.ini
+  RT1=$?
+  if [[ "$RT" == "0" && "$RT1" == "0" ]]; then
+    mv config.ini $CFGDIR/
+    cat $CFGDIR/config.ini
+    cat $CFGDIR/config.json
+    echo "DONE!!..."
+    sleep 120
     exit 0
   fi
 
   sleep "$WAIT"
 done
+
+
+# export VAULT_ADDR=http://tsi-vault-tsi-vault.space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud
+# /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock | sed -n '2p' | xargs > token.jwt
+# JWT=$(cat token.jwt)
+# curl --max-time 10 -s --request POST --data '{"jwt": "'"$JWT"'", "role": "dbrole1"}' $VAULT_ADDR/v1/auth/jwt/login
+# TOKEN=$(cat vout | jq -r '.auth.client_token')
+# curl -s -o config.json -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.json
+# curl -s -o temp -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.ini
+# cat temp | jq -r ".data.data.sha" | openssl base64 -d > config.ini
+# cp config.json /run/db/
+# cp config.ini /run/db/

@@ -15,6 +15,20 @@ spec:
         identity_template: "true"
         app: apps
     spec:
+      initContainers:
+        - name: sidecar
+          securityContext:
+            # privilaged is needed to create socket and bundle files
+            privileged: true
+          image: tsidentity/tornjak-example-sidecar:v0.1
+          imagePullPolicy: Always
+          #command: ['sh', '-c', 'while [[ ! -f /run/db/config.json || ! -f /run/db/config.ini ]]; do sleep 2; done;']
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+            - name: db-config
+              mountPath: /run/db
       containers:
         - image: tsidentity/tornjak-example-nodejs:v0.1
           imagePullPolicy: Always
@@ -24,7 +38,7 @@ spec:
           resources: {}
           volumeMounts:
           - name: db-config
-            mountPath: /run/db/config.json
+            mountPath: /run/db
             readOnly: true
         - image: tsidentity/tornjak-example-python:v0.1
           imagePullPolicy: Always
@@ -32,20 +46,6 @@ spec:
           ports:
             - containerPort: 5000
           resources: {}
-        - name: sidecar
-          securityContext:
-            # privilaged is needed to create socket and bundle files
-            privileged: true
-          image: tsidentity/tornjak-example-sidecar:v0.1
-          imagePullPolicy: Always
-          command: ["sleep"]
-          args: ["1000000000"]
-          volumeMounts:
-            - name: spire-agent-socket
-              mountPath: /run/spire/sockets
-              readOnly: true
-            - name: db-config
-              mountPath: /run/db
       restartPolicy: Always
       volumes:
         - name: spire-agent-socket
