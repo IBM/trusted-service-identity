@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ROLE="dbrole1"
+POLICY="dbpolicy"
 OIDC_URL=${OIDC_URL:-$1}
 ROOT_TOKEN=${ROOT_TOKEN:-$2}
 VAULT_ADDR=${VAULT_ADDR:-$3}
@@ -45,7 +47,7 @@ setupVault()
 
 
   # Connect OIDC - Set up our OIDC Discovery URL,
-  vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“dev”
+  vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“$ROLE”
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo " 'vault write auth/jwt/config oidc_discovery_url=' command failed"
@@ -54,15 +56,15 @@ setupVault()
      #exit 1
   fi
 
-  # Define a policy my-dev-policy that will be assigned to a dev role that we’ll create in the next step.
-  cat > vault-policy.hcl <<EOF
-  path "secret/data/db-config.json" {
+  # Define a policy my-mars-policy that will be assigned to a marsrole role that we’ll create in the next step.
+  cat > $POLICY.hcl <<EOF
+  path "secret/data/db-config/*" {
      capabilities = ["read"]
   }
 EOF
 
   # write policy
-  vault policy write my-db-policy ./vault-policy.hcl
+  vault policy write $POLICY ./$POLICY.hcl
 
 # bound_subject does not allow using wildcards
 # so we use bound_claims instead
@@ -76,33 +78,35 @@ EOF
           "sub":"spiffe://openshift.space-x.com/region/*/cluster_name/*/ns/*/sa/*/pod_name/apps-*"
       },
       "token_ttl": "24h",
-      "token_policies": "my-db-policy"
+      "token_policies": "$POLICY"
   }
 EOF
 
-  vault write auth/jwt/role/dbrole -<role.json
-  vault read auth/jwt/role/dbrole
+  vault write auth/jwt/role/$ROLE -<role.json
+  vault read auth/jwt/role/$ROLE
 }
 
 footer() {
 
   cat << EOF
 create the secret in Vault (e.g.):
-   create a file config.json
    vault kv put secret/db-config.json @config.json
 
 Then start the workload container and get inside:
 
-  kubectl -n default create -f examples/spire/mars-spaceX.yaml
+  kubectl -n default create -f examples/spire/sidecar.yaml
   kubectl -n default exec -it <container id> -- sh
 
 Once inside:
+  # install jq parser
+  apk add jq
+
   # get the JWT token, and export it as JWT env. variable:
   bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock
 
   # setup env. variables:
   export JWT=
-  export ROLE=dbrole
+  export ROLE=marsrole
   export VAULT_ADDR=$VAULT_ADDR
 
   # using this JWT to login with vault and get a token:
