@@ -6,12 +6,13 @@ const app = express();
 const PORT = 8080;
 const HOST = '0.0.0.0';
 
-var connection = mysql.createConnection(configfile);
-connection.connect();
-// var connection = mysql2.createConnection(configfile);
+let connection;
 
 app.get('/', (req, res) => {
-    
+    if (!connection){
+        connection = mysql.createConnection(configfile);
+        connection.connect();
+    }
     connection.query('SELECT * FROM MOVIE', function (error, results, fields) {
         if (error) throw error;
 
