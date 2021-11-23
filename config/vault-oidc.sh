@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROLE="dbrole1"
+ROLE="dbrole"
 POLICY="dbpolicy"
 OIDC_URL=${OIDC_URL:-$1}
 ROOT_TOKEN=${ROOT_TOKEN:-$2}
