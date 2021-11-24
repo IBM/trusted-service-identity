@@ -196,7 +196,7 @@ store its value a key:
 
 ```console
 SHA64=$(openssl base64 -in config.ini )
-vault kv put secret/data/db-config/config.ini sha="$SHA64"
+vault kv put secret/db-config/config.ini sha="$SHA64"
 # then to retrieve it:
 vault kv get -field=sha secret/db-config/config.ini | openssl base64 -d
 ```
@@ -217,4 +217,4 @@ SPIFFE ID and pass it to Vault with a request to get the secure files.
 Once the files are received, they are mounted to common directory available to
 other containers in the pod, and the `sidecar`container exits.
 
-Then, `node` and `py` start, and they can use these securely stored and transmitted files. 
+Then, `node` and `py` start, and they can use these securely stored and transmitted files.

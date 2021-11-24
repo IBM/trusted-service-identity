@@ -50,7 +50,7 @@ while true
     cat $CFGDIR/config.ini
     cat $CFGDIR/config.json
     echo "DONE!!..."
-    sleep 120
+    sleep 30
     exit 0
   fi
 

@@ -44,9 +44,10 @@ spec:
             - containerPort: 8080
           resources: {}
           volumeMounts:
-          - name: db-config
-            mountPath: /run/db
+          - mountPath: /usr/src/app/config.json
+            name: db-config
             readOnly: true
+            subPath: config.json
         - image: tsidentity/tornjak-example-python:v0.1
           imagePullPolicy: Always
           name: py
@@ -54,9 +55,10 @@ spec:
             - containerPort: 5000
           resources: {}
           volumeMounts:
-          - name: db-config
-            mountPath: /run/db
+          - mountPath: /app/config.ini
+            name: db-config
             readOnly: true
+            subPath: config.ini
       restartPolicy: Always
       volumes:
         - name: spire-agent-socket
