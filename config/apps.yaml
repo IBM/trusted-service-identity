@@ -23,6 +23,13 @@ spec:
           image: tsidentity/tornjak-example-sidecar:v0.1
           imagePullPolicy: Always
           #command: ['sh', '-c', 'while [[ ! -f /run/db/config.json || ! -f /run/db/config.ini ]]; do sleep 2; done;']
+          env:
+          - name: SOCKETFILE
+            value: "/run/spire/sockets/agent.sock"
+          - name: ROLE
+            value: "dbrole"
+          - name: VAULT_ADDR
+            value: "http://tsi-vault-tsi-vault.space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud"
           volumeMounts:
             - name: spire-agent-socket
               mountPath: /run/spire/sockets
@@ -37,15 +44,21 @@ spec:
             - containerPort: 8080
           resources: {}
           volumeMounts:
-          - name: db-config
-            mountPath: /run/db
+          - mountPath: /usr/src/app/config.json
+            name: db-config
             readOnly: true
+            subPath: config.json
         - image: tsidentity/tornjak-example-python:v0.1
           imagePullPolicy: Always
           name: py
           ports:
             - containerPort: 5000
           resources: {}
+          volumeMounts:
+          - mountPath: /app/config.ini
+            name: db-config
+            readOnly: true
+            subPath: config.ini
       restartPolicy: Always
       volumes:
         - name: spire-agent-socket
