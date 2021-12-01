@@ -3,23 +3,23 @@ services:
     app-py:
         container_name: py
         build:
-            context: .
+            context: ./..
             dockerfile: ./python/Dockerfile
         ports:
             - 8000:5000
         volumes:
-            - ./python:/app
+            - ./../python:/app
         depends_on:
             - db
     app-node:
         container_name: node
         build:
-            context: .
+            context: ./..
             dockerfile: ./nodejs/Dockerfile
         ports:
             - 8001:8080
         volumes:
-            - ./nodejs:/usr/src/app
+            - ./../nodejs:/usr/src/app
         depends_on:
             - db
     # db-maria:
@@ -41,6 +41,6 @@ services:
         ports: 
             - 3306:3306
         volumes:
-            - ./db:/var/lib/mysql
+            - ./../db:/var/lib/mysql
             # - "./db-scripts/schema.sql:/docker-entrypoint-initdb.d/1.sql"
             # - "./db-scripts/data.sql:/docker-entrypoint-initdb.d/2.sql"

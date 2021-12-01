@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, redirect
 from flask_cors import CORS
 import MySQLdb
 import json
@@ -33,8 +33,33 @@ def index():
                 output += "<tr>"
                 for i in range(len(row)):
                     output += "<td>{}</td>".format(row[i])
+                output += "<td><a href='/delete/"+str(row[0])+"'>Delete</a></td>"
                 output += "</tr>"
             output += "</tbody></table>"
+
+            output += "<hr>";
+            output += """<form action='/addmovie' method='POST'>
+                    <table><tbody>
+                        <tr>
+                            <td><label for='name'>Name</label></td>
+                            <td><input id='name' type='text' placeholder='name' name='name'></td>
+                        </tr>
+                        <tr>
+                            <td><label for='year'>Year</label></td>
+                            <td><input id='year' type='number' placeholder='year' name='year'></td>
+                        </tr>
+                        <tr>
+                            <td><label for='director'>Director</label></td>
+                            <td><input id='director' type='text' placeholder='director' name='director'></td>
+                        </tr>
+                        <tr>
+                            <td><label for='genre'>Genre</label></td>
+                            <td><input id='genre' type='text' placeholder='genre' name='genre'></td>
+                        </tr>
+                        <tr><td colspan=2><button type='submit'>Add</button></td></tr>
+                    </tbody></table>
+                </form>""";
+            output += "<hr>";
         except Exception as e:
             output =  "Encountered error while retrieving data from database: {}".format(e)
         finally:
@@ -42,7 +67,52 @@ def index():
         return output
     except MySQLdb.Error as err:
         return "Something went wrong: {}".format(err)
-    
+
+@app.route('/delete/<id>', methods = ['GET'])
+def deletemovie(id):
+    try:
+        db=MySQLdb.connect(host=config["mysql"]["host"],port=int(config["mysql"]["port"]),user=config["mysql"]["user"],
+                    passwd=config["mysql"]["passwd"],db=config["mysql"]["db"])
+        try:
+            mycursor = db.cursor()
+
+            sql = "DELETE FROM MOVIE WHERE id = "+id
+            mycursor.execute(sql)
+            db.commit()
+            print(mycursor.rowcount, "record(s) deleted")
+        except Exception as e:
+            return "Encountered error while retrieving data from database: {}".format(e)
+        finally:
+            db.close()
+        return redirect("/")
+    except MySQLdb.Error as err:
+        return "Something went wrong: {}".format(err)
+
+@app.route('/addmovie', methods = ['POST'])
+def addmovie():
+    try:
+        data = request.form
+        # print(data)
+        db=MySQLdb.connect(host=config["mysql"]["host"],port=int(config["mysql"]["port"]),user=config["mysql"]["user"],
+                    passwd=config["mysql"]["passwd"],db=config["mysql"]["db"])
+        try:
+            mycursor = db.cursor()
+
+            sql = "INSERT INTO MOVIE (`name`,`year`,`director`,`genre`) VALUES (%s, %s, %s, %s)"
+            val = [(v) for k, v in data.items()]
+            print (val)
+            mycursor.execute(sql, val)
+
+            db.commit()
+
+            print(mycursor.rowcount, "record inserted.")
+        except Exception as e:
+            return "Encountered error while retrieving data from database: {}".format(e)
+        finally:
+            db.close()
+        return redirect("/")
+    except MySQLdb.Error as err:
+        return "Something went wrong: {}".format(err)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
