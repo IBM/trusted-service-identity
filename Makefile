@@ -15,8 +15,7 @@ NODEJS_IMG_MUTABLE := $(REPO)/$(NODEJS_IMG_NAME):$(VERSION)
 SIDECAR_IMG := $(REPO)/$(SIDECAR_IMG_NAME):$(GIT_COMMIT_SHA)
 SIDECAR_IMG_MUTABLE := $(REPO)/$(SIDECAR_IMG_NAME):$(VERSION)
 
-all: bin/python bin/nodejs bin/sidecar
-	container-python container-nodejs container-sidecar
+all: bin/python bin/nodejs bin/sidecar container-python container-nodejs container-sidecar
 
 bin/python:
 	docker build --no-cache -t $(PYTHON_IMG) -f python/Dockerfile .
