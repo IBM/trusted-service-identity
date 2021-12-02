@@ -35,13 +35,14 @@ while true
   curl --max-time 10 -s -o out --request POST --data '{ "jwt": "'"${JWT}"'", "role": "'"${ROLE}"'"}' "${VAULT_ADDR}"/v1/auth/jwt/login
   TOKEN=$(cat out | jq -r  '.auth.client_token')
 
-  curl --max-time 10 -s -o config.json -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.json
+  curl --max-time 10 -s -o temp -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.json
   RT=$?
+  cat temp | jq -r ".data.data" > config.json
   if [ "$RT" == "0" ]; then
     mv config.json $CFGDIR/
   fi
 
-  curl -s -o temp -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.ini
+  curl --max-time 10 -s -o temp -H "X-Vault-Token: $TOKEN" $VAULT_ADDR/v1/secret/data/db-config/config.ini
   RT=$?
   cat temp | jq -r ".data.data.sha" | openssl base64 -d > config.ini
   RT1=$?
