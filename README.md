@@ -17,7 +17,7 @@ the application (workload) identity verified by OIDC.
 
 This document describes the following steps:
 * [Building the demo application](#building-the-demo-application)
-* [Setting up Tornjak/SPIRE environment](#)
+* [Setting up Tornjak/SPIRE environment](#setting-up-tornjakspire-environment)
 * [Setting up Vault instance with OIDC enablement](#setting-up-vault-instance-with-oidc-enablement)
 * [Pushing the DB credentials to Vault](#pushing-the-db-credentials-to-vault)
 * [Configuring and deploying the sample application](#configuring-and-deploying-the-sample-application)
@@ -45,13 +45,11 @@ make container-python
 ```
 
 ## Setting up Tornjak/SPIRE environment
-Start minikube
-```
-minikube start --kubernetes-version=v1.20.2
-```
----
-** TODO: provide the links for setting up the Tornjak in various platforms **
----
+This demo example can be running on any Kubernetes platform (Kind, Minikube, OpenShift,
+IBM Cloud, AWS EKS, Azure etc.)
+
+Install the Tornjak/SPIRE environment with OIDC Discovery for your platform,
+as specified in [our tutorial](https://github.com/IBM/trusted-service-identity/blob/main/docs/spire-oidc-tutorial.md)
 
 ## Setting up Vault instance with OIDC enablement
 Setup Tornjak with OIDC and Vault instance, by following the [tutorial](https://github.com/IBM/trusted-service-identity/blob/main/docs/spire-oidc-vault.md).
@@ -174,14 +172,19 @@ kubectl apply -f config/app-python.yaml
 ```
 
 ## Validating the application
+Now we need to access the applications. This process depends on the underlining
+platform. Here we provide examples for Minikube, Kind and OpenShift in IBM Cloud.
+Check with your service provider how to access the running containers via services.
+
+<details><summary>Click to view Minikube steps</summary>
 
 ---
-** TODO: provide instructions for setting up access on minikube and IBM Cloud **
+** TODO: These need to be updated **
 ---
 
 
 Execute the following command to get the URL of the Node App:
-```
+```console
 minikube service app-node -n default --url
 ```
 We should see:
@@ -198,7 +201,7 @@ http://127.0.0.1:59980
 ---
 
 Execute the following command to get the URL of the Python App:
-```
+```console
 minikube service app-py -n default --url
 ```
 We should see:
@@ -212,6 +215,77 @@ We should see:
 http://127.0.0.1:60042
 ❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
 ```
+</details>
+
+<details><summary>Click to view Kind steps</summary>
+---
+** TODO: These need to be updated **
+---
+On kind, we can use port-forwarding to get HTTP access to applications:
+
+kubectl -n default port-forward spire-server-0 10000:10000
+
+Forwarding from 127.0.0.1:10000 -> 10000
+Forwarding from [::1]:10000 -> 10000
+
+Now you can test the connection to Tornjak server by going to http://127.0.0.1:10000 in your local browser.
+</details>
+
+<details><summary>Click to view OpenShift steps</summary>
+
+First obtain the ingress name using ibmcloud cli:
+
+```console
+$ # first obtain the cluster name:
+$ ibmcloud ks clusters
+$ # then use the cluster name to get the Ingress info:
+$ ibmcloud ks cluster get --cluster <cluster_name> | grep Ingress
+Ingress Subdomain:              space-x04-9d995xxx4-0000.eu-de.containers.appdomain.cloud
+Ingress Secret:                 space-x04-9d995xxx4-0000
+Ingress Status:                 healthy
+Ingress Message:                All Ingress components are healthy
+```
+Build an ingress file, using the Ingress Subdomain information obtained above.
+Use any arbitrary prefix to distinguish the applications.
+For example:
+
+host: tsi-vault.my-tsi-cluster-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apps-ingress
+  namespace: default
+spec:
+  rules:
+  - host: py.space-x04-9d995xxx4-0000.eu-de.containers.appdomain.cloud
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: apps
+            port:
+              number: 8000
+  - host: node.space-x04-9d995xxx4-0000.eu-de.containers.appdomain.cloud
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: apps
+            port:
+              number: 8001
+```
+
+Then access the service using the provided host values:
+* http://py.space-x04-9d995xxx4-0000.eu-de.containers.appdomain.cloud
+* http://node.space-x04-9d995xxx4-0000.eu-de.containers.appdomain.cloud
+
+</details>
 
 ---
 ** TODO: describe how to operate (add/remove) entries into DB. **
