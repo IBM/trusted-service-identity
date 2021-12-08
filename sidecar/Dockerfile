@@ -6,7 +6,9 @@ RUN apt update && \
     apt install -y wget && \
     apt install -y unzip && \
     apt install -y jq && \
-    apt install -y vim
+    apt install -y vim && \
+    apt install -y python3 && \
+    apt install -y python3-pip
 
 
 # install Spire agent cli:
@@ -33,9 +35,11 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
    rm -f awscliv2.zip
 
 COPY sidecar/run-sidecar.sh /usr/local/bin
+COPY sidecar/sidecar-script.py /usr/local/bin
 
 RUN cd /root
 
 # run it forever
-CMD ["/usr/local/bin/run-sidecar.sh"]
+# CMD ["/usr/local/bin/run-sidecar.sh"]
+CMD ["python3", "/usr/local/bin/sidecar-script.py"]
 # CMD ["/bin/bash", "-c", "tail -f /dev/null"]

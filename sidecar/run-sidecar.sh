@@ -16,7 +16,7 @@ while true
   while [ ! -S ${SOCKETFILE} ]; do
     sleep 5
   done
-  /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock > $RESP
+  /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath $SOCKETFILE > $RESP
   if [ "$?" == "1" ]; then
     continue
   else
