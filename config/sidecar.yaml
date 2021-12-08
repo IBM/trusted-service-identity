@@ -6,26 +6,26 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: apps
+  name: apps-sidecar
   labels:
-    app: apps
+    app: apps-sidecar
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: apps
+      app: apps-sidecar
   template:
     metadata:
       labels:
         identity_template: "true"
-        app: apps
+        app: apps-sidecar
     spec:
       hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: elon-musk
       containers:
-        - name: apps-main
+        - name: apps-sidecar
           securityContext:
             # privilaged is needed to create socket and bundle files
             privileged: true
