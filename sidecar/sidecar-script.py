@@ -6,9 +6,11 @@ import json
 import base64
 from decouple import config
 
-
+# read enviroment variable
 SOCKETFILE=os.getenv('SOCKETFILE') 
-if (SOCKETFILE is None):
+if (SOCKETFILE is None): 
+    # if the enviroment variable is not set, try to read from .env file 
+    # .env file mode for testing
     SOCKETFILE = config('SOCKETFILE', default='/run/spire/sockets/agent.sock')
 
 CFGDIR=os.getenv('CFGDIR')
@@ -25,6 +27,7 @@ if (VAULT_ADDR is None):
 
 TIMEOUT=0.5 # 30 sec
 
+# method used to obtain a resource/file from vault, using jwt token (i.e. X-Vault-Token)
 def getfile(filename, filePath, token):
     try:
         headers = {'X-Vault-Token': token}
@@ -34,13 +37,15 @@ def getfile(filename, filePath, token):
         with open(CFGDIR + ("" if CFGDIR.endswith('/') else "/") + filename, "w") as f:
             if (filename.upper().endswith(".JSON")):
                 data = obj["data"]["data"]
+                # JSON dump, if not we need to cast to string
                 f.write(json.dumps(data))
             else:
-                data = base64.b64decode(obj["data"]["data"]["sha"]).decode()
+                # other files, beside JSON, need to be encoded to base64 prior to storing into Vault
+                data = base64.b64decode(obj["data"]["data"]["sha"]).decode() # force cast to string
                 f.write(data)
         return True
-    except:
-        print("Error at file retrieval")
+    except Exception as e:
+        print("Error at file retrieval:", e)
         return False
 
 if __name__ == "__main__":
@@ -50,19 +55,24 @@ if __name__ == "__main__":
         while not os.path.exists(SOCKETFILE):
             time.sleep(0.08)
 
+        # obtain identity from spire server
         output = subprocess.check_output(["/opt/spire/bin/spire-agent", "api", "fetch", "jwt", "-audience", "vault", "-socketPath", SOCKETFILE])
-        token = output.split()[1].decode() # supress bytes
+        token = output.split()[1].decode() # supress bytes/cast to string
 
+        # Vault URL for identity check
         authurl = VAULT_ADDR+"/v1/auth/jwt/login"
+        # data load for the request
         authdata = {"jwt": token, "role": ROLE}
 
         authresponse = requests.post(url = authurl, data = authdata, timeout=10)
         obj=json.loads(authresponse.text)
+        # Vault token
         VAULT_TOKEN=obj["auth"]["client_token"]
 
         getfile("config.json", "db-config/", VAULT_TOKEN)
         getfile("config.ini", "db-config/", VAULT_TOKEN)
 
+        # check if both files were retrieved
         if os.path.exists(CFGDIR+"/"+"config.json") and os.path.exists(CFGDIR+"/"+"config.ini"):
             exit()
 

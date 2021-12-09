@@ -144,6 +144,34 @@ Before we run an application, we have to provide the Vault in the deployment fil
 [config/apps.yaml](config/apps.yaml) and update the value for *VAULT_ADDR* environment
 variable to correspond with the VAULT_ADDR used above.
 
+In addition we can run a specific script to help with the resources retrieval:
+
+`bash`
+```yaml
+spec:
+  ...
+  template:
+  ...
+    spec:
+      initContainers:
+        - name: sidecar
+        command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
+        ...
+```
+
+`python`
+```yaml
+spec:
+  ...
+  template:
+  ...
+    spec:
+      initContainers:
+        - name: sidecar
+        command: ["python3", "/usr/local/bin/sidecar-script-alt.py", , "/path/to/inputfile"]
+        ...
+```
+
 Start the deployment:
 
 ```console

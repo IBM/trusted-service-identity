@@ -1,8 +1,10 @@
 #!/bin/bash -x
 
 SOCKETFILE=${SOCKETFILE:-"/run/spire/sockets/agent.sock"}
-CFGDIR=${CFGDIR:-"/run/db"}
-ROLE=${ROLE:-"dbrole1"}
+# CFGDIR=${CFGDIR:-"/run/db"}
+# ROLE=${ROLE:-"dbrole1"}
+CFGDIR=${CFGDIR:-"/root"}
+ROLE=${ROLE:-"dbrole"}
 VAULT_ADDR=${VAULT_ADDR:-"http://tsi-vault-tsi-vault.space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud"}
 
 WAIT=30
@@ -16,6 +18,16 @@ get_resource () {
         fi
     fi
 }
+
+if [[ ! -f $1 ]]; then
+    echo "Input file was not found"
+    exit 0
+fi
+
+# read each line into array (i.e. files)
+mapfile -t files < $1
+
+echo "files:$files"
 
 while true 
 do
@@ -40,14 +52,27 @@ do
         exit 0
     fi
 
-    get_resource "config.json" "db-config/config.json"
-    get_resource "config.ini" "db-config/config.ini"
+    filenames=() # will store only files names, used to check if they exists later
+    for i in "${files[@]}"
+    do
+        tmp=$( echo "$i" | sed 's:.*/::' )
+        filenames+=("$tmp")
+        get_resource $tmp $i
+    done
 
-    if [[ -f "$CFGDIR/config.ini" && -f "$CFGDIR/config.json" ]]; then
-        echo "DONE!!..."
-        sleep 5
+    success=1
+    # check if all files were retrieved
+    for i in "${filenames[@]}"
+    do
+        if [[ ! -f "$CFGDIR/$i" ]]; then
+            success=0
+        fi
+    done
+
+    if [ $success -eq 1 ]; then
         exit 0
     fi
+
 
     sleep "$WAIT"
 done
