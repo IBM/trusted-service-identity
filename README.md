@@ -145,7 +145,7 @@ Before we run an application, we have to provide the Vault in the deployment fil
 variable to correspond with the VAULT_ADDR used above.
 
 In addition we can run a specific script to help with the resources retrieval:
-
+[config/apps.yaml](config/apps.yaml)
 `bash`
 ```yaml
 spec:
@@ -158,6 +158,7 @@ spec:
         command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
         ...
 ```
+[sidecar/run-sidecar-alt.sh](sidecar/run-sidecar-alt.sh)
 
 `python`
 ```yaml
@@ -168,8 +169,22 @@ spec:
     spec:
       initContainers:
         - name: sidecar
-        command: ["python3", "/usr/local/bin/sidecar-script-alt.py", , "/path/to/inputfile"]
+        command: ["python3", "/usr/local/bin/sidecar-script-alt.py", "/path/to/inputfile"]
         ...
+```
+[sidecar/sidecar-script-alt.py](ssidecar/sidecar-script-alt.py)
+
+In a similar way we can create a ConfigMap that would help us with the `inputfile`:
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: path-to-inputfile
+data:
+  inputfile.txt: |
+    db-config/config.ini
+    db-config/config.json
 ```
 
 Start the deployment:

@@ -23,7 +23,7 @@ if (ROLE is None):
 
 VAULT_ADDR=os.getenv('VAULT_ADDR')
 if (VAULT_ADDR is None):
-    VAULT_ADDR = config('VAULT_ADDR', default='http://tsi-vault-tsi-vault.space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud')
+    VAULT_ADDR = config('VAULT_ADDR', default='http://tsi-vault.my-cluster-0123456789-0000.eu-de.containers.appdomain.cloud')
 
 TIMEOUT=0.5 # 30 sec
 

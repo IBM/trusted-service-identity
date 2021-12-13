@@ -22,7 +22,11 @@ spec:
             privileged: true
           image: tsidentity/tornjak-example-sidecar:v0.1
           imagePullPolicy: Always
-          #command: ['sh', '-c', 'while [[ ! -f /run/db/config.json || ! -f /run/db/config.ini ]]; do sleep 2; done;']
+          # use command to override the command of the image/dockerfile
+          # if you want to use Python
+          # command: ["python3", "/usr/local/bin/sidecar-script-alt.py", , "/path/to/inputfile"]
+          # if you want to use Bash Script
+          # command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
           env:
           - name: SOCKETFILE
             value: "/run/spire/sockets/agent.sock"
