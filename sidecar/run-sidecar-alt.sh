@@ -1,8 +1,10 @@
 #!/bin/bash
 
 SOCKETFILE=${SOCKETFILE:-"/run/spire/sockets/agent.sock"}
-CFGDIR=${CFGDIR:-"/run/db"}
-ROLE=${ROLE:-"dbrole1"}
+# CFGDIR=${CFGDIR:-"/run/db"}
+# ROLE=${ROLE:-"dbrole1"}
+CFGDIR=${CFGDIR:-"/root"}
+ROLE=${ROLE:-"dbrole"}
 VAULT_ADDR=${VAULT_ADDR:-"http://tsi-vault.my-cluster-0123456789-0000.eu-de.containers.appdomain.cloud"}
 
 WAIT=30
@@ -19,6 +21,20 @@ get_resource () {
         fi
     fi
 }
+
+if [[ ! -f $1 ]]; then
+    cat <<HELPMEHELPME
+Utility that obtains a list of resources from Vault and saves them to a volume mount.
+Syntax: ${0} <INPUT_FILE>
+Where:
+<INPUT_FILE> - path to file that would contain resources (required)
+HELPMEHELPME
+    exit 0
+fi
+
+# read each line into array (i.e. files)
+mapfile -t files < $1
+
 
 while true 
 do
@@ -45,14 +61,27 @@ do
         exit 0
     fi
 
-    get_resource "config.json" "db-config/config.json"
-    get_resource "config.ini" "db-config/config.ini"
+    filenames=() # will store only files names, used to check if they exists later
+    for i in "${files[@]}"
+    do
+        tmp=$( echo "$i" | sed 's:.*/::' )
+        filenames+=("$tmp")
+        get_resource $tmp $i
+    done
 
-    if [[ -f "$CFGDIR/config.ini" && -f "$CFGDIR/config.json" ]]; then
-        echo "DONE!!..."
-        sleep 5
+    success=1
+    # check if all files were retrieved
+    for i in "${filenames[@]}"
+    do
+        if [[ ! -f "$CFGDIR/$i" ]]; then
+            success=0
+        fi
+    done
+
+    if [ $success -eq 1 ]; then
         exit 0
     fi
+
 
     sleep "$WAIT"
 done

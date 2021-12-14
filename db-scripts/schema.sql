@@ -5,7 +5,7 @@ USE testdb;
 DROP TABLE IF EXISTS MOVIE;
 
 CREATE TABLE MOVIE(  
-          id int(11) NOT NULL,
+          id int(11) NOT NULL AUTO_INCREMENT,
           name varchar(20),
           year int(11),
           director varchar(20),
