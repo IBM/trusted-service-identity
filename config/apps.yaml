@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: Always
           # use command to override the command of the image/dockerfile
           # if you want to use Python
-          # command: ["python3", "/usr/local/bin/sidecar-script-alt.py", , "/path/to/inputfile"]
+          command: ["python3", "/usr/local/bin/sidecar-script-alt.py", "/usr/local/bin/inputfile.txt"]
           # if you want to use Bash Script
           # command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
           env:
@@ -40,6 +40,9 @@ spec:
               readOnly: true
             - name: db-config
               mountPath: /run/db
+            - name: mount-inputfile
+              mountPath: /usr/local/bin/inputfile.txt
+              subPath: inputfile.txt
       containers:
         - image: tsidentity/tornjak-example-nodejs:v0.1
           imagePullPolicy: Always
@@ -71,6 +74,9 @@ spec:
             type: Directory
         - name: db-config
           emptyDir: {}
+        - name: mount-inputfile
+          configMap:
+            name: path-to-inputfile
 status: {}
 ---
 apiVersion: v1
@@ -90,3 +96,12 @@ spec:
       targetPort: 5000
 status:
   loadBalancer: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: path-to-inputfile
+data:
+  inputfile.txt: |
+    db-config/config.ini
+    db-config/config.json
