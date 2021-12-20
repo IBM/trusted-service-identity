@@ -1,0 +1,36 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  creationTimestamp: "2021-11-24T15:29:48Z"
+  name: apps-ingress-jggr2
+  namespace: default
+  ownerReferences:
+  - apiVersion: networking.k8s.io/v1beta1
+    controller: true
+    kind: Ingress
+    name: apps-ingress
+    uid: a1f75842-a197-4485-a35c-77e7ba038009
+  resourceVersion: "41943038"
+  uid: 197ca740-f8a5-465c-a779-788ecc968c34
+spec:
+  host: space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud
+  path: /node
+  port:
+    targetPort: "8001"
+  to:
+    kind: Service
+    name: apps
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2021-11-24T15:29:48Z"
+      status: "True"
+      type: Admitted
+    host: space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud
+    routerCanonicalHostname: space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud
+    routerName: default
+    wildcardPolicy: None
