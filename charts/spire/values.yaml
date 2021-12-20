@@ -1,0 +1,45 @@
+---
+# Default values for spire.
+# This is a YAML-formatted file.
+
+# namespace - namespace for deploying SPIRE agents and workload registrar
+namespace: spire
+# clustername needs to match between agent-config, k8s-workload-registrar config,
+# and the actual cluster name
+clustername: spire-example
+# region - arbitrary label to describe the region
+region: sample-region
+
+# SPIRE related elements
+# trustdomain is arbitrary but needs to match between agent-config and
+# k8s-workload-registrar config and SPIRE Server.
+# For multi-cluster support, trustdomain must be identical for all clusters and
+# SPIRE server
+trustdomain: spiretest.com
+# SPIRE version:
+spireVersion: 1.0.2
+
+# spireServer - location of the SPIRE server
+spireServer:
+  address: spire-server.appdomain.cloud
+  port: 443
+
+# SPIRE Agent related configuration
+spireAgent:
+  img: gcr.io/spiffe-io/spire-agent
+  # SPIRE Agent socket:
+  socketDir: /run/spire/sockets
+  socketFile: agent.sock
+
+# Workload Registrar configuration
+spireRegistrar:
+  img: gcr.io/spiffe-io/k8s-workload-registrar
+
+# Additional configuration related to the platform
+# azure - enables the plugin to suppor Azure platform, also
+# workaround since Azure doesn't support by default 10250 security port for kubelet
+azure: false
+# aws - enables the plugin for AWS NodeAttestor
+aws: false
+# openShift requires special configuration, including different security level
+openShift: false

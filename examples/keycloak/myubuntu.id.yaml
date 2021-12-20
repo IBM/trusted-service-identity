@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: myubuntuid
+  name: myubuntuid
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myubuntuid
+  template:
+    metadata:
+      annotations:
+        admission.trusted.identity/inject: "true"
+        # token-url: complete URL for obtaining a realm token:
+        tsi.identities: |
+          - tsi.keycloak/token-url: "http://keycloak.server/auth/realms/tsi-realm/protocol/openid-connect/token"
+            tsi.keycloak/audiences: "tsi-client"
+            tsi.keycloak/local-path: "tsi-secrets/identities"
+        # tsi.secrets: |
+        #      - tsi.secret/name: "mysecret1"
+        #        tsi.secret/constraints: "region,images"
+        #        tsi.secret/local-path: "tsi-secrets/"
+        #      - tsi.secret/name: "mysecret2"
+        #        tsi.secret/constraints: "region"
+        #        tsi.secret/local-path: "tsi-secrets"
+      labels:
+        app: myubuntuid
+      name: myubuntuid
+    spec:
+      containers:
+        - name: myubuntuid
+          image: ubuntu@sha256:250cc6f3f3ffc5cdaa9d8f4946ac79821aafb4d3afc93928f0de9336eba21aa4
+          imagePullPolicy: Always
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "while true; do ls /tsi-secrets; sleep 15; done;" ]

@@ -1,0 +1,27 @@
+# .goreleaser.yml
+release:
+  github:
+    owner: kompass
+    name: TI-KeyRelease
+
+# Github enterprise
+github_urls:
+  api: https://github.ibm.com/api/v3/
+  upload: https://github.ibm.com/api/uploads/
+  download: https://github.ibm.com/
+
+# Build customization
+builds:
+  - main: main.go
+    binary: ti-webhook
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+dockers:
+  - image: kompass/TI-KeyRelease
+# Archive customization
+archive:
+  format: tar.gz

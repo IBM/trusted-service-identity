@@ -1,0 +1,42 @@
+The installation of the SPIRE Agent and Workload Registrar for
+Universal Trusted Workload Identity Service has completed.
+
+    Cluster name: {{ .Values.clustername }}
+    Trust Domain: {{ .Values.trustdomain }}
+    Namespace:    {{ .Values.namespace }}
+  {{- if .Values.openShift }}
+    OpenShift mode: true
+  {{- end }}
+  {{- if .Values.aws }}
+    AWS NodeAttestor: true
+  {{- end }}
+
+  SPIRE info:
+      Spire Server address:  {{ .Values.spireServer.address }}:{{ .Values.spireServer.port }}
+      Spire Agent image: {{ .Values.spireAgent.img }}:{{ .Values.spireVersion }}
+      Spire Registrar image: {{ .Values.spireRegistrar.img }}:{{ .Values.spireVersion }}
+      Spire Agent sockets: {{ .Values.spireAgent.socketDir }}/{{ .Values.spireAgent.socketFile }}
+
+
+To enable Workload Registrar, create an entry on Tornjak UI:
+1. find out what node the registrar is running on:
+    kubectl -n {{ .Values.namespace }} get pods -o wide
+2. get the SPIFFE ID of the agent for this node (Tornjak -> Agents -> Agent List)
+3. create Entry (Tornjak -> Entries -> Create Entry) using appropriate Agent
+SPIFFE ID as Parent ID:
+
+SPIFFE ID:
+  spiffe://{{ .Values.trustdomain }}/{{ .Values.clustername }}/workload-registrar
+Parent ID:
+  spiffe://{{ .Values.trustdomain }}/spire/agent/k8s_psat/{{ .Values.clustername }}/xxx
+Selectors:
+  k8s:sa:spire-k8s-registrar,k8s:ns:{{ .Values.namespace }},k8s:container-name:k8s-workload-registrar
+* check Admin Flag
+
+  Chart Name: {{ .Chart.Name }}.
+  Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}

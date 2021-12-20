@@ -1,0 +1,24 @@
+FROM ubuntu:18.04
+
+ARG ARCH
+
+RUN apt update && \
+    apt install -y curl && \
+    apt install -y wget && \
+    apt install -y unzip && \
+    apt install -y jq && \
+    apt install -y vim
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/${ARCH}/kubectl && \
+    chmod +x kubectl
+
+COPY ./vault /usr/local/bin/vault
+COPY ./setup-vault-cli.sh /setup-vault-cli.sh
+COPY ./test-vault-cli.sh /test-vault-cli.sh
+
+# Default values for vault client setup
+ARG DEFAULT_VAULT_ADDR="http://vault:8200"
+ARG DEFAULT_VAULT_ROLE="tsi-role-rcni"
+ENV VAULT_ADDR=${DEFAULT_VAULT_ADDR}
+ENV VAULT_ROLE=${DEFAULT_VAULT_ROLE}
+
+CMD ["/bin/bash", "-c", "while true; do sleep 10; done;"]
