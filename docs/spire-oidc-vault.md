@@ -28,6 +28,7 @@ vault login -no-print "${ROOT_TOKEN}"
 
 ## Configure a Vault instance:
 We have a script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
+
 **All the commands listed here are in the script, so don't run them!**
 
 First few commands enable the Secret Engine and setup Vault OIDC Federation with
@@ -106,6 +107,11 @@ Once the script successfully completes,
 create a test secret value:
 ```console
 vault kv put secret/my-super-secret test=123
+```
+
+Put a sample file into Vault:
+```console
+vault kv put secret/config.json @config.json
 ```
 
 ## Testing the workload access to Vault secret

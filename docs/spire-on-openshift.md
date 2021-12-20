@@ -141,6 +141,7 @@ Where:
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: spire-server (optional)
   --oidc - execute OIDC installation (optional)
+  --clean - performs removal of projects (allows additional parameters e.g. -p | --project)
 ```
 
 Include the `CLUSTER_NAME` and the `TRUST_DOMAIN` as parameters. If you like to install in project (namespace) other than “tornjak”, pass the name with “-p” flag.
