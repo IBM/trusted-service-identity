@@ -411,14 +411,15 @@ For a production usage, we want to better protect the access to various componen
 Tornjak access is available via HTTP, TLS and mTLS protocols. In a production
 environment you should use TLS/mTLS that are based on certificates created from
 the organization rootCA. If you just like to  test these protocols, and don't have
-your own rootCA, you can use the sample from here: https://github.com/lumjjb/tornjak/tree/main/sample-keys/ca_process/CA
+your own rootCA, you can use the sample from here:
+https://github.com/spiffe/tornjak/tree/main/sample-keys/ca_process/CA
 or create your own:
 
 ```
 ROOTCA="sample-keys/CA/rootCA"
 # Create CA certs:
 openssl genrsa -out $ROOTCA.key 4096
-openssl req -x509 -subj \"/C=US/ST=CA/O=Acme, Inc./CN=example.com\" -new -nodes -key $ROOTCA.key -sha256 -days 1024 -out $ROOTCA.crt
+openssl req -x509 -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -new -nodes -key $ROOTCA.key -sha256 -days 1024 -out $ROOTCA.crt
 ```
 Put the `rootCA.key` and `rootCA.crt` files in `sample-keys/CA` directory.
 Then use `utils/createKeys.sh` script to create private key and certificate.
@@ -430,7 +431,16 @@ utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
 ```
 For our example, this is:
 ```console
-utils/createKeys.sh sample-keys/ $CLUSTER_NAME $INGRESS-DOMAIN-NAME
+utils/createKeys.sh sample-keys $CLUSTER_NAME $INGRESS_DOMAIN_NAME
+```
+
+When using IBM Cloud you can get these required values as follow:
+```console
+utils/get-cluster-info.sh
+export CLUSTER_NAME=
+export REGION=
+
+INGRESS-DOMAIN-NAME=$(ibmcloud oc cluster get --cluster "$CLUSTER_NAME" --output json | jq -r '.ingressHostname')
 ```
 
 Create a secret that is using the generated key and certificates:

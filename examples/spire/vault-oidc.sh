@@ -46,7 +46,7 @@ setupVault()
 
 
   # Connect OIDC - Set up our OIDC Discovery URL,
-  vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“marsrole”
+  vault write auth/jwt/config oidc_discovery_url=$OIDC_URL default_role=“$ROLE”
   RT=$?
   if [ $RT -ne 0 ] ; then
      echo " 'vault write auth/jwt/config oidc_discovery_url=' command failed"
@@ -93,7 +93,7 @@ create the secret in Vault (e.g.):
 
 Then start the workload container and get inside:
 
-  kubectl -n default create -f examples/spire/mars-spaceX.yaml
+  kubectl -n default create -f examples/spire/mars-demo.yaml
   kubectl -n default exec -it <container id> -- sh
 
 Once inside:

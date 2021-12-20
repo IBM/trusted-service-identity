@@ -11,7 +11,7 @@ This part of the tutorial assumes that OIDC is already [enabled on SPIRE](./spir
 For the purpose of this tutorial you can start your own instance of Vault
 as described [here](https://spiffe.io/docs/latest/keyless/vault/readme/#create-the-config-file-and-run-the-vault-server)
 or you can start the simple Vault instance as described in TSI documentation
-[Setup Vault](../README.md#setup-vault)
+[Setup Vault](./vault.md)
 
 Obtain the **VAULT_ADDR** and **ROOT_TOKEN** as documented. (ROOT_TOKEN is displayed
 in the log file)
@@ -26,8 +26,9 @@ Now test the connection to Vault:
 vault login -no-print "${ROOT_TOKEN}"
 ```
 
-## Configure a Vault instace:
+## Configure a Vault instance:
 We have a script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
+
 **All the commands listed here are in the script, so don't run them!**
 
 First few commands enable the Secret Engine and setup Vault OIDC Federation with
@@ -108,6 +109,11 @@ create a test secret value:
 vault kv put secret/my-super-secret test=123
 ```
 
+Put a sample file into Vault:
+```console
+vault kv put secret/config.json @config.json
+```
+
 ## Testing the workload access to Vault secret
 For testing this setup we are going to use
 the test deployment file [examples/spire/mars-demo.yaml](examples/spire/mars-demo.yaml)
@@ -169,8 +175,23 @@ root@ip-192-168-62-164:/usr/local/bin# ./demo-vault.sh
 
 $ /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock
 ```
+<<<<<<< HEAD
+
+The JWT token is the long string that follows the **token**:
+
+```console
+bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sock
+ets/agent.sock
+token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5):
+	eyJhbGciOiJSUzI1NiIs....cy46fb465a
+```
+
+export this long string as JWT env. variable:
+
+=======
 This operation retrieves the SPIFFE id for this pod with its JWT representation.
 e.g:
+>>>>>>> main
 ```
 token(spiffe://openshift.space-x.com/region/us-east-1/cluster_name/aws-tsi-test-03/ns/default/sa/elon-musk/pod_name/mars-mission-f5844b797-br5w9)
 . . . .

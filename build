@@ -1,7 +1,0 @@
-dep ensure
-TSI_VERSION=$(cat ./tsi-version.txt)
-CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ti-webhook .
-if [ $? -ne 0 ]; then exit 1 ; fi
-docker build --no-cache -t tsidentity/ti-webhook:${TSI_VERSION} .
-
-docker push tsidentity/ti-webhook:${TSI_VERSION}
