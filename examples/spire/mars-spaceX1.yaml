@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mars-mission1
+  labels:
+    app: mars-mission1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mars-mission1
+  template:
+    metadata:
+      labels:
+        identity_template: "true"
+        app: mars-mission1
+    spec:
+      containers:
+        - name: mars-mission1-main
+          image: us.gcr.io/scytale-registry/aws-cli:latest
+          command: ["sleep"]
+          args: ["1000000000"]
