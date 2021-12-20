@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elon-musk
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apps-sidecar
+  labels:
+    app: apps-sidecar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apps-sidecar
+  template:
+    metadata:
+      labels:
+        identity_template: "true"
+        app: apps-sidecar
+    spec:
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: elon-musk
+      containers:
+        - name: apps-sidecar
+          securityContext:
+            # privilaged is needed to create socket and bundle files
+            privileged: true
+          # image: us.gcr.io/scytale-registry/aws-cli:latest
+          image: tsidentity/tornjak-example-sidecar:v0.1
+          imagePullPolicy: Always
+          command: ["sleep"]
+          args: ["1000000000"]
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+            - name: db-config
+              mountPath: /run/db
+      volumes:
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: Directory
+        - name: db-config
+          emptyDir: {}
