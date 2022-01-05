@@ -139,6 +139,21 @@ Deploy DB service:
 ```console
 kubectl apply -f config/db-node.yaml
 ```
+
+### *Info*: MySQL server
+MySQL server has a `root` user (admin) for which a password must be defined by provinding a value for parameter `MYSQL_ROOT_PASSWORD`, and a technical user that application should use, we have named it `testroot` (value for parameter `MYSQL_USER`) and a password for our technical user by provinding a value for parameter `MYSQL_PASSWORD`.
+```yaml
+  ...
+  env:
+    - name: MYSQL_PASSWORD
+      value: testnewroot
+    - name: MYSQL_ROOT_PASSWORD
+      value: testroot
+    - name: MYSQL_USER
+      value: newroot
+  ...
+```
+
 ---
 Before we run an application, we have to provide the Vault in the deployment file
 [config/apps.yaml](config/apps.yaml) and update the value for *VAULT_ADDR* environment
