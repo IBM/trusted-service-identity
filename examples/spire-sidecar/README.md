@@ -7,7 +7,8 @@ to manage credentials stored securely in Vault.
 There are two, independent web applications:
 * [python](https://www.python.org/) (py)
 * [Node.js](https://nodejs.org/en/) (node)
-that connect to [MySQL](https://www.mysql.com/) (db) database that stores
+
+that connect to [MySQL](https://www.mysql.com/) database that stores
 sample data records.
 
 Access to this DB instance is never provided to the sample applications during
@@ -16,13 +17,39 @@ it is dynamically obtained from the secure Vault by the `sidecar`, based on
 the application (workload) identity verified by OIDC.
 
 This document describes the following steps:
+* [Starting the database](#starting-the-database)
 * [Building the demo application](#building-the-demo-application)
 * [Setting up Tornjak/SPIRE environment](#setting-up-tornjakspire-environment)
 * [Setting up Vault instance with OIDC enablement](#setting-up-vault-instance-with-oidc-enablement)
 * [Pushing the DB credentials to Vault](#pushing-the-db-credentials-to-vault)
 * [Configuring and deploying the sample application](#configuring-and-deploying-the-sample-application)
-* [Validating the application](#validating-the-application)(
+* [Validating the application](#validating-the-application)
+* [Application management](#application-management)
+* [Updating/Changing credentials](#updatingchanging-credentials)
 * [Cleanup](#cleanup)
+
+## Starting the database
+Application will access the data from the database,
+so first we need to deploy the MySQL database for storing the entries used by `py` and `node` applications.
+
+### *Info*: MySQL server
+MySQL server has a `root` user (admin) for which a password must be defined by provinding a value for parameter `MYSQL_ROOT_PASSWORD`, and a technical user that application should use, we have named it `testroot` (value for parameter `MYSQL_USER`) and a password for our technical user by provinding a value for parameter `MYSQL_PASSWORD`.
+```yaml
+  ...
+  env:
+    - name: MYSQL_PASSWORD
+      value: testnewroot
+    - name: MYSQL_ROOT_PASSWORD
+      value: testroot
+    - name: MYSQL_USER
+      value: newroot
+  ...
+```
+
+Deploy DB service:
+```console
+kubectl apply -f config/db-node.yaml
+```
 
 
 ## Building the Demo application
@@ -89,8 +116,6 @@ files:
 Where the userid and password must match the DB values used in our
 sample configuration [config/db-node.yaml](config/db-node.yaml)
 
-[**TODO:** *we need to make sure all the password and users values match accross all the examples, deployments and configurations. We need to document why we have 2 different passwords ^^??*]
-
 where, for example, we can have [config/config.json](config/config.json):
 ```json
 {
@@ -132,35 +157,17 @@ vault kv get -field=sha secret/db-config/config.ini | openssl base64 -d
 ```
 
 ## Configuring and deploying the sample application
-First we need to deploy the MySQL database for storing the entries used by
-`py` and `node` applications.
-
-Deploy DB service:
-```console
-kubectl apply -f config/db-node.yaml
-```
-
-### *Info*: MySQL server
-MySQL server has a `root` user (admin) for which a password must be defined by provinding a value for parameter `MYSQL_ROOT_PASSWORD`, and a technical user that application should use, we have named it `testroot` (value for parameter `MYSQL_USER`) and a password for our technical user by provinding a value for parameter `MYSQL_PASSWORD`.
-```yaml
-  ...
-  env:
-    - name: MYSQL_PASSWORD
-      value: testnewroot
-    - name: MYSQL_ROOT_PASSWORD
-      value: testroot
-    - name: MYSQL_USER
-      value: newroot
-  ...
-```
-
----
-Before we run an application, we have to provide the Vault in the deployment file
-[config/apps.yaml](config/apps.yaml) and update the value for *VAULT_ADDR* environment
-variable to correspond with the VAULT_ADDR used above.
-
-In addition we can run a specific script to help with the resources retrieval:
+The applications will access the MySQL database and retrieve
+the data stored there. The credentials for accessing this db
+are stored in Vault, therefore
+we have to update the Vault info in the deployment file
 [config/apps.yaml](config/apps.yaml)
+and provide the value for *VAULT_ADDR* environment variable
+to correspond to the VAULT_ADDR used earlier.
+
+In addition we can run a bash script to help with the resources retrieval:
+[config/apps.yaml](config/apps.yaml)
+
 `bash`
 ```yaml
 spec:
@@ -173,6 +180,9 @@ spec:
         command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
         ...
 ```
+
+[**TODO:** *we need to better describe when to use -alt scripts and how to use them. *]
+
 [sidecar/run-sidecar-alt.sh](sidecar/run-sidecar-alt.sh)
 
 `python`
@@ -189,7 +199,8 @@ spec:
 ```
 [sidecar/sidecar-script-alt.py](ssidecar/sidecar-script-alt.py)
 
-In a similar way we can create a ConfigMap that would help us with the `inputfile`:
+In a similar way, we can create a *ConfigMap* that would help us with the `inputfile`:
+
 ```yaml
 ---
 apiVersion: v1
@@ -202,6 +213,8 @@ data:
     db-config/config.json
 ```
 
+[**TODO:** *describe how to to create this ConfigMap *]
+
 Start the deployment:
 
 ```console
@@ -211,24 +224,27 @@ kubectl -n default create -f config/apps.yaml
 When deployed, the `sidecar` *containerInit* would run first, obtain the JWT token with
 SPIFFE ID and pass it to Vault with a request to get the secure files.
 Once the files are received, they are mounted to common directory available to
-other containers in the pod, and the `sidecar`container exits.
+other containers in the pod, and the `sidecar` container exits.
 
 Then, `node` and `py` start, and they can use these securely stored and transmitted files.
 
 To deploy individual applications (*without the sidecars*):
 
-Deploy Node App service
-```
+Deploy Node App service:
+
+```console
 kubectl apply -f config/app-node.yaml
 ```
-Deploy Pyton App service
-```
+
+Deploy Python App service:
+
+```console
 kubectl apply -f config/app-python.yaml
 ```
 
 ## Validating the application
 Now we need to access the applications. This process depends on the underlining
-platform. Here we provide examples for Minikube, Kind and OpenShift in IBM Cloud.
+platform. Here we provide examples for Minikube, Kind, and OpenShift in IBM Cloud.
 Check with your service provider how to access the running containers via services.
 
 <details><summary>Click to view Minikube steps</summary>
@@ -346,7 +362,16 @@ Then access the service using the provided host values:
 [**TODO:** *describe how to update the credentials for accessing DB *]
 
 ## Cleanup
-Remove minikube instance
+Remove the deployments:
+
+```console
+kubectl -n default delete ConfigMap path-to-inputfile
+kubectl -n default delete -f config/apps.yaml
+kubectl delete -f config/db-node.yaml
 ```
+
+Remove minikube instance:
+
+```console
 minikube delete
 ```
