@@ -88,10 +88,10 @@ files:
 
 Where the userid and password must match the DB values used in our
 sample configuration [config/db-node.yaml](config/db-node.yaml)
----
-** TODO we need to make sure the values match. Why do we have 2 passwds in ^^??***
----
-where, for example, we can have *config.json*:
+
+[**TODO:** *we need to make sure all the password and users values match accross all the examples, deployments and configurations. We need to document why we have 2 different passwords ^^??*]
+
+where, for example, we can have [config/config.json](config/config.json):
 ```json
 {
     "host"     : "db",
@@ -111,7 +111,7 @@ vault kv put secret/db-config/config.json @config.json
 vault kv get -format=json secret/db-config/config.json
 ```
 
-The second file needed is *config.ini*:
+The second file needed is [config/config.ini](config/config.ini):
 ```
 [mysql]
 host=db
@@ -215,10 +215,7 @@ other containers in the pod, and the `sidecar`container exits.
 
 Then, `node` and `py` start, and they can use these securely stored and transmitted files.
 
-To deploy individual applications:
----
-** TODO: need to add the sidecar into deployments **
----
+To deploy individual applications (*without the sidecars*):
 
 Deploy Node App service
 ```
@@ -236,10 +233,7 @@ Check with your service provider how to access the running containers via servic
 
 <details><summary>Click to view Minikube steps</summary>
 
----
-** TODO: These need to be updated **
----
-
+[**TODO:** *These need to be checked/updated*]
 
 Execute the following command to get the URL of the Node App:
 ```console
@@ -276,9 +270,9 @@ http://127.0.0.1:60042
 </details>
 
 <details><summary>Click to view Kind steps</summary>
----
-** TODO: These need to be updated **
----
+
+[**TODO:** *These need to be checked/updated*]
+
 On kind, we can use port-forwarding to get HTTP access to applications:
 
 kubectl -n default port-forward spire-server-0 10000:10000
@@ -291,7 +285,7 @@ Now you can test the connection to Tornjak server by going to http://127.0.0.1:1
 
 <details><summary>Click to view OpenShift steps</summary>
 
-First obtain the ingress name using ibmcloud cli:
+First obtain the ingress name using *ibmcloud* cli:
 
 ```console
 $ # first obtain the cluster name:
@@ -305,9 +299,7 @@ Ingress Message:                All Ingress components are healthy
 ```
 Build an ingress file, using the Ingress Subdomain information obtained above.
 Use any arbitrary prefix to distinguish the applications.
-For example:
-
-host: tsi-vault.my-tsi-cluster-9d995c4a8c7c5f281ce13xxxxxxxxxxx-0000.eu-de.containers.appdomain.cloud
+For example for host: `space-x04-9d995xxx4-0000.eu-de.containers.appdomain.cloud`
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -345,15 +337,15 @@ Then access the service using the provided host values:
 
 </details>
 
----
-** TODO: describe how to operate (add/remove) entries into DB. **
----
-** TODO: how to update the credentials
----
+## Application management
 
+[**TODO:** *describe how to operate (add/remove) entries into DB. *]
+
+## Updating/Changing credentials
+
+[**TODO:** *describe how to update the credentials for accessing DB *]
 
 ## Cleanup
----
 Remove minikube instance
 ```
 minikube delete
