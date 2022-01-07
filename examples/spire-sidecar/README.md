@@ -17,16 +17,19 @@ it is dynamically obtained from the secure Vault by the `sidecar`, based on
 the application (workload) identity verified by OIDC.
 
 This document describes the following steps:
-* [Starting the database](#starting-the-database)
-* [Building the demo application](#building-the-demo-application)
-* [Setting up Tornjak/SPIRE environment](#setting-up-tornjakspire-environment)
-* [Setting up Vault instance with OIDC enablement](#setting-up-vault-instance-with-oidc-enablement)
-* [Pushing the DB credentials to Vault](#pushing-the-db-credentials-to-vault)
-* [Configuring and deploying the sample application](#configuring-and-deploying-the-sample-application)
-* [Validating the application](#validating-the-application)
-* [Application management](#application-management)
-* [Updating/Changing credentials](#updatingchanging-credentials)
-* [Cleanup](#cleanup)
+- [Application Example using Universal Workload Identity with Tornjak and SPIRE](#application-example-using-universal-workload-identity-with-tornjak-and-spire)
+  - [Demo Overview](#demo-overview)
+  - [Starting the database](#starting-the-database)
+    - [*Info*: MySQL server](#info-mysql-server)
+  - [Building the Demo application](#building-the-demo-application)
+  - [Setting up Tornjak/SPIRE environment](#setting-up-tornjakspire-environment)
+  - [Setting up Vault instance with OIDC enablement](#setting-up-vault-instance-with-oidc-enablement)
+  - [Pushing the DB credentials to Vault](#pushing-the-db-credentials-to-vault)
+  - [Configuring and deploying the sample application](#configuring-and-deploying-the-sample-application)
+  - [Validating the application](#validating-the-application)
+  - [Application management](#application-management)
+  - [Updating/Changing credentials](#updatingchanging-credentials)
+  - [Cleanup](#cleanup)
 
 ## Starting the database
 Application will access the data from the database,
@@ -161,14 +164,13 @@ The applications will access the MySQL database and retrieve
 the data stored there. The credentials for accessing this db
 are stored in Vault, therefore
 we have to update the Vault info in the deployment file
-[config/apps.yaml](config/apps.yaml)
+[config/apps.yaml](./config/apps.yaml)
 and provide the value for *VAULT_ADDR* environment variable
 to correspond to the VAULT_ADDR used earlier.
 
-In addition we can run a bash script to help with the resources retrieval:
-[config/apps.yaml](config/apps.yaml)
+In order to retrieve the secrets we have created a set of scripts (bash, python).
 
-`bash`
+For the `bash` variant of the script [sidecar/run-sidecar-alt.sh](./sidecar/run-sidecar-alt.sh) you can add the following code to your `yaml` file, in the *spec &#8594; template &#8594; spec &#8594; initContainers &#8594; command* :
 ```yaml
 spec:
   ...
@@ -181,11 +183,7 @@ spec:
         ...
 ```
 
-[**TODO:** *we need to better describe when to use -alt scripts and how to use them. *]
-
-[sidecar/run-sidecar-alt.sh](sidecar/run-sidecar-alt.sh)
-
-`python`
+Alternatively you can use the `python` variant of the script [sidecar/sidecar-script-alt.py](./sidecar/sidecar-script-alt.py) you can add the following code to your `yaml` file, in the *spec &#8594; template &#8594; spec &#8594; initContainers &#8594; command* :
 ```yaml
 spec:
   ...
@@ -197,23 +195,58 @@ spec:
         command: ["python3", "/usr/local/bin/sidecar-script-alt.py", "/path/to/inputfile"]
         ...
 ```
-[sidecar/sidecar-script-alt.py](ssidecar/sidecar-script-alt.py)
 
-In a similar way, we can create a *ConfigMap* that would help us with the `inputfile`:
+These scripts takes in a file as input, parses and stores each line into an array so that it knows which file to obtain from Vault and to put them in the specified volume mount.
 
+In order to create an input file in a dynamic way we can use the help of the *ConfigMap* funtionality offered to us.
+
+An example of a *ConfigMap* that would help us with the `inputfile` could look like:
 ```yaml
----
+--- # seprator to a new section or "new file"
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: path-to-inputfile
+  name: path-to-inputfile #name of the configmap that would be used in the volume mount
 data:
-  inputfile.txt: |
+  inputfile.txt: | # each file we want to obtain from vault, each file on a new line
     db-config/config.ini
     db-config/config.json
 ```
 
-[**TODO:** *describe how to to create this ConfigMap *]
+This  would have to be defined in the `yaml` file in the *volumes* section, ie:
+```yaml
+...
+spec:
+  ...
+  template:
+  ...
+    spec:
+      volumes:
+        - name: mount-inputfile
+          configMap:
+            name: path-to-inputfile
+...
+```
+
+In order for the `"/path/to/inputfile"` to exists we would need to add also:
+```yaml
+...
+spec:
+  ...
+  template:
+  ...
+    spec:
+      initContainers:
+        - name: sidecar
+        ...
+          volumeMounts:
+            - name: mount-inputfile #name of the previous declared volume
+              mountPath: /path/to/inputfile # no extension was used here, you can have inputfile.txt
+              subPath: inputfile # no extension was used here, you can have inputfile.txt
+```
+
+A full example can be found here [config/apps.yaml](./config/apps.yaml).
+
 
 Start the deployment:
 
