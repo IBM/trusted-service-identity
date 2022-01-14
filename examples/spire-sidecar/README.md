@@ -1,4 +1,4 @@
-# Application Example using Universal Workload Identity with Tornjak and SPIRE
+# Application Example using Universal Workload Identity with Tornjak and SPIRE (with Sidecar)
 
 ## Demo Overview
 This example demonstrates a simple application that is using
@@ -17,7 +17,6 @@ it is dynamically obtained from the secure Vault by the `sidecar`, based on
 the application (workload) identity verified by OIDC.
 
 This document describes the following steps:
-- [Application Example using Universal Workload Identity with Tornjak and SPIRE](#application-example-using-universal-workload-identity-with-tornjak-and-spire)
   - [Demo Overview](#demo-overview)
   - [Starting the database](#starting-the-database)
     - [*Info*: MySQL server](#info-mysql-server)
@@ -34,9 +33,12 @@ This document describes the following steps:
 ## Starting the database
 Application will access the data from the database,
 so first we need to deploy the MySQL database for storing the entries used by `py` and `node` applications.
+The sample [deployment file](./config/db-node.yaml)
+starts the DB container, Service for accessing it,
+and populates it with a sample data.
 
 ### *Info*: MySQL server
-MySQL server has a `root` user (admin) for which a password must be defined by provinding a value for parameter `MYSQL_ROOT_PASSWORD`, and a technical user that application should use, we have named it `testroot` (value for parameter `MYSQL_USER`) and a password for our technical user by provinding a value for parameter `MYSQL_PASSWORD`.
+MySQL server has a `root` user (admin) for which a password must be defined by providing a value for parameter `MYSQL_ROOT_PASSWORD`, and a technical user that application should use, we have named it `testroot` (value for parameter `MYSQL_USER`) and a password for our technical user by providing a value for parameter `MYSQL_PASSWORD`.
 ```yaml
   ...
   env:
