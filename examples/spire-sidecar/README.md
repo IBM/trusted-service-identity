@@ -81,12 +81,12 @@ This demo example can be running on any Kubernetes platform (Kind, Minikube, Ope
 IBM Cloud, AWS EKS, Azure etc.)
 
 Install the Tornjak/SPIRE environment with OIDC Discovery for your platform,
-as specified in [our tutorial](https://github.com/IBM/trusted-service-identity/blob/main/docs/spire-oidc-tutorial.md)
+as specified in [our tutorial](/docs/spire-oidc-tutorial.md)
 
 ## Setting up Vault instance with OIDC enablement
-Setup Tornjak with OIDC and Vault instance, by following the [tutorial](https://github.com/IBM/trusted-service-identity/blob/main/docs/spire-oidc-vault.md).
+Setup Tornjak with OIDC and Vault instance, by following the [tutorial](/docs/spire-oidc-vault.md).
 
-Create a vault instance per instructions [here](https://github.com/IBM/trusted-service-identity/blob/main/README.md#setup-vault).
+Create a vault instance per instructions [here](/docs/vault.md).
 
 Once Vault instance is up, setup the following environment variables:
 * OIDC_URL
@@ -136,7 +136,7 @@ where, for example, we can have [config/config.json](config/config.json):
 Insert it into Vault as keys:
 
 ```console
-vault kv put secret/db-config/config.json @config.json
+vault kv put secret/db-config/config.json @config/config.json
 # retrieve it to test: 
 vault kv get -format=json secret/db-config/config.json
 ```
@@ -155,7 +155,7 @@ Since this file is not in JSON format, we can use a trick to encode it and
 store its encoded value as a key:
 
 ```console
-SHA64=$(openssl base64 -in config.ini )
+SHA64=$(openssl base64 -in config/config.ini )
 vault kv put secret/db-config/config.ini sha="$SHA64"
 # then to retrieve it:
 vault kv get -field=sha secret/db-config/config.ini | openssl base64 -d
