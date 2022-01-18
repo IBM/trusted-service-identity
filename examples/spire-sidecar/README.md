@@ -277,6 +277,16 @@ Deploy Python App service:
 kubectl apply -f config/app-python.yaml
 ```
 
+
+Once the appliction is created, it might take a while to execute the
+`init container`*sidecar* before the *py* and *node* containers are created,
+so please wait until the completion.
+
+You can view the sidecar information:
+```console
+kubectl logs -f <pod_id> -c sidecar
+```
+
 ## Validating the application
 Now we need to access the applications. This process depends on the underlining
 platform. Here we provide examples for Minikube, Kind, and OpenShift in IBM Cloud.
