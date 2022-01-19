@@ -172,7 +172,7 @@ to correspond to the VAULT_ADDR used earlier.
 
 In order to retrieve the secrets we have created a set of scripts (bash, python).
 
-For the `bash` variant of the script [sidecar/run-sidecar-alt.sh](./sidecar/run-sidecar-alt.sh) you can add the following code to your `yaml` file, in the *spec &#8594; template &#8594; spec &#8594; initContainers &#8594; command* :
+For the `bash` variant of the script [sidecar/run-sidecar-bash.sh](./sidecar/run-sidecar-bash.sh) you can add the following code to your `yaml` file, in the *spec &#8594; template &#8594; spec &#8594; initContainers &#8594; command* :
 ```yaml
 spec:
   ...
@@ -181,7 +181,7 @@ spec:
     spec:
       initContainers:
         - name: sidecar
-        command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
+        command: ["/usr/local/bin/run-sidecar-bash.sh", "/path/to/inputfile"]
         ...
 ```
 
@@ -248,12 +248,20 @@ spec:
 ```
 
 A full example can be found here [config/apps.yaml](./config/apps.yaml).
+See `python` variant [config/apps.python.yaml](./config/apps.python.yaml).
+See `bash` variant [config/apps.bash.yaml](./config/apps.bash.yaml).
 
 
-Start the deployment:
+Start the deployment, `bash` variant:
 
 ```console
-kubectl -n default create -f config/apps.yaml
+kubectl -n default create -f config/apps.bash.yaml
+```
+
+Start the deployment, `python` variant:
+
+```console
+kubectl -n default create -f config/apps.python.yaml
 ```
 
 When deployed, the `sidecar` *containerInit* would run first, obtain the JWT token with
