@@ -166,7 +166,8 @@ The applications will access the MySQL database and retrieve
 the data stored there. The credentials for accessing this db
 are stored in Vault, therefore
 we have to update the Vault info in the deployment file
-[config/apps.yaml](./config/apps.yaml)
+[config/apps.bash.yaml](./config/apps.bash.yaml)
+or [config/apps.python.yaml](./config/apps.python.yaml)
 and provide the value for *VAULT_ADDR* environment variable
 to correspond to the VAULT_ADDR used earlier.
 
@@ -247,7 +248,7 @@ spec:
               subPath: inputfile # no extension was used here, you can have inputfile.txt
 ```
 
-A full example can be found here [config/apps.yaml](./config/apps.yaml).
+A full example can be found here:
 See `python` variant [config/apps.python.yaml](./config/apps.python.yaml).
 See `bash` variant [config/apps.bash.yaml](./config/apps.bash.yaml).
 
@@ -419,7 +420,8 @@ Remove the deployments:
 
 ```console
 kubectl -n default delete ConfigMap path-to-inputfile
-kubectl -n default delete -f config/apps.yaml
+kubectl -n default delete -f config/apps.bash.yaml # BASH
+kubectl -n default delete -f config/apps.python.yaml # PYTHON
 kubectl delete -f config/db-node.yaml
 ```
 
