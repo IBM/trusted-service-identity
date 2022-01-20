@@ -35,7 +35,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
    rm -f awscliv2.zip
 
 COPY sidecar/run-sidecar.sh /usr/local/bin
-COPY sidecar/run-sidecar-alt.sh /usr/local/bin
+COPY sidecar/run-sidecar-bash.sh /usr/local/bin
 COPY sidecar/sidecar-script.py /usr/local/bin
 COPY sidecar/sidecar-script-alt.py /usr/local/bin
 
