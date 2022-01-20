@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: Always
           # use command to override the command of the image/dockerfile
           # if you want to use Python
-          command: ["python3", "/usr/local/bin/sidecar-script-alt.py", "/usr/local/bin/inputfile.txt"]
+          command: ["python3", "/usr/local/bin/run-sidecar-python.py", "/usr/local/bin/inputfile.txt"]
           # if you want to use Bash Script
           # command: ["/usr/local/bin/run-sidecar-alt.sh", "/path/to/inputfile"]
           env:

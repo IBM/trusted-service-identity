@@ -36,8 +36,8 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 
 COPY sidecar/run-sidecar.sh /usr/local/bin
 COPY sidecar/run-sidecar-bash.sh /usr/local/bin
-COPY sidecar/sidecar-script.py /usr/local/bin
-COPY sidecar/sidecar-script-alt.py /usr/local/bin
+COPY sidecar/run-sidecar.py /usr/local/bin
+COPY sidecar/run-sidecar-python.py /usr/local/bin
 
 COPY sidecar/requirements.txt /usr/local/bin/requirements.txt
 RUN pip3 install -r /usr/local/bin/requirements.txt
@@ -49,6 +49,6 @@ RUN cd /root
 # CMD ["/usr/local/bin/run-sidecar.sh"] 
 
 # Use python script to obtain files
-CMD ["python3", "/usr/local/bin/sidecar-script.py"]
+CMD ["python3", "/usr/local/bin/run-sidecar.py"]
 
 # CMD ["/bin/bash", "-c", "tail -f /dev/null"]

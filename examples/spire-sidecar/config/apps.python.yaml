@@ -23,7 +23,7 @@ spec:
           image: tsidentity/tornjak-example-sidecar:v0.1
           imagePullPolicy: Always
           # use command to override the command of the image/dockerfile
-          command: ["python3", "/usr/local/bin/sidecar-script-alt.py", "/usr/local/bin/inputfile.txt"]
+          command: ["python3", "/usr/local/bin/run-sidecar-python.py", "/usr/local/bin/inputfile.txt"]
           env:
           - name: SOCKETFILE
             value: "/run/spire/sockets/agent.sock"

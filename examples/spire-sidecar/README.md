@@ -185,7 +185,7 @@ spec:
         ...
 ```
 
-Alternatively you can use the `python` variant of the script [sidecar/sidecar-script-alt.py](./sidecar/sidecar-script-alt.py) you can add the following code to your `yaml` file, in the *spec &#8594; template &#8594; spec &#8594; initContainers &#8594; command* :
+Alternatively you can use the `python` variant of the script [sidecar/run-sidecar-python.py](./sidecar/run-sidecar-python.py) you can add the following code to your `yaml` file, in the *spec &#8594; template &#8594; spec &#8594; initContainers &#8594; command* :
 ```yaml
 spec:
   ...
@@ -194,7 +194,7 @@ spec:
     spec:
       initContainers:
         - name: sidecar
-        command: ["python3", "/usr/local/bin/sidecar-script-alt.py", "/path/to/inputfile"]
+        command: ["python3", "/usr/local/bin/run-sidecar-python.py", "/path/to/inputfile"]
         ...
 ```
 
