@@ -1,10 +1,8 @@
 #!/bin/bash
 
 SOCKETFILE=${SOCKETFILE:-"/run/spire/sockets/agent.sock"}
-# CFGDIR=${CFGDIR:-"/run/db"}
-# ROLE=${ROLE:-"dbrole1"}
-CFGDIR=${CFGDIR:-"/root"}
-ROLE=${ROLE:-"dbrole"}
+CFGDIR=${CFGDIR:-"/run/db"}
+ROLE=${ROLE:-"dbrole1"}
 VAULT_ADDR=${VAULT_ADDR:-"http://tsi-vault.my-cluster-0123456789-0000.eu-de.containers.appdomain.cloud"}
 
 WAIT=30
