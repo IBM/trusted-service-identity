@@ -27,14 +27,15 @@ Syntax: ${0} <INPUT_FILE>
 Where:
 <INPUT_FILE> - path to file that would contain resources (required)
 HELPMEHELPME
-    exit 0
+    echo "File not found: $1"
+    exit 1
 fi
 
 # read each line into array (i.e. files)
 mapfile -t files < $1
 
 
-while true 
+while true
 do
     # make sure the socket file exists before requesting a token
     while [ ! -S ${SOCKETFILE} ]; do
@@ -44,7 +45,7 @@ do
     IDENTITY_TOKEN=$(/opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath $SOCKETFILE | sed -n '2p' | xargs)
     if [ -z "$IDENTITY_TOKEN" ]; then
         echo "IDENTITY_TOKEN not set"
-        exit 0
+        continue
     fi
     # For use with AWS S3:
     # the audience must be switched to 'mys3'
@@ -56,7 +57,7 @@ do
     VAULT_TOKEN=$(curl --max-time 10 -s --request POST --data '{ "jwt": "'"${IDENTITY_TOKEN}"'", "role": "'"${ROLE}"'"}' "${VAULT_ADDR}"/v1/auth/jwt/login | jq -r  '.auth.client_token')
     if [ -z "$VAULT_TOKEN" ]; then
         echo "VAULT_TOKEN not set"
-        exit 0
+        continue
     fi
 
     filenames=() # will store only files names, used to check if they exists later
