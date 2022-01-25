@@ -63,12 +63,12 @@ if __name__ == "__main__":
     # sanity check for input file
     if len(sys.argv) == 0:
         print("No input file was provided")
-        exit()
+        exit(1)
     inputfile = sys.argv[1]
     # sanity check if input file exists
     if not os.path.exists(inputfile):
         print("Input file was not found")
-        exit()
+        exit(1)
     with open(inputfile, 'r') as f:
         files = f.readlines()
     # convert file to dictionary

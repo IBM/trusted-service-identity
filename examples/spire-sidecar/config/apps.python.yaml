@@ -1,3 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: path-to-inputfile
+data:
+  inputfile.txt: |
+    db-config/config.ini
+    db-config/config.json
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,7 +33,10 @@ spec:
           image: tsidentity/tornjak-example-sidecar:v0.1
           imagePullPolicy: Always
           # use command to override the command of the image/dockerfile
-          command: ["python3", "/usr/local/bin/run-sidecar-python.py", "/usr/local/bin/inputfile.txt"]
+          command: ["python3"]
+          args:
+            - "/usr/local/bin/run-sidecar-python.py"
+            - "/usr/local/bin/inputfile.txt"
           env:
           - name: SOCKETFILE
             value: "/run/spire/sockets/agent.sock"
@@ -93,12 +106,3 @@ spec:
       targetPort: 5000
 status:
   loadBalancer: {}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: path-to-inputfile
-data:
-  inputfile.txt: |
-    db-config/config.ini
-    db-config/config.json
