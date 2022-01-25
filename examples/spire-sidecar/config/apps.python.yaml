@@ -43,6 +43,8 @@ spec:
           - name: ROLE
             value: "dbrole"
           - name: VAULT_ADDR
+            # value: "http://{{vault-address.cloud}}"
+            # TODO: remove
             value: "http://tsi-vault-tsi-vault.space-x04-9d995c4a8c7c5f281ce13d5467ff6a94-0000.eu-de.containers.appdomain.cloud"
           volumeMounts:
             - name: spire-agent-socket

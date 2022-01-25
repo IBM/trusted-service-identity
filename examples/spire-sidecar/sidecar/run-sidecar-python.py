@@ -97,7 +97,10 @@ if __name__ == "__main__":
         # check if all files were retrieved
         for file, path in listOfFile.items():
             getfile(file, path, VAULT_TOKEN)
-            success = success and os.path.exists(CFGDIR+"/"+file)
+            foundfile = os.path.exists(CFGDIR+"/"+file)
+            if not foundfile:
+                print("File was not found $s.", file)
+            success = success and foundfile
         
         if success:
             exit()

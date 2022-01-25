@@ -73,6 +73,7 @@ do
     for i in "${filenames[@]}"
     do
         if [[ ! -f "$CFGDIR/$i" ]]; then
+            echo "File was not found: $i"
             success=0
         fi
     done

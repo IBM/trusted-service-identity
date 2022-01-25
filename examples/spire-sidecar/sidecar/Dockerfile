@@ -34,9 +34,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
    rm -rf aws && \
    rm -f awscliv2.zip
 
-COPY sidecar/run-sidecar.sh /usr/local/bin
 COPY sidecar/run-sidecar-bash.sh /usr/local/bin
-COPY sidecar/run-sidecar.py /usr/local/bin
 COPY sidecar/run-sidecar-python.py /usr/local/bin
 
 COPY sidecar/requirements.txt /usr/local/bin/requirements.txt
@@ -46,9 +44,9 @@ RUN cd /root
 
 
 # Use shell script to obtain files
-# CMD ["/usr/local/bin/run-sidecar.sh"] 
+# CMD ["/usr/local/bin/run-sidecar-bash.sh", "~/inputfile.txt"] 
 
 # Use python script to obtain files
-CMD ["python3", "/usr/local/bin/run-sidecar.py"]
+CMD ["python3", "/usr/local/bin/run-sidecar-python.py", "~/inputfile.txt"]
 
 # CMD ["/bin/bash", "-c", "tail -f /dev/null"]
