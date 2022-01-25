@@ -10,9 +10,9 @@ from decouple import config
 
 
 # read enviroment variable
-SOCKETFILE=os.getenv('SOCKETFILE') 
-if (SOCKETFILE is None): 
-    # if the enviroment variable is not set, try to read from .env file 
+SOCKETFILE=os.getenv('SOCKETFILE')
+if (SOCKETFILE is None):
+    # if the enviroment variable is not set, try to read from .env file
     # .env file mode for testing
     SOCKETFILE = config('SOCKETFILE', default='/run/spire/sockets/agent.sock')
 
@@ -26,7 +26,7 @@ if (ROLE is None):
 
 VAULT_ADDR=os.getenv('VAULT_ADDR')
 if (VAULT_ADDR is None):
-    VAULT_ADDR = config('VAULT_ADDR', default='http://tsi-vault.my-cluster-0123456789-0000.eu-de.containers.appdomain.cloud')
+    VAULT_ADDR = config('VAULT_ADDR', default='http://tsi-vault')
 
 TIMEOUT=0.5 # 30 sec
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             if not foundfile:
                 print("File was not found $s.", file)
             success = success and foundfile
-        
+
         if success:
             exit()
 
