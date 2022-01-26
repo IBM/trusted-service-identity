@@ -115,13 +115,13 @@ you can do a following:
 ## Pushing the DB credentials to Vault
 Now we can push our secret files to Vault. For this example we will be using two
 files:
-* config.json
-* config.ini
+* config.json (for nodejs)
+* config.ini (for python)
 
 Where the userid and password must match the DB values used in our
 sample configuration [config/db-node.yaml](config/db-node.yaml)
 
-where, for example, we can have [config/config.json](config/config.json):
+For nodejs example, we can have [config/config.json](config/config.json):
 ```json
 {
     "host"     : "db",
@@ -141,7 +141,8 @@ vault kv put secret/db-config/config.json @config/config.json
 vault kv get -format=json secret/db-config/config.json
 ```
 
-The second file needed is [config/config.ini](config/config.ini):
+The second file used for the Python example, we can have
+[config/config.ini](config/config.ini):
 ```
 [mysql]
 host=db
@@ -248,10 +249,12 @@ spec:
               subPath: inputfile # no extension was used here, you can have inputfile.txt
 ```
 
-A full example can be found here:
-See `python` variant [config/apps.python.yaml](./config/apps.python.yaml).
-See `bash` variant [config/apps.bash.yaml](./config/apps.bash.yaml).
+A complete, working examples can be found here:
 
+* See `python` variant [config/apps.python.yaml](./config/apps.python.yaml).
+* See `bash` variant [config/apps.bash.yaml](./config/apps.bash.yaml).
+
+Make sure the example file have the appropriate VAULT values as specified earlier.
 
 Start the deployment, `bash` variant:
 

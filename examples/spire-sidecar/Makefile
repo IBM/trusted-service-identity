@@ -17,6 +17,8 @@ SIDECAR_IMG_MUTABLE := $(REPO)/$(SIDECAR_IMG_NAME):$(VERSION)
 
 all: bin/python bin/nodejs bin/sidecar container-python container-nodejs container-sidecar
 
+sidecar: bin/sidecar container-sidecar
+
 bin/python:
 	docker build --no-cache -t $(PYTHON_IMG) -f python/Dockerfile .
 	docker tag $(PYTHON_IMG) $(PYTHON_IMG_MUTABLE)

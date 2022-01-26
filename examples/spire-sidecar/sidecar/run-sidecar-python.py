@@ -25,8 +25,9 @@ if (ROLE is None):
     ROLE = config('ROLE', default='dbrole1')
 
 VAULT_ADDR=os.getenv('VAULT_ADDR')
-if (VAULT_ADDR is None):
-    VAULT_ADDR = config('VAULT_ADDR', default='http://tsi-vault')
+if (VAULT_ADDR is None or len(VAULT_ADDR)==0):
+    print("VAULT_ADDR not set")
+    exit(1)
 
 TIMEOUT=0.5 # 30 sec
 

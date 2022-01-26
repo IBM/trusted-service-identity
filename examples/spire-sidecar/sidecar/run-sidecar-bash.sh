@@ -3,7 +3,11 @@
 SOCKETFILE=${SOCKETFILE:-"/run/spire/sockets/agent.sock"}
 CFGDIR=${CFGDIR:-"/run/db"}
 ROLE=${ROLE:-"dbrole1"}
-VAULT_ADDR=${VAULT_ADDR:-"http://tsi-vault"}
+
+if [[ "$VAULT_ADDR" == "" ]]; then
+   echo "VAULT_ADDR not set"
+   exit 1
+fi
 
 WAIT=30
 
