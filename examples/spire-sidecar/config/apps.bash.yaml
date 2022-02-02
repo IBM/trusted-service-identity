@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: path-to-inputfile
+data:
+  inputfile.txt: |
+    db-config/config.ini
+    db-config/config.json
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apps
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        identity_template: "true"
+        app: apps
+    spec:
+      initContainers:
+        - name: sidecar
+          securityContext:
+            # privilaged is needed to create socket and bundle files
+            privileged: true
+          image: tsidentity/tornjak-example-sidecar:v0.1
+          imagePullPolicy: Always
+          # use command to override the command of the image/dockerfile
+          command: ["/usr/local/bin/run-sidecar-bash.sh"]
+          args:
+            - "/usr/local/bin/inputfile.txt"
+          env:
+          - name: SOCKETFILE
+            value: "/run/spire/sockets/agent.sock"
+          - name: ROLE
+            value: "dbrole"
+          - name: VAULT_ADDR
+            # Provide address to your VAULT server
+            # value: "http://{{vault-address.cloud}}"
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: true
+            - name: db-config
+              mountPath: /run/db
+            - name: mount-inputfile
+              mountPath: /usr/local/bin/inputfile.txt
+              subPath: inputfile.txt
+      containers:
+        - image: tsidentity/tornjak-example-nodejs:v0.1
+          imagePullPolicy: Always
+          name: node
+          ports:
+            - containerPort: 8080
+          resources: {}
+          volumeMounts:
+          - mountPath: /usr/src/app/config.json
+            name: db-config
+            readOnly: true
+            subPath: config.json
+        - image: tsidentity/tornjak-example-python:v0.1
+          imagePullPolicy: Always
+          name: py
+          ports:
+            - containerPort: 5000
+          resources: {}
+          volumeMounts:
+          - mountPath: /app/config.ini
+            name: db-config
+            readOnly: true
+            subPath: config.ini
+      restartPolicy: Always
+      volumes:
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: Directory
+        - name: db-config
+          emptyDir: {}
+        - name: mount-inputfile
+          configMap:
+            name: path-to-inputfile
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apps
+spec:
+  type: NodePort
+  selector:
+    app: apps
+  ports:
+    - name: "8001"
+      port: 8001
+      targetPort: 8080
+    - name: "8000"
+      port: 8000
+      targetPort: 5000
+status:
+  loadBalancer: {}

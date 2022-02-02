@@ -175,23 +175,9 @@ root@ip-192-168-62-164:/usr/local/bin# ./demo-vault.sh
 
 $ /opt/spire/bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sockets/agent.sock
 ```
-<<<<<<< HEAD
 
-The JWT token is the long string that follows the **token**:
-
-```console
-bin/spire-agent api fetch jwt -audience vault -socketPath /run/spire/sock
-ets/agent.sock
-token(spiffe://openshift.space-x.com/region/us-east/cluster_name/space-x01/ns/default/sa/elon-musk/pod_name/mars-mission-7874fd667c-rchk5):
-	eyJhbGciOiJSUzI1NiIs....cy46fb465a
-```
-
-export this long string as JWT env. variable:
-
-=======
 This operation retrieves the SPIFFE id for this pod with its JWT representation.
 e.g:
->>>>>>> main
 ```
 token(spiffe://openshift.space-x.com/region/us-east-1/cluster_name/aws-tsi-test-03/ns/default/sa/elon-musk/pod_name/mars-mission-f5844b797-br5w9)
 . . . .

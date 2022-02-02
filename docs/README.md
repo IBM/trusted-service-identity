@@ -33,3 +33,4 @@ These demos showcase various experiments
 1. [OIDC Tutorial](./spire-oidc-tutorial.md)
 2. [OIDC for Vault](./spire-oidc-vault.md)
 3. [AWS S3 storage access via OIDC](./spire-oidc-aws-s3.md)
+4. [Identity Sidecar for Python and MySQL applications](../examples/spire-sidecar/README.md)
