@@ -60,7 +60,7 @@ utils/createKeys.sh sample-keys $CLUSTER_NAME $INGRESS_DOMAIN_NAME
 
 Create a Kubernetes secret that is using the generated key and certificates.
 *key.pem* and *tls.pem* correspond to the TLS connection.
-*mtls.pem* is used for mTLS connection.
+*rootCA.pem* is used for mTLS connection.
 See the details
 [here](https://github.com/spiffe/tornjak/blob/main/sample-keys/ca_process/README.md)
 
@@ -81,9 +81,10 @@ kubectl -n tornjak delete po spire-server-0
 New `spire-server-0` pod should be re-created using the values provided by
 the newly created secret.
 
-### Ingress for TLS/mTLS
-As we setup HTTP ingress to Tornjak server earlier, to take advantage of the
-secure connection we have to also enable TLS/mTLS ingress.
+### Setting up TLS/mTLS access
+In addition to the HTTP ingress access to the Tornjak server
+as it was setup earlier,
+we have to now enable access to TLS and mTLS also.
 
 On **minikube**, we can retrieve the access points using service names:
 ```console
@@ -94,6 +95,8 @@ http://127.0.0.1:30670
 minikube service tornjak-mtls -n tornjak --url
 http://127.0.0.1:31740
 ```
+
+If you are using OpenShift, follow the Ingress setup [documentation](./spire-on-openshift.md).
 
 Now you can test the above connections to Tornjak server by going to
 `http://127.0.0.1:56404` using your local browser,
@@ -158,8 +161,9 @@ Now you can access all the Tornjak panels using the created Server Connection "s
 
 
 ## Disable HTTP access
-Once TLS/mTLS access points are validated, in production we should disable the
-HTTP service and HTTP Ingress for Tornjak.
+Once TLS/mTLS access points are validated, we should disable the
+HTTP service and HTTP Ingress for Tornjak,
+especially in production deployment.
 
 For non-minikube environments remove *tornjak-http* service and Ingress for `tornjak-http` service.
 
