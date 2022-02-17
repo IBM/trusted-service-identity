@@ -68,7 +68,7 @@ See the details
 kubectl -n tornjak create secret generic tornjak-certs \
 --from-file=key.pem="sample-keys/$CLUSTER_NAME.key"  \
 --from-file=tls.pem="sample-keys/$CLUSTER_NAME.crt" \
---from-file=mtls.pem="sample-keys/CA/rootCA.crt"
+--from-file=rootCA.pem="sample-keys/CA/rootCA.crt"
 ```
 
 Then just simply restart the spire server by killing the **spire-server-0** pod

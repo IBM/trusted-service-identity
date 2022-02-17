@@ -223,6 +223,18 @@ Forwarding from [::1]:10000 -> 10000
 
 Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:10000` in your local browser.
 
+### Accessing remote Tornjak back-end with a local instance of front-end
+To start a local instance of the Tornjak front-end server point at the running Tornjak APIs:
+
+```console
+cd tornjak-frontend
+REACT_APP_API_SERVER_URI=http://<tornjak_API>/  npm start
+```
+
+Assuming npm is installed, this will start a server on http://localhost:3000
+Please be patient, as it might take a few minutes to compile and start the server.
+
+
 ## Step 2. Deploy a SPIRE Agents
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node.
 It also deploys the optional component Workload Registrar
@@ -429,18 +441,19 @@ The syntax is:
 ```console
 utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
 ```
-For our example, this is:
-```console
-utils/createKeys.sh sample-keys $CLUSTER_NAME $INGRESS_DOMAIN_NAME
-```
 
-When using IBM Cloud you can get these required values as follow:
+When using IBM Cloud, you can get these required values as follow:
 ```console
 utils/get-cluster-info.sh
 export CLUSTER_NAME=
 export REGION=
 
-INGRESS-DOMAIN-NAME=$(ibmcloud oc cluster get --cluster "$CLUSTER_NAME" --output json | jq -r '.ingressHostname')
+INGRESS_DOMAIN_NAME=$(ibmcloud oc cluster get --cluster "$CLUSTER_NAME" --output json | jq -r '.ingressHostname')
+```
+
+In our example, this would be:
+```console
+utils/createKeys.sh sample-keys $CLUSTER_NAME $INGRESS_DOMAIN_NAME
 ```
 
 Create a secret that is using the generated key and certificates:
@@ -460,7 +473,8 @@ kubectl -n tornjak get pods
 kubectl -n tornjak delete po spire-server-0
 ```
 
-New pod should be created using the newly created secret with key and certs.
+New `spire-server-0` pod should be re-created using the newly created secret
+containing key and certs.
 
 ### Ingress for TLS/mTLS
 As we setup HTTP ingress to Tornjak server earlier, to take advantage of the
