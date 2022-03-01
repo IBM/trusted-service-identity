@@ -81,6 +81,16 @@ kubectl -n tornjak delete po spire-server-0
 New `spire-server-0` pod should be re-created using the values provided by
 the newly created secret.
 
+For debugging the certificate, you can use the following commands to view
+the secret content:
+
+```console
+Decode the secret:
+kubectl -n tornjak get secret tornjak-certs -o jsonpath='{.data}' | jq -r '."key.pem"' | base64 --decode
+kubectl -n tornjak get secret tornjak-certs -o jsonpath='{.data}' | jq -r '."tls.pem"' | base64 --decode
+kubectl -n tornjak get secret tornjak-certs -o jsonpath='{.data}' | jq -r '."rootCA.pem"' | base64 --decode
+```
+
 ### Setting up TLS/mTLS access
 In addition to the HTTP ingress access to the Tornjak server
 as it was setup earlier,
