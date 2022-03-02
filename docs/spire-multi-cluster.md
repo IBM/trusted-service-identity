@@ -33,7 +33,7 @@ all remote agents must be attested.
 SPIRE offers node attestors for some of the Cloud providers,
 like Amazon EKS, Microsoft Azure and Google GCP.
 For others we can use Kubernetes attestor,
-which is using [portable "KUBECONFIG" files](#capture-the-portable-kubeconfig-files).
+which is using [portable "KUBECONFIG" files](#step-1a-capture-the-portable-kubconfig-files).
 
 Configurations below shows various scenarios that depend on
 the deployment type of the remote servers.
