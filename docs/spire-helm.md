@@ -228,7 +228,7 @@ To start a local instance of the Tornjak front-end server point at the running T
 
 ```console
 cd tornjak-frontend
-REACT_APP_API_SERVER_URI=http://<tornjak_API>/  npm start
+REACT_APP_API_SERVER_URI=http://<tornjak_API>/ npm start
 ```
 
 Assuming npm is installed, this will start a server on http://localhost:3000
