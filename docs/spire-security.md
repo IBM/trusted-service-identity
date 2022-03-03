@@ -1,6 +1,6 @@
 # Enhanced SPIRE Security
 Tornjak supports HTTP and HTTPS protocols, using TLS and mTLS.
-In our demos we show the simples version, with HTTP.
+In our [demos](./README.md#tornjak-use-cases) we show the simple version, with HTTP.
 Our standard deployment uses default Root CA available
 [here](https://github.com/spiffe/tornjak/tree/main/sample-keys/ca_process/CA).
 
