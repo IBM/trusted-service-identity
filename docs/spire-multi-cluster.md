@@ -33,7 +33,7 @@ all remote agents must be attested.
 SPIRE offers node attestors for some of the Cloud providers,
 like Amazon EKS, Microsoft Azure and Google GCP.
 For others we can use Kubernetes attestor,
-which is using [portable "KUBECONFIG" files](#capture-the-portable-kubeconfig-files).
+which is using [portable "KUBECONFIG" files](#step-1a-capture-the-portable-kubeconfig-files).
 
 Configurations below shows various scenarios that depend on
 the deployment type of the remote servers.
@@ -96,7 +96,7 @@ Therefore, for every remote cluster,
 other then the cluster hosting the Tornjak,
 we need KUBECONFIG information.
 
-#### Step 1a. Capture the portable KUBCONFIG files
+#### Step 1a. Capture the portable KUBECONFIG files
 Gather the portable KUBECONFIGs for every remote cluster
 and output them into individual files
 using  `kubectl config view --flatten`.
