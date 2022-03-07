@@ -223,6 +223,18 @@ Forwarding from [::1]:10000 -> 10000
 
 Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:10000` in your local browser.
 
+### Accessing remote Tornjak back-end with a local instance of front-end
+To start a local instance of the Tornjak front-end server point at the running Tornjak APIs:
+
+```console
+cd tornjak-frontend
+REACT_APP_API_SERVER_URI=http://<tornjak_API>/ npm start
+```
+
+Assuming npm is installed, this will start a server on http://localhost:3000
+Please be patient, as it might take a few minutes to compile and start the server.
+
+
 ## Step 2. Deploy a SPIRE Agents
 This part of the tutorial deploys SPIRE Agents as daemonset, one per worker node.
 It also deploys the optional component Workload Registrar
@@ -405,80 +417,5 @@ minikube delete
 ```
 
 ## Advanced Features
-For a production usage, we want to better protect the access to various components.
-
-### Keys for Tornjak TLS/mTLS
-Tornjak access is available via HTTP, TLS and mTLS protocols. In a production
-environment you should use TLS/mTLS that are based on certificates created from
-the organization rootCA. If you just like to  test these protocols, and don't have
-your own rootCA, you can use the sample from here:
-https://github.com/spiffe/tornjak/tree/main/sample-keys/ca_process/CA
-or create your own:
-
-```
-ROOTCA="sample-keys/CA/rootCA"
-# Create CA certs:
-openssl genrsa -out $ROOTCA.key 4096
-openssl req -x509 -subj "/C=US/ST=CA/O=Acme, Inc./CN=example.com" -new -nodes -key $ROOTCA.key -sha256 -days 1024 -out $ROOTCA.crt
-```
-Put the `rootCA.key` and `rootCA.crt` files in `sample-keys/CA` directory.
-Then use `utils/createKeys.sh` script to create private key and certificate.
-Pass the cluster name and the domain name associated with your ingress:
-
-The syntax is:
-```console
-utils/createKeys.sh <keys-directory> <cluster-name> <ingress-domain-name>
-```
-For our example, this is:
-```console
-utils/createKeys.sh sample-keys $CLUSTER_NAME $INGRESS_DOMAIN_NAME
-```
-
-When using IBM Cloud you can get these required values as follow:
-```console
-utils/get-cluster-info.sh
-export CLUSTER_NAME=
-export REGION=
-
-INGRESS-DOMAIN-NAME=$(ibmcloud oc cluster get --cluster "$CLUSTER_NAME" --output json | jq -r '.ingressHostname')
-```
-
-Create a secret that is using the generated key and certificates:
-
-```
-kubectl -n tornjak create secret generic tornjak-certs \
---from-file=key.pem="sample-keys/$CLUSTER_NAME.key" \
---from-file=cert.pem="sample-keys/$CLUSTER_NAME.crt" \
---from-file=tls.pem="sample-keys/$CLUSTER_NAME.crt" \
---from-file=mtls.pem="sample-keys/$CLUSTER_NAME.crt"
-```
-
-Then just simply restart the spire server by killing the **spire-server-0** pod
-
-```
-kubectl -n tornjak get pods
-kubectl -n tornjak delete po spire-server-0
-```
-
-New pod should be created using the newly created secret with key and certs.
-
-### Ingress for TLS/mTLS
-As we setup HTTP ingress to Tornjak server earlier, to take advantage of the
-secure connection we have to also enable TLS/mTLS ingress.
-
-On **minikube**, we can retrieve the access points using service names:
-```console
-minikube service tornjak-http -n tornjak --url
-http://127.0.0.1:56404
-minikube service tornjak-tls -n tornjak --url
-http://127.0.0.1:30670
-minikube service tornjak-mtls -n tornjak --url
-http://127.0.0.1:31740
-```
-
-Now you can test the connection to Tornjak server by going to `http://127.0.0.1:56404` using your local browser, or secure (HTTPS) connection here: `http://127.0.0.1:30670`
-
-Once TLS/mTLS access points are validated, in production we should disable the
-HTTP service and HTTP Ingress for Tornjak.
-
-For non-minikube environments open Ingress to either `tornjak-tls` or `tornjak-mtls` service and remove Ingress for `tornjak-http` service.
+For a production usage, we want to better protect the access to various components
+Please see our [spire-security](./spire-security.md) section.
