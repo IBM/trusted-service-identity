@@ -1,4 +1,8 @@
----
+{{- if not (lookup "apiextensions.k8s.io/v1beta1" "CustomResourceDefinition" "" "spiffeids.spiffeid.spiffe.io") -}}
+{{/*
+    If does not exist, generate new SPIFFEID CRD
+*/}}
+
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -107,3 +111,5 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
+
+{{- end -}}

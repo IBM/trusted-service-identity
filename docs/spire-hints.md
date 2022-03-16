@@ -115,7 +115,7 @@ Either re-run the agents installation again,
 or create the CRD manually:
 
 ```console
-kubectl -n spire create -f charts/spire/templates/spiffeid.spiffe.io_spiffeids.yaml
+kubectl -n spire create -f charts/spire/ext/spiffeid.spiffe.io_spiffeids.yaml
 ```
 ---
 **Problem:**
@@ -126,7 +126,7 @@ time="2021-10-01T16:50:45Z" level=error msg="Failed to watch the Workload API: r
 ```
 **Description:**
 
-The Workload Registar cannot connect to the SPIRE agent.
+The Workload Registrar cannot connect to the SPIRE agent.
 
 **Solution:**
 
