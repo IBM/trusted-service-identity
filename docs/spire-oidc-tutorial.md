@@ -7,7 +7,7 @@ In this example we will deploy Tornjak and SPIRE server on OpenShift in IBM Clou
 
 ## Deploy Tornjak, SPIRE Server and Agents
 Follow the documentation to deploy [Tornjak on Openshift](./spire-on-openshift.md#deploy-on-openshift])
-with exception of enabling the `--oidc` flag:
+with exception of enabling the `--oidc` flag.
 
 ```
 # install:
@@ -17,12 +17,12 @@ utils/install-open-shift-tornjak.sh -c $CLUSTER_NAME -t $TRUST_DOMAIN -p $PROJEC
 for example:
 
 ```console
-utils/install-open-shift-tornjak.sh -c space-x01 -t openshift.space-x.com --oidc
+utils/install-open-shift-tornjak.sh -c $CLUSTER_NAME -t openshift.space-x.com --oidc
 ```
 
 This creates an output that has a following ending:
 
-```console
+```
 export SPIRE_SERVER=spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud
 
 Tornjak (http): http://tornjak-http-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud/
@@ -60,13 +60,20 @@ This output confirms that the OIDC endpoint is accessible and responds with vali
 
 Let's install the [SPIRE Agents](./spire-on-openshift.md#step-2-installing-spire-agents-on-openshift):
 
-```
+```console
 oc new-project spire --description="My TSI Spire Agent project on OpenShift"
 kubectl get configmap spire-bundle -n tornjak -o yaml | sed "s/namespace: tornjak/namespace: spire/" | kubectl apply -n spire -f -
+```
 
+Then export the value of the SPIRE_SERVER frome above:
+
+```
 export SPIRE_SERVER=spire-server-tornjak.space-x-01-9d995c4a8c7c5f281ce13d5467ff-0000.us-south.containers.appdomain.cloud
+```
+and run the agents installation:
 
-utils/install-open-shift-spire.sh -c space-x01 -s $SPIRE_SERVER -t openshift.space-x.com
+```console
+utils/install-open-shift-spire.sh -c $CLUSTER_NAME -r $REGION -s $SPIRE_SERVER -t openshift.space-x.com
 ```
 
 Confirm the agents were successfully deployed and get the host for the registrar:
