@@ -70,6 +70,11 @@ data:
             }
         }
       }
+      NodeAttestor "x509pop" {
+       plugin_data {
+          ca_bundle_path = "/opt/spire/sample-keys/rootCA.pem"
+       }
+      }
 
       {{- if .Values.attestors.aws_iid -}}
       {{- if .Values.attestors.aws_iid.access_key_id -}}
