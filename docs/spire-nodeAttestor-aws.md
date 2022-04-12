@@ -1,4 +1,4 @@
-# Setting up the SPIRE AWS NodeAttestor
+# [** DRAFT ***] Setting up the SPIRE AWS NodeAttestor
 
 ## Setting up the cluster
 Get AWS cli:
