@@ -46,6 +46,10 @@ spec:
               readOnly: true
             - name: spire-agent-token
               mountPath: /var/run/secrets/tokens
+              readOnly: true
+            - name: agent-x509
+              mountPath: /run/spire/agent
+              readOnly: true
           livenessProbe:
             exec:
               command:
@@ -68,6 +72,10 @@ spec:
           hostPath:
             path: {{ .Values.spireAgent.socketDir }}
             type: DirectoryOrCreate
+        - name: agent-x509
+          secret:
+            defaultMode: 0400
+            secretName: agent-x509
         - name: spire-agent-token
           projected:
             sources:

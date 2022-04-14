@@ -182,7 +182,8 @@ oc_cli adm policy add-scc-to-user privileged -z $SPIRE_AG_SA
 helm install --set "spireServer.address=$SPIRESERVER" --set "namespace=$PROJECT" \
  --set "clustername=$CLUSTERNAME" --set "trustdomain=$TRUSTDOMAIN" \
  --set "region=$REGION" \
- --set "openShift=true" spire charts/spire # --debug
+ --set "x509=true" \
+ --set "openShift=true" spire charts/spire --debug
 
 cat << EOF
 
