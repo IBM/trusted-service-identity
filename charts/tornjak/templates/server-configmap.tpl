@@ -72,7 +72,7 @@ data:
       }
       NodeAttestor "x509pop" {
        plugin_data {
-          ca_bundle_path = "/opt/spire/sample-keys/rootCA.pem"
+          ca_bundle_path = "/opt/spire/sample-x509/rootCA.pem"
        }
       }
 
