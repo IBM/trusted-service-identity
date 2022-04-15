@@ -18,6 +18,8 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
+      # extended to 7 days, just for testing
+      ca_ttl = "168h"
       socket_path = "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
 
       {{- if .Values.oidc.enable }}
