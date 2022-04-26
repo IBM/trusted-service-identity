@@ -15,13 +15,20 @@ else
 fi
 FILE=$NODE.sh
 TARGET_DIR="/target/run/spire/x509"
+TEMP_DIR="/tmp/ca"
 
 echo "#!/bin/bash -x" > $FILE
 chmod 755 $FILE
 
-echo "mkdir -p $TARGET_DIR" >> $FILE
+echo "mkdir -p $TEMP_DIR" >> $FILE
+echo "cd $TEMP_DIR" >> $FILE
+echo "mkdir certs crl newcerts private" >> $FILE
+echo "chmod 700 private" >> $FILE
+echo "touch index.txt" >> $FILE
+echo "echo 1000 > serial" >> $FILE
+echo "cd -" >> $FILE
 
-echo "cat > $TARGET_DIR/intermediate.cert.pem <<EOF" >> $FILE
+echo "cat > $TEMP_DIR/intermediate.cert.pem <<EOF" >> $FILE
 if [ -f $KEYS/intermediate.cert.pem ]; then
   cat $KEYS/intermediate.cert.pem >> $FILE
   echo "EOF" >> $FILE
@@ -32,7 +39,7 @@ else
 fi
 
 if [ -f $KEYS/intermediate.key.pem ]; then
-  echo "cat > $TARGET_DIR/intermediate.key.pem <<EOF" >> $FILE
+  echo "cat > $TEMP_DIR/intermediate.key.pem <<EOF" >> $FILE
   cat $KEYS/intermediate.key.pem >> $FILE
   echo "EOF" >> $FILE
   echo " " >> $FILE
@@ -41,26 +48,33 @@ else
   exit 1
 fi
 
-echo "cat > $TARGET_DIR/intermediate-openssl.cnf <<EOF" >> $FILE
+echo "cat > $TEMP_DIR/intermediate-openssl.cnf <<EOF" >> $FILE
 cat conf/intermediate-config.txt >> $FILE
 echo "EOF" >> $FILE
 echo " " >> $FILE
 
-echo "openssl genrsa -out $TARGET_DIR/node.key.pem 2048" >> $FILE
-echo "chmod 400 $TARGET_DIR/node.key.pem" >> $FILE
+echo "openssl genrsa -out $TEMP_DIR/node.key.pem 2048" >> $FILE
+echo "chmod 400 $TEMP_DIR/node.key.pem" >> $FILE
 
 echo 'SUBJ="/C=US/ST=CA/O=MyOrg, Inc./CN='"$NODE"'"' >> $FILE
 
-echo "openssl req -new -sha256 -key $TARGET_DIR/node.key.pem \\" >> $FILE
-echo ' -subj "${SUBJ}"'" -out $TARGET_DIR/node.csr \ " >> $FILE
-echo " -config $TARGET_DIR/intermediate-openssl.cnf 2>/dev/null" >> $FILE
+echo "openssl req -new -sha256 -key $TEMP_DIR/node.key.pem \\" >> $FILE
+echo ' -subj "${SUBJ}"'" -out $TEMP_DIR/node.csr \\" >> $FILE
+echo " -config $TEMP_DIR/intermediate-openssl.cnf 2>/dev/null" >> $FILE
 
-echo "openssl ca -config $TARGET_DIR/intermediate-openssl.cnf \\" >> $FILE
+echo "openssl ca -batch -config $TEMP_DIR/intermediate-openssl.cnf \\" >> $FILE
 echo "    -extensions server_cert -days 375 -notext -md sha256 \\" >> $FILE
-echo "    -in $TARGET_DIR/node.csr \\" >> $FILE
-echo "    -out $TARGET_DIR/node.cert.pem 2>/dev/null" >> $FILE
-echo "chmod 444 $TARGET_DIR/node.cert.pem" >> $FILE
+echo "    -in $TEMP_DIR/node.csr \\" >> $FILE
+echo "    -out $TEMP_DIR/node.cert.pem 2>/dev/null" >> $FILE
+echo "chmod 444 $TEMP_DIR/node.cert.pem" >> $FILE
 
-
-echo "cat $TARGET_DIR/node.cert.pem \\" >> $FILE
-echo "   $TARGET_DIR/intermediate.pem > $TARGET_DIR/node-bundle.cert.pem" >> $FILE
+echo "" >> $FILE
+echo "# cleanup:" >> $FILE
+echo "mkdir -p $TARGET_DIR" >> $FILE
+echo "cat $TEMP_DIR/node.cert.pem \\" >> $FILE
+echo "   $TEMP_DIR/intermediate.cert.pem > $TARGET_DIR/node-bundle.cert.pem" >> $FILE
+echo "mv $TEMP_DIR/node.key.pem $TARGET_DIR/" >> $FILE
+echo "rm -rf $TEMP_DIR/" >> $FILE
+echo "" >> $FILE
+echo "" >> $FILE
+echo "" >> $FILE

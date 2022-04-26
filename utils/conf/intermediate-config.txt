@@ -7,21 +7,21 @@ default_ca = CA_default
 
 [ CA_default ]
 # Directory and file locations.
-dir               = /target/run/spire/x509
-certs             = $dir/certs
-crl_dir           = $dir/crl
-new_certs_dir     = $dir/newcerts
-database          = $dir/index.txt
-serial            = $dir/serial
-RANDFILE          = $dir/private/.rand
+dir               = /tmp/ca
+certs             = \$dir/certs
+crl_dir           = \$dir/crl
+new_certs_dir     = \$dir/newcerts
+database          = \$dir/index.txt
+serial            = \$dir/serial
+RANDFILE          = \$dir/private/.rand
 
 # The root key and root certificate.
-private_key       = $dir/intermediate.key.pem
-certificate       = $dir/intermediate.cert.pem
+private_key       = \$dir/intermediate.key.pem
+certificate       = \$dir/intermediate.cert.pem
 
 # For certificate revocation lists.
-crlnumber         = $dir/crlnumber
-crl               = $dir/crl/intermediate.crl.pem
+crlnumber         = \$dir/crlnumber
+crl               = \$dir/crl/intermediate.crl.pem
 crl_extensions    = crl_ext
 default_crl_days  = 30
 
