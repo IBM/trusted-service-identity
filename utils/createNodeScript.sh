@@ -46,21 +46,21 @@ cat conf/intermediate-config.txt >> $FILE
 echo "EOF" >> $FILE
 echo " " >> $FILE
 
-echo "openssl genrsa -out $TARGET_DIR/$NODE.key.pem 2048" >> $FILE
-echo "chmod 400 $TARGET_DIR/$NODE.key.pem" >> $FILE
+echo "openssl genrsa -out $TARGET_DIR/node.key.pem 2048" >> $FILE
+echo "chmod 400 $TARGET_DIR/node.key.pem" >> $FILE
 
 echo 'SUBJ="/C=US/ST=CA/O=MyOrg, Inc./CN='"$NODE"'"' >> $FILE
 
-echo "openssl req -new -sha256 -key $TARGET_DIR/$NODE.key.pem \\" >> $FILE
-echo ' -subj "${SUBJ}"'" -out $TARGET_DIR/$NODE.csr \ " >> $FILE
+echo "openssl req -new -sha256 -key $TARGET_DIR/node.key.pem \\" >> $FILE
+echo ' -subj "${SUBJ}"'" -out $TARGET_DIR/node.csr \ " >> $FILE
 echo " -config $TARGET_DIR/intermediate-openssl.cnf 2>/dev/null" >> $FILE
 
 echo "openssl ca -config $TARGET_DIR/intermediate-openssl.cnf \\" >> $FILE
 echo "    -extensions server_cert -days 375 -notext -md sha256 \\" >> $FILE
-echo "    -in $TARGET_DIR/$NODE.csr \\" >> $FILE
-echo "    -out $TARGET_DIR/$NODE.cert.pem 2>/dev/null" >> $FILE
-echo "chmod 444 $TARGET_DIR/$NODE.cert.pem" >> $FILE
+echo "    -in $TARGET_DIR/node.csr \\" >> $FILE
+echo "    -out $TARGET_DIR/node.cert.pem 2>/dev/null" >> $FILE
+echo "chmod 444 $TARGET_DIR/node.cert.pem" >> $FILE
 
 
-echo "cat $TARGET_DIR/$NODE.cert.pem \\" >> $FILE
-echo "   $TARGET_DIR/intermediate.pem > $TARGET_DIR/$NODE-bundle.cert.pem" >> $FILE
+echo "cat $TARGET_DIR/node.cert.pem \\" >> $FILE
+echo "   $TARGET_DIR/intermediate.pem > $TARGET_DIR/node-bundle.cert.pem" >> $FILE

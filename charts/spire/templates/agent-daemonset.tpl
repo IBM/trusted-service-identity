@@ -73,9 +73,9 @@ spec:
             path: {{ .Values.spireAgent.socketDir }}
             type: DirectoryOrCreate
         - name: agent-x509
-          secret:
-            defaultMode: 0400
-            secretName: agent-x509
+          hostPath:
+            path: /run/spire/x509
+            type: Directory
         - name: spire-agent-token
           projected:
             sources:

@@ -27,8 +27,8 @@ data:
       {{- else if .Values.x509 }}
       NodeAttestor "x509pop" {
           plugin_data {
-            private_key_path = "/run/spire/agent/key.pem"
-            certificate_path = "/run/spire/agent/cert.pem"
+            private_key_path = "/run/spire/agent/node.key.pem"
+            certificate_path = "/run/spire/agent/node-bundle.cert.pem"
          }
       }
       {{- else }}
