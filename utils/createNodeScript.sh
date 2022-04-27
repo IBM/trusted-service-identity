@@ -15,6 +15,7 @@ else
 fi
 
 SCRIPTS="scripts"
+mkdir -p ${SCRIPTS}
 FILE=${SCRIPTS}/${NODE}.sh
 TEMP_DIR="/tmp/ca"
 TARGET_DIR="/target/run/spire/x509"
@@ -22,7 +23,6 @@ TARGET_DIR="/target/run/spire/x509"
 echo "#!/bin/bash" > ${FILE}
 chmod 755 ${FILE}
 
-echo "mkdir -p $SCRIPTS" >> ${FILE}
 echo "mkdir -p ${TEMP_DIR}" >> ${FILE}
 echo "cd ${TEMP_DIR}" >> ${FILE}
 echo "mkdir certs crl newcerts private" >> ${FILE}
