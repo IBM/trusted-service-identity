@@ -30,6 +30,16 @@ The steps are following:
 
 ### Generating RootCA
 
+This example comes with sample x509 certificates and keys to demonstrate
+`x509pop` nodeAttestor capabilities.
+
+The sample keys are present in [../sample-x509](../sample-x509) directory.
+You can create a new set of certs and keys:
+* [using a script](#generate_keys_using_a_script)
+* [manually (recommended)](#generate_keys_manually)
+
+## Generate keys using a script
+To create new sample certs and keys:
 ```console
 mkdir x509/ca
 cd x509/ca
