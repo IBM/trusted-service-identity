@@ -218,14 +218,15 @@ echo "$INGRESS"
 
 # setup TLS secret:
 CRN=$(ibmcloud oc ingress secret get -c "$CLUSTERNAME" --name "$INGSEC" --namespace openshift-ingress --output json | jq -r '.crn')
-ibmcloud oc ingress secret create --cluster "$CLUSTERNAME" --cert-crn "$CRN" --name "$INGSEC" --namespace "$PROJECT"
+# not needed for k8s 1.22 anymore:
+#ibmcloud oc ingress secret create --cluster "$CLUSTERNAME" --cert-crn "$CRN" --name "$INGSEC" --namespace "$PROJECT"
 if [ "$?" == "0" ]; then
   echo "All good"
 fi
 
 # create ingress deployment:
 oc_cli create -f- <<EOF
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: spireingress
@@ -239,9 +240,12 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: spire-server
-          servicePort: 8081
+          service:
+            name: spire-server
+            port:
+              number: 8081
 EOF
 
 # create route for Tornjak TLS:
