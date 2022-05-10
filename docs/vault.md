@@ -17,7 +17,7 @@ deployment.apps/tsi-vault created
 
 #### Obtain remote access to Vault service
 For `minikube` obtain the current endpoint as follow
-<details><summary>Click to view minikube steps</summary>
+<details><summary>[Click] to view minikube steps</summary>
 
 ```console
 minikube service tsi-vault -n tsi-vault --url
@@ -29,7 +29,7 @@ export VAULT_ADDR=http://192.168.99.105:30229
 
 
 To access Vault remotely in `IKS`, setup ingress access.
-<details><summary>Click to view IKS steps</summary>
+<details><summary>[Click] to view IKS steps</summary>
 
 Obtain the ingress name using `ibmcloud` cli:
 ```console
@@ -75,12 +75,12 @@ $ kubectl -n tsi-vault create -f ingress-IKS.yaml
 
 Create VAULT_ADDR env. variable:
 ```console
-export VAULT_ADDR="http://<Ingress>"
+export VAULT_ADDR="http://tsi-vault.<Ingress>"
 ```
 </details>
 
 To access Vault remotely OpenShift (including IKS ROKS)
-<details><summary>Click to view OpenShift steps</summary>
+<details><summary>[Click] to view OpenShift steps</summary>
 
 This assumes the OpenShift command line is already installed. Otherwise see
 the [documentation](https://docs.openshift.com/container-platform/4.2/cli_reference/openshift_cli/getting-started-cli.html)
@@ -96,7 +96,7 @@ export ROOT_TOKEN=$(kubectl -n tsi-vault logs $(kubectl -n tsi-vault get po | gr
 
 Test the remote connection to vault:
 ```console
-$ curl  http://<Ingress Subdomain or ICP master IP>/
+$ curl  $VAULT_ADDR
 <a href="/ui/">Temporary Redirect</a>.
 ```
 At this point, this is an expected result.
