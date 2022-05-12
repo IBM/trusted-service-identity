@@ -11,7 +11,7 @@ spec:
       app: spire-agent
   template:
     metadata:
-      namespace: spire
+      namespace: {{ .Values.namespace }}
       labels:
         app: spire-agent
     spec:
@@ -46,6 +46,10 @@ spec:
               readOnly: true
             - name: spire-agent-token
               mountPath: /var/run/secrets/tokens
+              readOnly: true
+            - name: agent-x509
+              mountPath: /run/spire/agent
+              readOnly: true
           livenessProbe:
             exec:
               command:
@@ -68,6 +72,10 @@ spec:
           hostPath:
             path: {{ .Values.spireAgent.socketDir }}
             type: DirectoryOrCreate
+        - name: agent-x509
+          hostPath:
+            path: /run/spire/x509
+            type: Directory
         - name: spire-agent-token
           projected:
             sources:
