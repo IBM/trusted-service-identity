@@ -33,6 +33,8 @@ spec:
             # not needed if using volumeClaimTemplates and sockets
             privileged: true
           volumeMounts:
+            - name: sample-x509
+              mountPath: /opt/spire/sample-x509
             - name: spire-config
               mountPath: /run/spire/config
               readOnly: true
@@ -124,6 +126,10 @@ spec:
             mountPath: {{ .Values.oidc.socketDir }}
         {{- end }}
       volumes:
+        - name: sample-x509
+          secret:
+            defaultMode: 0400
+            secretName: sample-x509
         - name: spire-config
           configMap:
             name: spire-server

@@ -14,15 +14,13 @@ clustername: spire-example
 # trustdomain is arbitrary but needs to match between Server and Agent
 trustdomain: spiretest.com
 # SPIRE version used for consistency across components
-spireVersion: 1.0.2
+spireVersion: 1.1.3
 
 # SPIRE Server configuration
 spireServer:
   # tornjakImage - Tornjak with SPIRE Server
-  # TODO this is just a temporary image with several patches. It
-  # should be removed after the patches are available in the SPIRE main
-  # img: ghcr.io/spiffe/tornjak-spire-server
-  img: tsidentity/local-spire-server
+  img: ghcr.io/spiffe/tornjak-spire-server
+
   socketDir: /run/spire-server/private
   socketFile: api.sock
   # selfSignedCA - SPIRE will create the self signed CA unless this value

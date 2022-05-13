@@ -218,8 +218,10 @@ echo "$INGRESS"
 
 # setup TLS secret:
 CRN=$(ibmcloud oc ingress secret get -c "$CLUSTERNAME" --name "$INGSEC" --namespace openshift-ingress --output json | jq -r '.crn')
+
 # not needed for k8s 1.22 anymore:
 #ibmcloud oc ingress secret create --cluster "$CLUSTERNAME" --cert-crn "$CRN" --name "$INGSEC" --namespace "$PROJECT"
+
 if [ "$?" == "0" ]; then
   echo "All good"
 fi
@@ -230,6 +232,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: spireingress
+  annotations:
+    kubernetes.io/ingress.class: "public-iks-k8s-nginx"
 spec:
   tls:
   - hosts:
