@@ -160,12 +160,14 @@ you must create entries to tie your agents to the parent ID with specific attest
 Once the workload registrar entry is created (as above),
 the registrar will create entries for each node.
 For example:
+```
 * spiffe://openshift.space-x.com/k8s-workload-registrar/spire-01/node/10.170.231.21
   - k8s_psat:cluster:spire-01
   - k8s_psat:agent_node_uid:7f450925-f3b3-4274-bfe9-e9d09bafbc12
 * spiffe://openshift.space-x.com/k8s-workload-registrar/spire-01/node/10.170.231.14
   - k8s_psat:cluster:spire-01
   - k8s_psat:agent_node_uid:c8b69816-f5f9-4e90-aaa1-6445d5bba11a
+```
 
 with `spiffe://openshift.space-x.com/spire/server` as Parent ID
 
@@ -213,12 +215,14 @@ So now we have to tie them together. Create new entries, one per each node:
 
 For example (pick one of the selector values to guarantee uniqueness):
 
+```
 * SPIFFE ID: spiffe://openshift.space-x.com/k8s-workload-registrar/spire-01/node/10.170.231.14
   - Parent ID: spiffe://openshift.space-x.com/spire/agent/x509pop/1753fc2737195744cd52942d9723e1d7d2804249
   - Selectors: x509pop:ca:fingerprint:42cd4a9e007c67a52bfb28cf3f4a8cfd576fbfd2
 * SPIFFE ID: spiffe://openshift.space-x.com/k8s-workload-registrar/spire-01/node/10.170.231.21
   - Parent ID: spiffe://openshift.space-x.com/spire/agent/x509pop/ca34d6728cf332689646010a1d9012d8fa449a3f
   - Selectors: x509pop:subject:cn:"some common name1"
+```
 
 No ADMIN selection required. 
 
