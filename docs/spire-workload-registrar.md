@@ -212,7 +212,7 @@ For example, agents:
 ```
 
 So now we have to tie the agents to these newly created entries. 
-Create new entries, one per each node, with a following values:
+Create new entries, one per each node, with following values:
 * SPIFFE ID - **exactly** as the SPIFFE ID of the entry created by the workload registrar for this agent
 * Parent ID - SPIFFE ID of the agent
 * Selectors - one (or more) agent fields to make the agent entry unique (e.g. *x509pop:ca:fingerprint*, *x509pop:subject:cn*)
