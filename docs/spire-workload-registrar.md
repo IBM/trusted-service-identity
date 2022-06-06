@@ -190,7 +190,7 @@ For example, agents:
   },
   {
    "type": "x509pop",
-   "value": "subject:cn:some common name1"
+   "value": "subject:cn:small7-agent1"
   }
 
 * spiffe://openshift.space-x.com/spire/agent/x509pop/1753fc2737195744cd52942d9723e1d7d2804249
@@ -206,12 +206,16 @@ For example, agents:
   },
   {
   "type": "x509pop",
-  "value": "subject:cn:some common name2"
+  "value": "subject:cn:small7-agent2"
   }
 ]
 ```
 
-So now we have to tie them together. Create new entries, one per each node:
+So now we have to tie the agents to these newly created entries. 
+Create new entries, one per each node, with following values:
+* SPIFFE ID - **exactly** as the SPIFFE ID of the entry created by the workload registrar for this agent
+* Parent ID - SPIFFE ID of the agent
+* Selectors - one (or more) agent fields to make the agent entry unique (e.g. *x509pop:ca:fingerprint*, *x509pop:subject:cn*)
 
 For example (pick one of the selector values to guarantee uniqueness):
 
@@ -221,7 +225,7 @@ For example (pick one of the selector values to guarantee uniqueness):
   - Selectors: x509pop:ca:fingerprint:42cd4a9e007c67a52bfb28cf3f4a8cfd576fbfd2
 * SPIFFE ID: spiffe://openshift.space-x.com/k8s-workload-registrar/spire-01/node/10.170.231.21
   - Parent ID: spiffe://openshift.space-x.com/spire/agent/x509pop/ca34d6728cf332689646010a1d9012d8fa449a3f
-  - Selectors: x509pop:subject:cn:"some common name1"
+  - Selectors: x509pop:subject:cn:"small7-agent1"
 ```
 
 No ADMIN selection required. 
