@@ -17,7 +17,8 @@ region: sample-region
 # SPIRE server
 trustdomain: spiretest.com
 # SPIRE version:
-spireVersion: 1.0.2
+# spireVersion: 1.0.2
+spireVersion: reattest
 
 # spireServer - location of the SPIRE server
 spireServer:
