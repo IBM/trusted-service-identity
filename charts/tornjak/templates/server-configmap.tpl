@@ -18,6 +18,10 @@ data:
       data_dir = "/run/spire/data"
       log_level = "DEBUG"
       default_svid_ttl = "1h"
+      # to reduce the frequency of spire-bundle exchange,
+      # extended CA duration to 7 days:
+      ca_ttl = "168h"
+
       socket_path = "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
 
       {{- if .Values.oidc.enable }}
