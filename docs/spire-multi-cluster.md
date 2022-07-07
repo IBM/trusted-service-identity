@@ -101,12 +101,14 @@ Gather the portable KUBECONFIGs for every remote cluster
 and output them into individual files
 using  `kubectl config view --flatten`.
 Make sure to use `--flatten` flag as it makes the output portable
-(includes all the required certificates):
+(includes all the required certificates).
+
+Run this in every remote cluster:
 ```console
 export KUBECONFIG=....
-export CLUSTERNAME=....
+export CLUSTER_NAME=....
 mkdir /tmp/kubeconfigs
-kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTERNAME
+kubectl config view --flatten > /tmp/kubeconfigs/$CLUSTER_NAME
 ```
 
 For example, to support 2 remote clusters
@@ -117,8 +119,10 @@ we will have the following files:
 /tmp/kubeconfigs/cluster2
 ```
 
+#### Step 1b. Create secret in SPIRE server cluster
 Then using these individual files,
-create one secret in `tornjak` project.
+create one secret in `tornjak` project,
+where we will deploy SPIRE server.
 _Note_: don't use special characters, stick to alphanumerics.
 
 ```console
@@ -136,12 +140,13 @@ kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfig
 This change requires SPIRE server restart, but not the agents.
 
 
-#### Step 1b. Update the Tornjak helm charts
+#### Step 1c. Update the Tornjak helm charts
 Once the secret is created, we need to update the helm charts
 to support the Kuberenetes attestor (`k8s_psat`).
 
 Update the content of the
 [charts/tornjak/values.yaml](./charts/tornjak/values.yaml) file.
+Modify entries for `attestors\k8s_psat\remoteClusters`.
 Include `name` for every remote cluster that is using Kubernetes attestation.
 If `namespace` and `serviceAccount` are not provided,
 it defaults to:
@@ -151,22 +156,23 @@ serviceAccount: spire-agent
 ```
 Here is a sample configuration:
 
-```
-k8s_psat:
-  remoteClusters:
-  - name: cluster1
-    namespace: spire
-    serviceAccount: spire-agent
-  - name: cluster2
-  - name: cluster3
-    namespace: spire
-    serviceAccount: spire-agent
+```yaml
+attestors:
+  k8s_psat:
+    remoteClusters:
+    - name: cluster1
+      namespace: spire
+      serviceAccount: spire-agent
+    - name: cluster2
+    - name: cluster3
+      namespace: spire
+      serviceAccount: spire-agent
 ```
 ---
 ### Install Tornjak Server with the helm charts
 Then follow the standard installation as shown in
-[helm](./spire-helm.md#step-1-deploy-tornjak-with-a-spire-server)
-or [OpenShift](./spire-on-openshift.md#step-1-installing-tornjak-server-with-spire-on-openshift)
+[helm](./spire-helm.md#step-1-deploy-tornjak-with-a-spire-server), [OpenShift](./spire-on-openshift.md#step-1-installing-tornjak-server-with-spire-on-openshift)
+or [OIDC](./spire-oidc-tutorial.md)
 deployments.
 
 ### Install SPIRE Agents with the helm charts

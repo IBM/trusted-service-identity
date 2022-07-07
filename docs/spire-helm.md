@@ -132,7 +132,9 @@ Type     Reason     Age                  From               Message
 ```
 
 ## Setup Ingress
-If you are running these steps on local **minikube** you can skip this section and go directly to [Accessing Tornjak Server](#accessing-tornjak-server)
+If you are running these steps on local **minikube** or **kind**
+you can skip this section and go directly to
+[Accessing Tornjak Server](#accessing-tornjak-server)
 
 Ingress represents the external access to the cluster and it depends on the Cloud provider.
 
@@ -190,9 +192,13 @@ export SPIRE_PORT=<Port value for spire-server service>
 ```
 
 ## Accessing Tornjak Server
-In this tutorial we just need the simple HTTP access to the Tornjak Server. For more advanced protocols, please refer to the section [Advanced Features](./spire-helm.md#advanced-features).
+In this tutorial we just need the simple HTTP access to the Tornjak Server.
+For more advanced protocols, please refer to the section
+[Advanced Features](./spire-helm.md#advanced-features).
 
-Get the HTTP Ingress access to Tornjak. On **minikube**, as seen above, we can retrieve the access points using the service names:
+Get the HTTP Ingress access to Tornjak.
+On **minikube**, as seen above,
+we can retrieve the access points using the service names:
 
 ```console
 minikube service tornjak-http -n $SPIRESERVER_NS --url
@@ -209,7 +215,8 @@ http://127.0.0.1:56404
 
 ```
 
-Now you can test the connection to the **Tornjak** server by going to `http://127.0.0.1:56404` using your local browser.
+Now you can test the connection to the **Tornjak** server
+by going to `http://127.0.0.1:56404` using your local browser.
 
 On **kind**, we can use port-forwarding to get HTTP access to Tornjak:
 
@@ -221,17 +228,20 @@ Forwarding from 127.0.0.1:10000 -> 10000
 Forwarding from [::1]:10000 -> 10000
 ```
 
-Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:10000` in your local browser.
+Now you can test the connection to **Tornjak** server
+by going to `http://127.0.0.1:10000` in your local browser.
 
 ### Accessing remote Tornjak back-end with a local instance of front-end
-To start a local instance of the Tornjak front-end server point at the running Tornjak APIs:
+This is an optional step, not needed for the main demo.
+To start a local instance of the Tornjak front-end server,
+point at the running Tornjak APIs:
 
 ```console
 cd tornjak-frontend
 REACT_APP_API_SERVER_URI=http://<tornjak_API>/ npm start
 ```
 
-Assuming npm is installed, this will start a server on http://localhost:3000
+Assuming `npm` is installed, this will start a server on http://localhost:3000
 Please be patient, as it might take a few minutes to compile and start the server.
 
 
@@ -253,10 +263,12 @@ export AGENT_NS=spire
 kubectl create namespace $AGENT_NS
 ```
 
-Next, we need to get the `spire-bundle` that contains all the keys and certificates, from the SPIRE server and copy it to this new namespace.
+Next, we need to get the `spire-bundle` that contains all the keys and certificates.
+Get it from the SPIRE server namespace and copy it to the agent namespace.
 
 ### Single Cluster
-Assuming both are deployed in the same cluster, just in different namespaces, the format is following:
+Assuming both are deployed in the same cluster, just in different namespaces,
+the format is following:
 
 ```console
 kubectl get configmap spire-bundle -n "$SPIRESERVER_NS" -o yaml | sed "s/namespace: $SPIRESERVER_NS/namespace: $AGENT_NS/" | kubectl apply -n "$AGENT_NS" -f -
@@ -267,8 +279,8 @@ kubectl get configmap spire-bundle -n tornjak -o yaml | sed "s/namespace: tornja
 ```
 
 ### Separate or Multi Cluster
-If the SPIRE server and the SPIRE agents are deployed in separate,
-or remote clusters, follow the steps here.
+If the SPIRE server and agents are deployed in separate
+(or remote) clusters, follow the steps here.
 
 Capture the current `spire-bundle` ConfigMap
 in cluster where Tornjak and SPIRE Server are deployed.
@@ -294,11 +306,12 @@ export SPIRE_SERVER=192.168.99.112
 export SPIRE_PORT=30064
 ```
 
-**But for this tutorial**,
-where both SPIRE server and SPIRE agents are deployed in the same cluster,
+**But for this tutorial** (e.g. minikube or kind),
+where both SPIRE server and agents are deployed in the same cluster,
 we can either use the Ingress value defined above,
 or we can use `ExternalName Service` to point at the `spire-service`
 created in a different namespace (e.g. tornjak):
+
 
 ```console
 kubectl -n $AGENT_NS create -f- <<EOF
@@ -402,7 +415,12 @@ spire-agent-4g8tg                  1/1     Running   0          20m
 spire-registrar-85fcc94797-r8rc8   1/1     Running   0          20m
 ```
 
-This looks good. The next step is [registering The Workload Registrar with the SPIRE Server](./spire-workload-registrar.md#register-workload-registrar-with-the-spire-server).
+This looks good.
+Verify that Tornjak server, in `Agents` tab shows the agent created above:
+* For *minikube* http://127.0.0.1:56404/agents (as shown earlier)
+* For *kind*: http://127.0.0.1:10000/agents
+
+The next step is [registering The Workload Registrar with the SPIRE Server](./spire-workload-registrar.md#register-workload-registrar-with-the-spire-server).
 
 ## Uninstall
 To uninstall helm charts:

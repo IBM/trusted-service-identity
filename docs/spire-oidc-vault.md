@@ -27,6 +27,9 @@ vault login -no-print "${ROOT_TOKEN}"
 ```
 
 ## Configure a Vault instance:
+This step requires `vault` cli to be installed locally.
+See [vaultproject.io](https://www.vaultproject.io/docs/install) for details.
+
 We have a script [examples/spire/vault-oidc.sh](../examples/spire/vault-oidc.sh) that configures the Vault instance with the required demo configuration, but before we run it, let's first explain what happens.
 
 **All the commands listed here are in the script, so don't run them!**
