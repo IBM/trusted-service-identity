@@ -1,4 +1,5 @@
 # Setting up the SPIRE NodeAttestor with Keylime
+## Keylime Overview
 [Keylime](https://keylime.dev) is an open-source tool,
 part of the [CNCF](https://cncf.io/) project,
 that provides a highly scalable remote boot attestation
@@ -13,13 +14,38 @@ tying the Workload Identity with Hardware Root of Trust:
 We know the firmware, packages, libraries. Enforcement of the software bill of materials (SBOM)
 * It measures and enforces the integrity of files (IMA)
 
-Once the node is attested by Keylime, the Keylime agents deliver securely
-`intermediate.key.pem` and `intermediate.cert.pem`
-to the node, and then create and sign
-`node.key.pem` and `node.cert.pem` used by
-SPIRE `x509pop` NodeAttestor (x509 proof of possession):
+## Attestation Process Overview
+We are using existing SPIRE `x509pop` NodeAttestor (x509 proof of possession)
+to attest the node:
+
 ([server plugin](https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_x509pop.md),
 [agent plugin](https://github.com/spiffe/spire/blob/main/doc/plugin_agent_nodeattestor_x509pop.md))
+
+* Keylime executes the measured boot attestation based on the list of sha256
+reference state of kernel, boot loader etc.
+* Once the node is successfully attested by Keylime,
+the Keylime server uses remote Keylime agents to securely deliver
+`intermediate.key.pem` and `intermediate.cert.pem`
+to the attested and verfied node, and then creates and signs
+`node.key.pem` and `node.cert.pem` with a short TTL
+that stay on the node.
+* SPIRE Agents use the `*.pem`s to complete the attestation and register with the
+SPIRE Server.
+* Keylime continues attesting the nodes and periodically creates new `x509`
+* When Keylime fails the attestation, the node is considered compromised and
+Keylime stops the `x509` injections.  Next, the Attestation driver bans the compromised agent. Between these two operation, it should make the compromised agent not able to manage identities for the hosted workloads.
+
+The detailed flow is available in [Attestation-demo.pdf](./ppt/Attestation-demo.pdf) deck.
+
+# Dependecies and Pre-reqs
+This requires a few updates:
+* node re-attestation: https://github.com/spiffe/spire/pull/3031
+* short TTL for JWT-SVIDs https://github.com/spiffe/spire/issues/2700
+* https://github.com/spiffe/spire/issues/3133
+* we have to clean up and open-source the CLI for managing the Keylime operations
+
+
+## Demo Setup
 
 This example requires x509 certificates. The samples are provided in
 [../sample-x509](../sample-x509).
@@ -102,4 +128,35 @@ helm install --set "spireServer.address=$SPIRE_SERVER" \
 --set "region=$REGION" \
 --set "x509=true" \
 --set "openShift=false" spire charts/spire --debug
+```
+
+Check the current status of the node:
+```console
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
+```
+
+Run the Attestation Driver:
+```console
+cd trusted-service-identity/utils/
+./keylime_monitor.sh &
+```
+
+Now, let's try to corrupt TPM PCRs
+```console
+# Corrupt the TPM PCRs
+ssh small7-agent3
+# then, once inside execute this:
+docker exec -it keylime_agent tpm2_pcrextend 4:sha1=f1d2d2f924e986ac86fdf7b36c94bcdf32beec15,sha256=b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+```
+This command will mess up the TPM by adding a random value to its PCRs.
+The next attestation will fail, because the TPM no longer correctly authenticates the boot log
+
+Check again the current status of the node:
+```console
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
+```
+
+Reboot the node to reset the PCRs
+```console 
+ssh small7-agent3 reboot
 ```

@@ -1,6 +1,9 @@
-#!/bin/bash 
+#!/bin/bash
 UC=/root/undercloud.yml
 MZ=/root/mzone.yml
+
+# setup access to the Tornjak Server:
+export TORNJAK="http://tornjak-http-tornjak.spire-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud"
 
 # to get the status of the Keylime cluster:
 # keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
@@ -21,7 +24,8 @@ do
    for NODE in $NODES
     do
       echo "*** Processing node $NODE that failed attestation...."
-      curl -s http://tornjak-http-tornjak.spire-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud/api/agent/list | jq > /tmp/agents.json
+      # curl -s http://tornjak-http-tornjak.spire-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud/api/agent/list | jq > /tmp/agents.json
+      curl -s ${TORNJAK}/api/agent/list | jq > /tmp/agents.json
       echo "*** All Agents received"
       NODEX="subject:cn:$NODE"
       FAGENT=$(cat /tmp/agents.json | jq --arg nodex $NODEX -r '.agents[] | select(.selectors[].value==$nodex) | .id.path')
@@ -32,10 +36,13 @@ do
       #FAGENT=$(cat /tmp/agents.json | jq -r "'"'.agents[] | select(.selectors[].value=="subject:cn:'"$NODE"'") | .id.path'"')"
       #FAGENT=$(cat /tmp/agents.json | jq -r '.agents[] | select(.selectors[].value=="subject:cn:$NODE") | .id.path'
       echo "$FAGENT"
-      RESULT=$(curl -s -X POST http://tornjak-http-tornjak.spire-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud/api/agent/ban -H 'Content-Type: application/json' -d  '{"id":{"trust_domain":"openshift.space-x.com","path":"'"$FAGENT"'"}}')
+      # RESULT=$(curl -s -X POST http://tornjak-http-tornjak.spire-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud/api/agent/ban -H 'Content-Type: application/json' -d  '{"id":{"trust_domain":"openshift.space-x.com","path":"'"$FAGENT"'"}}')
+      RESULT=$(curl -s -X POST ${TORNJAK}/api/agent/ban -H 'Content-Type: application/json' -d  '{"id":{"trust_domain":"openshift.space-x.com","path":"'"$FAGENT"'"}}')
       echo "RESULT: $RESULT"
       # ssh $NODE "rm /run/spire/x509/*.pem"
       # ssh $NODE "ls -l /run/spire/x509/"
+      # since we can't trust the node anymore, it's compromised, we should not
+      # bother with the cleanup, but let's just do it for fun:
       ssh -o LogLevel=quiet -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $NODE "rm /run/spire/x509/*.pem" 2>/dev/null
       ssh -o LogLevel=quiet -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $NODE "ls /run/spire/x509"
       echo "Cleanup of $NODE completed"
