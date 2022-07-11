@@ -37,7 +37,7 @@ Keylime stops the `x509` injections.  Next, the Attestation driver bans the comp
 
 The detailed flow is available in [Attestation-demo.pdf](./ppt/Attestation-demo.pdf) deck.
 
-# Dependecies and Pre-reqs
+# Dependencies and Pre-reqs
 This requires a few updates:
 * node re-attestation: https://github.com/spiffe/spire/pull/3031
 * short TTL for JWT-SVIDs https://github.com/spiffe/spire/issues/2700
@@ -157,6 +157,6 @@ keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
 ```
 
 Reboot the node to reset the PCRs
-```console 
+```console
 ssh small7-agent3 reboot
 ```
