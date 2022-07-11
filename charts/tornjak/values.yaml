@@ -82,3 +82,6 @@ attestors:
   azure_msi:
   #   tenants:
   #   - tenant: "TENANT_ID"
+
+  # x509 - enable x509 attestation 
+  x509: true

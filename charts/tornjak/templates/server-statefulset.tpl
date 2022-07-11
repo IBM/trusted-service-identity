@@ -44,6 +44,11 @@ spec:
             - name: spire-server-socket
               mountPath: {{ .Values.spireServer.socketDir }}
               readOnly: false
+            {{- if .Values.attestors.x509 }}
+            - name: sample-x509
+              mountPath: /opt/spire/sample-x509
+              readOnly: false
+            {{- end }}
             {{- if .Values.attestors.k8s_psat.remoteClusters }}
             - name: kubeconfigs
               mountPath: /run/spire/kubeconfigs
@@ -131,6 +136,12 @@ spec:
           secret:
             defaultMode: 0400
             secretName: tornjak-certs
+        {{- if .Values.attestors.k8s_psat.remoteClusters }}
+        - name: sample-x509
+          secret:
+             defaultMode: 0400
+             secretName: sample-x509
+        {{- end }}
         {{- if .Values.attestors.k8s_psat.remoteClusters }}
         - name: kubeconfigs
           secret:

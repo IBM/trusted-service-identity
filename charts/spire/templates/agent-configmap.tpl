@@ -24,6 +24,13 @@ data:
           plugin_data {
            }
       }
+      {{- else if .Values.x509 }}
+       NodeAttestor "x509pop" {
+           plugin_data {
+             private_key_path = "/run/spire/agent/node.key.pem"
+             certificate_path = "/run/spire/agent/node-bundle.cert.pem"
+          }
+       }
       {{- else }}
       NodeAttestor "k8s_psat" {
           plugin_data {

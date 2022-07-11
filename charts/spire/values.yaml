@@ -44,3 +44,5 @@ azure: false
 aws: false
 # openShift requires special configuration, including different security level
 openShift: false
+# x509 - enable x509 node_attestor
+x509: true

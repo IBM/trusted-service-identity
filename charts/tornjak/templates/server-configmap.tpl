@@ -58,6 +58,13 @@ data:
           connection_string = "/run/spire/data/datastore.sqlite3"
         }
       }
+     {{- if .Values.attestors.x509 }}
+      NodeAttestor "x509pop" {
+        plugin_data {
+           ca_bundle_path = "/opt/spire/sample-x509/rootCA.pem"
+        }
+      }
+     {{- end }}
       NodeAttestor "k8s_psat" {
         plugin_data {
             clusters = {
