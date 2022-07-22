@@ -113,7 +113,9 @@ were correctly deployed. Ssh to a hosts:
 ssh small7-agent0 "ls -l /run/spire/x509/; cat /run/spire/x509/*"
 ```
 
-When everything is good, setup the `spire-bundle` and execute the helm installation.
+## Install SPIRE Agents
+When everything is good, setup the `spire-bundle` from the SPIRE Server
+and execute the helm installation.
 
 Capture the spire-bundle on the SPIRE Server:
 
@@ -127,13 +129,18 @@ kubectl create ns spire
 kubectl create -f spire-bundle.yaml
 ```
 
-Setup the CLUSTER_NAME, REGION variables, and location of your SPIRE_SERVER:
 
+To get SPIRE info from the Server: 
+```console
+kubectl -n tornjak get routes | grep spire-server
+```
+
+Setup the CLUSTER_NAME, REGION variables, and location of your SPIRE_SERVER.
 ```
 cd ~/trusted-service-identity/
 export CLUSTER_NAME=css
 export REGION=us-ykt
-export SPIRE_SERVER=spire-server-tornjak.us-east.containers.appdomain.cloud
+export SPIRE_SERVER=
 ```
 
 Execute the SPIRE Agent installation:

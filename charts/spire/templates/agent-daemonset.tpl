@@ -73,7 +73,7 @@ spec:
             path: {{ .Values.spireAgent.socketDir }}
             type: DirectoryOrCreate
         - name: agent-x509
-            hostPath:
+          hostPath:
             path: /run/spire/x509
             type: Directory
         - name: spire-agent-token
