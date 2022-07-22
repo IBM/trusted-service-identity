@@ -44,26 +44,28 @@ This requires a few updates:
 * https://github.com/spiffe/spire/issues/3133
 * we have to clean up and open-source the CLI for managing the Keylime operations
 
-
-## Demo Setup
-
-This example requires x509 certificates. The samples are provided in
-[../sample-x509](../sample-x509).
-Instructions for creating your own are available [here](x509-create.md)
-
 ## Obtain a Kubernetes cluster with deployed Keylime
 We use an internal process for deploying a cluster with Keylime.
 Connect to the node that has Keylime server.
 
+## Demo Setup
+This example requires x509 certificates. The samples are provided in
+[../sample-x509](../sample-x509).
+Instructions for creating your own are available [here](x509-create.md)
+
+If you are already running the SPIRE/Tornjak server,
+find the *rootCA.pem*  currently used:
+
+```console
+kubectl -n tornjak get secrets sample-x509 -o jsonpath='{.data'} | jq -r '."rootCA.pem"' | base64 -d
+```
+
+Gather the correct keys and certs and put them in
+`trusted-service-identity/x509` directory.
+
 
 ## Deploy the x509 keys to all the nodes
-Obtain the Trusted Service Identity project
-```console
-cd ~
-git clone https://github.com/IBM/trusted-service-identity.git
-cd trusted-service-identity
-git checkout conf_container
-```
+
 
 Check the status of the current Keylime nodes and make sure they are all in
 `verified` state:
@@ -72,18 +74,32 @@ Check the status of the current Keylime nodes and make sure they are all in
 keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
 ```
 Sample response:
-```
+```json
 {
-  "concise": "verified",
-  "status": {
-    "small7-agent0": "verified",
-    "small7-agent1": "verified",
-    "small7-agent2": "verified",
-    "small7-agent3": "verified",
-    "small7-agent4": "verified"
-  }
+  "composite": {
+    "small7-agent0": {
+      "status": "verified"
+    },
+    "small7-agent1": {
+      "status": "verified"
+    },
+    "small7-agent2": {
+      "status": "verified"
+    },
+    "small7-agent3": {
+      "status": "verified"
+    },
+    "small7-agent4": {
+      "status": "verified"
+    }
+  },
+  "summary": {
+    "verified": 5
+  },
+  "concise": "verified"
 }
 ```
+
 Execute the key deployment script
 ```console
 cd utils
@@ -135,11 +151,79 @@ Check the current status of the node:
 keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
 ```
 
+Obtain the access to Tornjak e.g.
+```console
+export TORNJAK="http://tornjak-http-tornjak.spire-01-0000.us-east.containers.appdomain.cloud"
+```
+
 Run the Attestation Driver:
 ```console
 cd trusted-service-identity/utils/
+
 ./keylime_monitor.sh &
 ```
+
+
+
+## Enable Measured Boot Attestation
+Create the initial, correct kernel and boot loader reference state.
+These values are calculated by CI system and represent sha256 sums
+based on the kernel, boot loader etc etc.
+
+```console
+cat > mbref.json <<EOF
+{
+  "tag": "sdebuilder_kube_628aa5e_ubuntu_focal_amd64",
+  "shim_authcode_sha256": "0xdbffd70a2c43fd2c1931f18b8f8c08c5181db15f996f747dfed34def52fad036",
+  "grub_authcode_sha256": "0x412ce775fe05b194ce64441443aa721ad8b7dedb8e4f5e40481633d596d5b842",
+  "kernel_authcode_sha256": "0x03910cd3da2eefac39ce0bedf071dadf4e6b0a536121bd8e1f41f751aae3925e",
+  "kernel_plain_sha256": "0x5c6120cddb77ba236333081e69ac4f790d6983a899047df0e728bf1ab2b84afc",
+  "initrd_plain_sha256": "0xa1457f95224f364ab3c12f5ce24190d8c5cc0ba2e17259a2556e3a860259a96c"
+}
+EOF
+```
+
+So now, we can invoke the following commands to enable measure boot attestation:
+
+```console
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o mba-bundle-clear
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o mba-bios-clear
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o mba-sb-clear
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o mba-bundle-append --refstate "$(cat mbref.json)"
+```
+
+These commands need to be run before we deploy the x509 certificates.
+x509 should be deployed only if the attestation was successful (_verified_).
+
+```console
+keylime-op -u /root/undercloud.yml -m /root/mzone.yml -o status
+{
+  "composite": {
+    "small7-agent0": {
+      "status": "verified"
+    },
+    "small7-agent1": {
+      "status": "verified"
+    },
+    "small7-agent2": {
+      "status": "verified"
+    },
+    "small7-agent3": {
+      "status": "verified"
+    },
+    "small7-agent4": {
+      "status": "verified"
+    }
+  },
+  "summary": {
+    "verified": 5
+  },
+  "concise": "verified"
+}
+```
+
+
+
 
 Now, let's try to corrupt TPM PCRs
 ```console
