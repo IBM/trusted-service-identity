@@ -28,7 +28,8 @@ spec:
           args: ["-t", "30", "{{ .Values.spireServer.address }}:{{ .Values.spireServer.port }}"]
       containers:
         - name: spire-agent
-          image: {{ .Values.spireAgent.img }}:{{ .Values.spireVersion }}
+          # image: {{ .Values.spireAgent.img }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireAgent.img }}:reattest
           securityContext:
             # TODO: review this, maybe applicable for OpenShift only:
             # privilaged is needed to create socket and bundle files

@@ -46,7 +46,7 @@ This requires a few updates:
 
 ## Obtain a Kubernetes cluster with deployed Keylime
 We use an internal process for deploying a cluster with Keylime.
-Connect to the node that has Keylime server.
+Connect to the Kubernetes node that has Keylime server.
 
 ## Demo Setup
 This example requires x509 certificates. The samples are provided in
@@ -65,7 +65,6 @@ Gather the correct keys and certs and put them in
 
 
 ## Deploy the x509 keys to all the nodes
-
 
 Check the status of the current Keylime nodes and make sure they are all in
 `verified` state:
@@ -101,8 +100,9 @@ Sample response:
 ```
 
 Execute the key deployment script
+on SPIRE Server
 ```console
-cd utils
+cd trusted-service-identity/utils
 ./deployKeys_keylime.sh
 ```
 
@@ -130,7 +130,7 @@ kubectl create -f spire-bundle.yaml
 ```
 
 
-To get SPIRE info from the Server: 
+To get SPIRE info from the Server:
 ```console
 kubectl -n tornjak get routes | grep spire-server
 ```
@@ -152,6 +152,11 @@ helm install --set "spireServer.address=$SPIRE_SERVER" \
 --set "x509=true" \
 --set "openShift=false" spire charts/spire --debug
 ```
+
+Follow the step to register `workload registrar` for *non-k8s node attestors*:
+[./spire-workload-registrar.md#important-for-non-k8s-node-attestors](./spire-workload-registrar.md#important-for-non-k8s-node-attestors)
+
+Verify all the agents have corresponding
 
 Check the current status of the node:
 ```console
@@ -176,6 +181,10 @@ cd trusted-service-identity/utils/
 Create the initial, correct kernel and boot loader reference state.
 These values are calculated by CI system and represent sha256 sums
 based on the kernel, boot loader etc etc.
+
+These values must match your environment.
+*More about this in the future.*
+*Currently these values are only available internally.*
 
 ```console
 cat > mbref.json <<EOF
