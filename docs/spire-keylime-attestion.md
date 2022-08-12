@@ -52,6 +52,10 @@ Connect to the Kubernetes node that has Keylime server.
 This example requires x509 certificates. The samples are provided in
 [../sample-x509](../sample-x509).
 Instructions for creating your own are available [here](x509-create.md)
+To use the sample keys:
+```console
+cp -r ./sample-x509 ./x509
+```
 
 If you are already running the SPIRE/Tornjak server,
 find the *rootCA.pem*  currently used:
