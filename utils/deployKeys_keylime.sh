@@ -16,7 +16,7 @@ do
 done
 
 # get all the nodes for x509 deployment
-NODES=$(keylime-op -u ${UC} -m ${MZ} -o status | jq -r '.status | keys[]')
+NODES=$(keylime-op -u ${UC} -m ${MZ} -o status | jq -r '.composite | keys[]')
 for NODE in $NODES
 do
   echo "*** Processing $NODE...."

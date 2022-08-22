@@ -26,7 +26,8 @@ spireServer:
 
 # SPIRE Agent related configuration
 spireAgent:
-  img: gcr.io/spiffe-io/spire-agent
+  # img: gcr.io/spiffe-io/spire-agent
+  img: tsidentity/spire-agent
   # SPIRE Agent socket:
   socketDir: /run/spire/sockets
   socketFile: agent.sock
@@ -43,3 +44,5 @@ azure: false
 aws: false
 # openShift requires special configuration, including different security level
 openShift: false
+# x509 - enable x509 node_attestor
+x509: true

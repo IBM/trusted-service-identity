@@ -24,6 +24,12 @@ data:
       #AWS requires the use of RSA.  EC cryptography is not supported
       ca_key_type = "rsa-2048"
 
+      # this is to prevent frequent updates to spire-bundle
+      ca_ttl = "500h"
+      # to test re-attestation, continous
+      agent_ttl = "5m"
+
+
       # Creates the iss claim in JWT-SVIDs.
       jwt_issuer = "https://{{ .Values.oidc.serviceName }}.{{ .Values.oidc.myDiscoveryDomain }}"
 
@@ -52,6 +58,13 @@ data:
           connection_string = "/run/spire/data/datastore.sqlite3"
         }
       }
+     {{- if .Values.attestors.x509 }}
+      NodeAttestor "x509pop" {
+        plugin_data {
+           ca_bundle_path = "/opt/spire/sample-x509/rootCA.pem"
+        }
+      }
+     {{- end }}
       NodeAttestor "k8s_psat" {
         plugin_data {
             clusters = {
@@ -69,6 +82,13 @@ data:
                 {{- end }}
             }
         }
+      }
+
+      NodeAttestor "x509pop" {
+       plugin_data {
+          ca_bundle_path = "/opt/spire/sample-x509/rootCA.pem"
+          reattest = true
+       }
       }
 
       {{- if .Values.attestors.aws_iid -}}
