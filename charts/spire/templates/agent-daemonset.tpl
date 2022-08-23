@@ -11,7 +11,7 @@ spec:
       app: spire-agent
   template:
     metadata:
-      namespace: spire
+      namespace: {{ .Values.namespace }}
       labels:
         app: spire-agent
     spec:
@@ -46,6 +46,7 @@ spec:
               readOnly: true
             - name: spire-agent-token
               mountPath: /var/run/secrets/tokens
+              readOnly: true
           livenessProbe:
             exec:
               command:
