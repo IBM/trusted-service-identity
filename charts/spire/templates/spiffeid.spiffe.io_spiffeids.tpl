@@ -8,6 +8,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
+    "helm.sh/resource-policy": keep
   name: spiffeids.spiffeid.spiffe.io
 spec:
   group: spiffeid.spiffe.io

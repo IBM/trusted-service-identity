@@ -221,7 +221,9 @@ Forwarding from 127.0.0.1:10000 -> 10000
 Forwarding from [::1]:10000 -> 10000
 ```
 
-Now you can test the connection to **Tornjak** server by going to `http://127.0.0.1:10000` in your local browser.
+Now you can test the connection to **Tornjak** server by going to
+`http://localhost:10000`
+in your local browser.
 
 ### Accessing remote Tornjak back-end with a local instance of front-end
 To start a local instance of the Tornjak front-end server point at the running Tornjak APIs:
@@ -405,6 +407,13 @@ spire-registrar-85fcc94797-r8rc8   1/1     Running   0          20m
 This looks good. The next step is [registering The Workload Registrar with the SPIRE Server](./spire-workload-registrar.md#register-workload-registrar-with-the-spire-server).
 
 ## Uninstall
+_NOTICE_:
+Managing CRDs via Helm might lead to inconsistent behavior
+(see [issue #144](https://github.com/IBM/trusted-service-identity/issues/144)
+and
+[https://helm.sh/docs/chart_best_practices/custom_resource_definitions/](https://helm.sh/docs/chart_best_practices/custom_resource_definitions/)),
+therefore we decided to disable the CRD deletion ([PR#145](https://github.com/IBM/trusted-service-identity/pull/145)). As a result, `spiffeId` CRD becomes orphaned and needs to be deal with outside of HELM.
+
 To uninstall helm charts:
 ```console
 helm uninstall spire
