@@ -79,6 +79,7 @@ attestors:
   #   tenants:
   #   - tenant: "TENANT_ID"
 
+<<<<<<< HEAD
 # tornjak - Tornjak specific configurtion
 tornjak:
    config:
@@ -103,3 +104,8 @@ tornjak:
        dataStore:
          driver: "sqlite3"
          file: "./agentlocaldb"
+=======
+tornjak:
+  config:
+    key1: "value1"
+>>>>>>> 978bcc2 (reverted to original docker image)
