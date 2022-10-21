@@ -20,7 +20,14 @@ spireVersion: 1.1.5 # OIDC only works with SPIRE 1.1.x
 # SPIRE Server configuration
 spireServer:
   # tornjakImage - Tornjak with SPIRE Server
+<<<<<<< HEAD
   img: ghcr.io/spiffe/tornjak-be-spire-server
+=======
+  # TODO this is just a temporary image with several patches. It
+  # should be removed after the patches are available in the SPIRE main
+  # img: ghcr.io/spiffe/tornjak-spire-server
+  img: tsidentity/local-spire-server
+>>>>>>> 0edcd81 (tsidentity docker image)
   socketDir: /run/spire-server/private
   socketFile: api.sock
   # selfSignedCA - SPIRE will create the self signed CA unless this value
@@ -79,33 +86,6 @@ attestors:
   #   tenants:
   #   - tenant: "TENANT_ID"
 
-<<<<<<< HEAD
-# tornjak - Tornjak specific configurtion
-tornjak:
-   config:
-     # enableUserMgment - when true, IAM configuration must be specified
-     enableUserMgment: true
-     # separateFrontend - when true, the frontend component is created under
-     # a separate container
-     separateFrontend: true
-     # Front-end specific configurtion:
-     frontend:
-       # authServerURL - URL of the authentication server
-       authServerURL: "http://keycloak.tornjak.appdomain.cloud"
-       # apiServerURL - URL of the Tornjak back-end
-       apiServerURL: "http://tornjak-http-tornjak.tornjak.appdomain.cloud"
-     # Back-end specific configuration
-     backend:
-       # jwksURL - URL for JWKS verification
-       jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
-       # redirectURL - URL for redirecting after successful authentication
-       redirectURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/auth?client_id=Tornjak-React-auth"
-       # dataStore - persistent DB for storing Tornjak specific information
-       dataStore:
-         driver: "sqlite3"
-         file: "./agentlocaldb"
-=======
 tornjak:
   config:
     key1: "value1"
->>>>>>> 978bcc2 (reverted to original docker image)
