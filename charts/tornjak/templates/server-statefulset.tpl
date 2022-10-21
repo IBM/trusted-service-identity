@@ -42,7 +42,7 @@ spec:
       containers:
         - name: spire-server
           # image: {{ .Values.spireServer.img }}:milosz
-          image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
+          image: {{ .Values.spireServer.img }}:config
           imagePullPolicy: Always
           args:
             - -config
