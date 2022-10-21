@@ -40,77 +40,16 @@ spec:
       serviceAccountName: spire-server
       shareProcessNamespace: true
       containers:
-      - name: spire-server
-        image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
-        imagePullPolicy: Always
-        args:
-        - -config
-        - /run/spire/config/server.conf
-        - -tornjak-config
-        - /run/spire/tornjak-config/server.conf
-        ports:
-        - containerPort: 8081
-          protocol: TCP
-        securityContext:
-          # privileged is needed to access mounted files (e.g. /run/spire/data)
-          # not needed if using volumeClaimTemplates and sockets
-          privileged: true
-        volumeMounts:
-        - name: tornjak-config
-          mountPath: /run/spire/tornjak-config
-          readOnly: true
-        - name: spire-config
-          mountPath: /run/spire/config
-          readOnly: true
-        - name: spire-data
-          mountPath: /run/spire/data
-        - name: certs
-          mountPath: /opt/spire/sample-keys
-        - name: spire-server-socket
-          mountPath: {{ .Values.spireServer.socketDir }}
-        livenessProbe:
-          exec:
-            command:
-            - "/opt/spire/bin/spire-server"
-            - "healthcheck"
-            - "-socketPath"
-            - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
-          failureThreshold: 2
-          initialDelaySeconds: 15
-          periodSeconds: 60
-          successThreshold: 1
-          timeoutSeconds: 3
-      {{- if .Values.oidc.enable }}
-        readinessProbe:
-          failureThreshold: 3
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-          exec:
-            command:
-            - "/opt/spire/bin/spire-server"
-            - "healthcheck"
-            - "-socketPath"
-            - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
-            - "--shallow"
-        {{- end }}
-      {{- if .Values.oidc.enable }}
-      - name: spire-oidc
-        # TODO: OIDC image higher than 1.1.x causes compatibility issues
-        image: {{ .Values.oidc.image }}:1.1.5
-        imagePullPolicy: IfNotPresent
-        args:
-        - -config
-        - /run/spire/oidc/config/oidc-discovery-provider.conf
-        ports:
-        - containerPort: 443
-          name: spire-oidc-port
-          protocol: TCP
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        securityContext:
+        - name: spire-server
+          # image: {{ .Values.spireServer.img }}:milosz
+          image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
+          imagePullPolicy: Always
+          args:
+            - -config
+            - /run/spire/config/server.conf
+          ports:
+            - containerPort: 8081
+          securityContext:
             # privileged is needed to access mounted files (e.g. /run/spire/data)
             # not needed if using volumeClaimTemplates and sockets
             privileged: true

@@ -20,14 +20,7 @@ spireVersion: 1.1.5 # OIDC only works with SPIRE 1.1.x
 # SPIRE Server configuration
 spireServer:
   # tornjakImage - Tornjak with SPIRE Server
-<<<<<<< HEAD
   img: ghcr.io/spiffe/tornjak-be-spire-server
-=======
-  # TODO this is just a temporary image with several patches. It
-  # should be removed after the patches are available in the SPIRE main
-  # img: ghcr.io/spiffe/tornjak-spire-server
-  img: tsidentity/local-spire-server
->>>>>>> 0edcd81 (tsidentity docker image)
   socketDir: /run/spire-server/private
   socketFile: api.sock
   # selfSignedCA - SPIRE will create the self signed CA unless this value
