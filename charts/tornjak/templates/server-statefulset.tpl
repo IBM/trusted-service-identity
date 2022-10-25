@@ -73,7 +73,9 @@ spec:
           {{- end }}
         {{- if .Values.oidc.enable }}
         - name: spire-oidc
-          image: {{ .Values.oidc.image }}:{{ .Values.spireVersion }}
+          # TODO: errors for OIDC images higher than 1.1.x
+          #  image: {{ .Values.oidc.image }}:{{ .Values.spireVersion }}
+          image: {{ .Values.oidc.image }}:1.1.5
           args:
           - -config
           - /run/spire/oidc/config/oidc-discovery-provider.conf
