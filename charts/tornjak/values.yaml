@@ -80,3 +80,6 @@ attestors:
   azure_msi:
   #   tenants:
   #   - tenant: "TENANT_ID"
+
+config:
+  key1: "hi"
