@@ -8,10 +8,9 @@ metadata:
 data:
   server.conf: |
     server {
-    {{- if .Values.tornjak.config.key1 }}"
-      key1: "{{- .Values.tornjak.config.key1 }}"
-    {{- end }}
-      key2: "value2"
+      {{- range $key, $val := .Values.tornjak.config }}
+      {{ $key }}: {{ $val | quote }}
+      {{- end }}
     }
 {{- end }}
 {{- end }}
