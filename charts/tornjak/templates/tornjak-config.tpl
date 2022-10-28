@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: tornjak-config
+  namespace: {{ .Values.namespace }}
 data:
   server.conf: |
     server {
