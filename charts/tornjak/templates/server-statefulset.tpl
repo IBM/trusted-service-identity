@@ -1,3 +1,22 @@
+{{- if .Values.tornjak }}
+{{- if .Values.tornjak.config }}
+{{- if .Values.tornjak.config.enableUserMgment }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: tornjak-frontend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: spire-server
+  ports:
+    - name: tornjak-frontend
+      port: 3000
+      targetPort: 3000
+---
+{{- end }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -146,11 +165,37 @@ spec:
             - name: spire-oidc-socket
               mountPath: {{ .Values.oidc.socketDir }}
         {{- end }}
+        {{- if .Values.tornjak }}
+        {{- if .Values.tornjak.config }}
+        {{- if .Values.tornjak.config.enableUserMgment }}
+        - name: frontend
+          # image: mohammedmunirabdi/deploy-tornjak-frontend-kubernetes:latest
+          # image: tsidentity/tornjak-spire-server:latest
+          image: tsidentity/tornjak-fe:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            {{- if .Values.tornjak.config.REACT_APP_AUTH_SERVER_URI }}
+            - name: REACT_APP_AUTH_SERVER_URI
+              value: {{ .Values.tornjak.config.REACT_APP_AUTH_SERVER_URI }}
+            {{- end }}
+            {{- if .Values.tornjak.config.REACT_APP_API_SERVER_URI }}
+            - name: REACT_APP_API_SERVER_URI
+              value: {{ .Values.tornjak.config.REACT_APP_API_SERVER_URI }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
       volumes:
+        {{- if .Values.tornjak }}
+        {{- if .Values.tornjak.config }}
         - name: tornjak-config
           configMap:
             defaultMode: 420
             name: tornjak-config
+        {{- end }}
+        {{- end }}
         - name: spire-config
           configMap:
             name: spire-server
