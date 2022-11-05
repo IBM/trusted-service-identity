@@ -80,7 +80,7 @@ attestors:
   #   - tenant: "TENANT_ID"
 
 tornjak:
-   config:
-     enableUserMgment: false
-     REACT_APP_AUTH_SERVER_URI: "http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
-     REACT_APP_API_SERVER_URI: "http://tornjak-http-tornjak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
+   config: 
+     enableUserMgment: true
+     authServerUri: "http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"
+     apiServerUri: "http://tornjak-http-tornjak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud"

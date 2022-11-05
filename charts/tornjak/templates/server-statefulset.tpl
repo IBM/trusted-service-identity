@@ -176,13 +176,13 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            {{- if .Values.tornjak.config.REACT_APP_AUTH_SERVER_URI }}
+            {{- if .Values.tornjak.config.authServerUri }}
             - name: REACT_APP_AUTH_SERVER_URI
-              value: {{ .Values.tornjak.config.REACT_APP_AUTH_SERVER_URI }}
+              value: {{ .Values.tornjak.config.authServerUri }}
             {{- end }}
-            {{- if .Values.tornjak.config.REACT_APP_API_SERVER_URI }}
+            {{- if .Values.tornjak.config.apiServerUri }}
             - name: REACT_APP_API_SERVER_URI
-              value: {{ .Values.tornjak.config.REACT_APP_API_SERVER_URI }}
+              value: {{ .Values.tornjak.config.apiServerUri }}
             {{- end }}
         {{- end }}
         {{- end }}
