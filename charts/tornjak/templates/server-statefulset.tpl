@@ -22,11 +22,9 @@ kind: StatefulSet
 metadata:
   name: spire-server
   namespace: {{ .Values.namespace }}
-  generation: 4
   labels:
     app: spire-server
 spec:
-  podManagementPolicy: OrderedReady
   replicas: 1
   selector:
     matchLabels:
