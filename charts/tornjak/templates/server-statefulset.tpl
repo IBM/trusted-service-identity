@@ -48,7 +48,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: spire-server
-          image: {{ .Values.spireServer.img }}:iam2
+          image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
           imagePullPolicy: Always
           args:
             - -config
@@ -136,7 +136,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
             exec:
-              command: 
+              command:
                 - /bin/ps
                 - aux
                 - ' ||'
