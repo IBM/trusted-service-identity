@@ -79,8 +79,27 @@ attestors:
   #   tenants:
   #   - tenant: "TENANT_ID"
 
+# tornjak - Tornjak specific configurtion
 tornjak:
    config:
+     # enableUserMgment - when true, IAM configuration must be specified
      enableUserMgment: true
-     authServerUri: "http://keycloak.tornjak.appdomain.cloud"
-     apiServerUri: "http://tornjak-http-tornjak.appdomain.cloud"
+     # separateFrontend - when true, the frontend component is created under
+     # a separate container
+     separateFrontend: true
+     # Front-end specific configurtion:
+     frontend:
+       # authServerURL - URL of the authentication server
+       authServerURL: "http://keycloak.tornjak.appdomain.cloud"
+       # apiServerURL - URL of the Tornjak back-end
+       apiServerURL: "http://tornjak-http-tornjak.appdomain.cloud"
+     # Back-end specific configuration
+     backend:
+       # jwksURL - URL for JWKS verification
+       jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
+       # redirectURL - URL for redirecting after successful authentication
+       redirectURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/auth?client_id=Tornjak-React-auth"
+       # dataStore - persistent DB for storing Tornjak specific information
+       dataStore:
+         driver: "sqlite3"
+         file: "./agentlocaldb"

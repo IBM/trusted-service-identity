@@ -9,18 +9,31 @@ data:
       metadata = "insert metadata"
     }
 
+    {{- if .Values.tornjak }}
+    {{- if .Values.tornjak.config }}
+    {{- if .Values.tornjak.config.backend }}
+
+    {{- if .Values.tornjak.config.backend.dataStore }}
     plugins {
       DataStore "sql" {
         plugin_data {
-          drivername = "sqlite3"
-          filename = "./agentlocaldb" #TODO is this a good location
+          drivername = {{ .Values.tornjak.config.backend.dataStore.driver }}
+          # TODO is this a good location?
+          filename = {{ .Values.tornjak.config.backend.dataStore.file }}
         }
       }
+      {{- end }}
 
+      {{- if .Values.tornjak.config.backend.enableUserMgment }}
       UserManagement "KeycloakAuth" {
         plugin_data {
-          jwksURL = "http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
-          redirectURL = "http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/realms/tornjak/protocol/openid-connect/auth?client_id=Tornjak-React-auth"
+          jwksURL = {{ .Values.tornjak.config.backend.jwksURL }}
+          redirectURL = {{ .Values.tornjak.config.backend.redirectURL }}
         }
       }
     }
+    {{- end }}
+
+    {{- end }}
+    {{- end }}
+    {{- end }}

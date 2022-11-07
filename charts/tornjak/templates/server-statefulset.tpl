@@ -159,22 +159,23 @@ spec:
       {{- end }}
       {{- if .Values.tornjak }}
       {{- if .Values.tornjak.config }}
-      {{- if .Values.tornjak.config.enableUserMgment }}
+      {{- if .Values.tornjak.config.separateFrontendt }}
       - name: frontend
-        # image: mohammedmunirabdi/deploy-tornjak-frontend-kubernetes:latest
-        # image: tsidentity/tornjak-spire-server:latest
+        # TODO change to official image name
         image: tsidentity/tornjak-fe:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
-        {{- if .Values.tornjak.config.authServerUri }}
+        {{- if .Values.tornjak.config.frontend }}
+        {{- if .Values.tornjak.config.frontend.apiServerUrL }}
         - name: REACT_APP_AUTH_SERVER_URI
-          value: {{ .Values.tornjak.config.authServerUri }}
+          value: {{ .Values.tornjak.config.frontend.authServerURL }}
         {{- end }}
-        {{- if .Values.tornjak.config.apiServerUri }}
+        {{- if .Values.tornjak.config.frontend.apiServerURL }}
         - name: REACT_APP_API_SERVER_URI
-          value: {{ .Values.tornjak.config.apiServerUri }}
+          value: {{ .Values.tornjak.config.frontend.apiServerURL }}
+        {{- end }}
         {{- end }}
       {{- end }}
       {{- end }}
