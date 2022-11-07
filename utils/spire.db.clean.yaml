@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: spire-server-
+  name: spire-server-0
+  namespace: tornjak
+spec:
+  containers:
+  - command: ["sleep"]
+    args: ["1000000000"]
+    image: ghcr.io/spiffe/tornjak-spire-server:1.1.5
+    imagePullPolicy: Always
+    name: spire-server
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - mountPath: /run/spire/data
+      name: spire-data
+    - mountPath: /run/spire-server/private
+      name: spire-server-socket
+  volumes:
+  - hostPath:
+      path: /run/spire-server/private
+      type: DirectoryOrCreate
+    name: spire-server-socket
+  - hostPath:
+      path: /var/spire-data
+      type: DirectoryOrCreate
+    name: spire-data
