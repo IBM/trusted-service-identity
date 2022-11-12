@@ -20,7 +20,7 @@ spireVersion: 1.1.5 # OIDC only works with SPIRE 1.1.x
 # SPIRE Server configuration
 spireServer:
   # tornjakImage - Tornjak with SPIRE Server
-  img: ghcr.io/spiffe/tornjak-spire-server
+  img: ghcr.io/spiffe/tornjak-be-spire-server
   socketDir: /run/spire-server/private
   socketFile: api.sock
   # selfSignedCA - SPIRE will create the self signed CA unless this value
@@ -92,7 +92,7 @@ tornjak:
        # authServerURL - URL of the authentication server
        authServerURL: "http://keycloak.tornjak.appdomain.cloud"
        # apiServerURL - URL of the Tornjak back-end
-       apiServerURL: "http://tornjak-http-tornjak.appdomain.cloud"
+       apiServerURL: "http://tornjak-http-tornjak.tornjak.appdomain.cloud"
      # Back-end specific configuration
      backend:
        # jwksURL - URL for JWKS verification

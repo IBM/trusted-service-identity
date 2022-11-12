@@ -1,6 +1,6 @@
 {{- if .Values.tornjak }}
 {{- if .Values.tornjak.config }}
-{{- if .Values.tornjak.config.enableUserMgment }}
+{{- if .Values.tornjak.config.separateFrontend }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -159,16 +159,17 @@ spec:
       {{- end }}
       {{- if .Values.tornjak }}
       {{- if .Values.tornjak.config }}
-      {{- if .Values.tornjak.config.separateFrontendt }}
+      {{- if .Values.tornjak.config.separateFrontend }}
       - name: frontend
         # TODO change to official image name
-        image: tsidentity/tornjak-fe:latest
+        image: ghcr.io/spiffe/tornjak-fe:latest
+        # image: ghcr.io/spiffe/tornjak-fe:1.5.1
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
         {{- if .Values.tornjak.config.frontend }}
-        {{- if .Values.tornjak.config.frontend.apiServerUrL }}
+        {{- if .Values.tornjak.config.frontend.authServerURL }}
         - name: REACT_APP_AUTH_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.authServerURL }}
         {{- end }}
