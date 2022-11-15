@@ -145,9 +145,34 @@ Make sure the permissions for accessing the socket are correct.
 ---
 ## SPIRE Server
 **Problem:**
+SPIRE container does not start `CrashLoopBackOff`.
+Log shows:
+
+```
+time="2022-11-07T18:16:15Z" level=info msg="Data directory: \"/run/spire/data\""
+time="2022-11-07T18:16:15Z" level=info msg="Opening SQL database" db_type=sqlite3 subsystem_name=sql
+time="2022-11-07T18:16:15Z" level=error msg="Incompatible DB schema is too new for code version, upgrade SPIRE Server" schema=19 subsystem_name=sql version_info=1.3.5
+time="2022-11-07T18:16:15Z" level=error msg="Fatal run error" error="datastore-sql: incompatible DB schema and code version"
+time="2022-11-07T18:16:15Z" level=error msg="Server crashed" error="datastore-sql: incompatible DB schema and code version"
+```
 
 **Description:**
+The existing DB schema is not compatible with the SPIRE version.
+The database is persisted on the host, even between SPIRE restarts.
 
 **Solution:**
+Simply delete the current DB on the host,
+so it can be recreated with a correct version.
+Use the handy utility:
+[utils/spire.db.clean.yaml](../utils/spire.db.clean.yaml):
+
+```console
+create -f tornjak create -f utils/spire.db.clean.yaml
+kubectl -n tornjak exec -it spire-server-0 -- sh
+# once inside: 
+cd /run/spire/data/
+rm *
+```
+
 
 ---

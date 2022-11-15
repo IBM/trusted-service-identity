@@ -26,7 +26,7 @@ Where:
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: tornjak (optional)
   --oidc - execute OIDC installation (optional)
-  --iam - enable IAM
+  --iam - enable IAM (optional)
   --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
 }
@@ -43,7 +43,7 @@ cleanup() {
   oc delete sa "$SPIRE_SA" 2>/dev/null
   oc delete secret spire-secret tornjak-certs  2>/dev/null
   oc delete cm spire-bundle spire-server oidc-discovery-provider 2>/dev/null
-  oc delete service spire-server spire-oidc tornjak-http tornjak-mtls tornjak-tls 2>/dev/null
+  oc delete service spire-server spire-oidc tornjak-http tornjak-mtls tornjak-tls tornjak-frontend-service 2>/dev/null
   oc delete route spire-server tornjak-http tornjak-mtls tornjak-tls oidc tornjak-frontend-service 2>/dev/null
   oc delete ingress spireingress 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
@@ -264,8 +264,14 @@ oc_cli create route passthrough tornjak-tls --service tornjak-tls
 # create route for Tornjak mTLS:
 oc_cli create route passthrough tornjak-mtls --service tornjak-mtls
 # create route for Tornjak HTTP:
-# oc create route passthrough tornjak-http --service tornjak-http
-oc_cli expose svc/tornjak-http
+if $IAM ; then
+# open the route for separate FrontEnd service
+  oc_cli expose svc/tornjak-frontend-service
+else
+  # use the standar, all-in-one container
+  # oc create route passthrough tornjak-http --service tornjak-http
+  oc_cli expose svc/tornjak-http
+fi
 
 if $IAM ; then
   # open route for Backend
@@ -282,8 +288,14 @@ echo # "https://$SPIRESERV"
 echo "export SPIRE_SERVER=$SPIRESERV"
 echo # empty line to separate visually
 
-TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-http --output json |  jq -r '.spec.host')
+if $IAM ; then
+  echo "Using IAM integration"
+  TORNJAKHTTP=$(oc -n "$PROJECT" get route ttornjak-frontend-service --output json |  jq -r '.spec.host')
+else
+  TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-http --output json |  jq -r '.spec.host')
+fi
 echo "Tornjak (http): http://$TORNJAKHTTP"
+
 TORNJAKTLS=$(oc -n "$PROJECT" get route tornjak-tls --output json |  jq -r '.spec.host')
 echo "Tornjak (TLS): https://$TORNJAKTLS"
 TORNJAKMTLS=$(oc -n "$PROJECT" get route tornjak-mtls --output json |  jq -r '.spec.host')
