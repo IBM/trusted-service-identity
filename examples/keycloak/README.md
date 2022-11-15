@@ -1,7 +1,12 @@
 # Trusted Service Identity Demo with Keycloak
+This demo shows how to use identities created by TSI to authenticate with Keycloak.
+In general, we show how the TSI enabled workloads running in Kuberentes OpenShift
+are able to authenticate themselves with Keycloak.
+We also demonstrate the fine-grain authorization with Keycloak resource service.
 
 **Notice**
-This documentation is outdated and requires an update.
+This documentation was written prior to adopting SPIRE, there it is
+currently outdated and requires an update.
 To see a working version, please refer to the
 [main-no-spire](/tree/main-no-spire/) branch.
 
