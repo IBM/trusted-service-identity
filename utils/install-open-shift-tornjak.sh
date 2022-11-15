@@ -26,7 +26,7 @@ Where:
   -t <TRUST_DOMAIN> - the trust root of SPIFFE identity provider, default: spiretest.com (optional)
   -p <PROJECT_NAME> - OpenShift project [namespace] to install the Server, default: tornjak (optional)
   --oidc - execute OIDC installation (optional)
-  --iam - enable user management (optional)
+  --iam - enable IAM (optional)
   --clean - performs removal of project (allows additional parameters i.e. -p|--project).
 HELPMEHELPME
 }
@@ -44,7 +44,7 @@ cleanup() {
   oc delete secret spire-secret tornjak-certs  2>/dev/null
   oc delete cm spire-bundle spire-server oidc-discovery-provider 2>/dev/null
   oc delete service spire-server spire-oidc tornjak-http tornjak-mtls tornjak-tls tornjak-frontend-service 2>/dev/null
-  oc delete route spire-server tornjak-http tornjak-mtls tornjak-tls oidc 2>/dev/null
+  oc delete route spire-server tornjak-http tornjak-mtls tornjak-tls oidc tornjak-frontend-service 2>/dev/null
   oc delete ingress spireingress 2>/dev/null
   #oc delete group $GROUPNAME --ignore-not-found=true
   #oc delete project "$PROJECT" 2>/dev/null
@@ -140,6 +140,11 @@ installSpireServer(){
 
 # switch to `tornjak` namespace:
 oc project "$PROJECT" 2> /dev/null
+
+if $IAM ; then
+  echo "*** Running in IAM mode ***"
+  echo "       Make sure you extend the 'charts/tornjak/values.yaml' with required IAM information"
+fi
 
 # get ingress information:
 INGSEC=$(ibmcloud oc cluster get --cluster "$CLUSTERNAME" --output json | jq -r '.ingressSecretName')
@@ -263,9 +268,14 @@ if $IAM ; then
 # open the route for separate FrontEnd service
   oc_cli expose svc/tornjak-frontend-service
 else
-  # use the standar, all-in-one container 
+  # use the standar, all-in-one container
   # oc create route passthrough tornjak-http --service tornjak-http
   oc_cli expose svc/tornjak-http
+fi
+
+if $IAM ; then
+  # open route for Backend
+  oc_cli expose svc/tornjak-frontend-service
 fi
 
 if $OIDC ; then

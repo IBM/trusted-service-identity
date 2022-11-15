@@ -7,7 +7,8 @@ spec:
     app: tsi-keycloak
   ports:
   - protocol: TCP
-    port: 9090
+    port: 8080
+    # port: 9090
     targetPort: 8080
   type: NodePort
 ---
@@ -31,13 +32,33 @@ spec:
     spec:
       containers:
         - name: tsi-keycloak
-          image: lumjjb/keycloak-tsi:latest
+          image: quay.io/keycloak/keycloak:19.0.3
           imagePullPolicy: Always
-          args: [ "-b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled" ]
+          args:
+          - start-dev
           env:
-          - name: DB_VENDOR
-            value: "h2"
-          - name: KEYCLOAK_USER
-            value: "admin"
-          - name: KEYCLOAK_PASSWORD
-            value: "**********"
+          - name: PROXY_ADDRESS_FORWARDING
+            value: "true"
+          - name: KEYCLOAK_ADMIN
+            value: admin
+          - name: KEYCLOAK_ADMIN_PASSWORD
+            value: adminpasswd
+          - name: KC_PROXY
+            value: edge
+          - name: KEYCLOAK_FRONTEND_URL
+            value: http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/auth/
+          - name: KEYCLOAK_ADMIN_URL
+            value: http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/auth/realms/master/admin/
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /realms/master
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
