@@ -264,17 +264,11 @@ oc_cli create route passthrough tornjak-tls --service tornjak-tls
 # create route for Tornjak mTLS:
 oc_cli create route passthrough tornjak-mtls --service tornjak-mtls
 # create route for Tornjak HTTP:
-if $IAM ; then
-# open the route for separate FrontEnd service
-  oc_cli expose svc/tornjak-frontend-service
-else
-  # use the standar, all-in-one container
-  # oc create route passthrough tornjak-http --service tornjak-http
-  oc_cli expose svc/tornjak-http
-fi
+# oc create route passthrough tornjak-http --service tornjak-http
+oc_cli expose svc/tornjak-http
 
 if $IAM ; then
-  # open route for Backend
+# open the route for separate FrontEnd service
   oc_cli expose svc/tornjak-frontend-service
 fi
 
@@ -290,7 +284,7 @@ echo # empty line to separate visually
 
 if $IAM ; then
   echo "Using IAM integration"
-  TORNJAKHTTP=$(oc -n "$PROJECT" get route ttornjak-frontend-service --output json |  jq -r '.spec.host')
+  TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-frontend-service --output json |  jq -r '.spec.host')
 else
   TORNJAKHTTP=$(oc -n "$PROJECT" get route tornjak-http --output json |  jq -r '.spec.host')
 fi
