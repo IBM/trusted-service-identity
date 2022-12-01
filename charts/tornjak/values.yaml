@@ -81,20 +81,28 @@ attestors:
 
 # tornjak - Tornjak specific configurtion
 tornjak:
-   config:
-     # enableUserMgment - when true, IAM configuration must be specified
+  config:
+    # enableUserMgment - when true, IAM configuration must be specified
      enableUserMgment: true
      # separateFrontend - when true, the frontend component is created under
      # a separate container
      separateFrontend: true
+     # img - Tornjak image (frontend + backend) if not separated above
+     img: ghcr.io/spiffe/tornjak
      # Front-end specific configurtion:
      frontend:
+       # img - Tornjak frontend image, if seperate from backend
+       img: ghcr.io/spiffe/tornjak-fe
        # authServerURL - URL of the authentication server
        authServerURL: "http://keycloak.tornjak.appdomain.cloud"
        # apiServerURL - URL of the Tornjak back-end
        apiServerURL: "http://tornjak-http-tornjak.tornjak.appdomain.cloud"
      # Back-end specific configuration
      backend:
+       # img - Tornjak backend image
+       img: ghcr.io/spiffe/tornjak-be
+       socketDir: /run/spire-server/private
+       socketFile: api.sock
        # jwksURL - URL for JWKS verification
        jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
        # redirectURL - URL for redirecting after successful authentication
