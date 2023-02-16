@@ -182,6 +182,7 @@ spec:
         - name: spire-oidc-socket
           mountPath: {{ .Values.oidc.socketDir }}
       {{- end }}
+
       {{- if .Values.tornjak }}
       {{- if .Values.tornjak.config }}
       {{- if .Values.tornjak.config.separateFrontend }}
@@ -192,18 +193,24 @@ spec:
         - containerPort: 3000
         env:
         {{- if .Values.tornjak.config.frontend }}
+        
+        {{- if .Values.tornjak.config.enableUserMgment }}
         {{- if .Values.tornjak.config.frontend.authServerURL }}
         - name: REACT_APP_AUTH_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.authServerURL }}
         {{- end }}
+        {{- end }}
+
         {{- if .Values.tornjak.config.frontend.apiServerURL }}
         - name: REACT_APP_API_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.apiServerURL }}
         {{- end }}
+        
         {{- end }}
       {{- end }}
       {{- end }}
       {{- end }}
+      
       volumes:
       {{- if .Values.tornjak }}
       {{- if .Values.tornjak.config }}
