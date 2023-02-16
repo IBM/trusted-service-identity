@@ -14,7 +14,7 @@ for Tornjak and the users to access.
 kubectl create ns tornjak
 ```
 1. Update the attributes in the Keycloak deployment file  
-[examples/keycloak/keycloak.yaml](../examples/keycloak/keycloak.yaml)
+[examples/keycloak-IAM/keycloak.yaml](../examples/keycloak-IAM/keycloak.yaml)
   * `KEYCLOAK_ADMIN` - userid for the Keycloak admin
   * `KEYCLOAK_ADMIN_PASSWORD` - password for the Keycloak
   * `KEYCLOAK_FRONTEND_URL` - URL for the Keycloak Auhentication // TODO
@@ -22,7 +22,7 @@ kubectl create ns tornjak
 
 1. Create a Keycloak deployment
 ```console
-kubectl create -f examples/keycloak/
+kubectl create -f examples/keycloak/keycloak.yaml
 ```
 This would start Keycloak instance as
 Kubernetes [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)

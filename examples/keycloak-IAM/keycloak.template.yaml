@@ -46,9 +46,9 @@ spec:
           - name: KC_PROXY
             value: edge
           - name: KEYCLOAK_FRONTEND_URL
-            value: http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/auth/
+            value: http://keycloak.appdomain.cloud/auth/
           - name: KEYCLOAK_ADMIN_URL
-            value: http://keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud/auth/realms/master/admin/
+            value: http://keycloak.appdomain.cloud/auth/realms/master/admin/
           ports:
           - containerPort: 8080
             name: http

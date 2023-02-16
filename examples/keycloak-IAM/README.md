@@ -15,10 +15,10 @@ First we need to standup an instance of Keycloak.
 
 Create a namespace dedicated to Keycloak
 ```console
-create namespace keycloak
+kubectl create namespace keycloak
 ```
 
-Create a Keycloak Deployment using a provided sample file [keycloak.yaml](./keycloak.yaml)
+Create a Keycloak Deployment using a provided sample template [keycloak.template.yaml](./keycloak.template.yaml)
 This would start a Development version of Keycloak instance,
 along with Service "keycloak" running on port 8080.
 
@@ -100,6 +100,10 @@ $ kubectl -n keycloak -f ingress.keycloak.yaml
 $ kubectl -n keycloak get ingress keycloak-ingress
 ```
 This is your acess point for Keycloak service
+Connect to Keycloak, e.g: 
+http://keycloak-keycloak.appdomain.cloud
+
+and select `Administration Console`. Login using credentials used above to create Keycloak instance.  
 
 </details>
 
