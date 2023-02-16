@@ -83,7 +83,7 @@ attestors:
 tornjak:
   config:
     # enableUserMgment - when true, IAM configuration must be specified
-    enableUserMgment: true
+    enableUserMgment: false
     # separateFrontend - when true, the frontend component is created under
     # a separate container
     separateFrontend: true
@@ -96,7 +96,7 @@ tornjak:
       # authServerURL - URL of the authentication server
       authServerURL: "http://keycloak.tornjak.appdomain.cloud"
       # apiServerURL - URL of the Tornjak back-end
-      apiServerURL: "http://tornjak-http-tornjak.tornjak.appdomain.cloud"
+      apiServerURL: "http://tornjak-http-tornjak.appdomain.cloud"
      # Back-end specific configuration
     backend:
     # img - Tornjak backend image
