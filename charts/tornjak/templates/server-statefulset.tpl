@@ -4,6 +4,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: {{ .Values.namespace }}
   name: tornjak-frontend-service
 spec:
   type: LoadBalancer
