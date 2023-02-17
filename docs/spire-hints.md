@@ -161,17 +161,22 @@ The existing DB schema is not compatible with the SPIRE version.
 The database is persisted on the host, even between SPIRE restarts.
 
 **Solution:**
-Simply delete the current DB on the host,
-so it can be recreated with a correct version.
+Simply stop the SPIRE server (remove it)
+then delete the current DB on the host,
+and restart SPIRE 
+so DB can be recreated with a correct version.
 Use the handy utility:
 [utils/spire.db.clean.yaml](../utils/spire.db.clean.yaml):
 
 ```console
-create -f tornjak create -f utils/spire.db.clean.yaml
+kubectl -n tornjak create -f utils/spire.db.clean.yaml
 kubectl -n tornjak exec -it spire-server-0 -- sh
 # once inside: 
 cd /run/spire/data/
 rm *
+exit
+kubectl -n tornjak delete -f utils/spire.db.clean.yaml
+# restart the SPIRE Server
 ```
 
 
