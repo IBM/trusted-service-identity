@@ -89,6 +89,9 @@ tornjak:
     separateFrontend: true
     # img - Tornjak image (frontend + backend) if not separated above
     img: ghcr.io/spiffe/tornjak
+    # version - the Tornjak version for all images 
+    # TODO we should use a specific version instead of 'latest'
+    version: latest
     # Front-end specific configurtion:
     frontend:
       # img - Tornjak frontend image, if seperate from backend

@@ -93,7 +93,7 @@ spec:
         {{- end }}
 
       - name: tornjak-backend
-        image: {{ .Values.tornjak.config.backend.img }}:latest
+        image: {{ .Values.tornjak.config.backend.img }}:{{ .Values.tornjak.config.version }}
         imagePullPolicy: Always
         args:
         - -config
@@ -188,7 +188,7 @@ spec:
       {{- if .Values.tornjak.config }}
       {{- if .Values.tornjak.config.separateFrontend }}
       - name: tornjak-frontend
-        image: {{ .Values.tornjak.config.frontend.img }}:latest
+        image: {{ .Values.tornjak.config.frontend.img }}:{{ .Values.tornjak.config.version }}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
