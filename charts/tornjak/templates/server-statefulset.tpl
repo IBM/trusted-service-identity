@@ -4,6 +4,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: {{ .Values.namespace }}
   name: tornjak-frontend-service
 spec:
   type: LoadBalancer
@@ -46,8 +47,6 @@ spec:
         args:
         - -config
         - /run/spire/config/server.conf
-        - -tornjak-config
-        - /run/spire/tornjak-config/server.conf
         ports:
         - containerPort: 8081
           protocol: TCP
@@ -56,9 +55,6 @@ spec:
           # not needed if using volumeClaimTemplates and sockets
           privileged: true
         volumeMounts:
-        - name: tornjak-config
-          mountPath: /run/spire/tornjak-config
-          readOnly: true
         - name: spire-config
           mountPath: /run/spire/config
           readOnly: true
@@ -95,6 +91,36 @@ spec:
             - "{{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}"
             - "--shallow"
         {{- end }}
+
+      - name: tornjak-backend
+        image: {{ .Values.tornjak.config.backend.img }}:{{ .Values.tornjak.config.version }}
+        imagePullPolicy: Always
+        args:
+        - -config
+        - /run/spire/config/server.conf
+        - -tornjak-config
+        - /run/spire/tornjak-config/server.conf
+        ports:
+        - containerPort: 8081
+          protocol: TCP
+        securityContext:
+          # privileged is needed to access mounted files (e.g. /run/spire/data)
+          # not needed if using volumeClaimTemplates and sockets
+          privileged: true
+        volumeMounts:
+        - name: tornjak-config
+          mountPath: /run/spire/tornjak-config
+          readOnly: true
+        - name: spire-config
+          mountPath: /run/spire/config
+          readOnly: true
+        - name: spire-data
+          mountPath: /run/spire/data
+        - name: certs
+          mountPath: /opt/spire/sample-keys
+        - name: spire-server-socket
+          mountPath: {{ .Values.tornjak.config.backend.socketDir }}
+        # livenessProbe:
       {{- if .Values.oidc.enable }}
       - name: spire-oidc
         # TODO: OIDC image higher than 1.1.x causes compatibility issues
@@ -157,30 +183,35 @@ spec:
         - name: spire-oidc-socket
           mountPath: {{ .Values.oidc.socketDir }}
       {{- end }}
+
       {{- if .Values.tornjak }}
       {{- if .Values.tornjak.config }}
       {{- if .Values.tornjak.config.separateFrontend }}
-      - name: frontend
-        # TODO change to official image name
-        image: ghcr.io/spiffe/tornjak-fe:latest
-        # image: ghcr.io/spiffe/tornjak-fe:1.5.1
+      - name: tornjak-frontend
+        image: {{ .Values.tornjak.config.frontend.img }}:{{ .Values.tornjak.config.version }}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
         {{- if .Values.tornjak.config.frontend }}
+        
+        {{- if .Values.tornjak.config.enableUserMgment }}
         {{- if .Values.tornjak.config.frontend.authServerURL }}
         - name: REACT_APP_AUTH_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.authServerURL }}
         {{- end }}
+        {{- end }}
+
         {{- if .Values.tornjak.config.frontend.apiServerURL }}
         - name: REACT_APP_API_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.apiServerURL }}
         {{- end }}
+        
         {{- end }}
       {{- end }}
       {{- end }}
       {{- end }}
+      
       volumes:
       {{- if .Values.tornjak }}
       {{- if .Values.tornjak.config }}
