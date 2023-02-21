@@ -96,9 +96,9 @@ spec:
         image: {{ .Values.tornjak.config.backend.img }}:{{ .Values.tornjak.config.version }}
         imagePullPolicy: Always
         args:
-        - -config
+        - --config
         - /run/spire/config/server.conf
-        - -tornjak-config
+        - --tornjak-config
         - /run/spire/tornjak-config/server.conf
         ports:
         - containerPort: 8081
