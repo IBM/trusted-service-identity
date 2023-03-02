@@ -82,8 +82,8 @@ attestors:
 # tornjak - Tornjak specific configuration
 tornjak:
   config:
-    # enableUserMgment - when true, IAM configuration must be specified
-    enableUserMgment: false
+    # enableUserMgmt - when true, IAM configuration must be specified
+    enableUserMgmt: false
     # separateFrontend - when true, the frontend component is created under
     # a separate container
     separateFrontend: false

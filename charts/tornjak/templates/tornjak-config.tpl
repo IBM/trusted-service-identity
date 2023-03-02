@@ -25,7 +25,7 @@ data:
       }
       {{- end }}
 
-      {{- if .Values.tornjak.config.enableUserMgment }}
+      {{- if .Values.tornjak.config.enableUserMgmt }}
       UserManagement "KeycloakAuth" {
         plugin_data {
           jwksURL = "{{ .Values.tornjak.config.backend.jwksURL }}"

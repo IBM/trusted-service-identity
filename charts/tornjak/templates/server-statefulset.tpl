@@ -195,7 +195,7 @@ spec:
         env:
         {{- if .Values.tornjak.config.frontend }}
         
-        {{- if .Values.tornjak.config.enableUserMgment }}
+        {{- if .Values.tornjak.config.enableUserMgmt }}
         {{- if .Values.tornjak.config.frontend.authServerURL }}
         - name: REACT_APP_AUTH_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.authServerURL }}
