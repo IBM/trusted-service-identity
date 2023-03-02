@@ -65,7 +65,7 @@ attestors:
     #   namespace: spire
     #   serviceAccount: spire-agent
 
-  # awd_iid - enables node attestion in AWS EKS.
+  # awd_iid - enables node attestation in AWS EKS.
   # provide "access_key_id" and "secret_access_key"
   # see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md
   aws_iid:
@@ -73,28 +73,28 @@ attestors:
   #   secret_access_key: "SECRET_ACCESS_KEY"
   #   skip_block_device: true
 
-  # azure_msi - enables node attestion using Azure MSI:
+  # azure_msi - enables node attestation using Azure MSI:
   # see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_azure_msi.md
   azure_msi:
   #   tenants:
   #   - tenant: "TENANT_ID"
 
-# tornjak - Tornjak specific configurtion
+# tornjak - Tornjak specific configuration
 tornjak:
   config:
     # enableUserMgment - when true, IAM configuration must be specified
     enableUserMgment: false
     # separateFrontend - when true, the frontend component is created under
     # a separate container
-    separateFrontend: true
+    separateFrontend: false
     # img - Tornjak image (frontend + backend) if not separated above
     img: ghcr.io/spiffe/tornjak
     # version - the Tornjak version for all images 
     # TODO we should use a specific version instead of 'latest'
     version: latest
-    # Front-end specific configurtion:
+    # Front-end specific configuration:
     frontend:
-      # img - Tornjak frontend image, if seperate from backend
+      # img - Tornjak frontend image, if separate from backend
       img: ghcr.io/spiffe/tornjak-fe
       # authServerURL - URL of the authentication server
       authServerURL: "http://keycloak.tornjak.appdomain.cloud"
