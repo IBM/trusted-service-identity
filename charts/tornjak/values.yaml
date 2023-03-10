@@ -95,6 +95,7 @@ tornjak:
     version: latest
     # Front-end specific configuration:
     frontend:
+      ingress: "http://tornjak-fe.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress for Frontend
       # img - Tornjak frontend image, if separate from backend
       img: ghcr.io/spiffe/tornjak-fe
       # authServerURL - URL of the authentication server 
@@ -105,6 +106,7 @@ tornjak:
      # Back-end specific configuration
     backend:
     # img - Tornjak backend image
+      ingress: "http://tornjak-be.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress for Backend
       img: ghcr.io/spiffe/tornjak-be
       socketDir: /run/spire-server/private
       socketFile: api.sock
