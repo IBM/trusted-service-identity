@@ -88,8 +88,8 @@ tornjak:
     # a separate container
     separateFrontend: false
     # img - Tornjak image (frontend + backend) if not separated above
-    # img: ghcr.io/spiffe/tornjak
-    img: tsidentity/tornjak
+    img: ghcr.io/spiffe/tornjak
+    # img: tsidentity/tornjak
     # version - the Tornjak version for all images 
     # TODO we should use a specific version instead of 'latest'
     version: latest
@@ -100,8 +100,8 @@ tornjak:
       # authServerURL - URL of the authentication server 
       authServerURL: "http://keycloak.tornjak.appdomain.cloud" 
       # apiServerURL - URL of the Tornjak back-end
-      # apiServerURL: "http://tornjak-http-tornjak.tornjak.appdomain.cloud" # 👈 Use it with Cloud Ingress 
-      apiServerURL: "http://localhost:10000"  # 👈 Use it for minikube or kind
+      apiServerURL: "http://tornjak-be.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress 
+      # apiServerURL: "http://localhost:10000"  # 👈 Use it for minikube or kind
      # Back-end specific configuration
     backend:
     # img - Tornjak backend image
