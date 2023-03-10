@@ -14,7 +14,6 @@ data:
     {{- if .Values.tornjak }}
     {{- if .Values.tornjak.config }}
     {{- if .Values.tornjak.config.backend }}
-
     {{- if .Values.tornjak.config.backend.dataStore }}
       DataStore "sql" {
         plugin_data {

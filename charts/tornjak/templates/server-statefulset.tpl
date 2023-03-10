@@ -1,6 +1,5 @@
 {{- if .Values.tornjak }}
 {{- if .Values.tornjak.config }}
-{{- if .Values.tornjak.config.separateFrontend }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,7 +14,6 @@ spec:
       port: 3000
       targetPort: 3000
 ---
-{{- end }}
 {{- end }}
 {{- end }}
 apiVersion: apps/v1
