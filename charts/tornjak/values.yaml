@@ -89,27 +89,31 @@ tornjak:
     separateFrontend: false
     # img - Tornjak image (frontend + backend) if not separated above
     img: ghcr.io/spiffe/tornjak
-    # img: tsidentity/tornjak
     # version - the Tornjak version for all images 
     # TODO we should use a specific version instead of 'latest'
     version: latest
     # Front-end specific configuration:
     frontend:
-      ingress: "tornjak-fe.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress for Frontend
       # img - Tornjak frontend image, if separate from backend
       img: ghcr.io/spiffe/tornjak-fe
+      # ingress - if Ingress required, don't use 'http://' prefix
+      # keep empty if local, or direct access available
+      ingress:  # 👈 Use it with Cloud Ingress for Frontend
       # authServerURL - URL of the authentication server 
       authServerURL: "http://keycloak.tornjak.appdomain.cloud" 
       # apiServerURL - URL of the Tornjak back-end
-      apiServerURL: "http://tornjak-be.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress 
-      # apiServerURL: "http://localhost:10000"  # 👈 Use it for minikube or kind
+      apiServerURL: "http://localhost:10000"  # 👈 Use it for minikube or kind
      # Back-end specific configuration
     backend:
     # img - Tornjak backend image
-      ingress: "tornjak-be.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress for Backend
       img: ghcr.io/spiffe/tornjak-be
+      # socketDir - path to the socket file on the host (and in the container) 
       socketDir: /run/spire-server/private
+      # socketFile - name of the socket file
       socketFile: api.sock
+      # ingress - if Ingress required, don't use 'http://' prefix
+      # keep empty if local, or direct access available
+      ingress: # 👈 Use it with Cloud Ingress for Backend
       # jwksURL - URL for JWKS verification
       jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
       # redirectURL - URL for redirecting after successful authentication

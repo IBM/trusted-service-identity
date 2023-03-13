@@ -21,7 +21,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: t-http
+    - name: tornjak-be-http
       port: 10000
       targetPort: 10000
       protocol: TCP
@@ -36,7 +36,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: t-tls
+    - name: tornjak-be-tls
       port: 20000
       targetPort: 20000
       protocol: TCP
@@ -51,7 +51,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: t-mtls
+    - name: tornjak-be-mtls
       port: 30000
       targetPort: 30000
       protocol: TCP
@@ -68,6 +68,6 @@ spec:
   selector:
     app: spire-server
   ports:
-    - name: tornjak-frontend
+    - name: tornjak-fe
       port: 3000
       targetPort: 3000
