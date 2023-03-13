@@ -1,21 +1,3 @@
-{{- if .Values.tornjak }}
-{{- if .Values.tornjak.config }}
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: {{ .Values.namespace }}
-  name: tornjak-frontend-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: spire-server
-  ports:
-    - name: tornjak-frontend
-      port: 3000
-      targetPort: 3000
----
-{{- end }}
-{{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

@@ -16,7 +16,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tornjak-http
+  name: tornjak-be-http
   namespace: {{ .Values.namespace }}
 spec:
   type: NodePort
@@ -31,7 +31,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tornjak-tls
+  name: tornjak-be-tls
   namespace: {{ .Values.namespace }}
 spec:
   type: NodePort
@@ -46,7 +46,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tornjak-mtls
+  name: tornjak-be-mtls
   namespace: {{ .Values.namespace }}
 spec:
   type: NodePort
@@ -57,3 +57,17 @@ spec:
       protocol: TCP
   selector:
     app: spire-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: tornjak-fe
+spec:
+  type: LoadBalancer
+  selector:
+    app: spire-server
+  ports:
+    - name: tornjak-frontend
+      port: 3000
+      targetPort: 3000
