@@ -112,10 +112,8 @@ spec:
         {{- end }}
         {{- end }}
 
-        {{- if .Values.tornjak.config.frontend.apiServerURL }}
         - name: REACT_APP_API_SERVER_URI
-          value: {{ include "tornjak.apiURL" . }}          
-        {{- end }}
+          value: {{ include "tornjak.apiURL" . | required "Either .Values.tornjak.config.backend.ingress or .Values.tornjak.config.frontend.apiServerURL is required." }}          
         
         {{- end }}
 
