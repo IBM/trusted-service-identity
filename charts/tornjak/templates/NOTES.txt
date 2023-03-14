@@ -27,7 +27,7 @@ Universal Trusted Workload Identity Service has completed.
       myDiscoveryDomain: {{ .Values.oidc.myDiscoveryDomain }}
 {{- end }}
 
-{{- if .Values.tornjak.config.enableUserMgment }}
+{{- if .Values.tornjak.config.enableUserMgmt }}
       User Mgmnt enabled: true
       {{- if .Values.tornjak.config.frontend.authServerURL }}
       authServerURL: {{ .Values.tornjak.config.frontend.authServerURL }}

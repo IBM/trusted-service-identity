@@ -1,23 +1,3 @@
-{{- if .Values.tornjak }}
-{{- if .Values.tornjak.config }}
-{{- if .Values.tornjak.config.separateFrontend }}
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: {{ .Values.namespace }}
-  name: tornjak-frontend-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: spire-server
-  ports:
-    - name: tornjak-frontend
-      port: 3000
-      targetPort: 3000
----
-{{- end }}
-{{- end }}
-{{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -41,6 +21,7 @@ spec:
       serviceAccountName: spire-server
       shareProcessNamespace: true
       containers:
+      
       - name: spire-server
         image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
         imagePullPolicy: Always
@@ -92,13 +73,42 @@ spec:
             - "--shallow"
         {{- end }}
 
+      {{- if .Values.tornjak }}
+      {{- if .Values.tornjak.config }}
+      {{- if .Values.tornjak.config.separateFrontend }}
       - name: tornjak-backend
         image: {{ .Values.tornjak.config.backend.img }}:{{ .Values.tornjak.config.version }}
+      {{- else }}
+      - name: tornjak
+        image: {{ .Values.tornjak.config.img }}:{{ .Values.tornjak.config.version }}
+
+        env:
+
+        {{- if .Values.tornjak.config.frontend }}
+        
+        {{- if .Values.tornjak.config.enableUserMgmt }}
+        {{- if .Values.tornjak.config.frontend.authServerURL }}
+        - name: REACT_APP_AUTH_SERVER_URI
+          value: {{ .Values.tornjak.config.frontend.authServerURL }}
+        {{- end }}
+        {{- end }}
+
+        {{- if .Values.tornjak.config.frontend.apiServerURL }}
+        - name: REACT_APP_API_SERVER_URI
+          value: {{ .Values.tornjak.config.frontend.apiServerURL }}
+        {{- end }}
+        
+        {{- end }}
+
+      {{- end }}
+      {{- end }}
+      {{- end }}
+
         imagePullPolicy: Always
         args:
-        - --config
+        - -c
         - /run/spire/config/server.conf
-        - --tornjak-config
+        - -t
         - /run/spire/tornjak-config/server.conf
         ports:
         - containerPort: 8081
@@ -114,13 +124,10 @@ spec:
         - name: spire-config
           mountPath: /run/spire/config
           readOnly: true
-        - name: spire-data
-          mountPath: /run/spire/data
-        - name: certs
-          mountPath: /opt/spire/sample-keys
         - name: spire-server-socket
           mountPath: {{ .Values.tornjak.config.backend.socketDir }}
         # livenessProbe:
+
       {{- if .Values.oidc.enable }}
       - name: spire-oidc
         # TODO: OIDC image higher than 1.1.x causes compatibility issues
@@ -163,6 +170,7 @@ spec:
             - ' ||'
             - grep
             - oidc-discovery-provider -config /run/spire/oidc/config/oidc-discovery-provider.conf
+
       - name: nginx-oidc
         image: nginx:latest
         imagePullPolicy: Always
@@ -195,7 +203,7 @@ spec:
         env:
         {{- if .Values.tornjak.config.frontend }}
         
-        {{- if .Values.tornjak.config.enableUserMgment }}
+        {{- if .Values.tornjak.config.enableUserMgmt }}
         {{- if .Values.tornjak.config.frontend.authServerURL }}
         - name: REACT_APP_AUTH_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.authServerURL }}

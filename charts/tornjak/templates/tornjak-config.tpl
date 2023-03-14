@@ -14,7 +14,6 @@ data:
     {{- if .Values.tornjak }}
     {{- if .Values.tornjak.config }}
     {{- if .Values.tornjak.config.backend }}
-
     {{- if .Values.tornjak.config.backend.dataStore }}
       DataStore "sql" {
         plugin_data {
@@ -25,7 +24,7 @@ data:
       }
       {{- end }}
 
-      {{- if .Values.tornjak.config.enableUserMgment }}
+      {{- if .Values.tornjak.config.enableUserMgmt }}
       UserManagement "KeycloakAuth" {
         plugin_data {
           jwksURL = "{{ .Values.tornjak.config.backend.jwksURL }}"
