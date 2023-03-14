@@ -74,7 +74,11 @@ Universal Trusted Workload Identity Service has completed.
       }
 {{- end }}
 
+Tornjak Backend API: {{ include "tornjak.apiURL" . }}
+
+
 To learn more about the release, try:
 
   $ helm status {{ .Release.Name }}
   $ helm get all {{ .Release.Name }}
+

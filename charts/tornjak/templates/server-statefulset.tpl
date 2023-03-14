@@ -78,9 +78,28 @@ spec:
       {{- if .Values.tornjak.config.separateFrontend }}
       - name: tornjak-backend
         image: {{ .Values.tornjak.config.backend.img }}:{{ .Values.tornjak.config.version }}
+        startupProbe:
+          httpGet:
+            scheme: HTTP
+            path: /api/tornjak/serverinfo
+            port: 10000  
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
       {{- else }}
       - name: tornjak
         image: {{ .Values.tornjak.config.img }}:{{ .Values.tornjak.config.version }}
+        startupProbe:
+          httpGet:
+            scheme: HTTP
+            port: 3000  
+          failureThreshold: 6
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 10
 
         env:
 
@@ -95,7 +114,7 @@ spec:
 
         {{- if .Values.tornjak.config.frontend.apiServerURL }}
         - name: REACT_APP_API_SERVER_URI
-          value: {{ .Values.tornjak.config.frontend.apiServerURL }}
+          value: {{ include "tornjak.apiURL" . }}          
         {{- end }}
         
         {{- end }}
@@ -127,6 +146,15 @@ spec:
         - name: spire-server-socket
           mountPath: {{ .Values.tornjak.config.backend.socketDir }}
         # livenessProbe:
+        startupProbe:
+          httpGet:
+            scheme: HTTP
+            port: 3000  
+          failureThreshold: 6
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 10
 
       {{- if .Values.oidc.enable }}
       - name: spire-oidc
@@ -214,6 +242,16 @@ spec:
         - name: REACT_APP_API_SERVER_URI
           value: {{ .Values.tornjak.config.frontend.apiServerURL }}
         {{- end }}
+        startupProbe:
+          httpGet:
+            scheme: HTTP
+            port: 3000  
+          failureThreshold: 6
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 10
+
         
         {{- end }}
       {{- end }}

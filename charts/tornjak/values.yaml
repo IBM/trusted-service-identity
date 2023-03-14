@@ -98,7 +98,7 @@ tornjak:
       img: ghcr.io/spiffe/tornjak-fe
       # ingress - if Ingress required, don't use 'http://' prefix
       # keep empty if local, or direct access available
-      ingress:  # 👈 Use it with Cloud Ingress for Frontend
+      ingress: "" # 👈 Use it with Cloud Ingress for Frontend
       # authServerURL - URL of the authentication server 
       authServerURL: "http://keycloak.tornjak.appdomain.cloud" 
       # apiServerURL - URL of the Tornjak back-end
@@ -113,7 +113,7 @@ tornjak:
       socketFile: api.sock
       # ingress - if Ingress required, don't use 'http://' prefix
       # keep empty if local, or direct access available
-      ingress: # 👈 Use it with Cloud Ingress for Backend
+      ingress:  # 👈 Use it with Cloud Ingress for Backend
       # jwksURL - URL for JWKS verification
       jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
       # redirectURL - URL for redirecting after successful authentication
