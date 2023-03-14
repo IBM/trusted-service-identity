@@ -113,7 +113,7 @@ tornjak:
       socketFile: api.sock
       # ingress - if Ingress required, don't use 'http://' prefix
       # keep empty if local, or direct access available
-      ingress: # 👈 Use it with Cloud Ingress for Backend
+      ingress:  # 👈 Use it with Cloud Ingress for Backend
       # jwksURL - URL for JWKS verification
       jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
       # redirectURL - URL for redirecting after successful authentication
