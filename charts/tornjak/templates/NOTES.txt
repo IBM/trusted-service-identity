@@ -78,14 +78,14 @@ Universal Trusted Workload Identity Service has completed.
 
 No Backend Ingress provided. 
 Use port forwarding to access the Backend port:
-      kubectl -n spire port-forward spire-server-0 10000:10000
+      kubectl -n {{ .Values.namespace }} port-forward spire-server-0 10000:10000
 {{- end }}
 
 {{- if not .Values.tornjak.config.frontend.ingress }}
 
 No Frontend Ingress provided. 
 Use port forwarding to access the Frontend port:
-      kubectl -n spire port-forward spire-server-0 3000:3000
+      kubectl -n {{ .Values.namespace }} port-forward spire-server-0 3000:3000
 {{- end }}
 
 Tornjak Backend API Access: {{ include "tornjak.apiURL" . }}
