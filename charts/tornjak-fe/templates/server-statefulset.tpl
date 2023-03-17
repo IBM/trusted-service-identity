@@ -44,10 +44,9 @@ spec:
         {{- end }}
         {{- end }}
 
-        {{- if .Values.tornjak.config.frontend.apiServerURL }}
         - name: REACT_APP_API_SERVER_URI
-          value: {{ .Values.tornjak.config.frontend.apiServerURL }}
-        {{- end }}
+          value: {{ include "tornjak.apiURL" . | required "Either .Values.tornjak.config.backend.ingress or .Values.tornjak.config.frontend.apiServerURL is required." }}          
+
         startupProbe:
           httpGet:
             scheme: HTTP
@@ -64,19 +63,6 @@ spec:
       {{- end }}
       {{- end }}
       
-      volumes:
-      {{- if .Values.tornjak }}
-      {{- if .Values.tornjak.config }}
-      - name: tornjak-config
-        configMap:
-          defaultMode: 420
-          name: tornjak-config
-      {{- end }}
-      {{- end }}
-      - name: spire-config
-        configMap:
-          name: spire-server
-          defaultMode: 420
 
      
 
