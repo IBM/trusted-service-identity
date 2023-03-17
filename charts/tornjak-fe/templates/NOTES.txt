@@ -1,0 +1,98 @@
+The installation of the Tornjak with SPIRE Server for
+Universal Trusted Workload Identity Service has completed.
+
+      Chart Name: {{ .Chart.Name }}
+      Your release is named {{ .Release.Name }}
+
+      Cluster name: {{ .Values.clustername }}
+      Trust Domain: {{ .Values.trustdomain }}
+      Tornjak Image: {{ .Values.spireServer.img }}:{{ .Values.spireVersion }}
+      SPIRE Server socket: {{ .Values.spireServer.socketDir }}/{{ .Values.spireServer.socketFile }}
+{{- if .Values.openShift }}
+      OpenShift mode: true
+{{- end }}
+{{- if .Values.attestors.aws_iid -}}
+{{- if .Values.attestors.aws_iid.access_key_id -}}
+{{- if .Values.attestors.aws_iid.secret_access_key -}}
+      Using NodeAttestor "aws_iid" with
+         "access_key_id" and "secret_access_key"
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.oidc.enable }}
+      OIDC enable: true
+      OIDC image: {{ .Values.oidc.image }}
+      OIDC service name:   {{ .Values.oidc.serviceName }}
+      listen_socket_path:  {{ .Values.oidc.socketDir }}/{{ .Values.oidc.socketFile }}
+      myDiscoveryDomain: {{ .Values.oidc.myDiscoveryDomain }}
+{{- end }}
+
+{{- if .Values.tornjak.config.enableUserMgmt }}
+      User Mgmnt enabled: true
+      {{- if .Values.tornjak.config.frontend.authServerURL }}
+      authServerURL: {{ .Values.tornjak.config.frontend.authServerURL }}
+      {{- end }}
+      In tornjak-config.tpl: 
+            UserManagement "KeycloakAuth" {
+               plugin_data {
+                 jwksURL = "{{ .Values.tornjak.config.backend.jwksURL }}"
+                 redirectURL = "{{ .Values.tornjak.config.backend.redirectURL }}"
+               }
+            }
+{{- end }}
+
+{{- if .Values.tornjak.config.separateFrontend }}
+      Tornjak Backend: 
+            img: {{ .Values.tornjak.config.backend.img }}
+            socket: "{{ .Values.tornjak.config.backend.socketDir }}/{{ .Values.tornjak.config.backend.socketFile }}"
+            jwksURL: {{ .Values.tornjak.config.backend.jwksURL }}
+            redirectURL: {{ .Values.tornjak.config.backend.redirectURL }}
+            dataStore driver: {{ .Values.tornjak.config.backend.dataStore.driver }}
+            dataStore file: {{ .Values.tornjak.config.backend.dataStore.file }}
+      Tornjak Frontend:
+            img: {{ .Values.tornjak.config.frontend.img }}
+            Backend API: {{ .Values.tornjak.config.frontend.apiServerURL }}
+{{- else }}
+      Tornjak img: {{ .Values.tornjak.config.img }}
+{{- end }}
+
+{{- if .Values.attestors.k8s_psat.remoteClusters }}
+      Multi-cluster support enabled.
+      Make sure `kubeconfig` secret is created to support a following:
+
+      clusters = {
+          "{{ .Values.clustername }}" = {
+              # use_token_review_api_validation = true
+              service_account_allow_list = ["spire:spire-agent"]
+          },
+          {{- range $k, $v := .Values.attestors.k8s_psat.remoteClusters }}
+          "{{ $v.name }}" = {
+              service_account_allow_list = ["{{ $v.namespace | default "spire" }}:{{ $v.serviceAccount | default "spire-agent" }}"]
+              kube_config_file = "/run/spire/kubeconfigs/{{ $v.name }}"
+          },
+          {{- end }}
+      }
+{{- end }}
+
+{{- if not .Values.tornjak.config.backend.ingress }}
+
+No Backend Ingress provided. 
+Use port forwarding to access the Backend port:
+      kubectl -n {{ .Values.namespace }} port-forward spire-server-0 10000:10000
+{{- end }}
+
+{{- if not .Values.tornjak.config.frontend.ingress }}
+
+No Frontend Ingress provided. 
+Use port forwarding to access the Frontend port:
+      kubectl -n {{ .Values.namespace }} port-forward spire-server-0 3000:3000
+{{- end }}
+
+Tornjak Backend API Access: {{ include "tornjak.apiURL" . }}
+Tornjak Frontend Access:    {{ include "tornjak.FrontendURL" . }}
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
