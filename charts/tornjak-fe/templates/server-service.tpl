@@ -6,7 +6,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: spire-server
+    app: tornjak-fe
   ports:
     - name: tornjak-fe
       port: 3000

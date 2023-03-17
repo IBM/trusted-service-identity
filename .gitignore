@@ -25,3 +25,6 @@ charts/ti-key-release-2/charts/*
 charts/ti-key-release-1/Chart.yaml
 charts/ti-key-release-2/Chart.yaml
 /db/**/*
+
+# kubeconfig
+kube-01.yaml

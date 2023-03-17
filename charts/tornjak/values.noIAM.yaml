@@ -1,0 +1,124 @@
+---
+# Default values for deployment of SPIRE Server with Tornjak
+# This is a YAML-formatted file.
+
+# namespace - for deploying the Server and Tornjak
+namespace: tornjak
+# openShift requires special configuration, including different security level
+openShift: false
+# clustername is required to set up access for SPIRE agents deployed
+# in the same cluster
+clustername: spire-example
+
+# SPIRE related elements
+# trustdomain is arbitrary but needs to match between Server and Agent
+trustdomain: example.org
+# SPIRE version used for consistency across components
+spireVersion: 1.1.5 # OIDC only works with SPIRE 1.1.x
+# spireVersion: 1.3.5
+
+# SPIRE Server configuration
+spireServer:
+  # tornjakImage - Tornjak with SPIRE Server
+  img: ghcr.io/spiffe/spire-server
+  socketDir: /run/spire-server/private
+  socketFile: api.sock
+  # selfSignedCA - SPIRE will create the self signed CA unless this value
+  # is set to 'false'. In this case, make sure the key is accessible by
+  # Server in "/run/spire/secret/bootstrap.key" and the certificate in
+  # "/run/spire/secret/bootstrap.crt"
+  selfSignedCA: true
+
+# Enable OIDC
+oidc:
+  # to enable support for OIDC, change the value to true
+  enable: false
+  serviceName: oidc-tornjak
+  image: gcr.io/spiffe-io/oidc-discovery-provider
+  socketDir: /run/oidc-discovery-provider
+  socketFile: server.sock
+  # myDiscoveryDomain - replace the myDiscoveryDomain with the Ingress information
+  # e.g. this could be an output of IBM Cloud command:
+  #  ibmcloud oc cluster get --cluster "$MY_CLUSTER" --output json | jq -r '.ingressHostname'
+  myDiscoveryDomain: MY_DISCOVERY_DOMAIN
+
+attestors:
+  # k8s_psat - enables support for a single SPIRE server managing
+  # agents deployed in multiple, different clusters, with K8S PSAT NodeAttestor
+  # Prior to this deployment, create a secret that contains KUBECONFIG information
+  # for every remoteCluster.
+  #    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name1>`
+  #    `kubectl config view --flatten > /tmp/kubeconfigs/<cluster_name2>`
+  # Then create a secret:
+  #     `kubectl -n tornjak create secret generic kubeconfigs --from-file=/tmp/kubeconfigs`
+  #
+  # Provide "name" value(s). "namespace" and "serviceAccount" are optional
+  #  default namespace value = "spire"
+  #  default serviceAccount value = spire-agent
+  k8s_psat:
+    remoteClusters:
+    # - name: cluster1
+    #   namespace: spire
+    #   serviceAccount: spire-agent
+    # - name: cluster2
+    # - name: cluster3
+    #   namespace: spire
+    #   serviceAccount: spire-agent
+
+  # awd_iid - enables node attestation in AWS EKS.
+  # provide "access_key_id" and "secret_access_key"
+  # see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_aws_iid.md
+  aws_iid:
+  #   access_key_id: "ACCESS_KEY_ID"
+  #   secret_access_key: "SECRET_ACCESS_KEY"
+  #   skip_block_device: true
+
+  # azure_msi - enables node attestation using Azure MSI:
+  # see complete documentation: https://github.com/spiffe/spire/blob/main/doc/plugin_server_nodeattestor_azure_msi.md
+  azure_msi:
+  #   tenants:
+  #   - tenant: "TENANT_ID"
+
+# tornjak - Tornjak specific configuration
+tornjak:
+  config:
+    # enableUserMgmt - when true, IAM configuration must be specified
+    enableUserMgmt: false
+    # separateFrontend - when true, the frontend component is created under
+    # a separate container
+    separateFrontend: false
+    # img - Tornjak image (frontend + backend) if not separated above
+    img: ghcr.io/spiffe/tornjak
+    # version - the Tornjak version for all images 
+    # TODO we should use a specific version instead of 'latest'
+    version: latest
+    # Front-end specific configuration:
+    frontend:
+      # img - Tornjak frontend image, if separate from backend
+      img: ghcr.io/spiffe/tornjak-fe
+      # ingress - if Ingress required, don't use 'http://' prefix
+      # keep empty if local, or direct access available
+      # ingress: "tornjak-fe.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress for Frontend
+      # authServerURL - URL of the authentication server 
+      authServerURL: "http://keycloak.tornjak.appdomain.cloud" 
+      # apiServerURL - URL of the Tornjak back-end
+      apiServerURL: "http://localhost:10000"  # 👈 Use it for minikube or kind
+     # Back-end specific configuration
+    backend:
+    # img - Tornjak backend image
+      img: ghcr.io/spiffe/tornjak-be
+      # socketDir - path to the socket file on the host (and in the container) 
+      socketDir: /run/spire-server/private
+      # socketFile - name of the socket file
+      socketFile: api.sock
+      # ingress - if Ingress required, don't use 'http://' prefix
+      # keep empty if local, or direct access available
+      ingress: "tornjak-be.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud" # 👈 Use it with Cloud Ingress for Backend
+      # jwksURL - URL for JWKS verification
+      jwksURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/certs"
+      # redirectURL - URL for redirecting after successful authentication
+      redirectURL: "http://keycloak.tornjak.appdomain.cloud/realms/tornjak/protocol/openid-connect/auth?client_id=Tornjak-React-auth"
+      # dataStore - persistent DB for storing Tornjak specific information
+      dataStore:
+        driver: "sqlite3"
+        file: "./agentlocaldb"
