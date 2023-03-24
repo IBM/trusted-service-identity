@@ -1,27 +1,32 @@
 ---
 # Default values for deployment of Tornjak Frontend
 # This is a YAML-formatted file.
-# namespace - for deploying the Server and Tornjak
-namespace: tornjak-fe
+
+# namespace - for deploying the Tornjak Frontend
+#             using default Helm Release namespace if not set
+namespaceOverride: ""
+# nameOverride - specify the name, otherwise the Chart name will be used
+nameOverride: ""
+fullnameOverride: ""
+
 # SPIRE related elements
 # trustdomain is arbitrary but needs to match between Server and Agent
-trustdomain: example.org
+# trustdomain: example.org
 # tornjak - Tornjak specific configuration
 tornjak:
   config:
     # enableUserMgmt - when true, IAM configuration must be specified
     enableUserMgmt: false # ??
     # version - the Tornjak version for all images 
-    # TODO we should use a specific version instead of 'latest'
-    version: latest
+    version: "v1.0.1"
     # Front-end specific configuration:
     frontend:
       # img - Tornjak frontend image, if separate from backend
       img: ghcr.io/spiffe/tornjak-fe
       # ingress - if Ingress required, don't use 'http://' prefix
       # keep empty if local, or direct access available
-      ingress: tornjak-fe.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud  # 👈 Use it with Cloud Ingress for Frontend
+      ingress: ""  # 👈 Use it with Cloud Ingress for Frontend
       # authServerURL - URL of the authentication server 
       authServerURL: "http://keycloak.tornjak.appdomain.cloud" 
       # apiServerURL - URL of the Tornjak back-end
-      apiServerURL: "tornjak-be.kube-01-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-east.containers.appdomain.cloud"  # 👈 Use it for minikube or kind
+      apiServerURL: "http://localhost:10000"  # 👈 Use it for minikube or kind

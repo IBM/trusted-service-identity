@@ -6,7 +6,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: tornjak-fe-ingress
-  namespace: {{ .Values.namespace }}
+  namespace: {{ include "tornjak-fe.namespace" . }}
 spec:
   rules:
     # provide the actual Ingress for `host` value:

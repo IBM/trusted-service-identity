@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tornjak-fe
-  namespace: {{ .Values.namespace }}
+  name: {{ include "spire-server.fullname" . }}
+  namespace: {{ include "tornjak-fe.namespace" . }}
   labels:
     app: tornjak-fe
 spec:
@@ -12,7 +12,7 @@ spec:
       app: tornjak-fe
   template:
     metadata:
-      namespace: {{ .Values.namespace }}
+      namespace: {{ include "tornjak-fe.namespace" . }}
       labels:
         app: tornjak-fe
     spec:

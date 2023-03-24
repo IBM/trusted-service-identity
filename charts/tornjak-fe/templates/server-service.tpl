@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: {{ .Values.namespace }}
+  namespace: {{ include "tornjak-fe.namespace" . }}
   name: tornjak-fe
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: tornjak-fe
   ports:
