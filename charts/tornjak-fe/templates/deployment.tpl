@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "spire-server.fullname" . }}
+  name: {{ include "tornjak-fe.fullname" . }}
   namespace: {{ include "tornjak-fe.namespace" . }}
   labels:
-    app: tornjak-fe
+    app: {{ include "tornjak-fe.fullname" . }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tornjak-fe
+      app: {{ include "tornjak-fe.fullname" . }}
   template:
     metadata:
       namespace: {{ include "tornjak-fe.namespace" . }}
       labels:
-        app: tornjak-fe
+        app: {{ include "tornjak-fe.fullname" . }}
     spec:
       shareProcessNamespace: true
       containers:
