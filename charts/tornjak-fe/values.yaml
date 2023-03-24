@@ -9,9 +9,6 @@ namespaceOverride: ""
 nameOverride: ""
 fullnameOverride: ""
 
-# SPIRE related elements
-# trustdomain is arbitrary but needs to match between Server and Agent
-# trustdomain: example.org
 # tornjak - Tornjak specific configuration
 tornjak:
   config:
