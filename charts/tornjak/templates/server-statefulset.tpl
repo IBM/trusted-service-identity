@@ -95,7 +95,7 @@ spec:
           httpGet:
             scheme: HTTP
             port: 3000  
-          failureThreshold: 6
+          failureThreshold: 10
           initialDelaySeconds: 60
           periodSeconds: 30
           successThreshold: 1
@@ -144,15 +144,6 @@ spec:
         - name: spire-server-socket
           mountPath: {{ .Values.tornjak.config.backend.socketDir }}
         # livenessProbe:
-        startupProbe:
-          httpGet:
-            scheme: HTTP
-            port: 3000  
-          failureThreshold: 6
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          successThreshold: 1
-          timeoutSeconds: 10
 
       {{- if .Values.oidc.enable }}
       - name: spire-oidc
@@ -244,9 +235,9 @@ spec:
           httpGet:
             scheme: HTTP
             port: 3000  
-          failureThreshold: 6
+          failureThreshold: 10
           initialDelaySeconds: 60
-          periodSeconds: 30
+          periodSeconds: 60
           successThreshold: 1
           timeoutSeconds: 10
 
