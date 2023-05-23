@@ -1,2 +1,2 @@
 python-decouple==3.5
-requests==2.26
+requests==2.31.0
