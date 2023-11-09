@@ -69,7 +69,7 @@ cd trusted-service-identity
 The first part of the tutorial deploys Tornjak bundled with SPIRE Server using helm charts.
 **Reminder:** these steps apply only to single cluster deployment.
 For Multi-Cluster deployment, please refer to
-[Mulit-Cluster](./spire-multi-cluster.md)
+[Multi-Cluster](./spire-multi-cluster.md)
 
 We can deploy the helm charts on any Kubernetes platform. [Here are instructions](./spire-on-openshift.md) for installing on OpenShift.
 

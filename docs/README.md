@@ -22,15 +22,23 @@ are deployed in the same cluster as the workloads and SPIRE agents.
 ![multi-cluster](imgs/multi_cluster.jpg)
 
 These demos deploy Tornjak Server and SPIRE agents in various scenarios:
-1. deploy in a single cluster locally [via helm charts](./spire-helm.md)
-2. deploy in IBM Cloud [via helm charts](./spire-helm.md)
-3. deploy on [OpenShift in IBM Cloud](./spire-on-openshift.md)
-4. [multi-cluster deployment](./spire-multi-cluster.md)
-5. [SPIRE agents on AWS](./spire-on-aws.md)
+1. Deploy in a single cluster locally [via helm charts](./spire-helm.md)
+1. Deploy in IBM Cloud [via helm charts](./spire-helm.md)
+1. Deploy on [OpenShift in IBM Cloud](./spire-on-openshift.md)
+1. [Multi-cluster deployment](./spire-multi-cluster.md)
+1. [SPIRE agents on AWS](./spire-on-aws.md)
+1. Enable [User Management](./user-management.md) for Tornjak
 
 ## Tornjak use-cases
 These demos showcase various experiments
 1. [OIDC Tutorial](./spire-oidc-tutorial.md)
-2. [OIDC for Vault](./spire-oidc-vault.md)
-3. [AWS S3 storage access via OIDC](./spire-oidc-aws-s3.md)
-4. [Identity Sidecar for Python and MySQL applications](../examples/spire-sidecar/README.md)
+1. [OIDC for Vault](./spire-oidc-vault.md)
+1. [AWS S3 storage access via OIDC](./spire-oidc-aws-s3.md)
+1. [Identity Sidecar for Python and MySQL applications](../examples/spire-sidecar/README.md)
+1. Enhanced [Security](./spire-security.md) configuration
+
+## Other documentation
+1. Our [Hints](./spire-hints.md) collection provides answers to various deployment problems
+1. Documentation on configuring [SPIRE Workload Registrar](./spire-security.md)
+1. Documentation on setting up [Vault](./vault.md)
+1. [Keycloak Deployment](./keycloak.md) to support User Management for Tornjak
