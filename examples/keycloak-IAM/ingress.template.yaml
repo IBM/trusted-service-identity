@@ -8,15 +8,15 @@ spec:
     # use the following command to get the subdomain:
     #    ibmcloud ks cluster get --cluster <cluster-name> | grep Ingress
     # any prefix can be added (e.g.):
-    # host: tsi-keycloak.tsi-fra-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
-  - host: keycloak.tornjak-02-9d995c4a8c7c5f281ce13d5467ff6a94-0000.us-south.containers.appdomain.cloud
+    #  host: keycloak.tsi-fra-8abee0d19746a818fd9d58aa25c34ecfe-0000.eu-de.containers.appdomain.cloud
+  - host:
     http:
       paths:
       - pathType: Prefix
         path: "/"
         backend:
           service:
-            name: tsi-keycloak
+            name: keycloak
             port:
               # number: 9090
               number: 8080
